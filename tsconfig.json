@@ -14,20 +14,16 @@
     "sourceMap": true
   },
   "typedocOptions": {
+    "out": "docs",
     "mode": "modules",
     "name": "Documentation",
-    "readme": "md/documentation.md",
+    "theme": "default",
+    "readme": "none",
     "includeVersion": false,
     "excludePrivate": true,
     "stripInternal": true,
     "disableSources": false,
-    "hideGenerator": true,
-    "links": [
-      {
-        "label": "GitHub",
-        "url": "https://github.com/distributhor/arango-bsd"
-      }
-    ]
+    "hideGenerator": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "lib", "dist", "test", "scripts", "docs", "md"]

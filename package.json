@@ -35,8 +35,8 @@
     "lint:format": "yarn prettier:fix",
     "prettier:fix": "prettier --ignore-path .prettierignore --write '{src,test}/**/*.{js,ts,json,md}'",
     "prettier:check": "prettier --ignore-path .prettierignore --check '{src,test}/**/*.{js,ts,json,md}'",
-    "typedoc": "typedoc --tsconfig ./tsconfig.json --out docs --plugin typedoc-neo-theme --theme ./node_modules/typedoc-neo-theme/bin/default && nodetouch docs/.nojekyll",
     "readme": "node_modules/markdown-include/bin/cli.js md/main.conf.json && node_modules/markdown-include/bin/cli.js md/github.conf.json",
+    "typedoc": "typedoc --tsconfig ./tsconfig.json && nodetouch docs/.nojekyll",
     "doc": "yarn readme && yarn typedoc"
   },
   "dependencies": {
@@ -65,8 +65,6 @@
     "ts-jest": "^26.4.1",
     "ts-node": "^9.0.0",
     "typedoc": "^0.19.2",
-    "typedoc-neo-theme": "^1.0.10",
-    "typedoc-plugin-markdown": "^3.0.11",
     "typescript": "^4.0.3",
     "yarn": ">=1.22.0"
   },
