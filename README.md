@@ -6,4 +6,4 @@ So it is with a database driver as well. This tool aims to be just that for the 
 
 This project is currently in development, and should (for the foreseeable future at least) be considered a "pet project". It may take a long time until this project reaches a semi-fully featured "V1" non-pet-project state (it may never get there), and will also be subject to random breaking changes until then. Still, some of what is released may or may not be useful to other Arango developers, so the progress will be made public along the way. Use at own risk.
 
-Generated docs will be here: https://distributhor.github.io/arango-bsd/
+Generated docs are here: https://distributhor.github.io/arango-bsd/
