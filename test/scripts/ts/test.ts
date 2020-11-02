@@ -1,11 +1,15 @@
-import { ArangoDB } from "../src/db";
-import { fetchUserByName } from "../src/queries";
+//
+// Run with: ts-node test/scripts/ts/test.ts
+//
+
+import { ArangoDB } from "../../../src/index";
+import { fetchUserByName } from "../../resources/ts/queries";
 
 (async function () {
   try {
     const db = new ArangoDB({
       databaseName: "arango-bsd-test",
-      url: "http://root:letmein@db.localhost:8530",
+      url: "http://root:lol@db.localhost:8530",
     });
 
     const johnByQuery = await db.queryOne(fetchUserByName("John"));
@@ -14,7 +18,6 @@ import { fetchUserByName } from "../src/queries";
     console.log(johnByQuery);
     console.log(johnByKey);
   } catch (err) {
-    console.log("ERROR");
     console.log(err);
   }
 })();

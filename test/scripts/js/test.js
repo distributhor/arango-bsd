@@ -1,11 +1,14 @@
-const { ArangoDB } = require("../lib/db");
-const { fetchUserByName } = require("../lib/queries");
+//
+// Run with: node test/scripts/js/test.js
+//
+const { ArangoDB } = require("../../../lib/index");
+const { fetchUserByName } = require("../../resources/js/queries");
 
 (async function () {
   try {
     const db = new ArangoDB({
       databaseName: "arango-bsd-test",
-      url: "http://root:letmein@db.localhost:8530",
+      url: "http://root:lol@db.localhost:8530",
     });
 
     const johnByQuery = await db.queryOne(fetchUserByName("John"));
@@ -14,7 +17,6 @@ const { fetchUserByName } = require("../lib/queries");
     console.log(johnByQuery);
     console.log(johnByKey);
   } catch (err) {
-    console.log("ERROR");
     console.log(err);
   }
 })();

@@ -27,7 +27,8 @@
   "scripts": {
     "clean": "rimraf lib && rimraf dist",
     "build": "yarn clean && tsc",
-    "test": "jest -c test/jest.config.js --passWithNoTests",
+    "test": "jest -c test/jest.config.unit.js --passWithNoTests",
+    "integration:test": "jest -c test/jest.config.integration.js",
     "lint": "yarn lint:check",
     "lint:check": "eslint '{src,test}/**/*.{js,ts,json}'",
     "lint:fix": "eslint --fix '{src,test}/**/*.{js,ts,json}'",
@@ -51,6 +52,7 @@
     "@types/node-cache": "^4.2.5",
     "@typescript-eslint/eslint-plugin": "^4.4.1",
     "@typescript-eslint/parser": "^4.4.1",
+    "dotenv": "^8.2.0",
     "eslint": "^7.11.0",
     "eslint-config-prettier": "^6.13.0",
     "eslint-plugin-prettier": "^3.1.4",
