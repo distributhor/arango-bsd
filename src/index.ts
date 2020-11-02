@@ -8,6 +8,7 @@ export interface DatabaseConfig extends Config {
   hello?: boolean;
 }
 
+/** @internal */
 export interface SearchResult {
   data: any[];
   size: number;
@@ -15,6 +16,29 @@ export interface SearchResult {
   options: any;
 }
 
+/**
+ * A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/7.1.0/classes/_database_.database.html)
+ * instance. It provides easy access to the ArangoJS instance itself, so that it can be used as normal,
+ * but also adds additional, optional functionality.
+ *
+ * It takes a regular `ArangoJS` [Config](https://arangodb.github.io/arangojs/7.1.0/modules/_connection_.html#config) as the
+ * constructor argument, or alternatively an extended [[DatabaseConfig]].
+ *
+ * ```typescript
+ * import { aql } from "arangojs/aql";
+ * import { ArangoDB } from "arango-bsd";
+ *
+ * const db = new ArangoDB({ databaseName: "name", url: "arangoURI" });
+ *
+ * // uses the regular ArangoJS driver instance, exposed on the
+ * // `db.driver` property which returns the usual cursor
+ * db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ *
+ * // uses the backseat driver method, which immediately calls cursor.all()
+ * // on the results, returning all the documents, and not the cursor
+ * db.queryAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ * ```
+ */
 export class ArangoDB {
   public driver: Database;
 
