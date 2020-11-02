@@ -13,11 +13,7 @@ const db = new ArangoDB({
 const USER_COLLECTION = "user";
 
 describe("Arango Backseat Driver Integration Tests", () => {
-  // beforeEach(() => {
-  //   client.authenticate(process.env.SCORMCLOUD_APP_ID, process.env.SCORMCLOUD_SECRET_KEY, process.env.SCORMCLOUD_SCOPE);
-  // });
-
-  test("Ping ScormCloud API", async () => {
+  test("Hello", async () => {
     expect.assertions(1);
 
     try {
