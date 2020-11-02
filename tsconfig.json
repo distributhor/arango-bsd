@@ -17,7 +17,6 @@
     "mode": "modules",
     "name": "Documentation",
     "readme": "md/documentation.md",
-    "exclude": "src/browser.ts",
     "includeVersion": false,
     "excludePrivate": true,
     "stripInternal": true,
@@ -26,15 +25,7 @@
     "links": [
       {
         "label": "GitHub",
-        "url": "https://github.com/distributhor/paygate-sdk"
-      }
-    ],
-    "outline": [
-      {
-        "Types": "_types_",
-        "API Client": "_client_",
-        "Common Utils": "_util_",
-        "Express Middleware": "_middleware_"
+        "url": "https://github.com/distributhor/arango-bsd"
       }
     ]
   },
