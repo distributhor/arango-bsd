@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib",
+    "target": "es6",
+    "lib": ["es6"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "typedocOptions": {
+    "mode": "modules",
+    "name": "Documentation",
+    "readme": "md/documentation.md",
+    "exclude": "src/browser.ts",
+    "includeVersion": false,
+    "excludePrivate": true,
+    "stripInternal": true,
+    "disableSources": false,
+    "hideGenerator": true,
+    "links": [
+      {
+        "label": "GitHub",
+        "url": "https://github.com/distributhor/paygate-sdk"
+      }
+    ],
+    "outline": [
+      {
+        "Types": "_types_",
+        "API Client": "_client_",
+        "Common Utils": "_util_",
+        "Express Middleware": "_middleware_"
+      }
+    ]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "lib", "dist", "test", "impl", "scripts", "docs", "md"]
+}

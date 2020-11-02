@@ -1,0 +1,12 @@
+path_classifiers:
+  test:
+    - test
+  docs:
+    - md
+    - docs
+extraction:
+  javascript:
+    index:
+      exclude:
+        - scripts
+        - resources
