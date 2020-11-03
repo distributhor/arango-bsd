@@ -73,11 +73,13 @@
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
 						<p>A thin wrapper around an <code>ArangoJS</code> <a href="https://arangodb.github.io/arangojs/7.1.0/classes/_database_.database.html">Database</a>
-							instance. It provides easy access to the ArangoJS instance itself, so that it can be used as normal,
-						but also adds additional, optional functionality.</p>
+							instance. It provides easy access to the ArangoJS instance itself, which can be used as per normal,
+						but also adds additional functionality and conenience methods, which can optionally be used.</p>
 					</div>
-					<p>It takes a regular <code>ArangoJS</code> <a href="https://arangodb.github.io/arangojs/7.1.0/modules/_connection_.html#config">Config</a> as the
-					constructor argument, or alternatively an extended <a href="../interfaces/_index_.databaseconfig.html">DatabaseConfig</a>.</p>
+					<p>The constructor accepts an existing
+						<code>ArangoJS</code> <a href="https://arangodb.github.io/arangojs/7.1.0/classes/_database_.database.html">Database</a> instance,
+						<strong>or</strong> an <code>ArangoJS</code> <a href="https://arangodb.github.io/arangojs/7.1.0/modules/_connection_.html#config">Config</a>
+					<strong>or</strong> a <a href="../interfaces/_index_.databaseconfig.html">DatabaseConfig</a>, which is an extension of the normal <code>Config</code>.</p>
 					<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { aql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arangojs/aql&quot;</span>;
 <span class="hljs-keyword">import</span> { ArangoDB } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arango-bsd&quot;</span>;
 
@@ -119,7 +121,6 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#native" class="tsd-kind-icon">native</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#queryall" class="tsd-kind-icon">query<wbr>All</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#queryone" class="tsd-kind-icon">query<wbr>One</a></li>
 							</ul>
@@ -139,9 +140,17 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/8fa8b4d/src/index.ts#L43">src/index.ts:43</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/f941492/src/index.ts#L49">src/index.ts:49</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The constructor accepts an existing
+										<code>ArangoJS</code> <a href="https://arangodb.github.io/arangojs/7.1.0/classes/_database_.database.html">Database</a> instance,
+										<strong>or</strong> an <code>ArangoJS</code> <a href="https://arangodb.github.io/arangojs/7.1.0/modules/_connection_.html#config">Config</a>
+									<strong>or</strong> a <a href="../interfaces/_index_.databaseconfig.html">DatabaseConfig</a>, which is an extension of the normal <code>Config</code>.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -161,53 +170,61 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 					<div class="tsd-signature tsd-kind-icon">driver<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Database</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/8fa8b4d/src/index.ts#L43">src/index.ts:43</a></li>
+							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/f941492/src/index.ts#L49">src/index.ts:49</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A property that exposes the native <code>ArangoJS</code>
+							<a href="https://arangodb.github.io/arangojs/7.1.0/classes/_database_.database.html">Database</a> instance.</p>
+						</div>
+					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="native" class="tsd-anchor"></a>
-					<h3>native</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">native<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Database</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/8fa8b4d/src/index.ts#L53">src/index.ts:53</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Database</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="queryall" class="tsd-anchor"></a>
 					<h3>query<wbr>All</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">query<wbr>All<span class="tsd-signature-symbol">(</span>query<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">GeneratedAqlQuery</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">QueryOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">query<wbr>All<span class="tsd-signature-symbol">(</span>query<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AqlQuery</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">QueryOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/8fa8b4d/src/index.ts#L57">src/index.ts:57</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/f941492/src/index.ts#L76">src/index.ts:76</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The regular <code>driver.query</code> method will return a database cursor. If you wish to just
+										return all the documents in the result at once (same as invoking cursor.all()),
+									then use this method instead.</p>
+								</div>
+								<p>TODO: support for generic types on the retun value</p>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>query: <span class="tsd-signature-type">GeneratedAqlQuery</span></h5>
+									<h5>query: <span class="tsd-signature-type">AqlQuery</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>A query, as create by the <code>aql</code> function</p>
+										</div>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <span class="tsd-signature-type">QueryOptions</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>Driver options that may be passed in along with the query</p>
+										</div>
+									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>a list of objects</p>
 						</li>
 					</ul>
 				</section>
@@ -215,25 +232,44 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 					<a name="queryone" class="tsd-anchor"></a>
 					<h3>query<wbr>One</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">query<wbr>One<span class="tsd-signature-symbol">(</span>query<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">GeneratedAqlQuery</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">QueryOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">query<wbr>One<span class="tsd-signature-symbol">(</span>query<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AqlQuery</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">QueryOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/8fa8b4d/src/index.ts#L62">src/index.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/f941492/src/index.ts#L91">src/index.ts:91</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Will simply return the first value only of a query. One can quite easily handle
+										this via the <code>AQL</code> query itself, but in cases where you have issued a query where
+										you would typically expect either no result or exactly one result, it may convenient
+									to simply use use this function instead</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>query: <span class="tsd-signature-type">GeneratedAqlQuery</span></h5>
+									<h5>query: <span class="tsd-signature-type">AqlQuery</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>A query, as create by the <code>aql</code> function</p>
+										</div>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <span class="tsd-signature-type">QueryOptions</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>Driver options that may be passed in along with the query</p>
+										</div>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>an object</p>
 						</li>
 					</ul>
 				</section>
@@ -262,9 +298,6 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="_index_.arangodb.html#driver" class="tsd-kind-icon">driver</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_index_.arangodb.html#native" class="tsd-kind-icon">native</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_index_.arangodb.html#queryall" class="tsd-kind-icon">query<wbr>All</a>
