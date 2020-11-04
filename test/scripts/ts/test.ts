@@ -8,7 +8,7 @@ import { fetchUserByName } from "../../resources/ts/queries";
 (async function () {
   try {
     const db = new ArangoDB({
-      databaseName: "arango-bsd-test",
+      databaseName: "arango-driver-test",
       url: "http://root:lol@db.localhost:8530",
     });
 
