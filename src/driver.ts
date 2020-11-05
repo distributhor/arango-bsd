@@ -199,7 +199,7 @@ export class ArangoDB {
       }
     }
 
-    const validation = await this.checkDBStructure(structure);
+    const validation = await this.validateDBStructure(structure);
     const driver = await this.fromPool(structure.database);
 
     for (const entity of validation.collections) {
@@ -220,7 +220,7 @@ export class ArangoDB {
     for (const entity of validation.graphs) {
       if (!entity.exists) {
         const graph = structure.graphs.filter((graph) => graph.graph === entity.name)[0];
-        if (graph) {
+        if (graph && graph.edges && graph.edges.length > 0) {
           try {
             await driver.graph(graph.graph).create(graph.edges);
             response.graphs.push(`Graph '${entity.name}' created`);
@@ -239,7 +239,7 @@ export class ArangoDB {
   };
 
   /** @internal */
-  private async checkDBStructure(structure: DBStructure): Promise<DBStructureValidation> {
+  public async validateDBStructure(structure: DBStructure): Promise<DBStructureValidation> {
     const response: DBStructureValidation = {
       message: null,
       database: null,

@@ -24,8 +24,8 @@ const dbStructure: DBStructure = {
       edges: [
         {
           collection: CONST.userToGroupEdge,
-          from: [CONST.userCollection],
-          to: [CONST.groupCollection],
+          from: CONST.userCollection,
+          to: CONST.groupCollection,
         },
       ],
     },
@@ -38,17 +38,6 @@ const db = new ArangoDB({
 });
 
 describe("Arango Backseat Driver Integration Tests", () => {
-  // test("Hello", async () => {
-  //   expect.assertions(1);
-  //   try {
-  //     const johnByQuery = await db.queryOne(fetchUserByName("John"));
-  //     const johnByKey = await db.driver.collection(USER_COLLECTION).document(johnByQuery._key);
-  //     expect(johnByKey._key).toEqual(johnByQuery._key);
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // });
-
   test("Create database", async () => {
     expect.assertions(5);
 
@@ -56,7 +45,7 @@ describe("Arango Backseat Driver Integration Tests", () => {
     const dbList = await db.driver.listDatabases();
     expect(dbList.length).toBeGreaterThanOrEqual(1);
 
-    // JS version that tests what happens when no arg supplied
+    // TODO: JS version that tests what happens when no arg supplied
     // confirm that neither of the test DBs exist
     let testDB1Exists = await db.databaseExists(testDB1);
     let testDB2Exists = await db.databaseExists(testDB2);
@@ -90,6 +79,7 @@ describe("Arango Backseat Driver Integration Tests", () => {
       ])
     );
 
+    // TODO: confirm that removal and re-creation of collection doesn't affect dependent graph ?
     expect(result2.database).toEqual("Database created");
     expect(result2.graphs).toEqual(expect.arrayContaining([`Graph '${CONST.groupMembershipGraph}' created`]));
     expect(result2.collections).toEqual(
@@ -154,6 +144,50 @@ describe("Arango Backseat Driver Integration Tests", () => {
 
     const usersCollectionExist3 = await db.collectionExists(CONST.userCollection, testDB1);
     expect(usersCollectionExist3).toBeTruthy();
+
+    // confirm that empty array values are not handled, and do not break anything,
+    // ie, they are essentially unhandled and nothing happens - it's a safe operation
+    const emptyArraysDBStructure: DBStructure = {
+      database: testDB2,
+      collections: [],
+      graphs: [
+        {
+          graph: "xyz",
+          edges: [],
+        },
+      ],
+    };
+
+    const result4 = await db.createDBStructure(emptyArraysDBStructure);
+
+    expect(result4.database).toEqual("Database found");
+    expect(result4.collections.length).toEqual(0);
+    expect(result4.graphs.length).toEqual(0);
+  });
+
+  test("Validate database structure", async () => {
+    dbStructure.collections.push("abc");
+    dbStructure.graphs.push({
+      graph: "def",
+      edges: undefined,
+    });
+
+    const result = await db.validateDBStructure(dbStructure);
+
+    expect(result.collections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: CONST.userCollection, exists: true }),
+        expect.objectContaining({ name: CONST.groupCollection, exists: true }),
+        expect.objectContaining({ name: "abc", exists: false }),
+      ])
+    );
+
+    expect(result.graphs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: CONST.groupMembershipGraph, exists: true }),
+        expect.objectContaining({ name: "def", exists: false }),
+      ])
+    );
   });
 
   test("Delete database", async () => {
