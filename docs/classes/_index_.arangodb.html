@@ -56,10 +56,10 @@
 					<a href="../index.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_driver_.html">&quot;driver&quot;</a>
+					<a href="../modules/_index_.html">&quot;index&quot;</a>
 				</li>
 				<li>
-					<a href="_driver_.arangodb.html">ArangoDB</a>
+					<a href="_index_.arangodb.html">ArangoDB</a>
 				</li>
 			</ul>
 			<h1>Class ArangoDB</h1>
@@ -79,7 +79,7 @@
 					<p>The constructor accepts an existing
 						<code>ArangoJS</code> <a href="https://arangodb.github.io/arangojs/7.1.0/classes/_database_.database.html">Database</a> instance,
 						<strong>or</strong> an <code>ArangoJS</code> <a href="https://arangodb.github.io/arangojs/7.1.0/modules/_connection_.html#config">Config</a>
-					<strong>or</strong> a <a href="../interfaces/_types_.databaseconfig.html">DatabaseConfig</a>, which is an extension of the normal <code>Config</code>.</p>
+					<strong>or</strong> a <a href="../modules/_index_.html#databaseconfig">DatabaseConfig</a>, which is an extension of the normal <code>Config</code>.</p>
 					<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { aql } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arangojs/aql&quot;</span>;
 <span class="hljs-keyword">import</span> { ArangoDB } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arango-bsd&quot;</span>;
 
@@ -109,25 +109,25 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="_driver_.arangodb.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="_index_.arangodb.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_driver_.arangodb.html#driver" class="tsd-kind-icon">driver</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_index_.arangodb.html#driver" class="tsd-kind-icon">driver</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_driver_.arangodb.html#cleardatabase" class="tsd-kind-icon">clear<wbr>Database</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_driver_.arangodb.html#collectionexists" class="tsd-kind-icon">collection<wbr>Exists</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_driver_.arangodb.html#createdbstructure" class="tsd-kind-icon">createDBStructure</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_driver_.arangodb.html#databaseexists" class="tsd-kind-icon">database<wbr>Exists</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_driver_.arangodb.html#queryall" class="tsd-kind-icon">query<wbr>All</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_driver_.arangodb.html#queryone" class="tsd-kind-icon">query<wbr>One</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_driver_.arangodb.html#validatedbstructure" class="tsd-kind-icon">validateDBStructure</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#cleardatabase" class="tsd-kind-icon">clear<wbr>Database</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#collectionexists" class="tsd-kind-icon">collection<wbr>Exists</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#createdbstructure" class="tsd-kind-icon">createDBStructure</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#databaseexists" class="tsd-kind-icon">database<wbr>Exists</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#queryall" class="tsd-kind-icon">query<wbr>All</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#queryone" class="tsd-kind-icon">query<wbr>One</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#validatedbstructure" class="tsd-kind-icon">validateDBStructure</a></li>
 							</ul>
 						</section>
 					</div>
@@ -139,13 +139,13 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>ArangoDB<span class="tsd-signature-symbol">(</span>databaseOrConfig<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Database</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_.databaseconfig.html" class="tsd-signature-type">DatabaseConfig</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_driver_.arangodb.html" class="tsd-signature-type">ArangoDB</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>ArangoDB<span class="tsd-signature-symbol">(</span>databaseOrConfig<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Database</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_.databaseconfig.html" class="tsd-signature-type">DatabaseConfig</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_index_.arangodb.html" class="tsd-signature-type">ArangoDB</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/dc19346/src/driver.ts#L77">src/driver.ts:77</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L79">src/index.ts:79</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -153,7 +153,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 									<p>The constructor accepts an existing
 										<code>ArangoJS</code> <a href="https://arangodb.github.io/arangojs/7.1.0/classes/_database_.database.html">Database</a> instance,
 										<strong>or</strong> an <code>ArangoJS</code> <a href="https://arangodb.github.io/arangojs/7.1.0/modules/_connection_.html#config">Config</a>
-									<strong>or</strong> a <a href="../interfaces/_types_.databaseconfig.html">DatabaseConfig</a>, which is an extension of the normal <code>Config</code>.</p>
+									<strong>or</strong> a <a href="../modules/_index_.html#databaseconfig">DatabaseConfig</a>, which is an extension of the normal <code>Config</code>.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -162,7 +162,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 									<h5>databaseOrConfig: <span class="tsd-signature-type">Database</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_.databaseconfig.html" class="tsd-signature-type">DatabaseConfig</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_driver_.arangodb.html" class="tsd-signature-type">ArangoDB</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_index_.arangodb.html" class="tsd-signature-type">ArangoDB</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -175,7 +175,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 					<div class="tsd-signature tsd-kind-icon">driver<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Database</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/dc19346/src/driver.ts#L77">src/driver.ts:77</a></li>
+							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L79">src/index.ts:79</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -192,13 +192,13 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 					<a name="cleardatabase" class="tsd-anchor"></a>
 					<h3>clear<wbr>Database</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">clear<wbr>Database<span class="tsd-signature-symbol">(</span>db<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, method<span class="tsd-signature-symbol">?: </span><a href="../enums/_types_.dbclearancemethod.html" class="tsd-signature-type">DBClearanceMethod</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">clear<wbr>Database<span class="tsd-signature-symbol">(</span>db<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, method<span class="tsd-signature-symbol">?: </span><a href="../modules/_index_.html#dbclearancemethod" class="tsd-signature-type">DBClearanceMethod</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/dc19346/src/driver.ts#L135">src/driver.ts:135</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L137">src/index.ts:137</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -207,7 +207,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 									<h5>db: <span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> method: <a href="../enums/_types_.dbclearancemethod.html" class="tsd-signature-type">DBClearanceMethod</a><span class="tsd-signature-symbol"> = DBClearanceMethod.DELETE_DATA</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> method: <a href="../modules/_index_.html#dbclearancemethod" class="tsd-signature-type">DBClearanceMethod</a><span class="tsd-signature-symbol"> = DBClearanceMethod.DELETE_DATA</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -224,7 +224,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/dc19346/src/driver.ts#L130">src/driver.ts:130</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L132">src/index.ts:132</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -244,13 +244,13 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 					<a name="createdbstructure" class="tsd-anchor"></a>
 					<h3>createDBStructure</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">createDBStructure<span class="tsd-signature-symbol">(</span>structure<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_.dbstructure.html" class="tsd-signature-type">DBStructure</a>, clearDB<span class="tsd-signature-symbol">?: </span><a href="../enums/_types_.dbclearancemethod.html" class="tsd-signature-type">DBClearanceMethod</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_.dbstructureresult.html" class="tsd-signature-type">DBStructureResult</a><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">createDBStructure<span class="tsd-signature-symbol">(</span>structure<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_.dbstructure.html" class="tsd-signature-type">DBStructure</a>, clearDB<span class="tsd-signature-symbol">?: </span><a href="../modules/_index_.html#dbclearancemethod" class="tsd-signature-type">DBClearanceMethod</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_.dbstructureresult.html" class="tsd-signature-type">DBStructureResult</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/dc19346/src/driver.ts#L159">src/driver.ts:159</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L161">src/index.ts:161</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -259,7 +259,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 									<h5>structure: <a href="../interfaces/_types_.dbstructure.html" class="tsd-signature-type">DBStructure</a></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> clearDB: <a href="../enums/_types_.dbclearancemethod.html" class="tsd-signature-type">DBClearanceMethod</a></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> clearDB: <a href="../modules/_index_.html#dbclearancemethod" class="tsd-signature-type">DBClearanceMethod</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_.dbstructureresult.html" class="tsd-signature-type">DBStructureResult</a><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -276,7 +276,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/dc19346/src/driver.ts#L126">src/driver.ts:126</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L128">src/index.ts:128</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -299,7 +299,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/dc19346/src/driver.ts#L106">src/driver.ts:106</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L108">src/index.ts:108</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -340,7 +340,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/dc19346/src/driver.ts#L120">src/driver.ts:120</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L122">src/index.ts:122</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -381,7 +381,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/dc19346/src/driver.ts#L235">src/driver.ts:235</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L237">src/index.ts:237</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -403,9 +403,6 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<a href="../index.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-module">
-						<a href="../modules/_driver_.html">&quot;driver&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
 						<a href="../modules/_index_.html">&quot;index&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
@@ -415,37 +412,58 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#dbclearancemethod" class="tsd-kind-icon">DBClearance<wbr>Method</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#dbstructure" class="tsd-kind-icon">DBStructure</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#dbstructureresult" class="tsd-kind-icon">DBStructure<wbr>Result</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#dbstructurevalidation" class="tsd-kind-icon">DBStructure<wbr>Validation</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#databaseconfig" class="tsd-kind-icon">Database<wbr>Config</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#edgedefinition" class="tsd-kind-icon">Edge<wbr>Definition</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#graphdefinition" class="tsd-kind-icon">Graph<wbr>Definition</a>
+					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-module">
-						<a href="_driver_.arangodb.html" class="tsd-kind-icon">ArangoDB</a>
+						<a href="_index_.arangodb.html" class="tsd-kind-icon">ArangoDB</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="_driver_.arangodb.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="_index_.arangodb.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="_driver_.arangodb.html#driver" class="tsd-kind-icon">driver</a>
+								<a href="_index_.arangodb.html#driver" class="tsd-kind-icon">driver</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_driver_.arangodb.html#cleardatabase" class="tsd-kind-icon">clear<wbr>Database</a>
+								<a href="_index_.arangodb.html#cleardatabase" class="tsd-kind-icon">clear<wbr>Database</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_driver_.arangodb.html#collectionexists" class="tsd-kind-icon">collection<wbr>Exists</a>
+								<a href="_index_.arangodb.html#collectionexists" class="tsd-kind-icon">collection<wbr>Exists</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_driver_.arangodb.html#createdbstructure" class="tsd-kind-icon">createDBStructure</a>
+								<a href="_index_.arangodb.html#createdbstructure" class="tsd-kind-icon">createDBStructure</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_driver_.arangodb.html#databaseexists" class="tsd-kind-icon">database<wbr>Exists</a>
+								<a href="_index_.arangodb.html#databaseexists" class="tsd-kind-icon">database<wbr>Exists</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_driver_.arangodb.html#queryall" class="tsd-kind-icon">query<wbr>All</a>
+								<a href="_index_.arangodb.html#queryall" class="tsd-kind-icon">query<wbr>All</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_driver_.arangodb.html#queryone" class="tsd-kind-icon">query<wbr>One</a>
+								<a href="_index_.arangodb.html#queryone" class="tsd-kind-icon">query<wbr>One</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_driver_.arangodb.html#validatedbstructure" class="tsd-kind-icon">validateDBStructure</a>
+								<a href="_index_.arangodb.html#validatedbstructure" class="tsd-kind-icon">validateDBStructure</a>
 							</li>
 						</ul>
 					</li>
