@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as dotenv from "dotenv";
-import { ArangoDB } from "../../src/index";
+import { ArangoDB } from "../../src/driver";
 import { DBStructure } from "../../src/types";
 
 dotenv.config({ path: path.join(__dirname, ".env") });
