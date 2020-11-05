@@ -18,8 +18,8 @@ export interface DatabaseConfig extends Config {
 }
 
 export interface GraphDefinition {
-  graphName: string;
-  edgeDefinitions: EdgeDefinition[];
+  graph: string;
+  edges: EdgeDefinition[];
 }
 
 export interface EdgeDefinition {
@@ -30,15 +30,21 @@ export interface EdgeDefinition {
 
 export interface DBStructure {
   database: string;
-  collections: string[];
-  graphs: GraphDefinition[];
+  collections?: string[];
+  graphs?: GraphDefinition[];
 }
 
 export interface DBStructureValidation {
-  database: EntityExists;
-  collections: EntityExists[];
-  graphs: EntityExists[];
-  message: string;
+  message?: string;
+  database?: EntityExists;
+  collections?: EntityExists[];
+  graphs?: EntityExists[];
+}
+
+export interface DBStructureResult {
+  database?: string;
+  collections?: string[];
+  graphs?: string[];
 }
 
 /** @internal */

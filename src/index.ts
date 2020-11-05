@@ -10,6 +10,7 @@ import {
   DBStructure,
   DBStructureValidation,
   DBClearanceMethod,
+  DBStructureResult,
 } from "./types";
 
 /** @internal */
@@ -19,7 +20,7 @@ const debugInfo = Debug("arango-bsd:info");
 const debugError = Debug("arango-bsd:error");
 
 function isGraphDefinition(x: any): x is GraphDefinition {
-  return x.graphName;
+  return x.graph;
 }
 
 function isGraphDefinitionArray(x: any[]): x is GraphDefinition[] {
@@ -27,13 +28,13 @@ function isGraphDefinitionArray(x: any[]): x is GraphDefinition[] {
 }
 
 /** @internal */
-function toGraphNames(graphs: string[] | GraphDefinition[]) {
+function toGraphNames(graphs: string[] | GraphDefinition[]): string[] {
   if (graphs.length === 0) {
     return [];
   }
 
   if (isGraphDefinitionArray(graphs)) {
-    return graphs.map((g) => g.graphName);
+    return graphs.map((g) => g.graph);
   }
 
   return graphs;
@@ -85,6 +86,8 @@ export class ArangoDB {
     } else {
       this.driver = new Database(databaseOrConfig);
     }
+
+    this.pool = {};
   }
 
   /**
@@ -147,67 +150,99 @@ export class ArangoDB {
       }
     }
 
+    // TODO: graphs are not cleared yet ?
+
     const driver = await this.fromPool(db);
     (await driver.collections()).map((collection) => collection.truncate());
     debugInfo(`DB ${db} cleaned`);
   };
 
-  public createDBStructure = async (structure: DBStructure, clearDB?: DBClearanceMethod): Promise<void> => {
+  public createDBStructure = async (
+    structure: DBStructure,
+    clearDB?: DBClearanceMethod
+  ): Promise<DBStructureResult> => {
     if (!structure || !structure.database) {
-      return;
+      return { database: "Database not specified" };
     }
 
-    if (clearDB) {
-      await this.clearDatabase(structure.database, clearDB);
+    const response: DBStructureResult = {
+      database: undefined,
+      collections: [],
+      graphs: [],
+    };
+
+    const dbExists = await this.databaseExists(structure.database);
+
+    if (!dbExists) {
+      debugInfo(`Database '${structure.database}' not found`);
+
+      try {
+        await this.driver.createDatabase(structure.database);
+        debugInfo(`Database '${structure.database}' created`);
+        response.database = "Database created";
+      } catch (e) {
+        response.database = "Failed to create database";
+        debugInfo(`Failed to create database '${structure.database}'`);
+        debugError(e);
+        return response;
+      }
+    } else {
+      if (clearDB) {
+        await this.clearDatabase(structure.database, clearDB);
+        debugInfo(`Database '${structure.database}' cleared with method ${clearDB}`);
+        response.database = `Database cleared with method ${clearDB}`;
+      } else {
+        debugInfo(`Database '${structure.database}' found`);
+        response.database = "Database found";
+      }
     }
 
     const validation = await this.checkDBStructure(structure);
-
-    if (!validation.database.exists) {
-      debugInfo(`DB ${structure.database} not found`);
-      await this.driver.createDatabase(structure.database);
-
-      debugInfo(`DB ${structure.database} created`);
-      return this.createDBStructure(structure);
-    }
-
-    debugInfo(`DB ${structure.database} found`);
-
     const driver = await this.fromPool(structure.database);
 
-    for (const collectionEntity of validation.collections) {
-      if (!collectionEntity.exists) {
+    for (const entity of validation.collections) {
+      if (!entity.exists) {
         try {
-          await driver.collection(collectionEntity.name).create();
+          await driver.collection(entity.name).create();
+          response.collections.push(`Collection '${entity.name}' created`);
         } catch (e) {
-          debugError(`Failed to create collection ${collectionEntity.name}`);
+          response.collections.push(`Failed to create collection '${entity.name}'`);
+          debugError(`Failed to create collection '${entity.name}'`);
           debugError(e);
         }
+      } else {
+        response.collections.push(`Collection '${entity.name}' found`);
       }
     }
 
-    for (const graphEntity of validation.graphs) {
-      if (!graphEntity.exists) {
-        const graph = structure.graphs.filter((graphDefinition) => graphDefinition.graphName === graphEntity.name)[0];
+    for (const entity of validation.graphs) {
+      if (!entity.exists) {
+        const graph = structure.graphs.filter((graph) => graph.graph === entity.name)[0];
         if (graph) {
           try {
-            await driver.graph(graph.graphName).create(graph.edgeDefinitions);
+            await driver.graph(graph.graph).create(graph.edges);
+            response.graphs.push(`Graph '${entity.name}' created`);
           } catch (e) {
-            debugError(`Failed to create graph ${graphEntity.name}`);
+            response.graphs.push(`Failed to create graph '${entity.name}'`);
+            debugError(`Failed to create graph '${entity.name}'`);
             debugError(e);
           }
         }
+      } else {
+        response.graphs.push(`Graph '${entity.name}' found`);
       }
     }
+
+    return response;
   };
 
   /** @internal */
   private async checkDBStructure(structure: DBStructure): Promise<DBStructureValidation> {
     const response: DBStructureValidation = {
-      database: null,
-      collections: null,
-      graphs: null,
       message: null,
+      database: null,
+      collections: [],
+      graphs: [],
     };
 
     if (!structure || !structure.database) {
@@ -217,7 +252,7 @@ export class ArangoDB {
     const dbExists = await this.databaseExists(structure.database);
     if (!dbExists) {
       response.message = "Database does not exist";
-      response.database = { name: structure.database, exists: true };
+      response.database = { name: structure.database, exists: false };
       return response;
     }
 
@@ -312,6 +347,10 @@ export class ArangoDB {
 
   /** @internal */
   private fromPool = async (db: string): Promise<Database> => {
+    if (!this.pool) {
+      this.pool = {};
+    }
+
     if (!this.pool[db]) {
       const exists = await this.databaseExists(db);
       if (!exists) {

@@ -28,7 +28,7 @@
     "clean": "rimraf lib && rimraf dist",
     "build": "yarn clean && tsc",
     "test": "jest -c test/jest.config.unit.js --passWithNoTests",
-    "integration:test": "jest -c test/jest.config.integration.js",
+    "integration:test": "jest -c test/jest.config.integration.js --runInBand",
     "lint": "yarn lint:check",
     "lint:check": "eslint '{src,test}/**/*.{js,ts,json}'",
     "lint:fix": "eslint --fix '{src,test}/**/*.{js,ts,json}'",
