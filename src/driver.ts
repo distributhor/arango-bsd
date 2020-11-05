@@ -103,9 +103,9 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns a list of objects
    */
-  public queryAll = async (query: AqlQuery, options?: QueryOptions): Promise<any[]> => {
+  public async queryAll(query: AqlQuery, options?: QueryOptions): Promise<any[]> {
     return (await this.driver.query(query, options)).all();
-  };
+  }
 
   /**
    * Will simply return the first value only of a query. One can quite easily handle
@@ -117,25 +117,22 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns an object
    */
-  public queryOne = async (query: AqlQuery, options?: QueryOptions): Promise<any> => {
+  public async queryOne(query: AqlQuery, options?: QueryOptions): Promise<any> {
     return (await this.queryAll(query, options)).shift();
-  };
+  }
 
   // same as driver.exists, so not useful for checking if current instance exists,
   // but usefull for checking if a different instance exists
-  public databaseExists = async (db: string): Promise<boolean> => {
+  public async databaseExists(db: string): Promise<boolean> {
     return (await this.driver.listDatabases()).includes(db);
-  };
+  }
 
-  public collectionExists = async (collection: string, db?: string): Promise<boolean> => {
+  public async collectionExists(collection: string, db?: string): Promise<boolean> {
     const driver = db ? await this.fromPool(db) : this.driver;
     return (await driver.listCollections()).map((c) => c.name).includes(collection);
-  };
+  }
 
-  public clearDatabase = async (
-    db: string,
-    method: DBClearanceMethod = DBClearanceMethod.DELETE_DATA
-  ): Promise<void> => {
+  public async clearDatabase(db: string, method: DBClearanceMethod = DBClearanceMethod.DELETE_DATA): Promise<void> {
     const dbExists = await this.databaseExists(db);
     if (!dbExists) {
       return;
@@ -157,12 +154,9 @@ export class ArangoDB {
     const driver = await this.fromPool(db);
     (await driver.collections()).map((collection) => collection.truncate());
     debugInfo(`DB ${db} cleaned`);
-  };
+  }
 
-  public createDBStructure = async (
-    structure: DBStructure,
-    clearDB?: DBClearanceMethod
-  ): Promise<DBStructureResult> => {
+  public async createDBStructure(structure: DBStructure, clearDB?: DBClearanceMethod): Promise<DBStructureResult> {
     if (!structure || !structure.database) {
       return { database: "Database not specified" };
     }
@@ -236,9 +230,8 @@ export class ArangoDB {
     }
 
     return response;
-  };
+  }
 
-  /** @internal */
   public async validateDBStructure(structure: DBStructure): Promise<DBStructureValidation> {
     const response: DBStructureValidation = {
       message: null,
@@ -348,7 +341,7 @@ export class ArangoDB {
   }
 
   /** @internal */
-  private fromPool = async (db: string): Promise<Database> => {
+  private async fromPool(db: string): Promise<Database> {
     if (!this.pool) {
       this.pool = {};
     }
@@ -365,5 +358,5 @@ export class ArangoDB {
 
     debugInfo(`Returning '${db}' from pool`);
     return this.pool[db];
-  };
+  }
 }

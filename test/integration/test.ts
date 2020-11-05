@@ -16,7 +16,7 @@ const CONST = {
 };
 
 const dbStructure: DBStructure = {
-  database: testDB2,
+  database: undefined,
   collections: [CONST.userCollection, CONST.groupCollection],
   graphs: [
     {
@@ -34,7 +34,6 @@ const dbStructure: DBStructure = {
 
 const db = new ArangoDB({
   url: process.env.ARANGO_TEST_DB_URI,
-  // databaseName: testDB,
 });
 
 describe("Arango Backseat Driver Integration Tests", () => {
@@ -53,21 +52,22 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(testDB1Exists).toBeFalsy();
     expect(testDB2Exists).toBeFalsy();
 
-    await db.driver.createDatabase(testDB2);
+    await db.driver.createDatabase(testDB1);
 
     testDB1Exists = await db.databaseExists(testDB1);
     testDB2Exists = await db.databaseExists(testDB2);
 
-    expect(testDB1Exists).toBeFalsy();
-    expect(testDB2Exists).toBeTruthy();
+    expect(testDB1Exists).toBeTruthy();
+    expect(testDB2Exists).toBeFalsy();
   });
 
   test("Create database structure and test multi-driver behaviour", async () => {
     // create structure for existing DB
+    dbStructure.database = testDB1;
     const result1 = await db.createDBStructure(dbStructure);
 
     // create structure for non-existing DB
-    dbStructure.database = testDB1;
+    dbStructure.database = testDB2;
     const result2 = await db.createDBStructure(dbStructure);
 
     expect(result1.database).toEqual("Database found");
@@ -90,8 +90,8 @@ describe("Arango Backseat Driver Integration Tests", () => {
     );
 
     // confirm non-existent DB was created
-    const testDB1Exists = await db.databaseExists(testDB1);
-    expect(testDB1Exists).toBeTruthy();
+    const testDB2Exists = await db.databaseExists(testDB2);
+    expect(testDB2Exists).toBeTruthy();
 
     // check that expected collections exist and that different drivers behave as expected
     const currentDriverNameBefore = db.driver.name;
@@ -127,10 +127,11 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(userGroupsCollectionExist).toBeTruthy();
 
     // remove a collection and recreate the structure
-    testDB1Driver.collection(CONST.userCollection).drop();
-    const usersCollectionExist2 = await db.collectionExists(CONST.userCollection, testDB1);
+    testDB2Driver.collection(CONST.userCollection).drop();
+    const usersCollectionExist2 = await db.collectionExists(CONST.userCollection, testDB2);
     expect(usersCollectionExist2).toBeFalsy();
 
+    dbStructure.database = testDB2;
     const result3 = await db.createDBStructure(dbStructure);
 
     expect(result3.database).toEqual("Database found");
@@ -142,12 +143,12 @@ describe("Arango Backseat Driver Integration Tests", () => {
       ])
     );
 
-    const usersCollectionExist3 = await db.collectionExists(CONST.userCollection, testDB1);
+    const usersCollectionExist3 = await db.collectionExists(CONST.userCollection, testDB2);
     expect(usersCollectionExist3).toBeTruthy();
 
-    // confirm that empty array values are not handled, and do not break anything,
-    // ie, they are essentially unhandled and nothing happens - it's a safe operation
-    const emptyArraysDBStructure: DBStructure = {
+    // confirm that empty array values do not break anything, ie, that they
+    // are essentially unhandled and nothing happens, so it's a safe operation
+    const dbStructureWithEmptyArrays: DBStructure = {
       database: testDB2,
       collections: [],
       graphs: [
@@ -158,7 +159,7 @@ describe("Arango Backseat Driver Integration Tests", () => {
       ],
     };
 
-    const result4 = await db.createDBStructure(emptyArraysDBStructure);
+    const result4 = await db.createDBStructure(dbStructureWithEmptyArrays);
 
     expect(result4.database).toEqual("Database found");
     expect(result4.collections.length).toEqual(0);
