@@ -11,17 +11,17 @@ export interface UntypedObject {
   [key: string]: string;
 }
 
-export interface KV {
+export interface KeyValue {
   key: string;
   value: string;
 }
 
 export interface UniqueValue {
-  unique: KV;
+  unique: KeyValue;
 }
 
 export interface CompositeKey {
-  composite: KV[];
+  composite: KeyValue[];
 }
 
 export interface UniqueConstraint {
@@ -74,6 +74,11 @@ export interface DBStructureResult {
   graphs?: string[];
 }
 
+export const enum DBClearanceMethod {
+  DELETE_DATA = "DELETE_DATA",
+  RECREATE_DB = "RECREATE_DB",
+}
+
 /** @internal */
 export interface EntityExists {
   name: string;
@@ -88,11 +93,6 @@ export interface EntityAvailability {
   allExist: boolean;
 }
 
-export const enum DBClearanceMethod {
-  DELETE_DATA = "DELETE_DATA",
-  RECREATE_DB = "RECREATE_DB",
-}
-
 /** @internal */
 export function isGraphDefinition(x: any): x is GraphDefinition {
   return x.graph;
@@ -103,14 +103,12 @@ export function isGraphDefinitionArray(x: any[]): x is GraphDefinition[] {
   return x.length > 0 && isGraphDefinition(x[0]);
 }
 
-export function isKV(x: any): x is KV {
-  return x.key && x.value;
-}
-
+/** @internal */
 export function isUniqueValue(x: any): x is UniqueValue {
   return x.unique;
 }
 
+/** @internal */
 export function isCompositeKey(x: any): x is CompositeKey {
   return x.composite;
 }
