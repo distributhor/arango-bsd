@@ -44,6 +44,15 @@ export interface DatabaseConfig extends Config {
   hello?: boolean;
 }
 
+export interface CreateDocumentOptions {
+  stripUnderscoreProps?: boolean;
+}
+
+export interface ReadDocumentOptions {
+  stripInternalProps?: boolean;
+  stripUnderscoreProps?: boolean;
+}
+
 export interface GraphDefinition {
   graph: string;
   edges: EdgeDefinition[];

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>CompositeKey | Documentation</title>
+	<title>ReadDocumentOptions | Documentation</title>
 	<meta name="description" content="Documentation for Documentation">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/_types_.html">&quot;types&quot;</a>
 				</li>
 				<li>
-					<a href="_types_.compositekey.html">CompositeKey</a>
+					<a href="_types_.readdocumentoptions.html">ReadDocumentOptions</a>
 				</li>
 			</ul>
-			<h1>Interface CompositeKey</h1>
+			<h1>Interface ReadDocumentOptions</h1>
 		</div>
 	</div>
 </header>
@@ -73,7 +73,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">CompositeKey</span>
+						<span class="target">ReadDocumentOptions</span>
 					</li>
 				</ul>
 			</section>
@@ -84,7 +84,8 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_types_.compositekey.html#composite" class="tsd-kind-icon">composite</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_types_.readdocumentoptions.html#stripinternalprops" class="tsd-kind-icon">strip<wbr>Internal<wbr>Props</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_types_.readdocumentoptions.html#stripunderscoreprops" class="tsd-kind-icon">strip<wbr>Underscore<wbr>Props</a></li>
 							</ul>
 						</section>
 					</div>
@@ -93,12 +94,22 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="composite" class="tsd-anchor"></a>
-					<h3>composite</h3>
-					<div class="tsd-signature tsd-kind-icon">composite<span class="tsd-signature-symbol">:</span> <a href="_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a><span class="tsd-signature-symbol">[]</span></div>
+					<a name="stripinternalprops" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> strip<wbr>Internal<wbr>Props</h3>
+					<div class="tsd-signature tsd-kind-icon">strip<wbr>Internal<wbr>Props<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/edaf1ae/src/types.ts#L24">src/types.ts:24</a></li>
+							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/edaf1ae/src/types.ts#L52">src/types.ts:52</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="stripunderscoreprops" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> strip<wbr>Underscore<wbr>Props</h3>
+					<div class="tsd-signature tsd-kind-icon">strip<wbr>Underscore<wbr>Props<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/edaf1ae/src/types.ts#L53">src/types.ts:53</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -129,18 +140,9 @@
 					<li class=" tsd-kind-enum tsd-parent-kind-module">
 						<a href="../enums/_types_.querytype.html" class="tsd-kind-icon">Query<wbr>Type</a>
 					</li>
-				</ul>
-				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-module">
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="_types_.compositekey.html" class="tsd-kind-icon">Composite<wbr>Key</a>
-						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_types_.compositekey.html#composite" class="tsd-kind-icon">composite</a>
-							</li>
-						</ul>
 					</li>
-				</ul>
-				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="_types_.createdocumentoptions.html" class="tsd-kind-icon">Create<wbr>Document<wbr>Options</a>
 					</li>
@@ -165,9 +167,21 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="_types_.keyvalue.html" class="tsd-kind-icon">Key<wbr>Value</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-module">
 						<a href="_types_.readdocumentoptions.html" class="tsd-kind-icon">Read<wbr>Document<wbr>Options</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_types_.readdocumentoptions.html#stripinternalprops" class="tsd-kind-icon">strip<wbr>Internal<wbr>Props</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_types_.readdocumentoptions.html#stripunderscoreprops" class="tsd-kind-icon">strip<wbr>Underscore<wbr>Props</a>
+							</li>
+						</ul>
 					</li>
+				</ul>
+				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="_types_.uniqueconstraint.html" class="tsd-kind-icon">Unique<wbr>Constraint</a>
 					</li>

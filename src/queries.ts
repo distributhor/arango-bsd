@@ -1,5 +1,60 @@
-import { AqlQuery } from "arangojs/aql";
+/* eslint-disable no-prototype-builtins */
+import { aql, AqlQuery } from "arangojs/aql";
 import { UniqueConstraint, isCompositeKey, isUniqueValue, QueryType } from "./index";
+
+export function fetchByPropertyValue(collection: string, property: string, value: string, options: any = {}): AqlQuery {
+  let query = `FOR d IN ${collection} FILTER d.@property == @value`;
+
+  if (options && options.hasOwnProperty("sortBy")) {
+    query += ` SORT d.${options.sortBy}`;
+
+    if (options.hasOwnProperty("sortDirection")) {
+      if (options.sortDirection === "ascending") {
+        query += " ASC";
+      } else if (options.sortDirection === "descending") {
+        query += " DESC";
+      }
+    }
+
+    if (options.hasOwnProperty("sortOrder")) {
+      if (options.sortOrder === "ascending") {
+        query += " ASC";
+      } else if (options.sortOrder === "descending") {
+        query += " DESC";
+      }
+    }
+  }
+
+  // if (this._hasKeepOption(options)) {
+  //   query += " RETURN KEEP( d, [" + this._getKeepInstruction(options) + "])";
+  // } else if (this._hasOmitOption(options)) {
+  //   query += " RETURN UNSET_RECURSIVE( d, [" + this._getOmitInstruction(options) + "])";
+  // } else {
+  //   query += " RETURN d";
+  // }
+
+  query += " RETURN d";
+
+  return {
+    query,
+    bindVars: { property, value },
+  };
+}
+
+export function toUpdateDocumentByFieldNameQuery(
+  collection: string,
+  property: string,
+  value: string,
+  data: any
+): AqlQuery {
+  return aql`FOR d IN ${collection} FILTER d.${property} == "${value}" UPDATE u WITH ${JSON.stringify(
+    data
+  )} IN ${collection}`;
+}
+
+export function toDeleteDocumentByFieldNameQuery(collection: string, property: string, value: string): AqlQuery {
+  return aql`FOR d IN ${collection} FILTER d.${property} == "${value}" REMOVE u IN ${collection}`;
+}
 
 export function toUniqueConstraintQuery(
   constraints: UniqueConstraint,
