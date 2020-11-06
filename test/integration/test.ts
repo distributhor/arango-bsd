@@ -37,6 +37,7 @@ const db = new ArangoDB({
   url: process.env.ARANGO_TEST_DB_URI,
 });
 
+/*
 const userFixture = {
   name: "Willie",
   surname: "Krause",
@@ -160,6 +161,7 @@ const groupsFixture = [
     tags: ["city"],
   },
 ];
+*/
 
 const bulkUsersFixture = [
   {
