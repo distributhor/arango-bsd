@@ -2,7 +2,6 @@ import * as path from "path";
 import * as dotenv from "dotenv";
 import { ArangoDB } from "../../src/index";
 import { DBStructure } from "../../src/types";
-import { Collection } from "arangojs/collection";
 
 dotenv.config({ path: path.join(__dirname, ".env") });
 
@@ -232,7 +231,6 @@ const bulkUsersFixture = [
 ];
 
 describe("Arango Backseat Driver Integration Tests", () => {
-  /*
   test("Create database", async () => {
     expect.assertions(5);
 
@@ -401,7 +399,6 @@ describe("Arango Backseat Driver Integration Tests", () => {
 
     expect(result.length).toEqual(9);
   });
-  */
 
   test("Unique constraint validation", async () => {
     // const driver = db.driver.database(testDB);
@@ -447,7 +444,6 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(result4.unique).toBeTruthy();
   });
 
-  /*
   test("Delete database", async () => {
     expect.assertions(5);
 
@@ -468,5 +464,4 @@ describe("Arango Backseat Driver Integration Tests", () => {
       expect(e.response.body.errorMessage).toEqual("database not found");
     }
   });
-  */
 });
