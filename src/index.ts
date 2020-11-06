@@ -3,7 +3,6 @@ import { Database } from "arangojs";
 import { AqlQuery } from "arangojs/aql";
 import { QueryOptions } from "arangojs/database";
 import {
-  MemPool,
   DatabaseConfig,
   EntityAvailability,
   GraphDefinition,
@@ -16,7 +15,7 @@ import {
   UniqueConstraintResult,
   QueryType,
 } from "./types";
-import { toConstraintValidationQuery } from "./queries";
+import { toUniqueConstraintQuery } from "./queries";
 
 export * from "./types";
 
@@ -37,6 +36,11 @@ function toGraphNames(graphs: string[] | GraphDefinition[]): string[] {
   }
 
   return graphs;
+}
+
+/** @internal */
+export interface MemPool {
+  [key: string]: ArangoDB;
 }
 
 /**
@@ -89,6 +93,14 @@ export class ArangoDB {
     this.pool = {};
   }
 
+  public db(db: string): ArangoDB {
+    return this.fromPool(db);
+  }
+
+  public getDriver(db?: string): Database {
+    return db ? this.fromPool(db).driver : this.driver;
+  }
+
   /**
    * The regular `driver.query` method will return a database cursor. If you wish to just
    * return all the documents in the result at once (same as invoking cursor.all()),
@@ -118,7 +130,7 @@ export class ArangoDB {
     return (await this.queryAll(query, options)).shift();
   }
 
-  public async create(data: any, collection: string, db?: string): Promise<any> {
+  public async create(collection: string, data: any): Promise<any> {
     // const isBulk = Array.isArray(data) ? true : false;
     // if (isBulk) {
     //   for (let item of data) {
@@ -138,21 +150,17 @@ export class ArangoDB {
     //   }
     // }
 
-    const driver = db ? await this.fromPool(db) : this.driver;
-
-    return driver.collection(collection).save(data);
+    return this.driver.collection(collection).save(data);
   }
 
-  public async uniqueConstraintValidation(constraints: UniqueConstraint, db?: string): Promise<UniqueConstraintResult> {
+  public async uniqueConstraintValidation(constraints: UniqueConstraint): Promise<UniqueConstraintResult> {
     if (!constraints || constraints.constraints.length === 0) {
       return;
     }
 
-    // const query = toConstraintValidationQuery(constraints, QueryType.STRING) as string;
-    const query = toConstraintValidationQuery(constraints, QueryType.AQL) as AqlQuery;
-
-    const driver = db ? await this.fromPool(db) : this.driver;
-    const documents = await (await driver.query(query)).all();
+    // const query = toUniqueConstraintQuery(constraints, QueryType.STRING) as string;
+    const query = toUniqueConstraintQuery(constraints, QueryType.AQL) as AqlQuery;
+    const documents = await (await this.driver.query(query)).all();
 
     return {
       unique: documents.length > 0 ? false : true,
@@ -160,20 +168,18 @@ export class ArangoDB {
     };
   }
 
+  public async collectionExists(collection: string): Promise<boolean> {
+    return (await this.driver.listCollections()).map((c) => c.name).includes(collection);
+  }
+
+  public async graphExists(graph: string): Promise<boolean> {
+    return (await this.driver.listGraphs()).map((g) => g.name).includes(graph);
+  }
+
   // same as driver.exists, so not useful for checking if current instance exists,
   // but usefull for checking if a different instance exists
   public async databaseExists(db: string): Promise<boolean> {
     return (await this.driver.listDatabases()).includes(db);
-  }
-
-  public async collectionExists(collection: string, db?: string): Promise<boolean> {
-    const driver = db ? await this.fromPool(db) : this.driver;
-    return (await driver.listCollections()).map((c) => c.name).includes(collection);
-  }
-
-  public async graphExists(graph: string, db?: string): Promise<boolean> {
-    const driver = db ? await this.fromPool(db) : this.driver;
-    return (await driver.listGraphs()).map((g) => g.name).includes(graph);
   }
 
   public async clearDatabase(db: string, method: DBClearanceMethod = DBClearanceMethod.DELETE_DATA): Promise<void> {
@@ -195,8 +201,7 @@ export class ArangoDB {
 
     // TODO: graphs are not cleared yet ?
 
-    const driver = await this.fromPool(db);
-    (await driver.collections()).map((collection) => collection.truncate());
+    (await this.getDriver(db).collections()).map((collection) => collection.truncate());
     debugInfo(`DB ${db} cleaned`);
   }
 
@@ -238,12 +243,11 @@ export class ArangoDB {
     }
 
     const validation = await this.validateDBStructure(structure);
-    const driver = await this.fromPool(structure.database);
 
     for (const entity of validation.collections) {
       if (!entity.exists) {
         try {
-          await driver.collection(entity.name).create();
+          await this.getDriver(structure.database).collection(entity.name).create();
           response.collections.push(`Collection '${entity.name}' created`);
         } catch (e) {
           response.collections.push(`Failed to create collection '${entity.name}'`);
@@ -297,14 +301,14 @@ export class ArangoDB {
 
     response.database = { name: structure.database, exists: true };
 
-    const collectionAvailability = await this.checkAvailableCollections(structure.collections, structure.database);
+    const collectionAvailability = await this.checkAvailableCollections(structure.database, structure.collections);
     response.collections = collectionAvailability.all;
 
     if (!collectionAvailability.allExist) {
       response.message = "Required collections do not exist";
     }
 
-    const graphAvailability = await this.checkAvailableGraphs(structure.graphs, structure.database);
+    const graphAvailability = await this.checkAvailableGraphs(structure.database, structure.graphs);
     response.graphs = graphAvailability.all;
 
     if (!graphAvailability.allExist) {
@@ -319,7 +323,7 @@ export class ArangoDB {
   }
 
   /** @internal */
-  private async checkAvailableCollections(collections: string[], db?: string): Promise<EntityAvailability> {
+  private async checkAvailableCollections(db: string, collections: string[]): Promise<EntityAvailability> {
     const response: EntityAvailability = {
       all: [],
       missing: [],
@@ -331,9 +335,7 @@ export class ArangoDB {
       return response;
     }
 
-    const driver = db ? await this.fromPool(db) : this.driver;
-
-    response.existing = (await driver.listCollections()).map((c) => c.name);
+    response.existing = (await this.getDriver(db).listCollections()).map((c) => c.name);
 
     for (const collection of collections) {
       if (response.existing.includes(collection)) {
@@ -352,7 +354,7 @@ export class ArangoDB {
   }
 
   /** @internal */
-  private async checkAvailableGraphs(graphs: string[] | GraphDefinition[], db?: string): Promise<EntityAvailability> {
+  private async checkAvailableGraphs(db: string, graphs: string[] | GraphDefinition[]): Promise<EntityAvailability> {
     const response: EntityAvailability = {
       all: [],
       missing: [],
@@ -364,9 +366,7 @@ export class ArangoDB {
       return response;
     }
 
-    const driver = db ? await this.fromPool(db) : this.driver;
-
-    response.existing = (await driver.listGraphs()).map((c) => c.name);
+    response.existing = (await this.getDriver(db).listGraphs()).map((c) => c.name);
 
     for (const graph of toGraphNames(graphs)) {
       if (response.existing.includes(graph)) {
@@ -385,19 +385,14 @@ export class ArangoDB {
   }
 
   /** @internal */
-  private async fromPool(db: string): Promise<Database> {
+  private fromPool(db: string): ArangoDB {
     if (!this.pool) {
       this.pool = {};
     }
 
     if (!this.pool[db]) {
-      const exists = await this.databaseExists(db);
-      if (!exists) {
-        throw new Error(`DB ${db} does not exist`);
-      }
-
       debugInfo(`Adding '${db}' to pool`);
-      this.pool[db] = this.driver.database(db);
+      this.pool[db] = new ArangoDB(this.driver.database(db));
     }
 
     debugInfo(`Returning '${db}' from pool`);

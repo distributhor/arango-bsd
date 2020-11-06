@@ -7,7 +7,6 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const testDB1 = process.env.ARANGO_TEST_DB1_NAME;
 const testDB2 = process.env.ARANGO_TEST_DB2_NAME;
-const testDB = testDB1;
 
 const CONST = {
   userCollection: "users",
@@ -33,12 +32,12 @@ const dbStructure: DBStructure = {
   ],
 };
 
-const db = new ArangoDB({
+const arango = new ArangoDB({
   url: process.env.ARANGO_TEST_DB_URI,
 });
 
 /*
-const groupsFixture = [
+const groups = [
   {
     name: "Dev",
     tags: ["technical"],
@@ -66,7 +65,7 @@ const groupsFixture = [
 ];
 */
 
-const bulkUsersFixture = [
+const users = [
   {
     name: "Lance",
     surname: "Armstrong",
@@ -140,21 +139,21 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect.assertions(5);
 
     // confirm that at least one database is already present
-    const dbList = await db.driver.listDatabases();
+    const dbList = await arango.driver.listDatabases();
     expect(dbList.length).toBeGreaterThanOrEqual(1);
 
     // TODO: JS version that tests what happens when no arg supplied
     // confirm that neither of the test DBs exist
-    let testDB1Exists = await db.databaseExists(testDB1);
-    let testDB2Exists = await db.databaseExists(testDB2);
+    let testDB1Exists = await arango.databaseExists(testDB1);
+    let testDB2Exists = await arango.databaseExists(testDB2);
 
     expect(testDB1Exists).toBeFalsy();
     expect(testDB2Exists).toBeFalsy();
 
-    await db.driver.createDatabase(testDB1);
+    await arango.driver.createDatabase(testDB1);
 
-    testDB1Exists = await db.databaseExists(testDB1);
-    testDB2Exists = await db.databaseExists(testDB2);
+    testDB1Exists = await arango.databaseExists(testDB1);
+    testDB2Exists = await arango.databaseExists(testDB2);
 
     expect(testDB1Exists).toBeTruthy();
     expect(testDB2Exists).toBeFalsy();
@@ -163,11 +162,11 @@ describe("Arango Backseat Driver Integration Tests", () => {
   test("Create database structure and test multi-driver behaviour", async () => {
     // create structure for existing DB
     dbStructure.database = testDB1;
-    const result1 = await db.createDBStructure(dbStructure);
+    const result1 = await arango.createDBStructure(dbStructure);
 
     // create structure for non-existing DB
     dbStructure.database = testDB2;
-    const result2 = await db.createDBStructure(dbStructure);
+    const result2 = await arango.createDBStructure(dbStructure);
 
     expect(result1.database).toEqual("Database found");
     expect(result1.graphs).toEqual(expect.arrayContaining([`Graph '${CONST.groupMembershipGraph}' created`]));
@@ -189,18 +188,18 @@ describe("Arango Backseat Driver Integration Tests", () => {
     );
 
     // confirm non-existent DB was created
-    const testDB2Exists = await db.databaseExists(testDB2);
+    const testDB2Exists = await arango.databaseExists(testDB2);
     expect(testDB2Exists).toBeTruthy();
 
     // check that expected collections exist and that different drivers behave as expected
-    const currentDriverNameBefore = db.driver.name;
-    const testDB1Driver = db.driver.database(testDB1);
-    const testDB2Driver = db.driver.database(testDB2);
+    const currentDriverNameBefore = arango.driver.name;
+    const testDB1Driver = arango.driver.database(testDB1);
+    const testDB2Driver = arango.driver.database(testDB2);
     const testDB1DriverName = testDB1Driver.name;
     const testDB2DriverName = testDB2Driver.name;
-    const currentDriverNameAfter = db.driver.name;
+    const currentDriverNameAfter = arango.driver.name;
 
-    const collecionListSystem = await db.driver.listCollections();
+    const collecionListSystem = await arango.driver.listCollections();
     const collecionList1 = await testDB1Driver.listCollections();
     const collecionList2 = await testDB2Driver.listCollections();
 
@@ -213,11 +212,12 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(collecionList1.length).toEqual(3);
     expect(collecionList2.length).toEqual(3);
 
-    const usersCollectionOnSystemDB1 = await db.driver.collection(CONST.userCollection).exists();
-    const usersCollectionOnSystemDB2 = await db.collectionExists(CONST.userCollection);
-    const usersCollectionExist = await db.collectionExists(CONST.userCollection, testDB1);
-    const groupsCollectionExist = await db.collectionExists(CONST.groupCollection, testDB1);
-    const userGroupsCollectionExist = await db.collectionExists(CONST.userToGroupEdge, testDB1);
+    const usersCollectionOnSystemDB1 = await arango.driver.collection(CONST.userCollection).exists();
+    const usersCollectionOnSystemDB2 = await arango.collectionExists(CONST.userCollection);
+
+    const usersCollectionExist = await arango.db(testDB1).collectionExists(CONST.userCollection);
+    const groupsCollectionExist = await arango.db(testDB1).collectionExists(CONST.groupCollection);
+    const userGroupsCollectionExist = await arango.db(testDB1).collectionExists(CONST.userToGroupEdge);
 
     expect(usersCollectionOnSystemDB1).toBeFalsy();
     expect(usersCollectionOnSystemDB2).toBeFalsy();
@@ -227,11 +227,11 @@ describe("Arango Backseat Driver Integration Tests", () => {
 
     // remove a collection and recreate the structure
     testDB2Driver.collection(CONST.userCollection).drop();
-    const usersCollectionExist2 = await db.collectionExists(CONST.userCollection, testDB2);
+    const usersCollectionExist2 = await arango.db(testDB2).collectionExists(CONST.userCollection);
     expect(usersCollectionExist2).toBeFalsy();
 
     dbStructure.database = testDB2;
-    const result3 = await db.createDBStructure(dbStructure);
+    const result3 = await arango.createDBStructure(dbStructure);
 
     expect(result3.database).toEqual("Database found");
     expect(result3.graphs).toEqual(expect.arrayContaining([`Graph '${CONST.groupMembershipGraph}' found`]));
@@ -242,7 +242,7 @@ describe("Arango Backseat Driver Integration Tests", () => {
       ])
     );
 
-    const usersCollectionExist3 = await db.collectionExists(CONST.userCollection, testDB2);
+    const usersCollectionExist3 = await arango.db(testDB2).collectionExists(CONST.userCollection);
     expect(usersCollectionExist3).toBeTruthy();
 
     // confirm that empty array values do not break anything, ie, that they
@@ -258,7 +258,7 @@ describe("Arango Backseat Driver Integration Tests", () => {
       ],
     };
 
-    const result4 = await db.createDBStructure(dbStructureWithEmptyArrays);
+    const result4 = await arango.createDBStructure(dbStructureWithEmptyArrays);
 
     expect(result4.database).toEqual("Database found");
     expect(result4.collections.length).toEqual(0);
@@ -272,7 +272,7 @@ describe("Arango Backseat Driver Integration Tests", () => {
       edges: undefined,
     });
 
-    const result = await db.validateDBStructure(dbStructure);
+    const result = await arango.validateDBStructure(dbStructure);
 
     expect(result.collections).toEqual(
       expect.arrayContaining([
@@ -296,55 +296,41 @@ describe("Arango Backseat Driver Integration Tests", () => {
     // the Arango API (perform multiple create() actions in the background), while a nativeJsDriver.import()
     // performs a bulk import using one connection.
 
-    // const driver = db.driver.database(testDB);
+    // const driver = arango.driver.database(testDB);
     // const result = await driver.collection(CONST.userCollection).save(bulkUsersFixture);
 
-    const result = await db.create(bulkUsersFixture, CONST.userCollection, testDB);
+    const result = await arango.db(testDB1).create(CONST.userCollection, users);
     console.log(result);
 
     expect(result.length).toEqual(9);
   });
 
   test("Unique constraint validation", async () => {
-    // const driver = db.driver.database(testDB);
-
-    const result1 = await db.uniqueConstraintValidation(
-      {
-        collection: CONST.userCollection,
-        constraints: [{ unique: { key: "username", value: "chiefdoper" } }],
-      },
-      testDB
-    );
+    const result1 = await arango.db(testDB1).uniqueConstraintValidation({
+      collection: CONST.userCollection,
+      constraints: [{ unique: { key: "username", value: "chiefdoper" } }],
+    });
 
     expect(result1.unique).toBeFalsy();
 
-    const result2 = await db.uniqueConstraintValidation(
-      {
-        collection: CONST.userCollection,
-        constraints: [{ unique: { key: "username", value: "thetrain" } }],
-      },
-      testDB
-    );
+    const result2 = await arango.db(testDB1).uniqueConstraintValidation({
+      collection: CONST.userCollection,
+      constraints: [{ unique: { key: "username", value: "thetrain" } }],
+    });
 
     expect(result2.unique).toBeTruthy();
 
-    const result3 = await db.uniqueConstraintValidation(
-      {
-        collection: CONST.userCollection,
-        constraints: [{ unique: { key: "username", value: "thetrain" } }, { unique: { key: "name", value: "Lance" } }],
-      },
-      testDB
-    );
+    const result3 = await arango.db(testDB1).uniqueConstraintValidation({
+      collection: CONST.userCollection,
+      constraints: [{ unique: { key: "username", value: "thetrain" } }, { unique: { key: "name", value: "Lance" } }],
+    });
 
     expect(result3.unique).toBeFalsy();
 
-    const result4 = await db.uniqueConstraintValidation(
-      {
-        collection: CONST.userCollection,
-        constraints: [{ unique: { key: "username", value: "thetrain" } }, { unique: { key: "name", value: "Thomas" } }],
-      },
-      testDB
-    );
+    const result4 = await arango.db(testDB1).uniqueConstraintValidation({
+      collection: CONST.userCollection,
+      constraints: [{ unique: { key: "username", value: "thetrain" } }, { unique: { key: "name", value: "Thomas" } }],
+    });
 
     expect(result4.unique).toBeTruthy();
   });
@@ -352,17 +338,17 @@ describe("Arango Backseat Driver Integration Tests", () => {
   test("Delete database", async () => {
     expect.assertions(5);
 
-    await db.driver.dropDatabase(testDB1);
-    await db.driver.dropDatabase(testDB2);
+    await arango.driver.dropDatabase(testDB1);
+    await arango.driver.dropDatabase(testDB2);
 
-    const testDB1Exists = await db.databaseExists(testDB1);
-    const testDB2Exists = await db.databaseExists(testDB2);
+    const testDB1Exists = await arango.databaseExists(testDB1);
+    const testDB2Exists = await arango.databaseExists(testDB2);
 
     expect(testDB1Exists).toBeFalsy();
     expect(testDB2Exists).toBeFalsy();
 
     try {
-      await db.driver.dropDatabase(testDB1);
+      await arango.driver.dropDatabase(testDB1);
     } catch (e) {
       expect(e.response.body.code).toEqual(404);
       expect(e.response.body.errorNum).toEqual(1228);

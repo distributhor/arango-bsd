@@ -4,9 +4,16 @@
 
 import * as path from "path";
 import * as dotenv from "dotenv";
+// import { GeneratedAqlQuery } from "arangojs/aql";
 import { ArangoDB } from "../../../src/index";
 
 dotenv.config({ path: path.join(__dirname, "../../integration/.env") });
+
+// const fetchUserByName = (name: string): GeneratedAqlQuery => {
+//   return aql`
+//     FOR d IN user FILTER d.name LIKE ${name} RETURN d
+//   `;
+// };
 
 (async function () {
   try {

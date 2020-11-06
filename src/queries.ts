@@ -1,7 +1,7 @@
 import { AqlQuery } from "arangojs/aql";
 import { UniqueConstraint, isCompositeKey, isUniqueValue, QueryType } from "./index";
 
-export function toConstraintValidationQuery(
+export function toUniqueConstraintQuery(
   constraints: UniqueConstraint,
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
@@ -23,6 +23,7 @@ export function toConstraintValidationQuery(
   }
 
   let constraintCount = 0;
+
   for (const constraint of constraints.constraints) {
     constraintCount++;
 
@@ -32,6 +33,7 @@ export function toConstraintValidationQuery(
 
     if (isCompositeKey(constraint)) {
       let keyCount = 0;
+
       query += " (";
 
       for (const kv of constraint.composite) {

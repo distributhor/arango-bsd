@@ -1,4 +1,3 @@
-import { Database } from "arangojs";
 import { Config } from "arangojs/connection";
 
 // export interface SearchResult {
@@ -7,11 +6,6 @@ import { Config } from "arangojs/connection";
 //   total: number;
 //   options: any;
 // }
-
-/** @internal */
-export interface MemPool {
-  [key: string]: Database;
-}
 
 export interface UntypedObject {
   [key: string]: string;

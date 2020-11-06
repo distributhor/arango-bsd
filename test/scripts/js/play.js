@@ -1,8 +1,14 @@
 //
 // Run with: node test/scripts/js/test.js
 //
+const { aql } = require("arangojs/aql");
 const { ArangoDB } = require("../../../lib/index");
-const { fetchUserByName } = require("../../resources/js/queries");
+
+const fetchUserByName = (name) => {
+  return aql`
+    FOR d IN user FILTER d.name LIKE ${name} RETURN d 
+  `;
+};
 
 (async function () {
   try {
