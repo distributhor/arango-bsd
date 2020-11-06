@@ -123,10 +123,15 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#cleardatabase" class="tsd-kind-icon">clear<wbr>Database</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#collectionexists" class="tsd-kind-icon">collection<wbr>Exists</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#create" class="tsd-kind-icon">create</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#createdbstructure" class="tsd-kind-icon">createDBStructure</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#databaseexists" class="tsd-kind-icon">database<wbr>Exists</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#db" class="tsd-kind-icon">db</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#getdriver" class="tsd-kind-icon">get<wbr>Driver</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#graphexists" class="tsd-kind-icon">graph<wbr>Exists</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#queryall" class="tsd-kind-icon">query<wbr>All</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#queryone" class="tsd-kind-icon">query<wbr>One</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#uniqueconstraintvalidation" class="tsd-kind-icon">unique<wbr>Constraint<wbr>Validation</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_index_.arangodb.html#validatedbstructure" class="tsd-kind-icon">validateDBStructure</a></li>
 							</ul>
 						</section>
@@ -145,7 +150,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L79">src/index.ts:79</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L78">src/index.ts:78</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -175,7 +180,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 					<div class="tsd-signature tsd-kind-icon">driver<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Database</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L79">src/index.ts:79</a></li>
+							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L78">src/index.ts:78</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -198,7 +203,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L137">src/index.ts:137</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L185">src/index.ts:185</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -218,13 +223,36 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 					<a name="collectionexists" class="tsd-anchor"></a>
 					<h3>collection<wbr>Exists</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">collection<wbr>Exists<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, db<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">collection<wbr>Exists<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L132">src/index.ts:132</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L171">src/index.ts:171</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>collection: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="create" class="tsd-anchor"></a>
+					<h3>create</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">create<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L133">src/index.ts:133</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -233,10 +261,10 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 									<h5>collection: <span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> db: <span class="tsd-signature-type">string</span></h5>
+									<h5>data: <span class="tsd-signature-type">any</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -250,7 +278,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L161">src/index.ts:161</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L208">src/index.ts:208</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -276,13 +304,82 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L128">src/index.ts:128</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L181">src/index.ts:181</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>db: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="db" class="tsd-anchor"></a>
+					<h3>db</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">db<span class="tsd-signature-symbol">(</span>db<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_index_.arangodb.html" class="tsd-signature-type">ArangoDB</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L96">src/index.ts:96</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>db: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_index_.arangodb.html" class="tsd-signature-type">ArangoDB</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getdriver" class="tsd-anchor"></a>
+					<h3>get<wbr>Driver</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Driver<span class="tsd-signature-symbol">(</span>db<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Database</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L100">src/index.ts:100</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> db: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Database</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="graphexists" class="tsd-anchor"></a>
+					<h3>graph<wbr>Exists</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">graph<wbr>Exists<span class="tsd-signature-symbol">(</span>graph<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L175">src/index.ts:175</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>graph: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -299,7 +396,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L108">src/index.ts:108</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L115">src/index.ts:115</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -340,7 +437,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L122">src/index.ts:122</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L129">src/index.ts:129</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -372,6 +469,29 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="uniqueconstraintvalidation" class="tsd-anchor"></a>
+					<h3>unique<wbr>Constraint<wbr>Validation</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">unique<wbr>Constraint<wbr>Validation<span class="tsd-signature-symbol">(</span>constraints<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_.uniqueconstraint.html" class="tsd-signature-type">UniqueConstraint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_.uniqueconstraintresult.html" class="tsd-signature-type">UniqueConstraintResult</a><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L156">src/index.ts:156</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>constraints: <a href="../interfaces/_types_.uniqueconstraint.html" class="tsd-signature-type">UniqueConstraint</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_types_.uniqueconstraintresult.html" class="tsd-signature-type">UniqueConstraintResult</a><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="validatedbstructure" class="tsd-anchor"></a>
 					<h3>validateDBStructure</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -381,7 +501,7 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/d2cded5/src/index.ts#L237">src/index.ts:237</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/a4d5b4a/src/index.ts#L283">src/index.ts:283</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -406,12 +526,18 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 						<a href="../modules/_index_.html">&quot;index&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
+						<a href="../modules/_queries_.html">&quot;queries&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
 						<a href="../modules/_types_.html">&quot;types&quot;</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#compositekey" class="tsd-kind-icon">Composite<wbr>Key</a>
+					</li>
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="../modules/_index_.html#dbclearancemethod" class="tsd-kind-icon">DBClearance<wbr>Method</a>
 					</li>
@@ -433,6 +559,33 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 					<li class=" tsd-kind-reference tsd-parent-kind-module">
 						<a href="../modules/_index_.html#graphdefinition" class="tsd-kind-icon">Graph<wbr>Definition</a>
 					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#kv" class="tsd-kind-icon">KV</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#querytype" class="tsd-kind-icon">Query<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#uniqueconstraint" class="tsd-kind-icon">Unique<wbr>Constraint</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#uniqueconstraintresult" class="tsd-kind-icon">Unique<wbr>Constraint<wbr>Result</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#uniquevalue" class="tsd-kind-icon">Unique<wbr>Value</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#untypedobject" class="tsd-kind-icon">Untyped<wbr>Object</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#iscompositekey" class="tsd-kind-icon">is<wbr>Composite<wbr>Key</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#iskv" class="tsd-kind-icon">isKV</a>
+					</li>
+					<li class=" tsd-kind-reference tsd-parent-kind-module">
+						<a href="../modules/_index_.html#isuniquevalue" class="tsd-kind-icon">is<wbr>Unique<wbr>Value</a>
+					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-module">
@@ -451,16 +604,31 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 								<a href="_index_.arangodb.html#collectionexists" class="tsd-kind-icon">collection<wbr>Exists</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_index_.arangodb.html#create" class="tsd-kind-icon">create</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_index_.arangodb.html#createdbstructure" class="tsd-kind-icon">createDBStructure</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_index_.arangodb.html#databaseexists" class="tsd-kind-icon">database<wbr>Exists</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_index_.arangodb.html#db" class="tsd-kind-icon">db</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_index_.arangodb.html#getdriver" class="tsd-kind-icon">get<wbr>Driver</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_index_.arangodb.html#graphexists" class="tsd-kind-icon">graph<wbr>Exists</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_index_.arangodb.html#queryall" class="tsd-kind-icon">query<wbr>All</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_index_.arangodb.html#queryone" class="tsd-kind-icon">query<wbr>One</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_index_.arangodb.html#uniqueconstraintvalidation" class="tsd-kind-icon">unique<wbr>Constraint<wbr>Validation</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_index_.arangodb.html#validatedbstructure" class="tsd-kind-icon">validateDBStructure</a>
@@ -483,6 +651,9 @@ db.queryAll(aql<span class="hljs-string">`FOR d IN user FILTER d.name LIKE <span
 				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
 				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
