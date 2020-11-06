@@ -264,7 +264,7 @@ export class ArangoDB {
         const graph = structure.graphs.filter((graph) => graph.graph === entity.name)[0];
         if (graph && graph.edges && graph.edges.length > 0) {
           try {
-            await driver.graph(graph.graph).create(graph.edges);
+            await this.getDriver(structure.database).graph(graph.graph).create(graph.edges);
             response.graphs.push(`Graph '${entity.name}' created`);
           } catch (e) {
             response.graphs.push(`Failed to create graph '${entity.name}'`);
