@@ -8,10 +8,15 @@ import {
   EntityAvailability,
   GraphDefinition,
   DBStructure,
+  DBStructureResult,
   DBStructureValidation,
   DBClearanceMethod,
-  DBStructureResult,
+  isGraphDefinitionArray,
+  UniqueConstraint,
+  UniqueConstraintResult,
+  QueryType,
 } from "./types";
+import { toConstraintValidationQuery } from "./queries";
 
 export * from "./types";
 
@@ -20,16 +25,6 @@ const debugInfo = Debug("arango-bsd:info");
 
 /** @internal */
 const debugError = Debug("arango-bsd:error");
-
-/** @internal */
-function isGraphDefinition(x: any): x is GraphDefinition {
-  return x.graph;
-}
-
-/** @internal */
-function isGraphDefinitionArray(x: any[]): x is GraphDefinition[] {
-  return x.length > 0 && isGraphDefinition(x[0]);
-}
 
 /** @internal */
 function toGraphNames(graphs: string[] | GraphDefinition[]): string[] {
@@ -123,6 +118,48 @@ export class ArangoDB {
     return (await this.queryAll(query, options)).shift();
   }
 
+  public async create(data: any, collection: string, db?: string): Promise<any> {
+    // const isBulk = Array.isArray(data) ? true : false;
+    // if (isBulk) {
+    //   for (let item of data) {
+    //     if (item.hasOwnProperty("_key")) {
+    //       if (item._key == "" || !this._isString(item._key)) {
+    //         delete item._key;
+    //         delete item._id;
+    //       }
+    //     }
+    //   }
+    // } else {
+    //   if (data.hasOwnProperty("_key")) {
+    //     if (data._key == "" || !this._isString(data._key)) {
+    //       delete data._key;
+    //       delete data._id;
+    //     }
+    //   }
+    // }
+
+    const driver = db ? await this.fromPool(db) : this.driver;
+
+    return driver.collection(collection).save(data);
+  }
+
+  public async uniqueConstraintValidation(constraints: UniqueConstraint, db?: string): Promise<UniqueConstraintResult> {
+    if (!constraints || constraints.constraints.length === 0) {
+      return;
+    }
+
+    // const query = toConstraintValidationQuery(constraints, QueryType.STRING) as string;
+    const query = toConstraintValidationQuery(constraints, QueryType.AQL) as AqlQuery;
+
+    const driver = db ? await this.fromPool(db) : this.driver;
+    const documents = await (await driver.query(query)).all();
+
+    return {
+      unique: documents.length > 0 ? false : true,
+      documents,
+    };
+  }
+
   // same as driver.exists, so not useful for checking if current instance exists,
   // but usefull for checking if a different instance exists
   public async databaseExists(db: string): Promise<boolean> {
@@ -132,6 +169,11 @@ export class ArangoDB {
   public async collectionExists(collection: string, db?: string): Promise<boolean> {
     const driver = db ? await this.fromPool(db) : this.driver;
     return (await driver.listCollections()).map((c) => c.name).includes(collection);
+  }
+
+  public async graphExists(graph: string, db?: string): Promise<boolean> {
+    const driver = db ? await this.fromPool(db) : this.driver;
+    return (await driver.listGraphs()).map((g) => g.name).includes(graph);
   }
 
   public async clearDatabase(db: string, method: DBClearanceMethod = DBClearanceMethod.DELETE_DATA): Promise<void> {

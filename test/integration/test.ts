@@ -2,11 +2,13 @@ import * as path from "path";
 import * as dotenv from "dotenv";
 import { ArangoDB } from "../../src/index";
 import { DBStructure } from "../../src/types";
+import { Collection } from "arangojs/collection";
 
 dotenv.config({ path: path.join(__dirname, ".env") });
 
 const testDB1 = process.env.ARANGO_TEST_DB1_NAME;
 const testDB2 = process.env.ARANGO_TEST_DB2_NAME;
+const testDB = testDB1;
 
 const CONST = {
   userCollection: "users",
@@ -36,7 +38,201 @@ const db = new ArangoDB({
   url: process.env.ARANGO_TEST_DB_URI,
 });
 
+const userFixture = {
+  name: "Willie",
+  surname: "Krause",
+  username: "willie",
+  password: "Password123",
+  email: "willie@plumbonline.com",
+  idnumber: "7202077262089",
+  gender: "M",
+  age: 40,
+  legacy: {
+    profile: "57a89cc191cbed0ce04c9371",
+    password: "pbkdf2_sha256$11200$jzaWJImRJEfs$Pb1CxsDZwB7EHmMrjngJTtPgSf/LMaHikSW4emqW1os=",
+    api_key: "b7xc4LZloITp36lMlBviuj3bLCWBSSzuzRL3m1KWVhp",
+    secret_key: "70o79XpP2tO3KwgJxB903St1W0ofXl8GIRkP59ndV2S",
+  },
+  roles: {
+    ui: ["classroom", "courses", "events"],
+    api: ["qa"],
+  },
+  hobbies: ["running", "cycling"],
+  aspirations: [],
+  codename: null,
+  profile: {},
+  qualifications: [
+    {
+      name: "Bsc Computer Science",
+      institution: "Self Taught",
+      dateObtaned: "1976-06-07",
+    },
+    {
+      name: "Bsc Trail Running",
+      institution: "Table Mountain",
+      dateObtaned: "2017",
+    },
+  ],
+};
+
+const additionalUsersFixture = [
+  {
+    name: "James",
+    surname: "Wiggill",
+    username: "james",
+    gender: "M",
+    age: 38,
+  },
+  {
+    name: "Stachek",
+    surname: "Jarosz",
+    username: "stash",
+    gender: "M",
+    age: 37,
+  },
+  {
+    name: "Kay",
+    surname: "Jarosz",
+    username: "kay",
+    gender: "F",
+    age: 36,
+  },
+  {
+    name: "Keri-Lynn",
+    surname: "Krause",
+    username: "keri",
+    gender: "F",
+    age: 38,
+  },
+  {
+    name: "Andries",
+    surname: "Krause",
+    username: "andries",
+    gender: "M",
+    age: 36,
+  },
+  {
+    name: "Ferdie",
+    surname: "Visagie",
+    username: "ferdie",
+    gender: "M",
+    age: 40,
+  },
+  {
+    name: "Frikkie",
+    surname: "van der Merwe",
+    username: "frikkie",
+  },
+  {
+    name: "Koos",
+    surname: "Kombuis",
+    username: "koos",
+  },
+  {
+    name: "Piet",
+    surname: "Pompies",
+    username: "piet",
+  },
+];
+
+const groupsFixture = [
+  {
+    name: "Dev",
+    tags: ["technical"],
+  },
+  {
+    name: "Admin",
+    tags: ["business"],
+  },
+  {
+    name: "Marketing",
+    tags: ["business"],
+  },
+  {
+    name: "Support",
+    tags: ["technical", "business"],
+  },
+  {
+    name: "CPT",
+    tags: ["city"],
+  },
+  {
+    name: "JHB",
+    tags: ["city"],
+  },
+];
+
+const bulkUsersFixture = [
+  {
+    name: "Lance",
+    surname: "Armstrong",
+    username: "chiefdoper",
+    country: "USA",
+    team: "US Postal",
+    role: "GC",
+  },
+  {
+    name: "George",
+    surname: "Hincapie",
+    username: "steamtrain",
+    country: "USA",
+    team: "US Postal",
+    role: "Domestique",
+  },
+  {
+    name: "Ivan",
+    surname: "Basso",
+    username: "closebutnotquite",
+    country: "Italy",
+    team: "CSC",
+    role: "GC",
+  },
+  {
+    name: "Jan",
+    surname: "Ullrich",
+    username: "wishiwas3kglighter",
+    country: "Germany",
+    team: "T Mobile",
+    role: "GC",
+  },
+  {
+    name: "Alberto",
+    surname: "Contador",
+    username: "pistolero",
+    country: "Spain",
+    team: "Saxobank Tinkoff",
+    role: "GC",
+  },
+  {
+    name: "Alejandro",
+    surname: "Valverda",
+    username: "stillgoing",
+    country: "Spain",
+    team: "Movistar",
+  },
+  {
+    name: "Mathieu",
+    surname: "van der Poel",
+    username: "bossofcross",
+    team: "Alpecin Fenix",
+    role: "Classics",
+  },
+  {
+    name: "Wout",
+    surname: "van Aert",
+    username: "Jumbo Visma",
+    role: "Classics",
+  },
+  {
+    name: "Tadej",
+    surname: "Pogačar",
+    username: "UAE Emirates",
+    role: "GC",
+  },
+];
+
 describe("Arango Backseat Driver Integration Tests", () => {
+  /*
   test("Create database", async () => {
     expect.assertions(5);
 
@@ -191,6 +387,67 @@ describe("Arango Backseat Driver Integration Tests", () => {
     );
   });
 
+  test("Import test data", async () => {
+    // Bulk vs Batch ...
+    // Doing a nativeJsDriver.create() with an array of data seems like it issues a batch operation against
+    // the Arango API (perform multiple create() actions in the background), while a nativeJsDriver.import()
+    // performs a bulk import using one connection.
+
+    // const driver = db.driver.database(testDB);
+    // const result = await driver.collection(CONST.userCollection).save(bulkUsersFixture);
+
+    const result = await db.create(bulkUsersFixture, CONST.userCollection, testDB);
+    console.log(result);
+
+    expect(result.length).toEqual(9);
+  });
+  */
+
+  test("Unique constraint validation", async () => {
+    // const driver = db.driver.database(testDB);
+
+    const result1 = await db.uniqueConstraintValidation(
+      {
+        collection: CONST.userCollection,
+        constraints: [{ unique: { key: "username", value: "chiefdoper" } }],
+      },
+      testDB
+    );
+
+    expect(result1.unique).toBeFalsy();
+
+    const result2 = await db.uniqueConstraintValidation(
+      {
+        collection: CONST.userCollection,
+        constraints: [{ unique: { key: "username", value: "thetrain" } }],
+      },
+      testDB
+    );
+
+    expect(result2.unique).toBeTruthy();
+
+    const result3 = await db.uniqueConstraintValidation(
+      {
+        collection: CONST.userCollection,
+        constraints: [{ unique: { key: "username", value: "thetrain" } }, { unique: { key: "name", value: "Lance" } }],
+      },
+      testDB
+    );
+
+    expect(result3.unique).toBeFalsy();
+
+    const result4 = await db.uniqueConstraintValidation(
+      {
+        collection: CONST.userCollection,
+        constraints: [{ unique: { key: "username", value: "thetrain" } }, { unique: { key: "name", value: "Thomas" } }],
+      },
+      testDB
+    );
+
+    expect(result4.unique).toBeTruthy();
+  });
+
+  /*
   test("Delete database", async () => {
     expect.assertions(5);
 
@@ -211,4 +468,5 @@ describe("Arango Backseat Driver Integration Tests", () => {
       expect(e.response.body.errorMessage).toEqual("database not found");
     }
   });
+  */
 });
