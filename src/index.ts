@@ -135,7 +135,12 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns a list of objects
    */
-  public async queryAll(query: AqlQuery, options?: QueryOptions): Promise<any[]> {
+  public async queryAll(query: string | AqlQuery, options?: QueryOptions): Promise<any[]> {
+    // query(query: AqlQuery, options?: QueryOptions): Promise<ArrayCursor>
+    // query(query: string | AqlLiteral, bindVars?: Dict<any>, options?: QueryOptions): Promise<ArrayCursor>
+    if (typeof query === "string") {
+      return (await this.driver.query(query, undefined, options)).all();
+    }
     return (await this.driver.query(query, options)).all();
   }
 
@@ -149,7 +154,7 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns an object
    */
-  public async queryOne(query: AqlQuery, options?: QueryOptions): Promise<any> {
+  public async queryOne(query: string | AqlQuery, options?: QueryOptions): Promise<any> {
     return (await this.queryAll(query, options)).shift();
   }
 
@@ -215,7 +220,7 @@ export class ArangoDB {
     options: FetchOptions = {}
   ): Promise<any> {
     const result = await this.driver.query(
-      Queries.fetchDocumentByKeyValue(collection, { key: property, value }, options.sortOptions),
+      Queries.fetchDocumentByKeyValue(collection, { key: property, value }, options.sortOptions) as AqlQuery,
       options.queryOptions
     );
 
@@ -233,7 +238,7 @@ export class ArangoDB {
     options: FetchOneOptions = {}
   ): Promise<any> {
     const document = await this.queryOne(
-      Queries.fetchDocumentByKeyValue(collection, { key: property, value }),
+      Queries.fetchDocumentByKeyValue(collection, { key: property, value }) as AqlQuery,
       options.queryOptions
     );
 
@@ -261,7 +266,7 @@ export class ArangoDB {
     const documents = await this.queryAll(query);
 
     return {
-      unique: documents.length > 0 ? false : true,
+      violatesUniqueConstraint: documents.length > 0 ? true : false,
       documents,
     };
   }

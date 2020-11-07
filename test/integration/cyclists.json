@@ -1,0 +1,157 @@
+[
+  {
+    "name": "Lance",
+    "surname": "Armstrong",
+    "nickname": "Chief Doper",
+    "country": "USA",
+    "speciality": "General Classification"
+  },
+  {
+    "name": "George",
+    "surname": "Hincapie",
+    "nickname": "Super Domestique",
+    "country": "USA",
+    "speciality": "Domestique"
+  },
+  {
+    "name": "Ivan",
+    "surname": "Basso",
+    "nickname": "Close But Not Quite",
+    "country": "Italy",
+    "speciality": "General Classification"
+  },
+  {
+    "name": "Jan",
+    "surname": "Ullrich",
+    "nickname": "Wish I Was 3kg Lighter",
+    "country": "Germany",
+    "speciality": "General Classification"
+  },
+  {
+    "name": "Alberto",
+    "surname": "Contador",
+    "nickname": "El Pistolero",
+    "country": "Spain",
+    "speciality": "General Classification"
+  },
+  {
+    "name": "Alejandro",
+    "surname": "Valverde",
+    "nickname": "Still Going",
+    "country": "Spain"
+  },
+  {
+    "name": "Mathieu",
+    "surname": "van der Poel",
+    "nickname": "Boss Of Cross",
+    "country": "Netherlands",
+    "speciality": "Classics"
+  },
+  {
+    "name": "Wout",
+    "surname": "van Aert",
+    "nickname": "Can Do It All",
+    "country": "Belgium",
+    "speciality": "Classics"
+  },
+  {
+    "name": "Tadej",
+    "surname": "Pogačar",
+    "nickname": "Podgy",
+    "country": "Slovenia",
+    "speciality": "General Classification"
+  },
+  {
+    "name": "Vincenzo",
+    "surname": "Nibali",
+    "nickname": "The Shark",
+    "speciality": "General Classification"
+  },
+  {
+    "name": "Peter",
+    "surname": "Sagan",
+    "nickname": "The Hulk",
+    "country": "Slovakia",
+    "speciality": "Sprinter"
+  },
+  {
+    "name": "Arnaud",
+    "surname": "Démare",
+    "country": "France",
+    "speciality": "Sprinter"
+  },
+  {
+    "name": "Thibaut",
+    "surname": "Pinot",
+    "country": "France",
+    "speciality": "General Classification"
+  },
+  {
+    "name": "Mark",
+    "surname": "Cavendish",
+    "country": "UK",
+    "speciality": "Sprinter"
+  },
+  {
+    "name": "Chris",
+    "surname": "Froome",
+    "country": "UK",
+    "speciality": "General Classification"
+  },
+  {
+    "name": "Geraint",
+    "surname": "Thomas",
+    "country": "UK",
+    "speciality": "General Classification"
+  },
+  {
+    "name": "Marc",
+    "surname": "Soler",
+    "country": "Spain",
+    "speciality": "Climber"
+  },
+  {
+    "name": "Rohan",
+    "surname": "Dennis",
+    "country": "Australia",
+    "speciality": "Time Trial"
+  },
+  {
+    "name": "Thomas",
+    "surname": "de Ghent",
+    "country": "Belgium",
+    "nickname": "The Train",
+    "speciality": "Break Aways"
+  },
+  {
+    "name": "Caleb",
+    "surname": "Ewan",
+    "country": "Australia",
+    "speciality": "Sprinter"
+  },
+  {
+    "name": "Tony",
+    "surname": "Martin",
+    "country": "Germany",
+    "speciality": "Time Trial",
+    "nickname": "Pantzerwagen"
+  },
+  {
+    "name": "Fabian",
+    "surname": "Cancellara",
+    "country": "Switzerland",
+    "speciality": "Time Trial"
+  },
+  {
+    "name": "Julian",
+    "surname": "Alaphilippe",
+    "country": "France",
+    "speciality": "Classics"
+  },
+  {
+    "name": "Tim",
+    "surname": "Wellens",
+    "country": "Belgium",
+    "speciality": "Classics"
+  }
+]

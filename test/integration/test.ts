@@ -3,16 +3,19 @@ import * as dotenv from "dotenv";
 import { ArangoDB } from "../../src/index";
 import { DBStructure } from "../../src/types";
 
+import cyclists from "./cyclists.json";
+import teams from "./teams.json";
+
 dotenv.config({ path: path.join(__dirname, ".env") });
 
 const testDB1 = process.env.ARANGO_TEST_DB1_NAME;
 const testDB2 = process.env.ARANGO_TEST_DB2_NAME;
 
 const CONST = {
-  userCollection: "users",
-  groupCollection: "groups",
-  userToGroupEdge: "user_groups",
-  groupMembershipGraph: "group_membership",
+  userCollection: "cyclists",
+  groupCollection: "teams",
+  userToGroupEdge: "team_members",
+  groupMembershipGraph: "team_membership",
 };
 
 const dbStructure: DBStructure = {
@@ -36,105 +39,8 @@ const arango = new ArangoDB({
   url: process.env.ARANGO_TEST_DB_URI,
 });
 
-/*
-const groups = [
-  {
-    name: "Dev",
-    tags: ["technical"],
-  },
-  {
-    name: "Admin",
-    tags: ["business"],
-  },
-  {
-    name: "Marketing",
-    tags: ["business"],
-  },
-  {
-    name: "Support",
-    tags: ["technical", "business"],
-  },
-  {
-    name: "CPT",
-    tags: ["city"],
-  },
-  {
-    name: "JHB",
-    tags: ["city"],
-  },
-];
-*/
-
-const users = [
-  {
-    name: "Lance",
-    surname: "Armstrong",
-    username: "chiefdoper",
-    country: "USA",
-    team: "US Postal",
-    role: "GC",
-  },
-  {
-    name: "George",
-    surname: "Hincapie",
-    username: "steamtrain",
-    country: "USA",
-    team: "US Postal",
-    role: "Domestique",
-  },
-  {
-    name: "Ivan",
-    surname: "Basso",
-    username: "closebutnotquite",
-    country: "Italy",
-    team: "CSC",
-    role: "GC",
-  },
-  {
-    name: "Jan",
-    surname: "Ullrich",
-    username: "wishiwas3kglighter",
-    country: "Germany",
-    team: "T Mobile",
-    role: "GC",
-  },
-  {
-    name: "Alberto",
-    surname: "Contador",
-    username: "pistolero",
-    country: "Spain",
-    team: "Saxobank Tinkoff",
-    role: "GC",
-  },
-  {
-    name: "Alejandro",
-    surname: "Valverda",
-    username: "stillgoing",
-    country: "Spain",
-    team: "Movistar",
-  },
-  {
-    name: "Mathieu",
-    surname: "van der Poel",
-    username: "bossofcross",
-    team: "Alpecin Fenix",
-    role: "Classics",
-  },
-  {
-    name: "Wout",
-    surname: "van Aert",
-    username: "Jumbo Visma",
-    role: "Classics",
-  },
-  {
-    name: "Tadej",
-    surname: "Pogačar",
-    username: "UAE Emirates",
-    role: "GC",
-  },
-];
-
 describe("Arango Backseat Driver Integration Tests", () => {
+  /* 
   test("Create database", async () => {
     expect.assertions(5);
 
@@ -291,50 +197,155 @@ describe("Arango Backseat Driver Integration Tests", () => {
   });
 
   test("Import test data", async () => {
-    // Bulk vs Batch ...
-    // Doing a nativeJsDriver.create() with an array of data seems like it issues a batch operation against
-    // the Arango API (perform multiple create() actions in the background), while a nativeJsDriver.import()
-    // performs a bulk import using one connection.
+    const result1 = await arango.db(testDB1).create(CONST.userCollection, cyclists);
+    const result2 = await arango.db(testDB1).create(CONST.groupCollection, teams);
 
-    // const driver = arango.driver.database(testDB);
-    // const result = await driver.collection(CONST.userCollection).save(bulkUsersFixture);
-
-    const result = await arango.db(testDB1).create(CONST.userCollection, users);
-    console.log(result);
-
-    expect(result.length).toEqual(9);
+    expect(result1.length).toEqual(25);
+    expect(result2.length).toEqual(15);
   });
 
   test("Unique constraint validation", async () => {
     const result1 = await arango.db(testDB1).uniqueConstraintValidation({
       collection: CONST.userCollection,
-      constraints: [{ unique: { key: "username", value: "chiefdoper" } }],
+      constraints: [{ unique: { key: "nickname", value: "Chief Doper" } }],
     });
 
-    expect(result1.unique).toBeFalsy();
+    expect(result1.violatesUniqueConstraint).toBeTruthy();
 
     const result2 = await arango.db(testDB1).uniqueConstraintValidation({
       collection: CONST.userCollection,
-      constraints: [{ unique: { key: "username", value: "thetrain" } }],
+      constraints: [{ unique: { key: "nickname", value: "Tornado" } }],
     });
 
-    expect(result2.unique).toBeTruthy();
+    expect(result2.violatesUniqueConstraint).toBeFalsy();
 
     const result3 = await arango.db(testDB1).uniqueConstraintValidation({
       collection: CONST.userCollection,
-      constraints: [{ unique: { key: "username", value: "thetrain" } }, { unique: { key: "name", value: "Lance" } }],
+      constraints: [
+        { unique: { key: "nickname", value: "Tornado" } },
+        { unique: { key: "surname", value: "Armstrong" } },
+      ],
     });
 
-    expect(result3.unique).toBeFalsy();
+    expect(result3.violatesUniqueConstraint).toBeTruthy();
 
     const result4 = await arango.db(testDB1).uniqueConstraintValidation({
       collection: CONST.userCollection,
-      constraints: [{ unique: { key: "username", value: "thetrain" } }, { unique: { key: "name", value: "Thomas" } }],
+      constraints: [
+        { unique: { key: "nickname", value: "Tornado" } },
+        { unique: { key: "surname", value: "Voeckler" } },
+      ],
     });
 
-    expect(result4.unique).toBeTruthy();
+    expect(result4.violatesUniqueConstraint).toBeFalsy();
+
+    const result5 = await arango.db(testDB1).uniqueConstraintValidation({
+      collection: CONST.userCollection,
+      constraints: [
+        {
+          composite: [
+            { key: "name", value: "Thomas" },
+            { key: "surname", value: "de Ghent" },
+          ],
+        },
+      ],
+    });
+
+    expect(result5.violatesUniqueConstraint).toBeTruthy();
+
+    const result6 = await arango.db(testDB1).uniqueConstraintValidation({
+      collection: CONST.userCollection,
+      constraints: [
+        {
+          composite: [
+            { key: "name", value: "Thomas" },
+            { key: "surname", value: "Voeckler" },
+          ],
+        },
+      ],
+    });
+
+    expect(result6.violatesUniqueConstraint).toBeFalsy();
   });
 
+  test("Query ALL and query ONE, fetch and fetchOne", async () => {
+    const result1A = await arango
+      .db(testDB1)
+      .queryAll(`FOR d IN ${CONST.userCollection} FILTER d.speciality LIKE "Time Trial" RETURN d`);
+
+    expect(result1A.length).toEqual(4);
+    expect(result1A[0].surname).toBeDefined();
+
+    const result1B = await arango.db(testDB1).fetchByPropertyValue(CONST.userCollection, "speciality", "Time Trial");
+    expect(result1B.length).toEqual(4);
+    expect(result1B[0].surname).toBeDefined();
+
+    const result2A = await arango
+      .db(testDB1)
+      .queryAll(`FOR d IN ${CONST.userCollection} FILTER d.speciality LIKE "Trail Running" RETURN d`);
+
+    expect(result2A).toBeDefined();
+    expect(Array.isArray(result2A)).toBeTruthy();
+    expect(result2A.length).toEqual(0);
+
+    const result2B = await arango.db(testDB1).fetchByPropertyValue(CONST.userCollection, "speciality", "Trail Running");
+
+    expect(result2B).toBeDefined();
+    expect(Array.isArray(result2B)).toBeTruthy();
+    expect(result2B.length).toEqual(0);
+
+    const result3A = await arango
+      .db(testDB1)
+      .queryOne(`FOR d IN ${CONST.userCollection} FILTER d.speciality LIKE "Trail Running" RETURN d`);
+
+    expect(result3A).toBeUndefined();
+
+    const result3B = await arango
+      .db(testDB1)
+      .fetchOneByPropertyValue(CONST.userCollection, "speciality", "Trail Running");
+
+    expect(result3B).toBeUndefined();
+
+    const result4A = await arango
+      .db(testDB1)
+      .queryOne(`FOR d IN ${CONST.userCollection} FILTER d.speciality LIKE "Time Trial" RETURN d`);
+
+    expect(result4A).toBeDefined();
+    expect(result4A.surname).toBeDefined();
+
+    const result4B = await arango.db(testDB1).fetchOneByPropertyValue(CONST.userCollection, "speciality", "Time Trial");
+
+    expect(result4B).toBeDefined();
+    expect(result4B.surname).toBeDefined();
+
+    const result5A = await arango
+      .db(testDB1)
+      .queryOne(`FOR d IN ${CONST.userCollection} FILTER d.surname LIKE "Armstrong" RETURN d`);
+
+    expect(result5A).toBeDefined();
+    expect(result5A.name).toEqual("Lance");
+
+    const result5B = await arango.db(testDB1).fetchOneByPropertyValue(CONST.userCollection, "surname", "Armstrong");
+
+    expect(result5B).toBeDefined();
+    expect(result5B.name).toEqual("Lance");
+  });
+  */
+  /*
+  test("Create document", async () => {
+    const result1 = await arango.db(testDB1).create(CONST.userCollection, {
+      name: "Daryl",
+      surname: "Impey",
+      country: "South Africa",
+      speciality: "All Rounder",
+    });
+
+    console.log(result1);
+    // expect(result1.length).toEqual(4);
+    // expect(result1[0].surname).toBeDefined();
+  });
+  */
+  /*
   test("Delete database", async () => {
     expect.assertions(5);
 
@@ -355,4 +366,5 @@ describe("Arango Backseat Driver Integration Tests", () => {
       expect(e.response.body.errorMessage).toEqual("database not found");
     }
   });
+  */
 });

@@ -32,19 +32,31 @@ export interface UniqueConstraint {
 }
 
 export interface UniqueConstraintResult {
-  unique: boolean;
+  violatesUniqueConstraint: boolean;
   documents?: any[];
 }
 
-export const enum QueryType {
+export enum QueryType {
   STRING = "string",
   AQL = "aql",
 }
 
-export const enum QueryReturnType {
+export enum QueryReturnType {
   DOCUMENTS = "documents",
   CURSOR = "cursor",
 }
+
+export enum CombinatorType {
+  AND = "AND",
+  OR = "OR",
+}
+
+export const Combinator = {
+  AND: "&&",
+  OR: "||",
+  and: "&&",
+  or: "||",
+};
 
 export interface DatabaseConfig extends Config {
   hello?: boolean;

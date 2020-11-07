@@ -1,8 +1,38 @@
 import { QueryType } from "../../src";
-import { uniqueConstraintQuery } from "../../src/queries";
+import { fetchDocumentByCompositeKeyValue, fetchDocumentByKeyValue, uniqueConstraintQuery } from "../../src/queries";
 
 describe("Queries", () => {
-  test("Unique Constraint Validation Queries", async () => {
+  test("fetchDocumentByKeyValue", async () => {
+    const result1 = fetchDocumentByKeyValue("col", { key: "username", value: "ABC" }, undefined, QueryType.STRING);
+    expect(result1).toEqual('FOR d IN col FILTER d.username == "ABC" RETURN d');
+
+    const result2 = fetchDocumentByKeyValue("col", { key: "age", value: 42 }, undefined, QueryType.STRING);
+    expect(result2).toEqual("FOR d IN col FILTER d.age == 42 RETURN d");
+
+    const result3 = fetchDocumentByKeyValue(
+      "col",
+      [
+        { key: "username", value: "ABC" },
+        { key: "age", value: 42 },
+      ],
+      undefined,
+      QueryType.STRING
+    );
+    expect(result3).toEqual('FOR d IN col FILTER d.username == "ABC" || d.age == 42 RETURN d');
+
+    const result4 = fetchDocumentByCompositeKeyValue(
+      "col",
+      [
+        { key: "username", value: "ABC" },
+        { key: "age", value: 42 },
+      ],
+      undefined,
+      QueryType.STRING
+    );
+    expect(result4).toEqual('FOR d IN col FILTER d.username == "ABC" && d.age == 42 RETURN d');
+  });
+
+  test("uniqueConstraintQuery", async () => {
     const result1 = uniqueConstraintQuery(
       {
         collection: "col",

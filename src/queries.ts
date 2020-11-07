@@ -1,26 +1,37 @@
 /* eslint-disable no-prototype-builtins */
 import { aql, AqlQuery } from "arangojs/aql";
-import { UniqueConstraint, isCompositeKey, isUniqueValue, QueryType, KeyValue, SortOptions } from "./index";
+import {
+  UniqueConstraint,
+  isCompositeKey,
+  isUniqueValue,
+  QueryType,
+  KeyValue,
+  SortOptions,
+  Combinator,
+  CombinatorType,
+} from "./index";
 
-export function fetchDocumentByKeyValue(
+/** @internal */
+function _fetchDocumentByKeyValue(
   collection: string,
   identifier: KeyValue | KeyValue[],
-  options: SortOptions = {},
-  queryType: QueryType = QueryType.AQL
-): AqlQuery {
+  options: SortOptions,
+  queryType: QueryType,
+  combinator: CombinatorType
+): string | AqlQuery {
   const params: any = {};
   let query = `FOR d IN ${collection} FILTER`;
 
   if (Array.isArray(identifier)) {
     let keyCount = 0;
 
-    query += " (";
+    // query += " (";
 
     for (const kv of identifier) {
       keyCount++;
 
       if (keyCount > 1) {
-        query += " &&";
+        query += ` ${Combinator[combinator]}`;
       }
 
       if (queryType === QueryType.STRING) {
@@ -40,10 +51,14 @@ export function fetchDocumentByKeyValue(
       }
     }
 
-    query += " )";
+    // query += " )";
   } else {
     if (queryType === QueryType.STRING) {
-      query += ` d.${identifier.key} == "${identifier.value}"`;
+      if (typeof identifier.value === "number") {
+        query += ` d.${identifier.key} == ${identifier.value}`;
+      } else {
+        query += ` d.${identifier.key} == "${identifier.value}"`;
+      }
     } else {
       params["property"] = identifier.key;
       params["value"] = identifier.value;
@@ -73,10 +88,32 @@ export function fetchDocumentByKeyValue(
 
   query += " RETURN d";
 
-  return {
-    query,
-    bindVars: params,
-  };
+  if (queryType === QueryType.STRING) {
+    return query;
+  } else {
+    return {
+      query,
+      bindVars: params,
+    };
+  }
+}
+
+export function fetchDocumentByKeyValue(
+  collection: string,
+  identifier: KeyValue | KeyValue[],
+  options: SortOptions = {},
+  queryType: QueryType = QueryType.AQL
+): string | AqlQuery {
+  return _fetchDocumentByKeyValue(collection, identifier, options, queryType, CombinatorType.OR);
+}
+
+export function fetchDocumentByCompositeKeyValue(
+  collection: string,
+  identifier: KeyValue[],
+  options: SortOptions = {},
+  queryType: QueryType = QueryType.AQL
+): string | AqlQuery {
+  return _fetchDocumentByKeyValue(collection, identifier, options, queryType, CombinatorType.AND);
 }
 
 export function updateDocumentByKeyValue(collection: string, identifier: KeyValue, data: any): AqlQuery {
@@ -174,6 +211,7 @@ export function uniqueConstraintQuery(
 }
 
 export const Queries = {
+  fetchDocumentByCompositeKeyValue,
   fetchDocumentByKeyValue,
   updateDocumentByKeyValue,
   deleteDocumentByKeyValue,
