@@ -92,6 +92,8 @@ export interface FetchOneOptions {
 
 export interface FetchOptions {
   return?: QueryReturnType;
+  stripInternalProps?: boolean;
+  stripUnderscoreProps?: boolean;
   sortOptions?: SortOptions;
   queryOptions?: QueryOptions;
 }

@@ -1,7 +1,8 @@
 import * as path from "path";
 import * as dotenv from "dotenv";
+import { ArrayCursor } from "arangojs/cursor";
 import { ArangoDB } from "../../src/index";
-import { DBStructure } from "../../src/types";
+import { DBStructure, QueryReturnType } from "../../src/types";
 
 import cyclists from "./cyclists.json";
 import teams from "./teams.json";
@@ -40,7 +41,7 @@ const arango = new ArangoDB({
 });
 
 describe("Arango Backseat Driver Integration Tests", () => {
-  /* 
+  /* */
   test("Create database", async () => {
     expect.assertions(5);
 
@@ -200,7 +201,7 @@ describe("Arango Backseat Driver Integration Tests", () => {
     const result1 = await arango.db(testDB1).create(CONST.userCollection, cyclists);
     const result2 = await arango.db(testDB1).create(CONST.groupCollection, teams);
 
-    expect(result1.length).toEqual(25);
+    expect(result1.length).toEqual(24);
     expect(result2.length).toEqual(15);
   });
 
@@ -268,17 +269,135 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(result6.violatesUniqueConstraint).toBeFalsy();
   });
 
-  test("Query ALL and query ONE, fetch and fetchOne", async () => {
+  test("CRUD", async () => {
+    const result1A = await arango.db(testDB1).create(CONST.userCollection, {
+      name: "Daryl",
+      surname: "Impey",
+      country: "South Africa",
+      speciality: "All Rounder",
+      _secret: "Rusks",
+    });
+
+    expect(result1A).toBeDefined();
+    expect(result1A._key).toBeDefined();
+
+    const result2A = await arango.db(testDB1).create(
+      CONST.userCollection,
+      {
+        name: "Cadel",
+        surname: "Evans",
+        country: "Australia",
+        speciality: "GC",
+        _secret: "Smiling",
+      },
+      { stripUnderscoreProps: true }
+    );
+
+    expect(result2A).toBeDefined();
+    expect(result2A._key).toBeDefined();
+
+    const result1B = await arango.db(testDB1).read(CONST.userCollection, result1A._key);
+
+    expect(result1B.name).toEqual("Daryl");
+    expect(result1B.surname).toEqual("Impey");
+    expect(result1B._secret).toEqual("Rusks");
+
+    const result1C = await arango.db(testDB1).read(CONST.userCollection, result1A._key, { stripUnderscoreProps: true });
+
+    expect(result1C.name).toEqual("Daryl");
+    expect(result1C.surname).toEqual("Impey");
+    expect(result1C._secret).toBeUndefined();
+
+    const result1D = await arango.db(testDB1).read(CONST.userCollection, "Impey", { identifier: "surname" });
+
+    expect(result1D.name).toEqual("Daryl");
+    expect(result1D.surname).toEqual("Impey");
+    expect(result1D._secret).toEqual("Rusks");
+
+    const result1E = await arango
+      .db(testDB1)
+      .read(CONST.userCollection, "Impey", { identifier: "surname", stripUnderscoreProps: true });
+
+    expect(result1E.name).toEqual("Daryl");
+    expect(result1E.surname).toEqual("Impey");
+    expect(result1E._secret).toBeUndefined();
+
+    const result2B = await arango.db(testDB1).read(CONST.userCollection, result2A._key);
+
+    expect(result2B.name).toEqual("Cadel");
+    expect(result2B.surname).toEqual("Evans");
+    expect(result2B._secret).toBeUndefined();
+
+    const result2C = await arango
+      .db(testDB1)
+      .update(CONST.userCollection, result2A._key, { nickname: "G'day Mate", speciality: "All Rounder" });
+
+    expect(result2C._key).toBeDefined();
+    expect(result2C._oldRev).toBeDefined();
+
+    const result2D = await arango.db(testDB1).read(CONST.userCollection, result2A._key);
+    expect(result2D.name).toEqual("Cadel");
+    expect(result2D.surname).toEqual("Evans");
+    expect(result2D.nickname).toEqual("G'day Mate");
+    expect(result2D.speciality).toEqual("All Rounder");
+
+    await arango
+      .db(testDB1)
+      .update(CONST.userCollection, "Evans", { nickname: "Too Nice", speciality: "GC" }, { identifier: "surname" });
+
+    const result2F = await arango.db(testDB1).read(CONST.userCollection, result2A._key);
+    expect(result2F.name).toEqual("Cadel");
+    expect(result2F.surname).toEqual("Evans");
+    expect(result2F.nickname).toEqual("Too Nice");
+    expect(result2F.speciality).toEqual("GC");
+  });
+
+  test("queryAll, queryOne, fetch and fetchOne", async () => {
     const result1A = await arango
       .db(testDB1)
       .queryAll(`FOR d IN ${CONST.userCollection} FILTER d.speciality LIKE "Time Trial" RETURN d`);
 
-    expect(result1A.length).toEqual(4);
+    expect(result1A.length).toEqual(3);
     expect(result1A[0].surname).toBeDefined();
 
-    const result1B = await arango.db(testDB1).fetchByPropertyValue(CONST.userCollection, "speciality", "Time Trial");
-    expect(result1B.length).toEqual(4);
+    const result1B = await arango.db(testDB1).fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial");
+
+    expect(result1B.length).toEqual(3);
+    expect(result1B[0].name).toBeDefined();
     expect(result1B[0].surname).toBeDefined();
+    expect(result1B[0]._key).toBeDefined();
+    expect(result1B[0]._id).toBeDefined();
+    expect(result1B[0]._rev).toBeDefined();
+
+    const result1C = await arango
+      .db(testDB1)
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial", { stripUnderscoreProps: true });
+
+    expect(result1C.length).toEqual(3);
+    expect(result1C[0].name).toBeDefined();
+    expect(result1C[0].surname).toBeDefined();
+    expect(result1C[0]._key).toBeDefined();
+    expect(result1C[0]._id).toBeUndefined();
+    expect(result1C[0]._rev).toBeUndefined();
+
+    const result1D = await arango
+      .db(testDB1)
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial", { stripInternalProps: true });
+
+    expect(result1D.length).toEqual(3);
+    expect(result1D[0].name).toBeDefined();
+    expect(result1D[0].surname).toBeDefined();
+    expect(result1D[0]._key).toBeDefined();
+    expect(result1D[0]._id).toBeUndefined();
+    expect(result1D[0]._rev).toBeUndefined();
+
+    const result1E = await arango
+      .db(testDB1)
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial", { return: QueryReturnType.CURSOR });
+
+    expect(result1E instanceof ArrayCursor).toBeTruthy();
+    const allDocs = await result1E.all();
+    expect(allDocs[0].surname).toBeDefined();
 
     const result2A = await arango
       .db(testDB1)
@@ -288,7 +407,9 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(Array.isArray(result2A)).toBeTruthy();
     expect(result2A.length).toEqual(0);
 
-    const result2B = await arango.db(testDB1).fetchByPropertyValue(CONST.userCollection, "speciality", "Trail Running");
+    const result2B = await arango
+      .db(testDB1)
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Trail Running");
 
     expect(result2B).toBeDefined();
     expect(Array.isArray(result2B)).toBeTruthy();
@@ -320,32 +441,47 @@ describe("Arango Backseat Driver Integration Tests", () => {
 
     const result5A = await arango
       .db(testDB1)
-      .queryOne(`FOR d IN ${CONST.userCollection} FILTER d.surname LIKE "Armstrong" RETURN d`);
+      .queryOne(`FOR d IN ${CONST.userCollection} FILTER d.surname LIKE "Impey" RETURN d`);
 
     expect(result5A).toBeDefined();
-    expect(result5A.name).toEqual("Lance");
+    expect(result5A.name).toEqual("Daryl");
 
-    const result5B = await arango.db(testDB1).fetchOneByPropertyValue(CONST.userCollection, "surname", "Armstrong");
+    const result5B = await arango.db(testDB1).fetchOneByPropertyValue(CONST.userCollection, "surname", "Impey");
 
     expect(result5B).toBeDefined();
-    expect(result5B.name).toEqual("Lance");
-  });
-  */
-  /*
-  test("Create document", async () => {
-    const result1 = await arango.db(testDB1).create(CONST.userCollection, {
-      name: "Daryl",
-      surname: "Impey",
-      country: "South Africa",
-      speciality: "All Rounder",
-    });
+    expect(result5B.name).toEqual("Daryl");
+    expect(result5B.surname).toEqual("Impey");
+    expect(result5B._secret).toEqual("Rusks");
+    expect(result5B._key).toBeDefined();
+    expect(result5B._id).toBeDefined();
+    expect(result5B._rev).toBeDefined();
 
-    console.log(result1);
-    // expect(result1.length).toEqual(4);
-    // expect(result1[0].surname).toBeDefined();
+    const result5C = await arango
+      .db(testDB1)
+      .fetchOneByPropertyValue(CONST.userCollection, "surname", "Impey", { stripUnderscoreProps: true });
+
+    expect(result5C).toBeDefined();
+    expect(result5C.name).toEqual("Daryl");
+    expect(result5C.surname).toEqual("Impey");
+    expect(result5C._secret).toBeUndefined();
+    expect(result5C._key).toBeDefined();
+    expect(result5C._id).toBeUndefined();
+    expect(result5C._rev).toBeUndefined();
+
+    const result5D = await arango
+      .db(testDB1)
+      .fetchOneByPropertyValue(CONST.userCollection, "surname", "Impey", { stripInternalProps: true });
+
+    expect(result5D).toBeDefined();
+    expect(result5D.name).toEqual("Daryl");
+    expect(result5D.surname).toEqual("Impey");
+    expect(result5B._secret).toEqual("Rusks");
+    expect(result5D._key).toBeDefined();
+    expect(result5D._id).toBeUndefined();
+    expect(result5D._rev).toBeUndefined();
   });
-  */
-  /*
+
+  /* */
   test("Delete database", async () => {
     expect.assertions(5);
 
@@ -366,5 +502,4 @@ describe("Arango Backseat Driver Integration Tests", () => {
       expect(e.response.body.errorMessage).toEqual("database not found");
     }
   });
-  */
 });

@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { aql, AqlQuery } from "arangojs/aql";
+import { aql, AqlLiteral, AqlQuery } from "arangojs/aql";
 import {
   UniqueConstraint,
   isCompositeKey,
@@ -116,14 +116,18 @@ export function fetchDocumentByCompositeKeyValue(
   return _fetchDocumentByKeyValue(collection, identifier, options, queryType, CombinatorType.AND);
 }
 
-export function updateDocumentByKeyValue(collection: string, identifier: KeyValue, data: any): AqlQuery {
-  return aql`FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" UPDATE u WITH ${JSON.stringify(
-    data
-  )} IN ${collection}`;
+export function updateDocumentByKeyValue(collection: string, identifier: KeyValue, data: any): AqlLiteral {
+  return aql.literal(
+    `FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
+      data
+    )} IN ${collection}`
+  );
 }
 
-export function deleteDocumentByKeyValue(collection: string, identifier: KeyValue): AqlQuery {
-  return aql`FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" REMOVE u IN ${collection}`;
+export function deleteDocumentByKeyValue(collection: string, identifier: KeyValue): AqlLiteral {
+  return aql.literal(
+    `FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" REMOVE d IN ${collection}`
+  );
 }
 
 export function uniqueConstraintQuery(

@@ -176,7 +176,7 @@ export class ArangoDB {
     let document = undefined;
 
     if (options.identifier) {
-      document = await this.fetchOneByPropertyValue(collection, id, options.identifier, options);
+      document = await this.fetchOneByPropertyValue(collection, options.identifier, id, options);
     } else {
       // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
       document = await this.driver.collection(collection).document(id);
@@ -197,9 +197,10 @@ export class ArangoDB {
 
   public async update(collection: string, id: string, data: any, options: UpdateDocumentOptions = {}): Promise<any> {
     if (options.identifier) {
-      return this.driver.query(
+      const result = await this.driver.query(
         Queries.updateDocumentByKeyValue(collection, { key: options.identifier, value: id }, data)
       );
+      return result.all(); // returns [];
     }
 
     return this.driver.collection(collection).update(id, data);
@@ -213,7 +214,7 @@ export class ArangoDB {
     return this.driver.collection(collection).remove(id);
   }
 
-  public async fetchByPropertyValue(
+  public async fetchAllByPropertyValue(
     collection: string,
     property: string,
     value: string,
@@ -228,7 +229,19 @@ export class ArangoDB {
       return result;
     }
 
-    return result.all();
+    const documents = await result.all();
+
+    if (options.stripUnderscoreProps) {
+      documents.map((d) => {
+        stripUnderscoreProps(d, ["_key"]);
+      });
+    } else if (options.stripInternalProps) {
+      documents.map((d) => {
+        stripProps(d, ["_id", "_rev"]);
+      });
+    }
+
+    return documents;
   }
 
   public async fetchOneByPropertyValue(
