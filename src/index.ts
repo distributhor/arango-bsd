@@ -18,6 +18,9 @@ import {
   ReadDocumentOptions,
   UpdateDocumentOptions,
   DeleteDocumentOptions,
+  FetchOptions,
+  QueryReturnType,
+  FetchOneOptions,
 } from "./types";
 import { Queries } from "./queries";
 
@@ -42,20 +45,20 @@ function toGraphNames(graphs: string[] | GraphDefinition[]): string[] {
   return graphs;
 }
 
-function stripUnderscoreProps(obj: any, keepKey = false): void {
-  if (keepKey) {
-    Object.keys(obj).map((k) => {
-      if (k.startsWith("_") && k !== "_key") {
-        delete obj[k];
-      }
-    });
-  } else {
-    Object.keys(obj).map((k) => {
-      if (k.startsWith("_")) {
-        delete obj[k];
-      }
-    });
-  }
+function stripUnderscoreProps(obj: any, keep: string[]): void {
+  Object.keys(obj).map((k) => {
+    if (k.startsWith("_") && !keep.includes(k)) {
+      delete obj[k];
+    }
+  });
+}
+
+function stripProps(obj: any, props: string[]): void {
+  Object.keys(obj).map((k) => {
+    if (props.includes(k)) {
+      delete obj[k];
+    }
+  });
 }
 
 /** @internal */
@@ -121,79 +124,6 @@ export class ArangoDB {
     return db ? this.fromPool(db).driver : this.driver;
   }
 
-  public async create(collection: string, document: any, options: CreateDocumentOptions = {}): Promise<any> {
-    if (options.stripUnderscoreProps) {
-      if (Array.isArray(document)) {
-        document.map((o) => {
-          stripUnderscoreProps(o, true);
-        });
-      } else {
-        stripUnderscoreProps(document, true);
-      }
-    }
-
-    return this.driver.collection(collection).save(document);
-  }
-
-  public async read(collection: string, id: any, options: ReadDocumentOptions = {}): Promise<any> {
-    let document = undefined;
-
-    if (options.identifier) {
-      document = await this.fetchOneByPropertyValue(collection, id, options.identifier);
-    } else {
-      // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
-      document = await this.driver.collection(collection).document(id);
-    }
-
-    if (!document) {
-      return document;
-    }
-
-    if (options.stripUnderscoreProps) {
-      stripUnderscoreProps(document);
-    } else if (options.stripInternalProps) {
-      stripUnderscoreProps(document, true);
-    }
-
-    return document;
-  }
-
-  public async update(collection: string, id: string, data: any, options: UpdateDocumentOptions = {}): Promise<any> {
-    if (options.identifier) {
-      return this.driver.query(
-        Queries.updateDocumentByKeyValue(collection, { key: options.identifier, value: id }, data)
-      );
-    }
-
-    return this.driver.collection(collection).update(id, data);
-  }
-
-  public async delete(collection: string, id: string, options: DeleteDocumentOptions = {}): Promise<any> {
-    if (options.identifier) {
-      return this.driver.query(Queries.deleteDocumentByKeyValue(collection, { key: options.identifier, value: id }));
-    }
-
-    return this.driver.collection(collection).remove(id);
-  }
-
-  public async fetchByPropertyValue(
-    collection: string,
-    property: string,
-    value: string,
-    options: any = {}
-  ): Promise<any> {
-    return this.queryAll(Queries.fetchDocumentByKeyValue(collection, { key: property, value }, options));
-  }
-
-  public async fetchOneByPropertyValue(
-    collection: string,
-    property: string,
-    value: string,
-    options: any = {}
-  ): Promise<any> {
-    return this.queryOne(Queries.fetchDocumentByKeyValue(collection, { key: property, value }, options));
-  }
-
   /**
    * The regular `driver.query` method will return a database cursor. If you wish to just
    * return all the documents in the result at once (same as invoking cursor.all()),
@@ -221,6 +151,103 @@ export class ArangoDB {
    */
   public async queryOne(query: AqlQuery, options?: QueryOptions): Promise<any> {
     return (await this.queryAll(query, options)).shift();
+  }
+
+  public async create(collection: string, document: any, options: CreateDocumentOptions = {}): Promise<any> {
+    if (options.stripUnderscoreProps) {
+      if (Array.isArray(document)) {
+        document.map((o) => {
+          stripUnderscoreProps(o, ["_key"]);
+        });
+      } else {
+        stripUnderscoreProps(document, ["_key"]);
+      }
+    }
+
+    return this.driver.collection(collection).save(document);
+  }
+
+  public async read(collection: string, id: any, options: ReadDocumentOptions = {}): Promise<any> {
+    let document = undefined;
+
+    if (options.identifier) {
+      document = await this.fetchOneByPropertyValue(collection, id, options.identifier, options);
+    } else {
+      // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
+      document = await this.driver.collection(collection).document(id);
+    }
+
+    if (!document) {
+      return document;
+    }
+
+    if (options.stripUnderscoreProps) {
+      stripUnderscoreProps(document, ["_key"]);
+    } else if (options.stripInternalProps) {
+      stripProps(document, ["_id", "_rev"]);
+    }
+
+    return document;
+  }
+
+  public async update(collection: string, id: string, data: any, options: UpdateDocumentOptions = {}): Promise<any> {
+    if (options.identifier) {
+      return this.driver.query(
+        Queries.updateDocumentByKeyValue(collection, { key: options.identifier, value: id }, data)
+      );
+    }
+
+    return this.driver.collection(collection).update(id, data);
+  }
+
+  public async delete(collection: string, id: string, options: DeleteDocumentOptions = {}): Promise<any> {
+    if (options.identifier) {
+      return this.driver.query(Queries.deleteDocumentByKeyValue(collection, { key: options.identifier, value: id }));
+    }
+
+    return this.driver.collection(collection).remove(id);
+  }
+
+  public async fetchByPropertyValue(
+    collection: string,
+    property: string,
+    value: string,
+    options: FetchOptions = {}
+  ): Promise<any> {
+    const result = await this.driver.query(
+      Queries.fetchDocumentByKeyValue(collection, { key: property, value }, options.sortOptions),
+      options.queryOptions
+    );
+
+    if (options.return && options.return === QueryReturnType.CURSOR) {
+      return result;
+    }
+
+    return result.all();
+  }
+
+  public async fetchOneByPropertyValue(
+    collection: string,
+    property: string,
+    value: string,
+    options: FetchOneOptions = {}
+  ): Promise<any> {
+    const document = await this.queryOne(
+      Queries.fetchDocumentByKeyValue(collection, { key: property, value }),
+      options.queryOptions
+    );
+
+    if (!document) {
+      return document;
+    }
+
+    if (options.stripUnderscoreProps) {
+      stripUnderscoreProps(document, ["_key"]);
+    } else if (options.stripInternalProps) {
+      stripProps(document, ["_id", "_rev"]);
+    }
+
+    return document;
   }
 
   public async uniqueConstraintValidation(constraints: UniqueConstraint): Promise<UniqueConstraintResult> {

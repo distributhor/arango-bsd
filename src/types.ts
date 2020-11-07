@@ -1,4 +1,5 @@
 import { Config } from "arangojs/connection";
+import { QueryOptions } from "arangojs/database";
 
 // export interface SearchResult {
 //   data: any[];
@@ -40,8 +41,17 @@ export const enum QueryType {
   AQL = "aql",
 }
 
+export const enum QueryReturnType {
+  DOCUMENTS = "documents",
+  CURSOR = "cursor",
+}
+
 export interface DatabaseConfig extends Config {
   hello?: boolean;
+}
+
+export interface IdentifierOption {
+  identifier?: string;
 }
 
 export interface CreateDocumentOptions {
@@ -60,6 +70,23 @@ export interface UpdateDocumentOptions {
 
 export interface DeleteDocumentOptions {
   identifier?: string;
+}
+
+export interface FetchOneOptions {
+  stripInternalProps?: boolean;
+  stripUnderscoreProps?: boolean;
+  queryOptions?: QueryOptions;
+}
+
+export interface FetchOptions {
+  return?: QueryReturnType;
+  sortOptions?: SortOptions;
+  queryOptions?: QueryOptions;
+}
+
+export interface SortOptions {
+  sortBy?: string;
+  sortOrder?: string;
 }
 
 export interface GraphDefinition {

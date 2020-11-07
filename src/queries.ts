@@ -1,11 +1,11 @@
 /* eslint-disable no-prototype-builtins */
 import { aql, AqlQuery } from "arangojs/aql";
-import { UniqueConstraint, isCompositeKey, isUniqueValue, QueryType, KeyValue } from "./index";
+import { UniqueConstraint, isCompositeKey, isUniqueValue, QueryType, KeyValue, SortOptions } from "./index";
 
 export function fetchDocumentByKeyValue(
   collection: string,
   identifier: KeyValue | KeyValue[],
-  options: any = {},
+  options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): AqlQuery {
   const params: any = {};
@@ -53,14 +53,6 @@ export function fetchDocumentByKeyValue(
 
   if (options && options.hasOwnProperty("sortBy")) {
     query += ` SORT d.${options.sortBy}`;
-
-    if (options.hasOwnProperty("sortDirection")) {
-      if (options.sortDirection === "ascending") {
-        query += " ASC";
-      } else if (options.sortDirection === "descending") {
-        query += " DESC";
-      }
-    }
 
     if (options.hasOwnProperty("sortOrder")) {
       if (options.sortOrder === "ascending") {
