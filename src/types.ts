@@ -8,12 +8,12 @@ import { Config } from "arangojs/connection";
 // }
 
 export interface UntypedObject {
-  [key: string]: string;
+  [key: string]: any;
 }
 
 export interface KeyValue {
   key: string;
-  value: string;
+  value: string | number | boolean;
 }
 
 export interface UniqueValue {
@@ -49,8 +49,17 @@ export interface CreateDocumentOptions {
 }
 
 export interface ReadDocumentOptions {
+  identifier?: string;
   stripInternalProps?: boolean;
   stripUnderscoreProps?: boolean;
+}
+
+export interface UpdateDocumentOptions {
+  identifier?: string;
+}
+
+export interface DeleteDocumentOptions {
+  identifier?: string;
 }
 
 export interface GraphDefinition {

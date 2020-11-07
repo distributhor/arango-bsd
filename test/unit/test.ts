@@ -1,9 +1,9 @@
 import { QueryType } from "../../src";
-import { toUniqueConstraintQuery } from "../../src/queries";
+import { uniqueConstraintQuery } from "../../src/queries";
 
 describe("Queries", () => {
   test("Unique Constraint Validation Queries", async () => {
-    const result1 = toUniqueConstraintQuery(
+    const result1 = uniqueConstraintQuery(
       {
         collection: "col",
         constraints: [{ unique: { key: "A", value: "Annie Apple" } }],
@@ -13,7 +13,7 @@ describe("Queries", () => {
 
     expect(result1).toEqual('FOR d IN col FILTER d.A == "Annie Apple" RETURN d._key');
 
-    const result2 = toUniqueConstraintQuery(
+    const result2 = uniqueConstraintQuery(
       {
         collection: "col",
         constraints: [{ unique: { key: "A", value: "Annie Apple" } }, { unique: { key: "B", value: "Bouncy Ben" } }],
@@ -23,7 +23,7 @@ describe("Queries", () => {
 
     expect(result2).toEqual('FOR d IN col FILTER d.A == "Annie Apple" || d.B == "Bouncy Ben" RETURN d._key');
 
-    const result3 = toUniqueConstraintQuery(
+    const result3 = uniqueConstraintQuery(
       {
         collection: "col",
         constraints: [
@@ -40,7 +40,7 @@ describe("Queries", () => {
 
     expect(result3).toEqual('FOR d IN col FILTER ( d.C == "Clever Cat" && d.D == "Dippy Duck" ) RETURN d._key');
 
-    const result4 = toUniqueConstraintQuery(
+    const result4 = uniqueConstraintQuery(
       {
         collection: "col",
         constraints: [
@@ -65,7 +65,7 @@ describe("Queries", () => {
       'FOR d IN col FILTER ( d.C == "Clever Cat" && d.D == "Dippy Duck" ) || ( d.E == "Eddy Elephant" && d.F == "Firefighter Fred" ) RETURN d._key'
     );
 
-    const result5 = toUniqueConstraintQuery(
+    const result5 = uniqueConstraintQuery(
       {
         collection: "col",
         constraints: [
@@ -85,7 +85,7 @@ describe("Queries", () => {
       'FOR d IN col FILTER d.A == "Annie Apple" || ( d.C == "Clever Cat" && d.D == "Dippy Duck" ) RETURN d._key'
     );
 
-    const result6 = toUniqueConstraintQuery(
+    const result6 = uniqueConstraintQuery(
       {
         collection: "col",
         constraints: [
@@ -106,7 +106,7 @@ describe("Queries", () => {
       'FOR d IN col FILTER d.A == "Annie Apple" || ( d.C == "Clever Cat" && d.D == "Dippy Duck" ) || d.B == "Bouncy Ben" RETURN d._key'
     );
 
-    const result7 = toUniqueConstraintQuery(
+    const result7 = uniqueConstraintQuery(
       {
         collection: "col",
         constraints: [

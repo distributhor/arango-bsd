@@ -16,13 +16,10 @@ import {
   QueryType,
   CreateDocumentOptions,
   ReadDocumentOptions,
+  UpdateDocumentOptions,
+  DeleteDocumentOptions,
 } from "./types";
-import {
-  fetchByPropertyValue,
-  toDeleteDocumentByFieldNameQuery,
-  toUniqueConstraintQuery,
-  toUpdateDocumentByFieldNameQuery,
-} from "./queries";
+import { Queries } from "./queries";
 
 export * from "./types";
 
@@ -138,11 +135,11 @@ export class ArangoDB {
     return this.driver.collection(collection).save(document);
   }
 
-  public async read(collection: string, id: any, idProp?: string, options: ReadDocumentOptions = {}): Promise<any> {
+  public async read(collection: string, id: any, options: ReadDocumentOptions = {}): Promise<any> {
     let document = undefined;
 
-    if (idProp) {
-      document = await this.fetchOneByPropertyValue(collection, id, idProp);
+    if (options.identifier) {
+      document = await this.fetchOneByPropertyValue(collection, id, options.identifier);
     } else {
       // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
       document = await this.driver.collection(collection).document(id);
@@ -161,35 +158,22 @@ export class ArangoDB {
     return document;
   }
 
-  public async update(collection: string, id: string, data: any, idProp?: string): Promise<any> {
-    if (idProp) {
-      return this.driver.query(toUpdateDocumentByFieldNameQuery(collection, idProp, id, data));
+  public async update(collection: string, id: string, data: any, options: UpdateDocumentOptions = {}): Promise<any> {
+    if (options.identifier) {
+      return this.driver.query(
+        Queries.updateDocumentByKeyValue(collection, { key: options.identifier, value: id }, data)
+      );
     }
 
     return this.driver.collection(collection).update(id, data);
   }
 
-  public async delete(collection: string, id: string, data: any, idProp?: string): Promise<any> {
-    if (idProp) {
-      return this.driver.query(toDeleteDocumentByFieldNameQuery(collection, idProp, id));
+  public async delete(collection: string, id: string, options: DeleteDocumentOptions = {}): Promise<any> {
+    if (options.identifier) {
+      return this.driver.query(Queries.deleteDocumentByKeyValue(collection, { key: options.identifier, value: id }));
     }
 
     return this.driver.collection(collection).remove(id);
-  }
-
-  public async uniqueConstraintValidation(constraints: UniqueConstraint): Promise<UniqueConstraintResult> {
-    if (!constraints || constraints.constraints.length === 0) {
-      return;
-    }
-
-    // const query = toUniqueConstraintQuery(constraints, QueryType.STRING) as string;
-    const query = toUniqueConstraintQuery(constraints, QueryType.AQL) as AqlQuery;
-    const documents = await (await this.driver.query(query)).all();
-
-    return {
-      unique: documents.length > 0 ? false : true,
-      documents,
-    };
   }
 
   public async fetchByPropertyValue(
@@ -198,7 +182,7 @@ export class ArangoDB {
     value: string,
     options: any = {}
   ): Promise<any> {
-    return this.driver.query(fetchByPropertyValue(collection, property, value, options));
+    return this.queryAll(Queries.fetchDocumentByKeyValue(collection, { key: property, value }, options));
   }
 
   public async fetchOneByPropertyValue(
@@ -207,7 +191,7 @@ export class ArangoDB {
     value: string,
     options: any = {}
   ): Promise<any> {
-    return (await this.fetchByPropertyValue(collection, property, value, options))[0];
+    return this.queryOne(Queries.fetchDocumentByKeyValue(collection, { key: property, value }, options));
   }
 
   /**
@@ -237,6 +221,22 @@ export class ArangoDB {
    */
   public async queryOne(query: AqlQuery, options?: QueryOptions): Promise<any> {
     return (await this.queryAll(query, options)).shift();
+  }
+
+  public async uniqueConstraintValidation(constraints: UniqueConstraint): Promise<UniqueConstraintResult> {
+    if (!constraints || constraints.constraints.length === 0) {
+      return;
+    }
+
+    // const query = Queries.uniqueConstraintQuery(constraints, QueryType.STRING) as string;
+    const query = Queries.uniqueConstraintQuery(constraints, QueryType.AQL) as AqlQuery;
+    // const documents = await (await this.driver.query(query)).all();
+    const documents = await this.queryAll(query);
+
+    return {
+      unique: documents.length > 0 ? false : true,
+      documents,
+    };
   }
 
   public async collectionExists(collection: string): Promise<boolean> {

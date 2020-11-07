@@ -1,9 +1,55 @@
 /* eslint-disable no-prototype-builtins */
 import { aql, AqlQuery } from "arangojs/aql";
-import { UniqueConstraint, isCompositeKey, isUniqueValue, QueryType } from "./index";
+import { UniqueConstraint, isCompositeKey, isUniqueValue, QueryType, KeyValue } from "./index";
 
-export function fetchByPropertyValue(collection: string, property: string, value: string, options: any = {}): AqlQuery {
-  let query = `FOR d IN ${collection} FILTER d.@property == @value`;
+export function fetchDocumentByKeyValue(
+  collection: string,
+  identifier: KeyValue | KeyValue[],
+  options: any = {},
+  queryType: QueryType = QueryType.AQL
+): AqlQuery {
+  const params: any = {};
+  let query = `FOR d IN ${collection} FILTER`;
+
+  if (Array.isArray(identifier)) {
+    let keyCount = 0;
+
+    query += " (";
+
+    for (const kv of identifier) {
+      keyCount++;
+
+      if (keyCount > 1) {
+        query += " &&";
+      }
+
+      if (queryType === QueryType.STRING) {
+        if (typeof kv.value === "number") {
+          query += ` d.${kv.key} == ${kv.value}`;
+        } else {
+          query += ` d.${kv.key} == "${kv.value}"`;
+        }
+      } else {
+        const keyParam = `${kv.key}_key_${keyCount}`;
+        const valueParam = `${kv.key}_val_${keyCount}`;
+
+        params[keyParam] = kv.key;
+        params[valueParam] = kv.value;
+
+        query += ` d.@${keyParam} == @${valueParam}`;
+      }
+    }
+
+    query += " )";
+  } else {
+    if (queryType === QueryType.STRING) {
+      query += ` d.${identifier.key} == "${identifier.value}"`;
+    } else {
+      params["property"] = identifier.key;
+      params["value"] = identifier.value;
+      query += `  d.@property == @value`;
+    }
+  }
 
   if (options && options.hasOwnProperty("sortBy")) {
     query += ` SORT d.${options.sortBy}`;
@@ -37,26 +83,21 @@ export function fetchByPropertyValue(collection: string, property: string, value
 
   return {
     query,
-    bindVars: { property, value },
+    bindVars: params,
   };
 }
 
-export function toUpdateDocumentByFieldNameQuery(
-  collection: string,
-  property: string,
-  value: string,
-  data: any
-): AqlQuery {
-  return aql`FOR d IN ${collection} FILTER d.${property} == "${value}" UPDATE u WITH ${JSON.stringify(
+export function updateDocumentByKeyValue(collection: string, identifier: KeyValue, data: any): AqlQuery {
+  return aql`FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" UPDATE u WITH ${JSON.stringify(
     data
   )} IN ${collection}`;
 }
 
-export function toDeleteDocumentByFieldNameQuery(collection: string, property: string, value: string): AqlQuery {
-  return aql`FOR d IN ${collection} FILTER d.${property} == "${value}" REMOVE u IN ${collection}`;
+export function deleteDocumentByKeyValue(collection: string, identifier: KeyValue): AqlQuery {
+  return aql`FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" REMOVE u IN ${collection}`;
 }
 
-export function toUniqueConstraintQuery(
+export function uniqueConstraintQuery(
   constraints: UniqueConstraint,
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
@@ -65,7 +106,6 @@ export function toUniqueConstraintQuery(
   }
 
   const params: any = {};
-
   let query = `FOR d IN ${constraints.collection} FILTER`;
 
   if (constraints.excludeDocumentKey) {
@@ -140,3 +180,10 @@ export function toUniqueConstraintQuery(
     };
   }
 }
+
+export const Queries = {
+  fetchDocumentByKeyValue,
+  updateDocumentByKeyValue,
+  deleteDocumentByKeyValue,
+  uniqueConstraintQuery,
+};
