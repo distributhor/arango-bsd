@@ -207,7 +207,7 @@ export class ArangoDB {
   public async update(collection: string, id: string, data: any, options: UpdateDocumentOptions = {}): Promise<any> {
     if (options.identifier) {
       const result = await this.driver.query(
-        Queries.updateDocumentByKeyValue(collection, { key: options.identifier, value: id }, data)
+        Queries.updateDocumentsByKeyValue(collection, { key: options.identifier, value: id }, data)
       );
 
       return result.all();
@@ -219,7 +219,7 @@ export class ArangoDB {
   public async delete(collection: string, id: string, options: DeleteDocumentOptions = {}): Promise<any> {
     if (options.identifier) {
       const result = await this.driver.query(
-        Queries.deleteDocumentByKeyValue(collection, { key: options.identifier, value: id })
+        Queries.deleteDocumentsByKeyValue(collection, { key: options.identifier, value: id })
       );
 
       return result.all();
@@ -235,7 +235,7 @@ export class ArangoDB {
     options: FetchOptions = {}
   ): Promise<any> {
     const result = await this.driver.query(
-      Queries.fetchDocumentByKeyValue(collection, { key: property, value }, options.sortOptions) as AqlQuery,
+      Queries.fetchByKeyValue(collection, { key: property, value }, options.sortOptions) as AqlQuery,
       options.queryOptions
     );
 
@@ -265,7 +265,7 @@ export class ArangoDB {
     options: FetchOneOptions = {}
   ): Promise<any> {
     const document = await this.queryOne(
-      Queries.fetchDocumentByKeyValue(collection, { key: property, value }) as AqlQuery,
+      Queries.fetchByKeyValue(collection, { key: property, value }) as AqlQuery,
       options.queryOptions
     );
 
@@ -280,6 +280,15 @@ export class ArangoDB {
     }
 
     return document;
+  }
+
+  public async findByFilterCriteria(
+    collection: string,
+    filters: string[],
+    filterCombinator: string,
+    options: any
+  ): Promise<any> {
+    return undefined;
   }
 
   public async uniqueConstraintValidation(constraints: UniqueConstraint): Promise<UniqueConstraintResult> {

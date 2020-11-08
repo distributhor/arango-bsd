@@ -7,17 +7,104 @@ import {
   QueryType,
   KeyValue,
   SortOptions,
-  Combinator,
-  CombinatorType,
+  LogicalOperator,
+  LogicalOperatorType,
+  IndexValue,
 } from "./index";
 
 /** @internal */
-function _fetchDocumentByKeyValue(
+export function _findAllIndicesOfSubString(
+  subString: string | string[],
+  targetString: string,
+  caseInSensitive = true
+): IndexValue[] {
+  if (Array.isArray(subString)) {
+    let indices: IndexValue[] = [];
+
+    for (const s of subString) {
+      indices = indices.concat(_findAllIndicesOfSubString(s, targetString, caseInSensitive));
+    }
+
+    return indices.sort(function (a: any, b: any) {
+      return a.index > b.index ? 1 : -1;
+    });
+  }
+
+  if (targetString.length == 0) {
+    return [];
+  }
+
+  if (caseInSensitive) {
+    targetString = targetString.toLowerCase();
+    subString = subString.toLowerCase();
+  }
+
+  const indices: IndexValue[] = [];
+
+  let index = targetString.indexOf(subString);
+  while (index != -1) {
+    indices.push({ index, value: subString });
+    index = targetString.indexOf(subString, index + 1);
+  }
+
+  return indices;
+}
+
+export function _replacePropertNameTokens(filterString: string): string {
+  if (filterString.indexOf("(") > -1) {
+    const tmp = filterString.replace(/\(\s*/, "(d.");
+    return tmp.replace(/\s*\)/g, ")");
+  }
+
+  if (filterString.indexOf(")") > -1) {
+    return "d." + filterString.replace(/\s*\)/, ")");
+  }
+
+  return "d." + filterString;
+}
+
+/** @internal */
+export function _prefixPropertyNames(filterString: string): string {
+  const operatorIndices = _findAllIndicesOfSubString(["||", "&&"], filterString);
+
+  if (operatorIndices.length === 0) {
+    return _replacePropertNameTokens(filterString);
+  }
+
+  let modifiedFilter = "";
+  let stringIndex = 0;
+
+  for (let i = 0; i <= operatorIndices.length; i++) {
+    // The <= is intentional. We need to add one iteration beyond the number of operators,
+    // so that the last filter expression can be included in the string build
+    let partialFilterString = undefined;
+    let parsedOperator = undefined;
+
+    if (i === operatorIndices.length) {
+      partialFilterString = filterString.substring(stringIndex).trim();
+    } else {
+      partialFilterString = filterString.substring(stringIndex, operatorIndices[i].index).trim();
+      parsedOperator = filterString.substring(operatorIndices[i].index, operatorIndices[i].index + 2);
+      stringIndex = operatorIndices[i].index + 2;
+    }
+
+    modifiedFilter += _replacePropertNameTokens(partialFilterString);
+
+    if (parsedOperator) {
+      modifiedFilter += " " + parsedOperator + " ";
+    }
+  }
+
+  return modifiedFilter;
+}
+
+/** @internal */
+function _fetchByKeyValue(
   collection: string,
   identifier: KeyValue | KeyValue[],
   options: SortOptions,
   queryType: QueryType,
-  combinator: CombinatorType
+  operator: LogicalOperatorType
 ): string | AqlQuery {
   const params: any = {};
   let query = `FOR d IN ${collection} FILTER`;
@@ -31,7 +118,7 @@ function _fetchDocumentByKeyValue(
       keyCount++;
 
       if (keyCount > 1) {
-        query += ` ${Combinator[combinator]}`;
+        query += ` ${LogicalOperator[operator]}`;
       }
 
       if (queryType === QueryType.STRING) {
@@ -98,25 +185,112 @@ function _fetchDocumentByKeyValue(
   }
 }
 
-export function fetchDocumentByKeyValue(
+export function fetchByKeyValue(
   collection: string,
   identifier: KeyValue | KeyValue[],
   options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
-  return _fetchDocumentByKeyValue(collection, identifier, options, queryType, CombinatorType.OR);
+  return _fetchByKeyValue(collection, identifier, options, queryType, LogicalOperatorType.OR);
 }
 
-export function fetchDocumentByCompositeKeyValue(
+export function fetchByCompositeKeyValue(
   collection: string,
   identifier: KeyValue[],
   options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
-  return _fetchDocumentByKeyValue(collection, identifier, options, queryType, CombinatorType.AND);
+  return _fetchByKeyValue(collection, identifier, options, queryType, CombinatorType.AND);
 }
 
-export function updateDocumentByKeyValue(collection: string, identifier: KeyValue, data: any): AqlLiteral {
+export function findByFilterCriteria(
+  collection: string,
+  filters: string | string[],
+  filterOperator?: LogicalOperatorType,
+  options: any = {}
+): string | AqlLiteral {
+  // let resultMeta = {};
+  // let queryOptions = {};
+
+  // if (options.hasOwnProperty("returnDataFieldName")) {
+  //   queryOptions.returnDataFieldName = options.returnDataFieldName;
+  // }
+
+  let query = "FOR d IN " + collection;
+
+  if (options.hasOwnProperty("restrictTo")) {
+    query += " FILTER d." + options.restrictTo;
+  }
+
+  if (filters) {
+    if (Array.isArray(filters) && filters.length > 0) {
+      query += " FILTER ( ";
+
+      for (let i = 0; i < filters.length; i++) {
+        if (i > 0) {
+          query += " " + LogicalOperator[filterOperator] + " ";
+        }
+        query += _replacePropertNameTokens(filters[i]);
+      }
+
+      query += " )";
+    } else {
+      query += " FILTER ( " + this._prefixPropertyNames(filters) + " )";
+    }
+  }
+
+  // TODO: Support sorting by multiple criteria ...
+  // SORT u.lastName, u.firstName, u.id DESC
+  /*
+  if (options.hasOwnProperty("sortBy")) {
+    query += " SORT d." + options.sortBy;
+    resultMeta.sortBy = options.sortBy;
+
+    if (options.hasOwnProperty("sortDirection")) {
+      if (options.sortDirection === "ascending") {
+        query += " ASC";
+      } else if (options.sortDirection === "descending") {
+        query += " DESC";
+      }
+      resultMeta.sortDirection = options.sortDirection;
+    }
+
+    if (options.hasOwnProperty("sortOrder")) {
+      if (options.sortOrder === "ascending") {
+        query += " ASC";
+      } else if (options.sortOrder === "descending") {
+        query += " DESC";
+      }
+      resultMeta.sortOrder = options.sortOrder;
+    }
+  }
+
+  if (options.hasOwnProperty("limit") && options.limit > 0) {
+    resultMeta.limit = options.limit;
+    if (options.hasOwnProperty("fullCount") && options.fullCount) {
+      queryOptions.count = false;
+      queryOptions.options = { fullCount: true };
+    }
+    if (options.hasOwnProperty("offset")) {
+      resultMeta.offset = options.offset;
+      query += " LIMIT " + options.offset + ", " + options.limit;
+    } else {
+      resultMeta.offset = 0;
+      query += " LIMIT " + options.limit;
+    }
+  }
+
+  if (this._hasOmitOption(options)) {
+    query += " RETURN UNSET_RECURSIVE( d, [" + this._getOmitInstruction(options) + "])";
+  } else {
+    query += " RETURN d";
+  }
+  */
+
+  return aql.literal(query);
+}
+
+export function updateDocumentsByKeyValue(collection: string, identifier: KeyValue, data: any): AqlLiteral {
   return aql.literal(
     `FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
       data
@@ -124,7 +298,7 @@ export function updateDocumentByKeyValue(collection: string, identifier: KeyValu
   );
 }
 
-export function deleteDocumentByKeyValue(collection: string, identifier: KeyValue): AqlLiteral {
+export function deleteDocumentsByKeyValue(collection: string, identifier: KeyValue): AqlLiteral {
   return aql.literal(
     `FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
   );
@@ -215,9 +389,9 @@ export function uniqueConstraintQuery(
 }
 
 export const Queries = {
-  fetchDocumentByCompositeKeyValue,
-  fetchDocumentByKeyValue,
-  updateDocumentByKeyValue,
-  deleteDocumentByKeyValue,
+  fetchByCompositeKeyValue,
+  fetchByKeyValue,
+  updateDocumentsByKeyValue,
+  deleteDocumentsByKeyValue,
   uniqueConstraintQuery,
 };

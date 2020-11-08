@@ -17,6 +17,11 @@ export interface KeyValue {
   value: string | number | boolean;
 }
 
+export interface IndexValue {
+  index: number;
+  value: string | number | boolean;
+}
+
 export interface UniqueValue {
   unique: KeyValue;
 }
@@ -46,17 +51,31 @@ export enum QueryReturnType {
   CURSOR = "cursor",
 }
 
-export enum CombinatorType {
+export enum LogicalOperatorType {
   AND = "AND",
   OR = "OR",
 }
 
-export const Combinator = {
+export const LogicalOperator = {
   AND: "&&",
   OR: "||",
   and: "&&",
   or: "||",
 };
+
+export enum ComparisonOperator {
+  EQUAL = "EQUAL",
+  NOT_EQUAL = "NOT_EQUAL",
+  EMPTY = "EMPTY",
+  NOT_EMPTY = "NOT_EMPTY",
+  LIKE = "LIKE",
+}
+
+export interface Filter {
+  property: string;
+  operand: ComparisonOperator;
+  value: string | number | boolean;
+}
 
 export interface DatabaseConfig extends Config {
   hello?: boolean;
