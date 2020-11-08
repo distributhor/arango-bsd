@@ -200,7 +200,7 @@ export function fetchByCompositeKeyValue(
   options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
-  return _fetchByKeyValue(collection, identifier, options, queryType, CombinatorType.AND);
+  return _fetchByKeyValue(collection, identifier, options, queryType, LogicalOperatorType.AND);
 }
 
 export function findByFilterCriteria(
