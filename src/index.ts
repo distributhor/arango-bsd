@@ -176,14 +176,23 @@ export class ArangoDB {
     let document = undefined;
 
     if (options.identifier) {
+      // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
       document = await this.fetchOneByPropertyValue(collection, options.identifier, id, options);
     } else {
-      // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
-      document = await this.driver.collection(collection).document(id);
+      try {
+        document = await this.driver.collection(collection).document(id);
+      } catch (e) {
+        // e.errorNum = 1202
+        if (e.code && e.code === 404) {
+          return undefined;
+        } else {
+          throw e;
+        }
+      }
     }
 
     if (!document) {
-      return document;
+      return undefined;
     }
 
     if (options.stripUnderscoreProps) {
@@ -200,7 +209,8 @@ export class ArangoDB {
       const result = await this.driver.query(
         Queries.updateDocumentByKeyValue(collection, { key: options.identifier, value: id }, data)
       );
-      return result.all(); // returns [];
+
+      return result.all();
     }
 
     return this.driver.collection(collection).update(id, data);
@@ -208,7 +218,11 @@ export class ArangoDB {
 
   public async delete(collection: string, id: string, options: DeleteDocumentOptions = {}): Promise<any> {
     if (options.identifier) {
-      return this.driver.query(Queries.deleteDocumentByKeyValue(collection, { key: options.identifier, value: id }));
+      const result = await this.driver.query(
+        Queries.deleteDocumentByKeyValue(collection, { key: options.identifier, value: id })
+      );
+
+      return result.all();
     }
 
     return this.driver.collection(collection).remove(id);

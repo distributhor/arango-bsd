@@ -202,7 +202,7 @@ describe("Arango Backseat Driver Integration Tests", () => {
     const result2 = await arango.db(testDB1).create(CONST.groupCollection, teams);
 
     expect(result1.length).toEqual(24);
-    expect(result2.length).toEqual(15);
+    expect(result2.length).toEqual(16);
   });
 
   test("Unique constraint validation", async () => {
@@ -276,10 +276,57 @@ describe("Arango Backseat Driver Integration Tests", () => {
       country: "South Africa",
       speciality: "All Rounder",
       _secret: "Rusks",
+      results: {
+        2014: ["1st, Tour of Alberta", "1st, SA Champs TT", "2nd, SA Champs Road Race"],
+        2015: ["2nd, Vuelta a La Rioja"],
+        2017: ["1st, 94.7 Cycle Challenge"],
+        2018: ["1st, SA Champs TT", "1st, SA Champs Road Race", "1st, Tour Down Under"],
+      },
+      rating: {
+        sprint: 8,
+        climb: 7,
+        timetrial: 8,
+        punch: 8,
+        descend: 7,
+      },
     });
 
     expect(result1A).toBeDefined();
     expect(result1A._key).toBeDefined();
+
+    const result1B = await arango.db(testDB1).read(CONST.userCollection, result1A._key);
+
+    expect(result1B.name).toEqual("Daryl");
+    expect(result1B.surname).toEqual("Impey");
+    expect(result1B._secret).toEqual("Rusks");
+    expect(result1B.results[2018].length).toEqual(3);
+    expect(result1B.rating.timetrial).toEqual(8);
+
+    const result1C = await arango.db(testDB1).read(CONST.userCollection, result1A._key, { stripUnderscoreProps: true });
+
+    expect(result1C.name).toEqual("Daryl");
+    expect(result1C.surname).toEqual("Impey");
+    expect(result1C._secret).toBeUndefined();
+    expect(result1C.results[2018].length).toEqual(3);
+    expect(result1C.rating.timetrial).toEqual(8);
+
+    const result1D = await arango.db(testDB1).read(CONST.userCollection, "Impey", { identifier: "surname" });
+
+    expect(result1D.name).toEqual("Daryl");
+    expect(result1D.surname).toEqual("Impey");
+    expect(result1D._secret).toEqual("Rusks");
+    expect(result1D.results[2018].length).toEqual(3);
+    expect(result1D.rating.timetrial).toEqual(8);
+
+    const result1E = await arango
+      .db(testDB1)
+      .read(CONST.userCollection, "Impey", { identifier: "surname", stripUnderscoreProps: true });
+
+    expect(result1E.name).toEqual("Daryl");
+    expect(result1E.surname).toEqual("Impey");
+    expect(result1E._secret).toBeUndefined();
+    expect(result1E.results[2018].length).toEqual(3);
+    expect(result1E.rating.timetrial).toEqual(8);
 
     const result2A = await arango.db(testDB1).create(
       CONST.userCollection,
@@ -289,6 +336,19 @@ describe("Arango Backseat Driver Integration Tests", () => {
         country: "Australia",
         speciality: "GC",
         _secret: "Smiling",
+        results: {
+          2010: ["1st, La Flèche Wallonne", "5th, Giro d'Italia", "6th, Tour Down Under"],
+          2015: ["1st, Tour de France", "1st, Tirreno–Adriatico", "1st Tour de Romandie"],
+          2012: ["7th, Tour de France"],
+          2013: ["3rd, Giro d'Italia"],
+        },
+        rating: {
+          sprint: 6,
+          climb: 8,
+          timetrial: 9,
+          punch: 8,
+          descend: 7,
+        },
       },
       { stripUnderscoreProps: true }
     );
@@ -296,43 +356,23 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(result2A).toBeDefined();
     expect(result2A._key).toBeDefined();
 
-    const result1B = await arango.db(testDB1).read(CONST.userCollection, result1A._key);
-
-    expect(result1B.name).toEqual("Daryl");
-    expect(result1B.surname).toEqual("Impey");
-    expect(result1B._secret).toEqual("Rusks");
-
-    const result1C = await arango.db(testDB1).read(CONST.userCollection, result1A._key, { stripUnderscoreProps: true });
-
-    expect(result1C.name).toEqual("Daryl");
-    expect(result1C.surname).toEqual("Impey");
-    expect(result1C._secret).toBeUndefined();
-
-    const result1D = await arango.db(testDB1).read(CONST.userCollection, "Impey", { identifier: "surname" });
-
-    expect(result1D.name).toEqual("Daryl");
-    expect(result1D.surname).toEqual("Impey");
-    expect(result1D._secret).toEqual("Rusks");
-
-    const result1E = await arango
-      .db(testDB1)
-      .read(CONST.userCollection, "Impey", { identifier: "surname", stripUnderscoreProps: true });
-
-    expect(result1E.name).toEqual("Daryl");
-    expect(result1E.surname).toEqual("Impey");
-    expect(result1E._secret).toBeUndefined();
-
     const result2B = await arango.db(testDB1).read(CONST.userCollection, result2A._key);
 
     expect(result2B.name).toEqual("Cadel");
     expect(result2B.surname).toEqual("Evans");
     expect(result2B._secret).toBeUndefined();
+    expect(result2B.results[2012].length).toEqual(1);
+    expect(result2B.rating.sprint).toEqual(6);
 
-    const result2C = await arango
-      .db(testDB1)
-      .update(CONST.userCollection, result2A._key, { nickname: "G'day Mate", speciality: "All Rounder" });
+    const result2C = await arango.db(testDB1).update(CONST.userCollection, result2A._key, {
+      nickname: "G'day Mate",
+      speciality: "All Rounder",
+      results: { 2012: ["3rd, Critérium du Dauphiné"] },
+      rating: { sprint: 7 },
+    });
 
     expect(result2C._key).toBeDefined();
+    expect(result2C._rev).toBeDefined();
     expect(result2C._oldRev).toBeDefined();
 
     const result2D = await arango.db(testDB1).read(CONST.userCollection, result2A._key);
@@ -340,16 +380,133 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(result2D.surname).toEqual("Evans");
     expect(result2D.nickname).toEqual("G'day Mate");
     expect(result2D.speciality).toEqual("All Rounder");
+    expect(result2D.results["2012"]).toEqual(expect.arrayContaining(["3rd, Critérium du Dauphiné"]));
+    expect(result2D.results["2013"]).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]));
+    expect(result2D.rating).toEqual(
+      expect.objectContaining({
+        sprint: 7,
+        climb: 8,
+        timetrial: 9,
+        punch: 8,
+        descend: 7,
+      })
+    );
 
-    await arango
-      .db(testDB1)
-      .update(CONST.userCollection, "Evans", { nickname: "Too Nice", speciality: "GC" }, { identifier: "surname" });
+    const result2E = await arango.db(testDB1).update(
+      CONST.userCollection,
+      "Evans",
+      {
+        nickname: "Too Nice",
+        speciality: "GC",
+        results: { 2009: ["1st, UCI Road Race World Champs"] },
+        rating: { solo: 8 },
+      },
+      { identifier: "surname" }
+    );
+
+    expect(result2E).toBeDefined();
+    expect(Array.isArray(result2E)).toBeTruthy();
+    expect(result2E.length).toEqual(1);
+    expect(result2E[0]._key).toBeDefined();
+    expect(result2E[0]._rev).toBeDefined();
+    expect(result2E[0]._oldRev).toBeDefined();
 
     const result2F = await arango.db(testDB1).read(CONST.userCollection, result2A._key);
+
     expect(result2F.name).toEqual("Cadel");
     expect(result2F.surname).toEqual("Evans");
     expect(result2F.nickname).toEqual("Too Nice");
     expect(result2F.speciality).toEqual("GC");
+    expect(result2F.results["2012"]).toEqual(expect.arrayContaining(["3rd, Critérium du Dauphiné"]));
+    expect(result2F.results["2013"]).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]));
+    expect(result2F.results["2009"]).toEqual(expect.arrayContaining(["1st, UCI Road Race World Champs"]));
+    expect(result2F.rating).toEqual(
+      expect.objectContaining({
+        sprint: 7,
+        climb: 8,
+        timetrial: 9,
+        punch: 8,
+        descend: 7,
+        solo: 8,
+      })
+    );
+
+    const result2G = await arango.db(testDB1).read(CONST.userCollection, "Evans", { identifier: "surname" });
+
+    expect(result2G.name).toEqual("Cadel");
+    expect(result2G.surname).toEqual("Evans");
+
+    const result2H = await arango.db(testDB1).delete(CONST.userCollection, result2A._key);
+
+    expect(result2H._key).toBeDefined();
+    expect(result2H._rev).toBeDefined();
+
+    const result2I = await arango.db(testDB1).read(CONST.userCollection, result2A._key);
+
+    expect(result2I).toBeUndefined();
+
+    const result2J = await arango.db(testDB1).read(CONST.userCollection, "Evans", { identifier: "surname" });
+
+    expect(result2J).toBeUndefined();
+
+    const result3A = await arango.db(testDB1).create(CONST.userCollection, {
+      name: "Thomas",
+      surname: "Voeckler",
+      country: "France",
+    });
+
+    expect(result3A).toBeDefined();
+    expect(result3A._key).toBeDefined();
+
+    const result3B = await arango.db(testDB1).read(CONST.userCollection, result3A._key);
+
+    expect(result3B.name).toEqual("Thomas");
+    expect(result3B.surname).toEqual("Voeckler");
+
+    const result3C = await arango.db(testDB1).delete(CONST.userCollection, "Voeckler", { identifier: "surname" });
+
+    expect(result3C).toBeDefined();
+    expect(Array.isArray(result3C)).toBeTruthy();
+    expect(result3C.length).toEqual(1);
+    expect(result3C[0]._key).toBeDefined();
+    expect(result3C[0]._rev).toBeDefined();
+
+    const result3D = await arango.db(testDB1).read(CONST.userCollection, result3A._key);
+
+    expect(result3D).toBeUndefined();
+
+    const result4A = await arango.db(testDB1).update(
+      CONST.userCollection,
+      "Time Trial",
+      {
+        rating: { timetrial: 9 },
+      },
+      { identifier: "speciality" }
+    );
+
+    expect(result4A).toBeDefined();
+    expect(Array.isArray(result4A)).toBeTruthy();
+    expect(result4A.length).toEqual(3);
+    expect(result4A[0]._key).toBeDefined();
+    expect(result4A[0]._rev).toBeDefined();
+    expect(result4A[0]._oldRev).toBeDefined();
+
+    const result4B = await arango.db(testDB1).fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial");
+
+    expect(result4B.length).toEqual(3);
+    expect(result4B[0].rating.timetrial).toEqual(9);
+
+    const result5A = await arango.db(testDB1).delete(CONST.userCollection, "Break Aways", { identifier: "speciality" });
+
+    expect(result5A).toBeDefined();
+    expect(Array.isArray(result5A)).toBeTruthy();
+    expect(result5A.length).toEqual(1);
+
+    const result5B = await arango
+      .db(testDB1)
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Break Aways");
+
+    expect(result5B.length).toEqual(0);
   });
 
   test("queryAll, queryOne, fetch and fetchOne", async () => {

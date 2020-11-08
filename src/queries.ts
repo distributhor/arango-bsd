@@ -120,13 +120,13 @@ export function updateDocumentByKeyValue(collection: string, identifier: KeyValu
   return aql.literal(
     `FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
       data
-    )} IN ${collection}`
+    )} IN ${collection} RETURN { _key: NEW._key, _id: NEW._id, _rev: NEW._rev, _oldRev: OLD._rev }`
   );
 }
 
 export function deleteDocumentByKeyValue(collection: string, identifier: KeyValue): AqlLiteral {
   return aql.literal(
-    `FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" REMOVE d IN ${collection}`
+    `FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
   );
 }
 
