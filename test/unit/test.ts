@@ -47,20 +47,23 @@ describe("Queries", () => {
     const filter1 = 'name == "Thomas"';
     const filter2 = 'name == "Thomas" && age == 42';
     const filter3 = 'LIKE(name, "%thomas%", true)';
-    const filter4 = '(name == "Thomas" && age == 42) || name == "Lance"';
-    const filter5 = '(name == "Thomas" && age == 42) || (name == "Lance" && surname == "Armstrong")';
+    const filter4 = 'LIKE(name, "%thomas%", true) || age IN arr';
+    const filter5 = '(name == "Thomas" && age == 42) || name == "Lance"';
+    const filter6 = '(name == "Thomas" && age == 42) || (name == "Lance" && surname == "Armstrong")';
 
     const result1 = _prefixPropertyNames(filter1);
     const result2 = _prefixPropertyNames(filter2);
     const result3 = _prefixPropertyNames(filter3);
     const result4 = _prefixPropertyNames(filter4);
     const result5 = _prefixPropertyNames(filter5);
+    const result6 = _prefixPropertyNames(filter6);
 
     expect(result1).toEqual('d.name == "Thomas"');
     expect(result2).toEqual('d.name == "Thomas" && d.age == 42');
     expect(result3).toEqual('LIKE(d.name, "%thomas%", true)');
-    expect(result4).toEqual('(d.name == "Thomas" && d.age == 42) || d.name == "Lance"');
-    expect(result5).toEqual('(d.name == "Thomas" && d.age == 42) || (d.name == "Lance" && d.surname == "Armstrong")');
+    expect(result4).toEqual('LIKE(d.name, "%thomas%", true) || d.age IN arr');
+    expect(result5).toEqual('(d.name == "Thomas" && d.age == 42) || d.name == "Lance"');
+    expect(result6).toEqual('(d.name == "Thomas" && d.age == 42) || (d.name == "Lance" && d.surname == "Armstrong")');
   });
 
   test("Fetch by key value", async () => {

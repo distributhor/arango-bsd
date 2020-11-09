@@ -19,7 +19,7 @@ export interface KeyValue {
 
 export interface IndexValue {
   index: number;
-  value: string | number | boolean;
+  value: string;
 }
 
 export interface UniqueValue {
@@ -51,12 +51,16 @@ export enum QueryReturnType {
   CURSOR = "cursor",
 }
 
-export enum LogicalOperatorType {
+export enum NegationOperator {
+  NOT = "NOT",
+}
+
+export enum LogicalOperator {
   AND = "AND",
   OR = "OR",
 }
 
-export const LogicalOperator = {
+export const LogicalOperatorSign = {
   AND: "&&",
   OR: "||",
   and: "&&",
@@ -66,14 +70,31 @@ export const LogicalOperator = {
 export enum ComparisonOperator {
   EQUAL = "EQUAL",
   NOT_EQUAL = "NOT_EQUAL",
+  LESS = "LESS",
+  GREATER = "GREATER",
+  LESS_OR_EQUAL = "LESS_OR_EQUAL",
+  GREATER_OR_EQUAL = "GREATER_OR_EQUAL",
+  IN = "IN",
+  NOT_IN = "NOT_IN",
+  LIKE = "LIKE",
+  NOT_LIKE = "NOT_LIKE",
+  REGEX = "REGEX",
+  NOT_REGEX = "NOT_REGEX",
   EMPTY = "EMPTY",
   NOT_EMPTY = "NOT_EMPTY",
-  LIKE = "LIKE",
 }
+
+export const ComparisonOperatorSign = {
+  EQUAL: "==",
+  NOT_EQUAL: "!=",
+  EMPTY: "EMPTY",
+  NOT_EMPTY: "NOT_EMPTY",
+  LIKE: "LIKE",
+};
 
 export interface Filter {
   property: string;
-  operand: ComparisonOperator;
+  operator: ComparisonOperator;
   value: string | number | boolean;
 }
 

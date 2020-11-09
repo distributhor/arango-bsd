@@ -7,8 +7,8 @@ import {
   QueryType,
   KeyValue,
   SortOptions,
+  LogicalOperatorSign,
   LogicalOperator,
-  LogicalOperatorType,
   IndexValue,
 } from "./index";
 
@@ -50,6 +50,7 @@ export function _findAllIndicesOfSubString(
   return indices;
 }
 
+/** @internal */
 export function _replacePropertNameTokens(filterString: string): string {
   if (filterString.indexOf("(") > -1) {
     const tmp = filterString.replace(/\(\s*/, "(d.");
@@ -65,33 +66,44 @@ export function _replacePropertNameTokens(filterString: string): string {
 
 /** @internal */
 export function _prefixPropertyNames(filterString: string): string {
-  const operatorIndices = _findAllIndicesOfSubString(["||", "&&"], filterString);
+  const validLogicalOperators = ["||", "&&"];
+  // const validComparisonOperators = ["==", "!="];
 
-  if (operatorIndices.length === 0) {
+  const logicalOperatorIndices = _findAllIndicesOfSubString(validLogicalOperators, filterString);
+
+  if (logicalOperatorIndices.length === 0) {
+    // const idx = _findAllIndicesOfSubString(validComparisonOperators, filterString);
+    // console.log(idx[0]);
+    // const leftOperand = filterString.substring(0, idx[0].index);
+    // const rightOperand = filterString.substring(idx[0].index + idx[0].value.length);
+    // console.log(`${leftOperand}  ${idx[0].value}  ${rightOperand}`);
     return _replacePropertNameTokens(filterString);
   }
 
   let modifiedFilter = "";
   let stringIndex = 0;
 
-  for (let i = 0; i <= operatorIndices.length; i++) {
+  for (let i = 0; i <= logicalOperatorIndices.length; i++) {
     // The <= is intentional. We need to add one iteration beyond the number of operators,
     // so that the last filter expression can be included in the string build
     let partialFilterString = undefined;
-    let parsedOperator = undefined;
+    let logicalOperator = undefined;
 
-    if (i === operatorIndices.length) {
+    if (i === logicalOperatorIndices.length) {
       partialFilterString = filterString.substring(stringIndex).trim();
     } else {
-      partialFilterString = filterString.substring(stringIndex, operatorIndices[i].index).trim();
-      parsedOperator = filterString.substring(operatorIndices[i].index, operatorIndices[i].index + 2);
-      stringIndex = operatorIndices[i].index + 2;
+      partialFilterString = filterString.substring(stringIndex, logicalOperatorIndices[i].index).trim();
+      logicalOperator = filterString.substring(
+        logicalOperatorIndices[i].index,
+        logicalOperatorIndices[i].index + logicalOperatorIndices[i].value.length
+      );
+      stringIndex = logicalOperatorIndices[i].index + logicalOperatorIndices[i].value.length;
     }
 
     modifiedFilter += _replacePropertNameTokens(partialFilterString);
 
-    if (parsedOperator) {
-      modifiedFilter += " " + parsedOperator + " ";
+    if (logicalOperator) {
+      modifiedFilter += " " + logicalOperator + " ";
     }
   }
 
@@ -104,7 +116,7 @@ function _fetchByKeyValue(
   identifier: KeyValue | KeyValue[],
   options: SortOptions,
   queryType: QueryType,
-  operator: LogicalOperatorType
+  keyValueCombinator: LogicalOperator
 ): string | AqlQuery {
   const params: any = {};
   let query = `FOR d IN ${collection} FILTER`;
@@ -118,7 +130,7 @@ function _fetchByKeyValue(
       keyCount++;
 
       if (keyCount > 1) {
-        query += ` ${LogicalOperator[operator]}`;
+        query += ` ${LogicalOperatorSign[keyValueCombinator]}`;
       }
 
       if (queryType === QueryType.STRING) {
@@ -191,7 +203,7 @@ export function fetchByKeyValue(
   options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
-  return _fetchByKeyValue(collection, identifier, options, queryType, LogicalOperatorType.OR);
+  return _fetchByKeyValue(collection, identifier, options, queryType, LogicalOperator.OR);
 }
 
 export function fetchByCompositeKeyValue(
@@ -200,13 +212,13 @@ export function fetchByCompositeKeyValue(
   options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
-  return _fetchByKeyValue(collection, identifier, options, queryType, LogicalOperatorType.AND);
+  return _fetchByKeyValue(collection, identifier, options, queryType, LogicalOperator.AND);
 }
 
 export function findByFilterCriteria(
   collection: string,
   filters: string | string[],
-  filterOperator?: LogicalOperatorType,
+  filterCombinator?: LogicalOperator,
   options: any = {}
 ): string | AqlLiteral {
   // let resultMeta = {};
@@ -228,7 +240,7 @@ export function findByFilterCriteria(
 
       for (let i = 0; i < filters.length; i++) {
         if (i > 0) {
-          query += " " + LogicalOperator[filterOperator] + " ";
+          query += " " + LogicalOperatorSign[filterCombinator] + " ";
         }
         query += _replacePropertNameTokens(filters[i]);
       }
