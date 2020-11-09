@@ -1,7 +1,8 @@
-import { QueryType } from "../../src";
+import { ListOfFilters, MatchType, QueryType } from "../../src";
 import {
   fetchByCompositeKeyValue,
   fetchByKeyValue,
+  findByFilterCriteria,
   uniqueConstraintQuery,
   _findAllIndicesOfSubString,
   _prefixPropertyNames,
@@ -64,6 +65,62 @@ describe("Queries", () => {
     expect(result4).toEqual('LIKE(d.name, "%thomas%", true) || d.age IN arr');
     expect(result5).toEqual('(d.name == "Thomas" && d.age == 42) || d.name == "Lance"');
     expect(result6).toEqual('(d.name == "Thomas" && d.age == 42) || (d.name == "Lance" && d.surname == "Armstrong")');
+  });
+
+  test("Find by filter criteria", async () => {
+    const FILTER_1 = '(name == "Thomas" && age == 42) || name == "Lance"';
+    const FILTER_2 = '(name == "Thomas" && age == 42) || (name == "Lance" && surname == "Armstrong")';
+    const FILTER_3 = 'LIKE(name, "%thomas%", true) || age IN arr';
+
+    const FILTER_A = '(d.name == "Thomas" && d.age == 42) || d.name == "Lance"';
+    const FILTER_B = '(d.name == "Thomas" && d.age == 42) || (d.name == "Lance" && d.surname == "Armstrong")';
+    const FILTER_C = 'LIKE(d.name, "%thomas%", true) || d.age IN arr';
+
+    const result1 = findByFilterCriteria("col", FILTER_1, {
+      prefixPropertyNames: true,
+    }) as string;
+
+    const result2 = findByFilterCriteria("col", FILTER_2, {
+      prefixPropertyNames: true,
+    }) as string;
+
+    const result3 = findByFilterCriteria("col", FILTER_3, {
+      prefixPropertyNames: true,
+    }) as string;
+
+    expect(result1.includes(FILTER_A)).toBeTruthy();
+    expect(result2.includes(FILTER_B)).toBeTruthy();
+    expect(result3.includes(FILTER_C)).toBeTruthy();
+
+    const result4 = findByFilterCriteria("col", FILTER_A);
+    const result5 = findByFilterCriteria("col", FILTER_B);
+    const result6 = findByFilterCriteria("col", FILTER_C);
+
+    expect(result4).toEqual(result1);
+    expect(result5).toEqual(result2);
+    expect(result6).toEqual(result3);
+
+    expect(result4).toEqual('FOR d IN col FILTER ( (d.name == "Thomas" && d.age == 42) || d.name == "Lance" )');
+    expect(result5).toEqual(
+      'FOR d IN col FILTER ( (d.name == "Thomas" && d.age == 42) || (d.name == "Lance" && d.surname == "Armstrong") )'
+    );
+    expect(result6).toEqual('FOR d IN col FILTER ( LIKE(d.name, "%thomas%", true) || d.age IN arr )');
+
+    const FILTER_D: ListOfFilters = {
+      filters: ['name == "Thomas"', "d.age == 42", 'surname == "Armstrong"'],
+      match: MatchType.ANY,
+    };
+
+    const FILTER_E: ListOfFilters = {
+      filters: ['name == "Thomas"', "d.age == 42", 'surname == "Armstrong"'],
+      match: MatchType.ALL,
+    };
+
+    const result7 = findByFilterCriteria("col", FILTER_D);
+    expect(result7).toEqual('FOR d IN col FILTER ( name == "Thomas" OR d.age == 42 OR surname == "Armstrong" )');
+
+    const result8 = findByFilterCriteria("col", FILTER_E);
+    expect(result8).toEqual('FOR d IN col FILTER ( name == "Thomas" AND d.age == 42 AND surname == "Armstrong" )');
   });
 
   test("Fetch by key value", async () => {

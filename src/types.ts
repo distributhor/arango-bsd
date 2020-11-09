@@ -92,10 +92,19 @@ export const ComparisonOperatorSign = {
   LIKE: "LIKE",
 };
 
-export interface Filter {
-  property: string;
-  operator: ComparisonOperator;
-  value: string | number | boolean;
+export enum MatchType {
+  ANY = "ANY",
+  ALL = "ALL",
+}
+
+export enum MatchTypeOperator {
+  ANY = LogicalOperator.OR,
+  ALL = LogicalOperator.AND,
+}
+
+export interface ListOfFilters {
+  filters: string[];
+  match?: MatchType;
 }
 
 export interface DatabaseConfig extends Config {

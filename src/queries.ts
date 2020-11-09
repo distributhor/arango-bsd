@@ -10,7 +10,14 @@ import {
   LogicalOperatorSign,
   LogicalOperator,
   IndexValue,
+  ListOfFilters,
+  MatchTypeOperator,
 } from "./index";
+
+/** @internal */
+export function isListOfFilters(x: any): x is ListOfFilters {
+  return x.filters;
+}
 
 /** @internal */
 export function _findAllIndicesOfSubString(
@@ -217,8 +224,7 @@ export function fetchByCompositeKeyValue(
 
 export function findByFilterCriteria(
   collection: string,
-  filters: string | string[],
-  filterCombinator?: LogicalOperator,
+  filter: string | ListOfFilters,
   options: any = {}
 ): string | AqlLiteral {
   // let resultMeta = {};
@@ -234,20 +240,29 @@ export function findByFilterCriteria(
     query += " FILTER d." + options.restrictTo;
   }
 
-  if (filters) {
-    if (Array.isArray(filters) && filters.length > 0) {
+  if (filter) {
+    // if (Array.isArray(filter) && filter.length > 0) {}
+    if (isListOfFilters(filter)) {
       query += " FILTER ( ";
 
-      for (let i = 0; i < filters.length; i++) {
+      for (let i = 0; i < filter.filters.length; i++) {
         if (i > 0) {
-          query += " " + LogicalOperatorSign[filterCombinator] + " ";
+          query += " " + MatchTypeOperator[filter.match] + " ";
         }
-        query += _replacePropertNameTokens(filters[i]);
+        if (options.prefixPropertyNames) {
+          query += _replacePropertNameTokens(filter.filters[i]);
+        } else {
+          query += filter.filters[i];
+        }
       }
 
       query += " )";
     } else {
-      query += " FILTER ( " + this._prefixPropertyNames(filters) + " )";
+      if (options.prefixPropertyNames) {
+        query += " FILTER ( " + this._prefixPropertyNames(filter) + " )";
+      } else {
+        query += " FILTER ( " + filter + " )";
+      }
     }
   }
 
@@ -299,7 +314,8 @@ export function findByFilterCriteria(
   }
   */
 
-  return aql.literal(query);
+  return query;
+  //return aql.literal(query);
 }
 
 export function updateDocumentsByKeyValue(collection: string, identifier: KeyValue, data: any): AqlLiteral {
