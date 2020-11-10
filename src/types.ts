@@ -12,8 +12,8 @@ export interface UntypedObject {
   [key: string]: any;
 }
 
-export interface KeyValue {
-  key: string;
+export interface PropertyValue {
+  property: string;
   value: string | number | boolean;
 }
 
@@ -23,11 +23,11 @@ export interface IndexValue {
 }
 
 export interface UniqueValue {
-  unique: KeyValue;
+  unique: PropertyValue;
 }
 
 export interface CompositeKey {
-  composite: KeyValue[];
+  composite: PropertyValue[];
 }
 
 export interface UniqueConstraint {

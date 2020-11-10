@@ -1,6 +1,6 @@
 import { ListOfFilters, MatchType, QueryType } from "../../src";
 import {
-  fetchByKeyValue,
+  fetchByPropertyValue,
   fetchByCompositeValue,
   findByFilterCriteria,
   uniqueConstraintQuery,
@@ -165,17 +165,17 @@ describe("Queries", () => {
   });
 
   test("Fetch by key and composite value", async () => {
-    const result1 = fetchByKeyValue("col", { key: "username", value: "ABC" }, undefined, QueryType.STRING);
+    const result1 = fetchByPropertyValue("col", { property: "username", value: "ABC" }, undefined, QueryType.STRING);
     expect(result1).toEqual('FOR d IN col FILTER d.username == "ABC" RETURN d');
 
-    const result2 = fetchByKeyValue("col", { key: "age", value: 42 }, undefined, QueryType.STRING);
+    const result2 = fetchByPropertyValue("col", { property: "age", value: 42 }, undefined, QueryType.STRING);
     expect(result2).toEqual("FOR d IN col FILTER d.age == 42 RETURN d");
 
-    const result3 = fetchByKeyValue(
+    const result3 = fetchByPropertyValue(
       "col",
       [
-        { key: "username", value: "ABC" },
-        { key: "age", value: 42 },
+        { property: "username", value: "ABC" },
+        { property: "age", value: 42 },
       ],
       undefined,
       QueryType.STRING
@@ -185,8 +185,8 @@ describe("Queries", () => {
     const result4 = fetchByCompositeValue(
       "col",
       [
-        { key: "username", value: "ABC" },
-        { key: "age", value: 42 },
+        { property: "username", value: "ABC" },
+        { property: "age", value: 42 },
       ],
       undefined,
       QueryType.STRING
@@ -198,7 +198,7 @@ describe("Queries", () => {
     const result1 = uniqueConstraintQuery(
       {
         collection: "col",
-        constraints: [{ unique: { key: "A", value: "Annie Apple" } }],
+        constraints: [{ unique: { property: "A", value: "Annie Apple" } }],
       },
       QueryType.STRING
     );
@@ -208,7 +208,10 @@ describe("Queries", () => {
     const result2 = uniqueConstraintQuery(
       {
         collection: "col",
-        constraints: [{ unique: { key: "A", value: "Annie Apple" } }, { unique: { key: "B", value: "Bouncy Ben" } }],
+        constraints: [
+          { unique: { property: "A", value: "Annie Apple" } },
+          { unique: { property: "B", value: "Bouncy Ben" } },
+        ],
       },
       QueryType.STRING
     );
@@ -221,8 +224,8 @@ describe("Queries", () => {
         constraints: [
           {
             composite: [
-              { key: "C", value: "Clever Cat" },
-              { key: "D", value: "Dippy Duck" },
+              { property: "C", value: "Clever Cat" },
+              { property: "D", value: "Dippy Duck" },
             ],
           },
         ],
@@ -238,14 +241,14 @@ describe("Queries", () => {
         constraints: [
           {
             composite: [
-              { key: "C", value: "Clever Cat" },
-              { key: "D", value: "Dippy Duck" },
+              { property: "C", value: "Clever Cat" },
+              { property: "D", value: "Dippy Duck" },
             ],
           },
           {
             composite: [
-              { key: "E", value: "Eddy Elephant" },
-              { key: "F", value: "Firefighter Fred" },
+              { property: "E", value: "Eddy Elephant" },
+              { property: "F", value: "Firefighter Fred" },
             ],
           },
         ],
@@ -261,11 +264,11 @@ describe("Queries", () => {
       {
         collection: "col",
         constraints: [
-          { unique: { key: "A", value: "Annie Apple" } },
+          { unique: { property: "A", value: "Annie Apple" } },
           {
             composite: [
-              { key: "C", value: "Clever Cat" },
-              { key: "D", value: "Dippy Duck" },
+              { property: "C", value: "Clever Cat" },
+              { property: "D", value: "Dippy Duck" },
             ],
           },
         ],
@@ -281,14 +284,14 @@ describe("Queries", () => {
       {
         collection: "col",
         constraints: [
-          { unique: { key: "A", value: "Annie Apple" } },
+          { unique: { property: "A", value: "Annie Apple" } },
           {
             composite: [
-              { key: "C", value: "Clever Cat" },
-              { key: "D", value: "Dippy Duck" },
+              { property: "C", value: "Clever Cat" },
+              { property: "D", value: "Dippy Duck" },
             ],
           },
-          { unique: { key: "B", value: "Bouncy Ben" } },
+          { unique: { property: "B", value: "Bouncy Ben" } },
         ],
       },
       QueryType.STRING
@@ -304,18 +307,18 @@ describe("Queries", () => {
         constraints: [
           {
             composite: [
-              { key: "C", value: "Clever Cat" },
-              { key: "D", value: "Dippy Duck" },
+              { property: "C", value: "Clever Cat" },
+              { property: "D", value: "Dippy Duck" },
             ],
           },
-          { unique: { key: "A", value: "Annie Apple" } },
+          { unique: { property: "A", value: "Annie Apple" } },
           {
             composite: [
-              { key: "E", value: "Eddy Elephant" },
-              { key: "F", value: "Firefighter Fred" },
+              { property: "E", value: "Eddy Elephant" },
+              { property: "F", value: "Firefighter Fred" },
             ],
           },
-          { unique: { key: "B", value: "Bouncy Ben" } },
+          { unique: { property: "B", value: "Bouncy Ben" } },
         ],
       },
       QueryType.STRING

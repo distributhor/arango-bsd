@@ -22,7 +22,7 @@ import {
   QueryReturnType,
   FetchOneOptions,
   QueryResult,
-  KeyValue,
+  PropertyValue,
 } from "./types";
 import { Queries } from "./queries";
 import { ArrayCursor } from "arangojs/cursor";
@@ -180,7 +180,7 @@ export class ArangoDB {
 
     if (options.identifier) {
       // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
-      document = await this.fetchOneByPropertyValue(collection, options.identifier, id, options);
+      document = await this.fetchOneByPropertyValue(collection, { property: options.identifier, value: id }, options);
     } else {
       try {
         document = await this.driver.collection(collection).document(id);
@@ -210,7 +210,7 @@ export class ArangoDB {
   public async update(collection: string, id: string, data: any, options: UpdateDocumentOptions = {}): Promise<any> {
     if (options.identifier) {
       const result = await this.driver.query(
-        Queries.updateDocumentsByKeyValue(collection, { key: options.identifier, value: id }, data)
+        Queries.updateDocumentsByKeyValue(collection, { property: options.identifier, value: id }, data)
       );
 
       return result.all();
@@ -222,7 +222,7 @@ export class ArangoDB {
   public async delete(collection: string, id: string, options: DeleteDocumentOptions = {}): Promise<any> {
     if (options.identifier) {
       const result = await this.driver.query(
-        Queries.deleteDocumentsByKeyValue(collection, { key: options.identifier, value: id })
+        Queries.deleteDocumentsByKeyValue(collection, { property: options.identifier, value: id })
       );
 
       return result.all();
@@ -233,12 +233,11 @@ export class ArangoDB {
 
   public async fetchAllByPropertyValue(
     collection: string,
-    property: string,
-    value: string,
+    idenifier: PropertyValue,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult> {
     const result = await this.driver.query(
-      Queries.fetchByKeyValue(collection, { key: property, value }, options.sortOptions) as AqlQuery,
+      Queries.fetchByPropertyValue(collection, idenifier, options.sortOptions) as AqlQuery,
       options.queryOptions
     );
 
@@ -265,12 +264,11 @@ export class ArangoDB {
 
   public async fetchOneByPropertyValue(
     collection: string,
-    property: string,
-    value: string,
+    idenifier: PropertyValue,
     options: FetchOneOptions = {}
   ): Promise<any> {
     const document = await this.queryOne(
-      Queries.fetchByKeyValue(collection, { key: property, value }) as AqlQuery,
+      Queries.fetchByPropertyValue(collection, idenifier) as AqlQuery,
       options.queryOptions
     );
 
@@ -289,7 +287,7 @@ export class ArangoDB {
 
   public async fetchAllByCompositeValue(
     collection: string,
-    identifier: KeyValue[],
+    identifier: PropertyValue[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult> {
     const result = await this.driver.query(
@@ -320,7 +318,7 @@ export class ArangoDB {
 
   public async fetchOneByCompositeValue(
     collection: string,
-    identifier: KeyValue[],
+    identifier: PropertyValue[],
     options: FetchOneOptions = {}
   ): Promise<any> {
     const document = await this.queryOne(

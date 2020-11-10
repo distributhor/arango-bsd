@@ -5,7 +5,7 @@ import {
   isCompositeKey,
   isUniqueValue,
   QueryType,
-  KeyValue,
+  PropertyValue,
   SortOptions,
   IndexValue,
   ListOfFilters,
@@ -116,7 +116,7 @@ export function _prefixPropertyNames(filterString: string): string {
 /** @internal */
 function _fetchByKeyValue(
   collection: string,
-  identifier: KeyValue | KeyValue[],
+  identifier: PropertyValue | PropertyValue[],
   options: SortOptions,
   queryType: QueryType,
   keyValueMatchType: MatchType
@@ -138,15 +138,15 @@ function _fetchByKeyValue(
 
       if (queryType === QueryType.STRING) {
         if (typeof kv.value === "number") {
-          query += ` d.${kv.key} == ${kv.value}`;
+          query += ` d.${kv.property} == ${kv.value}`;
         } else {
-          query += ` d.${kv.key} == "${kv.value}"`;
+          query += ` d.${kv.property} == "${kv.value}"`;
         }
       } else {
-        const keyParam = `${kv.key}_key_${keyCount}`;
-        const valueParam = `${kv.key}_val_${keyCount}`;
+        const keyParam = `${kv.property}_key_${keyCount}`;
+        const valueParam = `${kv.property}_val_${keyCount}`;
 
-        params[keyParam] = kv.key;
+        params[keyParam] = kv.property;
         params[valueParam] = kv.value;
 
         query += ` d.@${keyParam} == @${valueParam}`;
@@ -157,12 +157,12 @@ function _fetchByKeyValue(
   } else {
     if (queryType === QueryType.STRING) {
       if (typeof identifier.value === "number") {
-        query += ` d.${identifier.key} == ${identifier.value}`;
+        query += ` d.${identifier.property} == ${identifier.value}`;
       } else {
-        query += ` d.${identifier.key} == "${identifier.value}"`;
+        query += ` d.${identifier.property} == "${identifier.value}"`;
       }
     } else {
-      params["property"] = identifier.key;
+      params["property"] = identifier.property;
       params["value"] = identifier.value;
       query += `  d.@property == @value`;
     }
@@ -200,9 +200,9 @@ function _fetchByKeyValue(
   };
 }
 
-export function fetchByKeyValue(
+export function fetchByPropertyValue(
   collection: string,
-  identifier: KeyValue | KeyValue[],
+  identifier: PropertyValue | PropertyValue[],
   options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
@@ -211,7 +211,7 @@ export function fetchByKeyValue(
 
 export function fetchByCompositeValue(
   collection: string,
-  identifier: KeyValue[],
+  identifier: PropertyValue[],
   options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
@@ -314,17 +314,17 @@ export function findByFilterCriteria(
   return aql.literal(query);
 }
 
-export function updateDocumentsByKeyValue(collection: string, identifier: KeyValue, data: any): AqlLiteral {
+export function updateDocumentsByKeyValue(collection: string, identifier: PropertyValue, data: any): AqlLiteral {
   return aql.literal(
-    `FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
+    `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
       data
     )} IN ${collection} RETURN { _key: NEW._key, _id: NEW._id, _rev: NEW._rev, _oldRev: OLD._rev }`
   );
 }
 
-export function deleteDocumentsByKeyValue(collection: string, identifier: KeyValue): AqlLiteral {
+export function deleteDocumentsByKeyValue(collection: string, identifier: PropertyValue): AqlLiteral {
   return aql.literal(
-    `FOR d IN ${collection} FILTER d.${identifier.key} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
+    `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
   );
 }
 
@@ -370,12 +370,12 @@ export function uniqueConstraintQuery(
         }
 
         if (queryType === QueryType.STRING) {
-          query += ` d.${kv.key} == "${kv.value}"`;
+          query += ` d.${kv.property} == "${kv.value}"`;
         } else {
-          const keyParam = `${kv.key}_key_${keyCount}`;
-          const valueParam = `${kv.key}_val_${keyCount}`;
+          const keyParam = `${kv.property}_key_${keyCount}`;
+          const valueParam = `${kv.property}_val_${keyCount}`;
 
-          params[keyParam] = kv.key;
+          params[keyParam] = kv.property;
           params[valueParam] = kv.value;
 
           query += ` d.@${keyParam} == @${valueParam}`;
@@ -387,12 +387,12 @@ export function uniqueConstraintQuery(
 
     if (isUniqueValue(constraint)) {
       if (queryType === QueryType.STRING) {
-        query += ` d.${constraint.unique.key} == "${constraint.unique.value}"`;
+        query += ` d.${constraint.unique.property} == "${constraint.unique.value}"`;
       } else {
-        const keyParam = `${constraint.unique.key}_key`;
-        const valueParam = `${constraint.unique.key}_val`;
+        const keyParam = `${constraint.unique.property}_key`;
+        const valueParam = `${constraint.unique.property}_val`;
 
-        params[keyParam] = constraint.unique.key;
+        params[keyParam] = constraint.unique.property;
         params[valueParam] = constraint.unique.value;
 
         query += ` d.@${keyParam} == @${valueParam}`;
@@ -413,7 +413,7 @@ export function uniqueConstraintQuery(
 }
 
 export const Queries = {
-  fetchByKeyValue,
+  fetchByPropertyValue,
   fetchByCompositeValue,
   findByFilterCriteria,
   updateDocumentsByKeyValue,
