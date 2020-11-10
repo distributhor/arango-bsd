@@ -201,7 +201,7 @@ describe("Arango Backseat Driver Integration Tests", () => {
     const result1 = await arango.db(testDB1).create(CONST.userCollection, cyclists);
     const result2 = await arango.db(testDB1).create(CONST.groupCollection, teams);
 
-    expect(result1.length).toEqual(24);
+    expect(result1.length).toEqual(25);
     expect(result2.length).toEqual(16);
   });
 
@@ -703,8 +703,29 @@ describe("Arango Backseat Driver Integration Tests", () => {
 
     expect(result7C).toBeUndefined();
   });
-
   /* */
+  test("findByFilterCriteria", async () => {
+    const result1A = await arango
+      .db(testDB1)
+      .findByFilterCriteria(CONST.userCollection, 'name == "Lance" || name == "Chris"', {
+        filterOptions: { prefixPropertyNames: true },
+      });
+
+    console.log(result1A);
+    // expect(result1A.length).toEqual(3);
+    // expect(result1A[0].surname).toBeDefined();
+
+    const result2A = await arango
+      .db(testDB1)
+      .findByFilterCriteria(CONST.userCollection, 'country == "Italy" && speciality == "General Classification"', {
+        filterOptions: { prefixPropertyNames: true },
+      });
+
+    console.log(result2A);
+    // expect(result1A.length).toEqual(3);
+    // expect(result1A[0].surname).toBeDefined();
+  });
+
   test("Delete database", async () => {
     expect.assertions(5);
 

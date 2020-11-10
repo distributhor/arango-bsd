@@ -21,6 +21,12 @@
     "speciality": "General Classification"
   },
   {
+    "name": "Marco",
+    "surname": "Pantani",
+    "country": "Italy",
+    "speciality": "Climbing"
+  },
+  {
     "name": "Jan",
     "surname": "Ullrich",
     "nickname": "Wish I Was 3kg Lighter",
@@ -65,6 +71,7 @@
     "name": "Vincenzo",
     "surname": "Nibali",
     "nickname": "The Shark",
+    "country": "Italy",
     "speciality": "General Classification"
   },
   {
@@ -108,7 +115,7 @@
     "name": "Marc",
     "surname": "Soler",
     "country": "Spain",
-    "speciality": "Climber"
+    "speciality": "Climbing"
   },
   {
     "name": "Rohan",

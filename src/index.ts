@@ -1,6 +1,6 @@
 import Debug from "debug";
 import { Database } from "arangojs";
-import { AqlQuery } from "arangojs/aql";
+import { AqlLiteral, AqlQuery } from "arangojs/aql";
 import { QueryOptions } from "arangojs/database";
 import {
   DatabaseConfig,
@@ -23,6 +23,8 @@ import {
   FetchOneOptions,
   QueryResult,
   PropertyValue,
+  ListOfFilters,
+  FindOptions,
 } from "./types";
 import { Queries } from "./queries";
 import { ArrayCursor } from "arangojs/cursor";
@@ -194,17 +196,7 @@ export class ArangoDB {
       }
     }
 
-    if (!document) {
-      return undefined;
-    }
-
-    if (options.stripUnderscoreProps) {
-      stripUnderscoreProps(document, ["_key"]);
-    } else if (options.stripInternalProps) {
-      stripProps(document, ["_id", "_rev"]);
-    }
-
-    return document;
+    return this.trimDocument(document, options);
   }
 
   public async update(collection: string, id: string, data: any, options: UpdateDocumentOptions = {}): Promise<any> {
@@ -231,6 +223,58 @@ export class ArangoDB {
     return this.driver.collection(collection).remove(id);
   }
 
+  private trimDocument(document: any, options: ReadDocumentOptions | FetchOneOptions = {}): any {
+    if (!document) {
+      return document;
+    }
+
+    if (options.stripUnderscoreProps) {
+      stripUnderscoreProps(document, ["_key"]);
+    } else if (options.stripInternalProps) {
+      stripProps(document, ["_id", "_rev"]);
+    }
+
+    return document;
+  }
+
+  private trimDocuments(documents: any[], options: FetchOptions = {}) {
+    if (options.stripUnderscoreProps) {
+      documents.map((d) => {
+        stripUnderscoreProps(d, ["_key"]);
+      });
+    } else if (options.stripInternalProps) {
+      documents.map((d) => {
+        stripProps(d, ["_id", "_rev"]);
+      });
+    }
+  }
+
+  public async fetchOneByPropertyValue(
+    collection: string,
+    idenifier: PropertyValue,
+    options: FetchOneOptions = {}
+  ): Promise<any> {
+    const document = await this.queryOne(
+      Queries.fetchByPropertyValue(collection, idenifier) as AqlQuery,
+      options.queryOptions
+    );
+
+    return this.trimDocument(document, options);
+  }
+
+  public async fetchOneByCompositeValue(
+    collection: string,
+    identifier: PropertyValue[],
+    options: FetchOneOptions = {}
+  ): Promise<any> {
+    const document = await this.queryOne(
+      Queries.fetchByCompositeValue(collection, identifier) as AqlQuery,
+      options.queryOptions
+    );
+
+    return this.trimDocument(document, options);
+  }
+
   public async fetchAllByPropertyValue(
     collection: string,
     idenifier: PropertyValue,
@@ -247,42 +291,11 @@ export class ArangoDB {
 
     const documents = await result.all();
 
-    if (options.stripUnderscoreProps) {
-      documents.map((d) => {
-        stripUnderscoreProps(d, ["_key"]);
-      });
-    } else if (options.stripInternalProps) {
-      documents.map((d) => {
-        stripProps(d, ["_id", "_rev"]);
-      });
-    }
+    this.trimDocuments(documents, options);
 
     return {
       data: documents,
     };
-  }
-
-  public async fetchOneByPropertyValue(
-    collection: string,
-    idenifier: PropertyValue,
-    options: FetchOneOptions = {}
-  ): Promise<any> {
-    const document = await this.queryOne(
-      Queries.fetchByPropertyValue(collection, idenifier) as AqlQuery,
-      options.queryOptions
-    );
-
-    if (!document) {
-      return document;
-    }
-
-    if (options.stripUnderscoreProps) {
-      stripUnderscoreProps(document, ["_key"]);
-    } else if (options.stripInternalProps) {
-      stripProps(document, ["_id", "_rev"]);
-    }
-
-    return document;
   }
 
   public async fetchAllByCompositeValue(
@@ -301,51 +314,34 @@ export class ArangoDB {
 
     const documents = await result.all();
 
-    if (options.stripUnderscoreProps) {
-      documents.map((d) => {
-        stripUnderscoreProps(d, ["_key"]);
-      });
-    } else if (options.stripInternalProps) {
-      documents.map((d) => {
-        stripProps(d, ["_id", "_rev"]);
-      });
-    }
+    this.trimDocuments(documents, options);
 
     return {
       data: documents,
     };
   }
 
-  public async fetchOneByCompositeValue(
+  public async findByFilterCriteria(
     collection: string,
-    identifier: PropertyValue[],
-    options: FetchOneOptions = {}
-  ): Promise<any> {
-    const document = await this.queryOne(
-      Queries.fetchByCompositeValue(collection, identifier) as AqlQuery,
+    filter: string | ListOfFilters,
+    options: FindOptions = {}
+  ): Promise<ArrayCursor | QueryResult> {
+    const result = await this.driver.query(
+      Queries.findByFilterCriteria(collection, filter, options.filterOptions) as AqlLiteral,
       options.queryOptions
     );
 
-    if (!document) {
-      return document;
+    if (options.return && options.return === QueryReturnType.CURSOR) {
+      return result;
     }
 
-    if (options.stripUnderscoreProps) {
-      stripUnderscoreProps(document, ["_key"]);
-    } else if (options.stripInternalProps) {
-      stripProps(document, ["_id", "_rev"]);
-    }
+    const documents = await result.all();
 
-    return document;
-  }
+    this.trimDocuments(documents, options);
 
-  public async findByFilterCriteria(
-    collection: string,
-    filters: string[],
-    filterCombinator: string,
-    options: any
-  ): Promise<QueryResult> {
-    return undefined;
+    return {
+      data: documents,
+    };
   }
 
   public async uniqueConstraintValidation(constraints: UniqueConstraint): Promise<UniqueConstraintResult> {

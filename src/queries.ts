@@ -11,6 +11,8 @@ import {
   ListOfFilters,
   MatchTypeOperator,
   MatchType,
+  FetchOptions,
+  FilterOptions,
 } from "./index";
 
 /** @internal */
@@ -221,7 +223,7 @@ export function fetchByCompositeValue(
 export function findByFilterCriteria(
   collection: string,
   filter: string | ListOfFilters,
-  options: any = {},
+  options: FilterOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlLiteral {
   // if (options.hasOwnProperty("returnDataFieldName")) {
@@ -252,7 +254,7 @@ export function findByFilterCriteria(
       query += " )";
     } else {
       if (options.prefixPropertyNames) {
-        query += " FILTER ( " + this._prefixPropertyNames(filter) + " )";
+        query += " FILTER ( " + _prefixPropertyNames(filter) + " )";
       } else {
         query += " FILTER ( " + filter + " )";
       }
@@ -306,6 +308,7 @@ export function findByFilterCriteria(
     query += " RETURN d";
   }
   */
+  query += " RETURN d";
 
   if (queryType === QueryType.STRING) {
     return query;

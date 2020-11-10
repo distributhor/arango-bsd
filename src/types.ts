@@ -1,4 +1,5 @@
 import { Config } from "arangojs/connection";
+import { CursorExtras } from "arangojs/cursor";
 import { QueryOptions } from "arangojs/database";
 
 // export interface SearchResult {
@@ -14,7 +15,7 @@ export interface UntypedObject {
 
 export interface PropertyValue {
   property: string;
-  value: string | number | boolean;
+  value: any;
 }
 
 export interface IndexValue {
@@ -53,6 +54,13 @@ export enum QueryReturnType {
 
 export interface QueryResult {
   data: any;
+  meta?: QueryMeta;
+  extra?: CursorExtras;
+}
+
+export interface QueryMeta {
+  count?: number;
+  fullCount?: number;
 }
 
 export enum MatchType {
@@ -108,6 +116,20 @@ export interface FetchOptions {
   stripUnderscoreProps?: boolean;
   sortOptions?: SortOptions;
   queryOptions?: QueryOptions;
+}
+
+export interface FindOptions {
+  return?: QueryReturnType;
+  stripInternalProps?: boolean;
+  stripUnderscoreProps?: boolean;
+  queryOptions?: QueryOptions;
+  filterOptions?: FilterOptions;
+}
+
+export interface FilterOptions {
+  prefixPropertyNames?: boolean;
+  restrictTo?: string;
+  sortOptions?: SortOptions;
 }
 
 export interface SortOptions {
