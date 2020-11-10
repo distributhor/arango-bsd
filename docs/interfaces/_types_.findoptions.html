@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>DeleteDocumentOptions | Documentation</title>
+	<title>FindOptions | Documentation</title>
 	<meta name="description" content="Documentation for Documentation">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/_types_.html">&quot;types&quot;</a>
 				</li>
 				<li>
-					<a href="_types_.deletedocumentoptions.html">DeleteDocumentOptions</a>
+					<a href="_types_.findoptions.html">FindOptions</a>
 				</li>
 			</ul>
-			<h1>Interface DeleteDocumentOptions</h1>
+			<h1>Interface FindOptions</h1>
 		</div>
 	</div>
 </header>
@@ -73,7 +73,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">DeleteDocumentOptions</span>
+						<span class="target">FindOptions</span>
 					</li>
 				</ul>
 			</section>
@@ -84,7 +84,11 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_types_.deletedocumentoptions.html#identifier" class="tsd-kind-icon">identifier</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_types_.findoptions.html#filteroptions" class="tsd-kind-icon">filter<wbr>Options</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_types_.findoptions.html#queryoptions" class="tsd-kind-icon">query<wbr>Options</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_types_.findoptions.html#return" class="tsd-kind-icon">return</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_types_.findoptions.html#stripinternalprops" class="tsd-kind-icon">strip<wbr>Internal<wbr>Props</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_types_.findoptions.html#stripunderscoreprops" class="tsd-kind-icon">strip<wbr>Underscore<wbr>Props</a></li>
 							</ul>
 						</section>
 					</div>
@@ -93,12 +97,52 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="identifier" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> identifier</h3>
-					<div class="tsd-signature tsd-kind-icon">identifier<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="filteroptions" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> filter<wbr>Options</h3>
+					<div class="tsd-signature tsd-kind-icon">filter<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="_types_.filteroptions.html" class="tsd-signature-type">FilterOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/983535e/src/types.ts#L104">src/types.ts:104</a></li>
+							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/983535e/src/types.ts#L126">src/types.ts:126</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="queryoptions" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> query<wbr>Options</h3>
+					<div class="tsd-signature tsd-kind-icon">query<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">QueryOptions</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/983535e/src/types.ts#L125">src/types.ts:125</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="return" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> return</h3>
+					<div class="tsd-signature tsd-kind-icon">return<span class="tsd-signature-symbol">:</span> <a href="../enums/_types_.queryreturntype.html" class="tsd-signature-type">QueryReturnType</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/983535e/src/types.ts#L122">src/types.ts:122</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="stripinternalprops" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> strip<wbr>Internal<wbr>Props</h3>
+					<div class="tsd-signature tsd-kind-icon">strip<wbr>Internal<wbr>Props<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/983535e/src/types.ts#L123">src/types.ts:123</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="stripunderscoreprops" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> strip<wbr>Underscore<wbr>Props</h3>
+					<div class="tsd-signature tsd-kind-icon">strip<wbr>Underscore<wbr>Props<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/983535e/src/types.ts#L124">src/types.ts:124</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -156,18 +200,9 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="_types_.databaseconfig.html" class="tsd-kind-icon">Database<wbr>Config</a>
 					</li>
-				</ul>
-				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-module">
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="_types_.deletedocumentoptions.html" class="tsd-kind-icon">Delete<wbr>Document<wbr>Options</a>
-						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_types_.deletedocumentoptions.html#identifier" class="tsd-kind-icon">identifier</a>
-							</li>
-						</ul>
 					</li>
-				</ul>
-				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="_types_.edgedefinition.html" class="tsd-kind-icon">Edge<wbr>Definition</a>
 					</li>
@@ -180,9 +215,30 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="_types_.filteroptions.html" class="tsd-kind-icon">Filter<wbr>Options</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-module">
 						<a href="_types_.findoptions.html" class="tsd-kind-icon">Find<wbr>Options</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_types_.findoptions.html#filteroptions" class="tsd-kind-icon">filter<wbr>Options</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_types_.findoptions.html#queryoptions" class="tsd-kind-icon">query<wbr>Options</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_types_.findoptions.html#return" class="tsd-kind-icon">return</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_types_.findoptions.html#stripinternalprops" class="tsd-kind-icon">strip<wbr>Internal<wbr>Props</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_types_.findoptions.html#stripunderscoreprops" class="tsd-kind-icon">strip<wbr>Underscore<wbr>Props</a>
+							</li>
+						</ul>
 					</li>
+				</ul>
+				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="_types_.graphdefinition.html" class="tsd-kind-icon">Graph<wbr>Definition</a>
 					</li>
