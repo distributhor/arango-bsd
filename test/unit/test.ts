@@ -87,31 +87,51 @@ describe("Queries", () => {
     const filterC = 'LIKE(d.name, "%thomas%", true) || d.age IN arr';
     const filterD = 'd.name IN ["Thomas","Lance"] && (d.age > 42 || d.speciality != "timetrial")';
 
-    const result1 = findByFilterCriteria("col", filter1, {
-      prefixPropertyNames: true,
-    }) as string;
+    const result1 = findByFilterCriteria(
+      "col",
+      filter1,
+      {
+        prefixPropertyNames: true,
+      },
+      QueryType.STRING
+    ) as string;
 
-    const result2 = findByFilterCriteria("col", filter2, {
-      prefixPropertyNames: true,
-    }) as string;
+    const result2 = findByFilterCriteria(
+      "col",
+      filter2,
+      {
+        prefixPropertyNames: true,
+      },
+      QueryType.STRING
+    ) as string;
 
-    const result3 = findByFilterCriteria("col", filter3, {
-      prefixPropertyNames: true,
-    }) as string;
+    const result3 = findByFilterCriteria(
+      "col",
+      filter3,
+      {
+        prefixPropertyNames: true,
+      },
+      QueryType.STRING
+    ) as string;
 
-    const result4 = findByFilterCriteria("col", filter4, {
-      prefixPropertyNames: true,
-    }) as string;
+    const result4 = findByFilterCriteria(
+      "col",
+      filter4,
+      {
+        prefixPropertyNames: true,
+      },
+      QueryType.STRING
+    ) as string;
 
     expect(result1.includes(filterA)).toBeTruthy();
     expect(result2.includes(filterB)).toBeTruthy();
     expect(result3.includes(filterC)).toBeTruthy();
     expect(result4.includes(filterD)).toBeTruthy();
 
-    const result5 = findByFilterCriteria("col", filterA);
-    const result6 = findByFilterCriteria("col", filterB);
-    const result7 = findByFilterCriteria("col", filterC);
-    const result8 = findByFilterCriteria("col", filterD);
+    const result5 = findByFilterCriteria("col", filterA, undefined, QueryType.STRING);
+    const result6 = findByFilterCriteria("col", filterB, undefined, QueryType.STRING);
+    const result7 = findByFilterCriteria("col", filterC, undefined, QueryType.STRING);
+    const result8 = findByFilterCriteria("col", filterD, undefined, QueryType.STRING);
 
     expect(result5).toEqual(result1);
     expect(result6).toEqual(result2);
@@ -137,10 +157,10 @@ describe("Queries", () => {
       match: MatchType.ALL,
     };
 
-    const result9 = findByFilterCriteria("col", FILTER_D);
+    const result9 = findByFilterCriteria("col", FILTER_D, undefined, QueryType.STRING);
     expect(result9).toEqual('FOR d IN col FILTER ( d.name == "Thomas" || d.age == 42 || d.surname == "Armstrong" )');
 
-    const result10 = findByFilterCriteria("col", FILTER_E);
+    const result10 = findByFilterCriteria("col", FILTER_E, undefined, QueryType.STRING);
     expect(result10).toEqual('FOR d IN col FILTER ( name == "Thomas" && age == 42 && surname == "Armstrong" )');
   });
 

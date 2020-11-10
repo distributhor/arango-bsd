@@ -192,12 +192,12 @@ function _fetchByKeyValue(
 
   if (queryType === QueryType.STRING) {
     return query;
-  } else {
-    return {
-      query,
-      bindVars: params,
-    };
   }
+
+  return {
+    query,
+    bindVars: params,
+  };
 }
 
 export function fetchByKeyValue(
@@ -221,11 +221,9 @@ export function fetchByCompositeValue(
 export function findByFilterCriteria(
   collection: string,
   filter: string | ListOfFilters,
-  options: any = {}
+  options: any = {},
+  queryType: QueryType = QueryType.AQL
 ): string | AqlLiteral {
-  // let resultMeta = {};
-  // let queryOptions = {};
-
   // if (options.hasOwnProperty("returnDataFieldName")) {
   //   queryOptions.returnDataFieldName = options.returnDataFieldName;
   // }
@@ -237,7 +235,6 @@ export function findByFilterCriteria(
   }
 
   if (filter) {
-    // if (Array.isArray(filter) && filter.length > 0) {}
     if (isListOfFilters(filter)) {
       query += " FILTER ( ";
 
@@ -310,8 +307,11 @@ export function findByFilterCriteria(
   }
   */
 
-  return query;
-  //return aql.literal(query);
+  if (queryType === QueryType.STRING) {
+    return query;
+  }
+
+  return aql.literal(query);
 }
 
 export function updateDocumentsByKeyValue(collection: string, identifier: KeyValue, data: any): AqlLiteral {
@@ -404,12 +404,12 @@ export function uniqueConstraintQuery(
 
   if (queryType === QueryType.STRING) {
     return query;
-  } else {
-    return {
-      query,
-      bindVars: params,
-    };
   }
+
+  return {
+    query,
+    bindVars: params,
+  };
 }
 
 export const Queries = {
