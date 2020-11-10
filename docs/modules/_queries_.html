@@ -73,10 +73,12 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_queries_.html#deletedocumentbykeyvalue" class="tsd-kind-icon">delete<wbr>Document<wbr>ByKey<wbr>Value</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_queries_.html#fetchdocumentbykeyvalue" class="tsd-kind-icon">fetch<wbr>Document<wbr>ByKey<wbr>Value</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_queries_.html#deletedocumentsbykeyvalue" class="tsd-kind-icon">delete<wbr>Documents<wbr>ByKey<wbr>Value</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_queries_.html#fetchbycompositevalue" class="tsd-kind-icon">fetch<wbr>ByComposite<wbr>Value</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_queries_.html#fetchbykeyvalue" class="tsd-kind-icon">fetch<wbr>ByKey<wbr>Value</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_queries_.html#findbyfiltercriteria" class="tsd-kind-icon">find<wbr>ByFilter<wbr>Criteria</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_queries_.html#uniqueconstraintquery" class="tsd-kind-icon">unique<wbr>Constraint<wbr>Query</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_queries_.html#updatedocumentbykeyvalue" class="tsd-kind-icon">update<wbr>Document<wbr>ByKey<wbr>Value</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_queries_.html#updatedocumentsbykeyvalue" class="tsd-kind-icon">update<wbr>Documents<wbr>ByKey<wbr>Value</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -91,16 +93,16 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-					<a name="deletedocumentbykeyvalue" class="tsd-anchor"></a>
-					<h3>delete<wbr>Document<wbr>ByKey<wbr>Value</h3>
+					<a name="deletedocumentsbykeyvalue" class="tsd-anchor"></a>
+					<h3>delete<wbr>Documents<wbr>ByKey<wbr>Value</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">delete<wbr>Document<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, identifier<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AqlQuery</span></li>
+						<li class="tsd-signature tsd-kind-icon">delete<wbr>Documents<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, identifier<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AqlLiteral</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/53aa2c9/src/queries.ts#L88">src/queries.ts:88</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L325">src/queries.ts:325</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -112,21 +114,53 @@
 									<h5>identifier: <a href="../interfaces/_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AqlQuery</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AqlLiteral</span></h4>
 						</li>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-					<a name="fetchdocumentbykeyvalue" class="tsd-anchor"></a>
-					<h3>fetch<wbr>Document<wbr>ByKey<wbr>Value</h3>
+					<a name="fetchbycompositevalue" class="tsd-anchor"></a>
+					<h3>fetch<wbr>ByComposite<wbr>Value</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">fetch<wbr>Document<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, identifier<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a><span class="tsd-signature-symbol">[]</span>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_types_.sortoptions.html" class="tsd-signature-type">SortOptions</a>, queryType<span class="tsd-signature-symbol">?: </span><a href="../enums/_types_.querytype.html" class="tsd-signature-type">QueryType</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AqlQuery</span></li>
+						<li class="tsd-signature tsd-kind-icon">fetch<wbr>ByComposite<wbr>Value<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, identifier<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a><span class="tsd-signature-symbol">[]</span>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_types_.sortoptions.html" class="tsd-signature-type">SortOptions</a>, queryType<span class="tsd-signature-symbol">?: </span><a href="../enums/_types_.querytype.html" class="tsd-signature-type">QueryType</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AqlQuery</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/53aa2c9/src/queries.ts#L5">src/queries.ts:5</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L212">src/queries.ts:212</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>collection: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>identifier: <a href="../interfaces/_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a><span class="tsd-signature-symbol">[]</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <a href="../interfaces/_types_.sortoptions.html" class="tsd-signature-type">SortOptions</a><span class="tsd-signature-symbol"> = {}</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> queryType: <a href="../enums/_types_.querytype.html" class="tsd-signature-type">QueryType</a><span class="tsd-signature-symbol"> = QueryType.AQL</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AqlQuery</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="fetchbykeyvalue" class="tsd-anchor"></a>
+					<h3>fetch<wbr>ByKey<wbr>Value</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">fetch<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, identifier<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a><span class="tsd-signature-symbol">[]</span>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_types_.sortoptions.html" class="tsd-signature-type">SortOptions</a>, queryType<span class="tsd-signature-symbol">?: </span><a href="../enums/_types_.querytype.html" class="tsd-signature-type">QueryType</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AqlQuery</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L203">src/queries.ts:203</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -144,7 +178,36 @@
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> queryType: <a href="../enums/_types_.querytype.html" class="tsd-signature-type">QueryType</a><span class="tsd-signature-symbol"> = QueryType.AQL</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AqlQuery</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AqlQuery</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="findbyfiltercriteria" class="tsd-anchor"></a>
+					<h3>find<wbr>ByFilter<wbr>Criteria</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">find<wbr>ByFilter<wbr>Criteria<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, filter<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_.listoffilters.html" class="tsd-signature-type">ListOfFilters</a>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AqlLiteral</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L221">src/queries.ts:221</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>collection: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>filter: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/_types_.listoffilters.html" class="tsd-signature-type">ListOfFilters</a></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> = {}</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AqlLiteral</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -158,7 +221,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/53aa2c9/src/queries.ts#L92">src/queries.ts:92</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L331">src/queries.ts:331</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -175,16 +238,16 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-					<a name="updatedocumentbykeyvalue" class="tsd-anchor"></a>
-					<h3>update<wbr>Document<wbr>ByKey<wbr>Value</h3>
+					<a name="updatedocumentsbykeyvalue" class="tsd-anchor"></a>
+					<h3>update<wbr>Documents<wbr>ByKey<wbr>Value</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">update<wbr>Document<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, identifier<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a>, data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AqlQuery</span></li>
+						<li class="tsd-signature tsd-kind-icon">update<wbr>Documents<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, identifier<span class="tsd-signature-symbol">: </span><a href="../interfaces/_types_.keyvalue.html" class="tsd-signature-type">KeyValue</a>, data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AqlLiteral</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/53aa2c9/src/queries.ts#L82">src/queries.ts:82</a></li>
+									<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L317">src/queries.ts:317</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -199,7 +262,7 @@
 									<h5>data: <span class="tsd-signature-type">any</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AqlQuery</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AqlLiteral</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -212,26 +275,46 @@
 					<div class="tsd-signature tsd-kind-icon">Queries<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/53aa2c9/src/queries.ts#L176">src/queries.ts:176</a></li>
+							<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L415">src/queries.ts:415</a></li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="queries.deletedocumentbykeyvalue-1" class="tsd-anchor"></a>
-						<h3>delete<wbr>Document<wbr>ByKey<wbr>Value</h3>
-						<div class="tsd-signature tsd-kind-icon">delete<wbr>Document<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">:</span> <a href="_queries_.html#deletedocumentbykeyvalue" class="tsd-signature-type">deleteDocumentByKeyValue</a></div>
+						<a name="queries.deletedocumentsbykeyvalue-1" class="tsd-anchor"></a>
+						<h3>delete<wbr>Documents<wbr>ByKey<wbr>Value</h3>
+						<div class="tsd-signature tsd-kind-icon">delete<wbr>Documents<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">:</span> <a href="_queries_.html#deletedocumentsbykeyvalue" class="tsd-signature-type">deleteDocumentsByKeyValue</a></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/53aa2c9/src/queries.ts#L179">src/queries.ts:179</a></li>
+								<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L420">src/queries.ts:420</a></li>
 							</ul>
 						</aside>
 					</section>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="queries.fetchdocumentbykeyvalue-1" class="tsd-anchor"></a>
-						<h3>fetch<wbr>Document<wbr>ByKey<wbr>Value</h3>
-						<div class="tsd-signature tsd-kind-icon">fetch<wbr>Document<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">:</span> <a href="_queries_.html#fetchdocumentbykeyvalue" class="tsd-signature-type">fetchDocumentByKeyValue</a></div>
+						<a name="queries.fetchbycompositevalue-1" class="tsd-anchor"></a>
+						<h3>fetch<wbr>ByComposite<wbr>Value</h3>
+						<div class="tsd-signature tsd-kind-icon">fetch<wbr>ByComposite<wbr>Value<span class="tsd-signature-symbol">:</span> <a href="_queries_.html#fetchbycompositevalue" class="tsd-signature-type">fetchByCompositeValue</a></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/53aa2c9/src/queries.ts#L177">src/queries.ts:177</a></li>
+								<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L417">src/queries.ts:417</a></li>
+							</ul>
+						</aside>
+					</section>
+					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
+						<a name="queries.fetchbykeyvalue-1" class="tsd-anchor"></a>
+						<h3>fetch<wbr>ByKey<wbr>Value</h3>
+						<div class="tsd-signature tsd-kind-icon">fetch<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">:</span> <a href="_queries_.html#fetchbykeyvalue" class="tsd-signature-type">fetchByKeyValue</a></div>
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L416">src/queries.ts:416</a></li>
+							</ul>
+						</aside>
+					</section>
+					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
+						<a name="queries.findbyfiltercriteria-1" class="tsd-anchor"></a>
+						<h3>find<wbr>ByFilter<wbr>Criteria</h3>
+						<div class="tsd-signature tsd-kind-icon">find<wbr>ByFilter<wbr>Criteria<span class="tsd-signature-symbol">:</span> <a href="_queries_.html#findbyfiltercriteria" class="tsd-signature-type">findByFilterCriteria</a></div>
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L418">src/queries.ts:418</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -241,17 +324,17 @@
 						<div class="tsd-signature tsd-kind-icon">unique<wbr>Constraint<wbr>Query<span class="tsd-signature-symbol">:</span> <a href="_queries_.html#uniqueconstraintquery" class="tsd-signature-type">uniqueConstraintQuery</a></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/53aa2c9/src/queries.ts#L180">src/queries.ts:180</a></li>
+								<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L421">src/queries.ts:421</a></li>
 							</ul>
 						</aside>
 					</section>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="queries.updatedocumentbykeyvalue-1" class="tsd-anchor"></a>
-						<h3>update<wbr>Document<wbr>ByKey<wbr>Value</h3>
-						<div class="tsd-signature tsd-kind-icon">update<wbr>Document<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">:</span> <a href="_queries_.html#updatedocumentbykeyvalue" class="tsd-signature-type">updateDocumentByKeyValue</a></div>
+						<a name="queries.updatedocumentsbykeyvalue-1" class="tsd-anchor"></a>
+						<h3>update<wbr>Documents<wbr>ByKey<wbr>Value</h3>
+						<div class="tsd-signature tsd-kind-icon">update<wbr>Documents<wbr>ByKey<wbr>Value<span class="tsd-signature-symbol">:</span> <a href="_queries_.html#updatedocumentsbykeyvalue" class="tsd-signature-type">updateDocumentsByKeyValue</a></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/53aa2c9/src/queries.ts#L178">src/queries.ts:178</a></li>
+								<li>Defined in <a href="https://github.com/distributhor/arango-bsd/blob/3d1d27a/src/queries.ts#L419">src/queries.ts:419</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -278,16 +361,22 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="_queries_.html#deletedocumentbykeyvalue" class="tsd-kind-icon">delete<wbr>Document<wbr>ByKey<wbr>Value</a>
+						<a href="_queries_.html#deletedocumentsbykeyvalue" class="tsd-kind-icon">delete<wbr>Documents<wbr>ByKey<wbr>Value</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="_queries_.html#fetchdocumentbykeyvalue" class="tsd-kind-icon">fetch<wbr>Document<wbr>ByKey<wbr>Value</a>
+						<a href="_queries_.html#fetchbycompositevalue" class="tsd-kind-icon">fetch<wbr>ByComposite<wbr>Value</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_queries_.html#fetchbykeyvalue" class="tsd-kind-icon">fetch<wbr>ByKey<wbr>Value</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_queries_.html#findbyfiltercriteria" class="tsd-kind-icon">find<wbr>ByFilter<wbr>Criteria</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_queries_.html#uniqueconstraintquery" class="tsd-kind-icon">unique<wbr>Constraint<wbr>Query</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="_queries_.html#updatedocumentbykeyvalue" class="tsd-kind-icon">update<wbr>Document<wbr>ByKey<wbr>Value</a>
+						<a href="_queries_.html#updatedocumentsbykeyvalue" class="tsd-kind-icon">update<wbr>Documents<wbr>ByKey<wbr>Value</a>
 					</li>
 					<li class=" tsd-kind-object-literal tsd-parent-kind-module">
 						<a href="_queries_.html#queries" class="tsd-kind-icon">Queries</a>

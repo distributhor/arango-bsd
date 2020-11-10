@@ -7,11 +7,10 @@ import {
   QueryType,
   KeyValue,
   SortOptions,
-  LogicalOperatorSign,
-  LogicalOperator,
   IndexValue,
   ListOfFilters,
   MatchTypeOperator,
+  MatchType,
 } from "./index";
 
 /** @internal */
@@ -58,33 +57,30 @@ export function _findAllIndicesOfSubString(
 }
 
 /** @internal */
-export function _replacePropertNameTokens(filterString: string): string {
-  if (filterString.indexOf("(") > -1) {
-    const tmp = filterString.replace(/\(\s*/, "(d.");
+export function _prefixPropertNameInFilterToken(filterStringToken: string): string {
+  if (filterStringToken.indexOf("(") > -1) {
+    const tmp = filterStringToken.replace(/\(\s*/, "(d.");
     return tmp.replace(/\s*\)/g, ")");
   }
 
-  if (filterString.indexOf(")") > -1) {
-    return "d." + filterString.replace(/\s*\)/, ")");
+  if (filterStringToken.indexOf(")") > -1) {
+    return "d." + filterStringToken.replace(/\s*\)/, ")");
   }
 
-  return "d." + filterString;
+  return "d." + filterStringToken;
 }
 
 /** @internal */
 export function _prefixPropertyNames(filterString: string): string {
+  // split filter string into tokens, delimited by logical operators,
+  // so that the lefthand operands (the variables) can be prefixed with d.
+  // const validLogicalOperators = ["||", "&&", "AND", "OR"];
   const validLogicalOperators = ["||", "&&"];
-  // const validComparisonOperators = ["==", "!="];
 
   const logicalOperatorIndices = _findAllIndicesOfSubString(validLogicalOperators, filterString);
 
   if (logicalOperatorIndices.length === 0) {
-    // const idx = _findAllIndicesOfSubString(validComparisonOperators, filterString);
-    // console.log(idx[0]);
-    // const leftOperand = filterString.substring(0, idx[0].index);
-    // const rightOperand = filterString.substring(idx[0].index + idx[0].value.length);
-    // console.log(`${leftOperand}  ${idx[0].value}  ${rightOperand}`);
-    return _replacePropertNameTokens(filterString);
+    return _prefixPropertNameInFilterToken(filterString);
   }
 
   let modifiedFilter = "";
@@ -107,7 +103,7 @@ export function _prefixPropertyNames(filterString: string): string {
       stringIndex = logicalOperatorIndices[i].index + logicalOperatorIndices[i].value.length;
     }
 
-    modifiedFilter += _replacePropertNameTokens(partialFilterString);
+    modifiedFilter += _prefixPropertNameInFilterToken(partialFilterString);
 
     if (logicalOperator) {
       modifiedFilter += " " + logicalOperator + " ";
@@ -123,7 +119,7 @@ function _fetchByKeyValue(
   identifier: KeyValue | KeyValue[],
   options: SortOptions,
   queryType: QueryType,
-  keyValueCombinator: LogicalOperator
+  keyValueMatchType: MatchType
 ): string | AqlQuery {
   const params: any = {};
   let query = `FOR d IN ${collection} FILTER`;
@@ -137,7 +133,7 @@ function _fetchByKeyValue(
       keyCount++;
 
       if (keyCount > 1) {
-        query += ` ${LogicalOperatorSign[keyValueCombinator]}`;
+        query += ` ${MatchTypeOperator[keyValueMatchType]}`;
       }
 
       if (queryType === QueryType.STRING) {
@@ -210,16 +206,16 @@ export function fetchByKeyValue(
   options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
-  return _fetchByKeyValue(collection, identifier, options, queryType, LogicalOperator.OR);
+  return _fetchByKeyValue(collection, identifier, options, queryType, MatchType.ANY);
 }
 
-export function fetchByCompositeKeyValue(
+export function fetchByCompositeValue(
   collection: string,
   identifier: KeyValue[],
   options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
-  return _fetchByKeyValue(collection, identifier, options, queryType, LogicalOperator.AND);
+  return _fetchByKeyValue(collection, identifier, options, queryType, MatchType.ALL);
 }
 
 export function findByFilterCriteria(
@@ -250,7 +246,7 @@ export function findByFilterCriteria(
           query += " " + MatchTypeOperator[filter.match] + " ";
         }
         if (options.prefixPropertyNames) {
-          query += _replacePropertNameTokens(filter.filters[i]);
+          query += _prefixPropertNameInFilterToken(filter.filters[i]);
         } else {
           query += filter.filters[i];
         }
@@ -417,8 +413,9 @@ export function uniqueConstraintQuery(
 }
 
 export const Queries = {
-  fetchByCompositeKeyValue,
   fetchByKeyValue,
+  fetchByCompositeValue,
+  findByFilterCriteria,
   updateDocumentsByKeyValue,
   deleteDocumentsByKeyValue,
   uniqueConstraintQuery,

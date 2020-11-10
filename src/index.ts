@@ -21,8 +21,11 @@ import {
   FetchOptions,
   QueryReturnType,
   FetchOneOptions,
+  QueryResult,
+  KeyValue,
 } from "./types";
 import { Queries } from "./queries";
+import { ArrayCursor } from "arangojs/cursor";
 
 export * from "./types";
 
@@ -233,7 +236,7 @@ export class ArangoDB {
     property: string,
     value: string,
     options: FetchOptions = {}
-  ): Promise<any> {
+  ): Promise<ArrayCursor | QueryResult> {
     const result = await this.driver.query(
       Queries.fetchByKeyValue(collection, { key: property, value }, options.sortOptions) as AqlQuery,
       options.queryOptions
@@ -255,7 +258,9 @@ export class ArangoDB {
       });
     }
 
-    return documents;
+    return {
+      data: documents,
+    };
   }
 
   public async fetchOneByPropertyValue(
@@ -282,12 +287,66 @@ export class ArangoDB {
     return document;
   }
 
+  public async fetchAllByCompositeValue(
+    collection: string,
+    identifier: KeyValue[],
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor | QueryResult> {
+    const result = await this.driver.query(
+      Queries.fetchByCompositeValue(collection, identifier, options.sortOptions) as AqlQuery,
+      options.queryOptions
+    );
+
+    if (options.return && options.return === QueryReturnType.CURSOR) {
+      return result;
+    }
+
+    const documents = await result.all();
+
+    if (options.stripUnderscoreProps) {
+      documents.map((d) => {
+        stripUnderscoreProps(d, ["_key"]);
+      });
+    } else if (options.stripInternalProps) {
+      documents.map((d) => {
+        stripProps(d, ["_id", "_rev"]);
+      });
+    }
+
+    return {
+      data: documents,
+    };
+  }
+
+  public async fetchOneByCompositeValue(
+    collection: string,
+    identifier: KeyValue[],
+    options: FetchOneOptions = {}
+  ): Promise<any> {
+    const document = await this.queryOne(
+      Queries.fetchByCompositeValue(collection, identifier) as AqlQuery,
+      options.queryOptions
+    );
+
+    if (!document) {
+      return document;
+    }
+
+    if (options.stripUnderscoreProps) {
+      stripUnderscoreProps(document, ["_key"]);
+    } else if (options.stripInternalProps) {
+      stripProps(document, ["_id", "_rev"]);
+    }
+
+    return document;
+  }
+
   public async findByFilterCriteria(
     collection: string,
     filters: string[],
     filterCombinator: string,
     options: any
-  ): Promise<any> {
+  ): Promise<QueryResult> {
     return undefined;
   }
 

@@ -2,7 +2,7 @@ import * as path from "path";
 import * as dotenv from "dotenv";
 import { ArrayCursor } from "arangojs/cursor";
 import { ArangoDB } from "../../src/index";
-import { DBStructure, QueryReturnType } from "../../src/types";
+import { DBStructure, QueryResult, QueryReturnType } from "../../src/types";
 
 import cyclists from "./cyclists.json";
 import teams from "./teams.json";
@@ -491,10 +491,12 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(result4A[0]._rev).toBeDefined();
     expect(result4A[0]._oldRev).toBeDefined();
 
-    const result4B = await arango.db(testDB1).fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial");
+    const result4B = (await arango
+      .db(testDB1)
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial")) as QueryResult;
 
-    expect(result4B.length).toEqual(3);
-    expect(result4B[0].rating.timetrial).toEqual(9);
+    expect(result4B.data.length).toEqual(3);
+    expect(result4B.data[0].rating.timetrial).toEqual(9);
 
     const result5A = await arango.db(testDB1).delete(CONST.userCollection, "Break Aways", { identifier: "speciality" });
 
@@ -502,11 +504,11 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(Array.isArray(result5A)).toBeTruthy();
     expect(result5A.length).toEqual(1);
 
-    const result5B = await arango
+    const result5B = (await arango
       .db(testDB1)
-      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Break Aways");
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Break Aways")) as QueryResult;
 
-    expect(result5B.length).toEqual(0);
+    expect(result5B.data.length).toEqual(0);
   });
 
   test("queryAll, queryOne, fetch and fetchOne", async () => {
@@ -517,40 +519,48 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(result1A.length).toEqual(3);
     expect(result1A[0].surname).toBeDefined();
 
-    const result1B = await arango.db(testDB1).fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial");
-
-    expect(result1B.length).toEqual(3);
-    expect(result1B[0].name).toBeDefined();
-    expect(result1B[0].surname).toBeDefined();
-    expect(result1B[0]._key).toBeDefined();
-    expect(result1B[0]._id).toBeDefined();
-    expect(result1B[0]._rev).toBeDefined();
-
-    const result1C = await arango
+    const result1B = (await arango
       .db(testDB1)
-      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial", { stripUnderscoreProps: true });
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial")) as QueryResult;
 
-    expect(result1C.length).toEqual(3);
-    expect(result1C[0].name).toBeDefined();
-    expect(result1C[0].surname).toBeDefined();
-    expect(result1C[0]._key).toBeDefined();
-    expect(result1C[0]._id).toBeUndefined();
-    expect(result1C[0]._rev).toBeUndefined();
+    expect(result1B.data.length).toEqual(3);
+    expect(result1B.data[0].name).toBeDefined();
+    expect(result1B.data[0].surname).toBeDefined();
+    expect(result1B.data[0]._key).toBeDefined();
+    expect(result1B.data[0]._id).toBeDefined();
+    expect(result1B.data[0]._rev).toBeDefined();
 
-    const result1D = await arango
+    const result1C = (await arango
       .db(testDB1)
-      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial", { stripInternalProps: true });
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial", {
+        stripUnderscoreProps: true,
+      })) as QueryResult;
 
-    expect(result1D.length).toEqual(3);
-    expect(result1D[0].name).toBeDefined();
-    expect(result1D[0].surname).toBeDefined();
-    expect(result1D[0]._key).toBeDefined();
-    expect(result1D[0]._id).toBeUndefined();
-    expect(result1D[0]._rev).toBeUndefined();
+    expect(result1C.data.length).toEqual(3);
+    expect(result1C.data[0].name).toBeDefined();
+    expect(result1C.data[0].surname).toBeDefined();
+    expect(result1C.data[0]._key).toBeDefined();
+    expect(result1C.data[0]._id).toBeUndefined();
+    expect(result1C.data[0]._rev).toBeUndefined();
 
-    const result1E = await arango
+    const result1D = (await arango
       .db(testDB1)
-      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial", { return: QueryReturnType.CURSOR });
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial", {
+        stripInternalProps: true,
+      })) as QueryResult;
+
+    expect(result1D.data.length).toEqual(3);
+    expect(result1D.data[0].name).toBeDefined();
+    expect(result1D.data[0].surname).toBeDefined();
+    expect(result1D.data[0]._key).toBeDefined();
+    expect(result1D.data[0]._id).toBeUndefined();
+    expect(result1D.data[0]._rev).toBeUndefined();
+
+    const result1E = (await arango
+      .db(testDB1)
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Time Trial", {
+        return: QueryReturnType.CURSOR,
+      })) as ArrayCursor;
 
     expect(result1E instanceof ArrayCursor).toBeTruthy();
     const allDocs = await result1E.all();
@@ -564,13 +574,13 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(Array.isArray(result2A)).toBeTruthy();
     expect(result2A.length).toEqual(0);
 
-    const result2B = await arango
+    const result2B = (await arango
       .db(testDB1)
-      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Trail Running");
+      .fetchAllByPropertyValue(CONST.userCollection, "speciality", "Trail Running")) as QueryResult;
 
-    expect(result2B).toBeDefined();
-    expect(Array.isArray(result2B)).toBeTruthy();
-    expect(result2B.length).toEqual(0);
+    expect(result2B.data).toBeDefined();
+    expect(Array.isArray(result2B.data)).toBeTruthy();
+    expect(result2B.data.length).toEqual(0);
 
     const result3A = await arango
       .db(testDB1)
@@ -636,6 +646,43 @@ describe("Arango Backseat Driver Integration Tests", () => {
     expect(result5D._key).toBeDefined();
     expect(result5D._id).toBeUndefined();
     expect(result5D._rev).toBeUndefined();
+
+    const result6A = (await arango.db(testDB1).fetchAllByCompositeValue(CONST.userCollection, [
+      { key: "country", value: "Belgium" },
+      { key: "speciality", value: "Classics" },
+    ])) as QueryResult;
+
+    expect(result6A.data.length).toEqual(2);
+    expect(result6A.data[0].name === "Wout" || result6A.data[0].name === "Tim").toBeTruthy();
+    expect(result6A.data[1].surname === "van Aert" || result6A.data[1].surname === "Wellens").toBeTruthy();
+
+    const result6B = (await arango.db(testDB1).fetchAllByCompositeValue(CONST.userCollection, [
+      { key: "country", value: "UK" },
+      { key: "speciality", value: "Classics" },
+    ])) as QueryResult;
+
+    expect(result6B.data.length).toEqual(0);
+
+    const result7A = await arango.db(testDB1).fetchOneByCompositeValue(CONST.userCollection, [
+      { key: "country", value: "Belgium" },
+      { key: "speciality", value: "Classics" },
+    ]);
+
+    expect(result7A.surname === "van Aert" || result7A.surname === "Wellens").toBeTruthy();
+
+    const result7B = await arango.db(testDB1).fetchOneByCompositeValue(CONST.userCollection, [
+      { key: "name", value: "Jan" },
+      { key: "surname", value: "Ullrich" },
+    ]);
+
+    expect(result7B.surname).toEqual("Ullrich");
+
+    const result7C = await arango.db(testDB1).fetchOneByCompositeValue(CONST.userCollection, [
+      { key: "name", value: "Jan" },
+      { key: "surname", value: "Armstrong" },
+    ]);
+
+    expect(result7C).toBeUndefined();
   });
 
   /* */

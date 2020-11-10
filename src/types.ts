@@ -51,46 +51,9 @@ export enum QueryReturnType {
   CURSOR = "cursor",
 }
 
-export enum NegationOperator {
-  NOT = "NOT",
+export interface QueryResult {
+  data: any;
 }
-
-export enum LogicalOperator {
-  AND = "AND",
-  OR = "OR",
-}
-
-export const LogicalOperatorSign = {
-  AND: "&&",
-  OR: "||",
-  and: "&&",
-  or: "||",
-};
-
-export enum ComparisonOperator {
-  EQUAL = "EQUAL",
-  NOT_EQUAL = "NOT_EQUAL",
-  LESS = "LESS",
-  GREATER = "GREATER",
-  LESS_OR_EQUAL = "LESS_OR_EQUAL",
-  GREATER_OR_EQUAL = "GREATER_OR_EQUAL",
-  IN = "IN",
-  NOT_IN = "NOT_IN",
-  LIKE = "LIKE",
-  NOT_LIKE = "NOT_LIKE",
-  REGEX = "REGEX",
-  NOT_REGEX = "NOT_REGEX",
-  EMPTY = "EMPTY",
-  NOT_EMPTY = "NOT_EMPTY",
-}
-
-export const ComparisonOperatorSign = {
-  EQUAL: "==",
-  NOT_EQUAL: "!=",
-  EMPTY: "EMPTY",
-  NOT_EMPTY: "NOT_EMPTY",
-  LIKE: "LIKE",
-};
 
 export enum MatchType {
   ANY = "ANY",
@@ -98,8 +61,8 @@ export enum MatchType {
 }
 
 export enum MatchTypeOperator {
-  ANY = LogicalOperator.OR,
-  ALL = LogicalOperator.AND,
+  ANY = "||",
+  ALL = "&&",
 }
 
 export interface ListOfFilters {
@@ -220,3 +183,46 @@ export function isUniqueValue(x: any): x is UniqueValue {
 export function isCompositeKey(x: any): x is CompositeKey {
   return x.composite;
 }
+
+/*
+export enum NegationOperator {
+  NOT = "NOT",
+}
+
+export enum LogicalOperator {
+  AND = "AND",
+  OR = "OR",
+}
+
+export const LogicalOperatorSign = {
+  AND: "&&",
+  OR: "||",
+  and: "&&",
+  or: "||",
+};
+
+export enum ComparisonOperator {
+  EQUAL = "EQUAL",
+  NOT_EQUAL = "NOT_EQUAL",
+  LESS = "LESS",
+  GREATER = "GREATER",
+  LESS_OR_EQUAL = "LESS_OR_EQUAL",
+  GREATER_OR_EQUAL = "GREATER_OR_EQUAL",
+  IN = "IN",
+  NOT_IN = "NOT_IN",
+  LIKE = "LIKE",
+  NOT_LIKE = "NOT_LIKE",
+  REGEX = "REGEX",
+  NOT_REGEX = "NOT_REGEX",
+  EMPTY = "EMPTY",
+  NOT_EMPTY = "NOT_EMPTY",
+}
+
+export const ComparisonOperatorSign = {
+  EQUAL: "==",
+  NOT_EQUAL: "!=",
+  EMPTY: "EMPTY",
+  NOT_EMPTY: "NOT_EMPTY",
+  LIKE: "LIKE",
+};
+*/
