@@ -1,13 +1,13 @@
 //
-// Run with: ts-node test/scripts/ts/test.ts
+// Run with: ts-node test/scripts/play.ts
 //
 
-import * as path from "path";
-import * as dotenv from "dotenv";
+import * as path from 'path'
+import * as dotenv from 'dotenv'
 // import { GeneratedAqlQuery } from "arangojs/aql";
-import { ArangoDB } from "../../../src/index";
+import { ArangoDB } from '../../src/index'
 
-dotenv.config({ path: path.join(__dirname, "../../integration/.env") });
+dotenv.config({ path: path.join(__dirname, '../../integration/.env') })
 
 // const fetchUserByName = (name: string): GeneratedAqlQuery => {
 //   return aql`
@@ -15,12 +15,12 @@ dotenv.config({ path: path.join(__dirname, "../../integration/.env") });
 //   `;
 // };
 
-(async function () {
+void (async function () {
   try {
     const db = new ArangoDB({
       databaseName: process.env.ARANGO_TEST_DB1_NAME,
-      url: process.env.ARANGO_TEST_DB_URI,
-    });
+      url: process.env.ARANGO_TEST_DB_URI
+    })
 
     // const johnByQuery = await db.queryOne(fetchUserByName("John"));
     // const johnByKey = await db.driver.collection("user").document(johnByQuery._key);
@@ -36,18 +36,18 @@ dotenv.config({ path: path.join(__dirname, "../../integration/.env") });
     // console.log(query);
 
     const result1 = await db.uniqueConstraintValidation({
-      collection: "users",
-      constraints: [{ unique: { key: "username", value: "chiefdoper" } }],
-    });
+      collection: 'users',
+      constraints: [{ unique: { property: 'username', value: 'chiefdoper' } }]
+    })
 
-    console.log(result1);
+    console.log(result1)
 
     const result2 = await db.uniqueConstraintValidation({
-      collection: "users",
-      constraints: [{ unique: { key: "username", value: "thetrain" } }],
-    });
+      collection: 'users',
+      constraints: [{ unique: { property: 'username', value: 'thetrain' } }]
+    })
 
-    console.log(result2);
+    console.log(result2)
 
     // const result3 = await db.uniqueConstraintValidation({
     //   collection: "users",
@@ -63,6 +63,6 @@ dotenv.config({ path: path.join(__dirname, "../../integration/.env") });
 
     // console.log(result4);
   } catch (err) {
-    console.log(err.response.body);
+    console.log(err.response.body)
   }
-})();
+})()
