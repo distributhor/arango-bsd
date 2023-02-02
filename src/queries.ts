@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { aql, AqlLiteral, AqlQuery } from "arangojs/aql";
+import { literal, AqlLiteral, AqlQuery } from 'arangojs/aql'
 import {
   UniqueConstraint,
   isCompositeKey,
@@ -11,13 +11,12 @@ import {
   ListOfFilters,
   MatchTypeOperator,
   MatchType,
-  FetchOptions,
-  FilterOptions,
-} from "./index";
+  FilterOptions
+} from './index'
 
 /** @internal */
 export function isListOfFilters(x: any): x is ListOfFilters {
-  return x.filters;
+  return x.filters
 }
 
 /** @internal */
@@ -27,49 +26,49 @@ export function _findAllIndicesOfSubString(
   caseInSensitive = true
 ): IndexValue[] {
   if (Array.isArray(subString)) {
-    let indices: IndexValue[] = [];
+    let indices: IndexValue[] = []
 
     for (const s of subString) {
-      indices = indices.concat(_findAllIndicesOfSubString(s, targetString, caseInSensitive));
+      indices = indices.concat(_findAllIndicesOfSubString(s, targetString, caseInSensitive))
     }
 
     return indices.sort(function (a: any, b: any) {
-      return a.index > b.index ? 1 : -1;
-    });
+      return a.index > b.index ? 1 : -1
+    })
   }
 
-  if (targetString.length == 0) {
-    return [];
+  if (targetString.length === 0) {
+    return []
   }
 
   if (caseInSensitive) {
-    targetString = targetString.toLowerCase();
-    subString = subString.toLowerCase();
+    targetString = targetString.toLowerCase()
+    subString = subString.toLowerCase()
   }
 
-  const indices: IndexValue[] = [];
+  const indices: IndexValue[] = []
 
-  let index = targetString.indexOf(subString);
-  while (index != -1) {
-    indices.push({ index, value: subString });
-    index = targetString.indexOf(subString, index + 1);
+  let index = targetString.indexOf(subString)
+  while (index !== -1) {
+    indices.push({ index, value: subString })
+    index = targetString.indexOf(subString, index + 1)
   }
 
-  return indices;
+  return indices
 }
 
 /** @internal */
 export function _prefixPropertNameInFilterToken(filterStringToken: string): string {
-  if (filterStringToken.indexOf("(") > -1) {
-    const tmp = filterStringToken.replace(/\(\s*/, "(d.");
-    return tmp.replace(/\s*\)/g, ")");
+  if (filterStringToken.includes('(')) {
+    const tmp = filterStringToken.replace(/\(\s*/, '(d.')
+    return tmp.replace(/\s*\)/g, ')')
   }
 
-  if (filterStringToken.indexOf(")") > -1) {
-    return "d." + filterStringToken.replace(/\s*\)/, ")");
+  if (filterStringToken.includes(')')) {
+    return 'd.' + filterStringToken.replace(/\s*\)/, ')')
   }
 
-  return "d." + filterStringToken;
+  return 'd.' + filterStringToken
 }
 
 /** @internal */
@@ -77,42 +76,42 @@ export function _prefixPropertyNames(filterString: string): string {
   // split filter string into tokens, delimited by logical operators,
   // so that the lefthand operands (the variables) can be prefixed with d.
   // const validLogicalOperators = ["||", "&&", "AND", "OR"];
-  const validLogicalOperators = ["||", "&&"];
+  const validLogicalOperators = ['||', '&&']
 
-  const logicalOperatorIndices = _findAllIndicesOfSubString(validLogicalOperators, filterString);
+  const logicalOperatorIndices = _findAllIndicesOfSubString(validLogicalOperators, filterString)
 
   if (logicalOperatorIndices.length === 0) {
-    return _prefixPropertNameInFilterToken(filterString);
+    return _prefixPropertNameInFilterToken(filterString)
   }
 
-  let modifiedFilter = "";
-  let stringIndex = 0;
+  let modifiedFilter: string = ''
+  let stringIndex = 0
 
   for (let i = 0; i <= logicalOperatorIndices.length; i++) {
     // The <= is intentional. We need to add one iteration beyond the number of operators,
     // so that the last filter expression can be included in the string build
-    let partialFilterString = undefined;
-    let logicalOperator = undefined;
+    let partialFilterString: string
+    let logicalOperator: string | undefined
 
     if (i === logicalOperatorIndices.length) {
-      partialFilterString = filterString.substring(stringIndex).trim();
+      partialFilterString = filterString.substring(stringIndex).trim()
     } else {
-      partialFilterString = filterString.substring(stringIndex, logicalOperatorIndices[i].index).trim();
+      partialFilterString = filterString.substring(stringIndex, logicalOperatorIndices[i].index).trim()
       logicalOperator = filterString.substring(
         logicalOperatorIndices[i].index,
         logicalOperatorIndices[i].index + logicalOperatorIndices[i].value.length
-      );
-      stringIndex = logicalOperatorIndices[i].index + logicalOperatorIndices[i].value.length;
+      )
+      stringIndex = logicalOperatorIndices[i].index + logicalOperatorIndices[i].value.length
     }
 
-    modifiedFilter += _prefixPropertNameInFilterToken(partialFilterString);
+    modifiedFilter += _prefixPropertNameInFilterToken(partialFilterString)
 
     if (logicalOperator) {
-      modifiedFilter += " " + logicalOperator + " ";
+      modifiedFilter += ' ' + logicalOperator + ' '
     }
   }
 
-  return modifiedFilter;
+  return modifiedFilter
 }
 
 /** @internal */
@@ -123,61 +122,61 @@ function _fetchByKeyValue(
   queryType: QueryType,
   keyValueMatchType: MatchType
 ): string | AqlQuery {
-  const params: any = {};
-  let query = `FOR d IN ${collection} FILTER`;
+  const params: any = {}
+  let query = `FOR d IN ${collection} FILTER`
 
   if (Array.isArray(identifier)) {
-    let keyCount = 0;
+    let keyCount = 0
 
     // query += " (";
 
     for (const kv of identifier) {
-      keyCount++;
+      keyCount++
 
       if (keyCount > 1) {
-        query += ` ${MatchTypeOperator[keyValueMatchType]}`;
+        query += ` ${MatchTypeOperator[keyValueMatchType]}`
       }
 
       if (queryType === QueryType.STRING) {
-        if (typeof kv.value === "number") {
-          query += ` d.${kv.property} == ${kv.value}`;
+        if (typeof kv.value === 'number') {
+          query += ` d.${kv.property} == ${kv.value}`
         } else {
-          query += ` d.${kv.property} == "${kv.value}"`;
+          query += ` d.${kv.property} == "${kv.value}"`
         }
       } else {
-        const keyParam = `${kv.property}_key_${keyCount}`;
-        const valueParam = `${kv.property}_val_${keyCount}`;
+        const keyParam = `${kv.property}_key_${keyCount}`
+        const valueParam = `${kv.property}_val_${keyCount}`
 
-        params[keyParam] = kv.property;
-        params[valueParam] = kv.value;
+        params[keyParam] = kv.property
+        params[valueParam] = kv.value
 
-        query += ` d.@${keyParam} == @${valueParam}`;
+        query += ` d.@${keyParam} == @${valueParam}`
       }
     }
 
     // query += " )";
   } else {
     if (queryType === QueryType.STRING) {
-      if (typeof identifier.value === "number") {
-        query += ` d.${identifier.property} == ${identifier.value}`;
+      if (typeof identifier.value === 'number') {
+        query += ` d.${identifier.property} == ${identifier.value}`
       } else {
-        query += ` d.${identifier.property} == "${identifier.value}"`;
+        query += ` d.${identifier.property} == "${identifier.value}"`
       }
     } else {
-      params["property"] = identifier.property;
-      params["value"] = identifier.value;
-      query += `  d.@property == @value`;
+      params.property = identifier.property
+      params.value = identifier.value
+      query += '  d.@property == @value'
     }
   }
 
-  if (options && options.hasOwnProperty("sortBy")) {
-    query += ` SORT d.${options.sortBy}`;
+  if (options?.hasOwnProperty('sortBy')) {
+    query += ` SORT d.${options.sortBy}`
 
-    if (options.hasOwnProperty("sortOrder")) {
-      if (options.sortOrder === "ascending") {
-        query += " ASC";
-      } else if (options.sortOrder === "descending") {
-        query += " DESC";
+    if (options.hasOwnProperty('sortOrder')) {
+      if (options.sortOrder === 'ascending') {
+        query += ' ASC'
+      } else if (options.sortOrder === 'descending') {
+        query += ' DESC'
       }
     }
   }
@@ -190,16 +189,16 @@ function _fetchByKeyValue(
   //   query += " RETURN d";
   // }
 
-  query += " RETURN d";
+  query += ' RETURN d'
 
   if (queryType === QueryType.STRING) {
-    return query;
+    return query
   }
 
   return {
     query,
-    bindVars: params,
-  };
+    bindVars: params
+  }
 }
 
 export function fetchByPropertyValue(
@@ -208,7 +207,7 @@ export function fetchByPropertyValue(
   options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
-  return _fetchByKeyValue(collection, identifier, options, queryType, MatchType.ANY);
+  return _fetchByKeyValue(collection, identifier, options, queryType, MatchType.ANY)
 }
 
 export function fetchByCompositeValue(
@@ -217,7 +216,7 @@ export function fetchByCompositeValue(
   options: SortOptions = {},
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
-  return _fetchByKeyValue(collection, identifier, options, queryType, MatchType.ALL);
+  return _fetchByKeyValue(collection, identifier, options, queryType, MatchType.ALL)
 }
 
 export function findByFilterCriteria(
@@ -230,33 +229,33 @@ export function findByFilterCriteria(
   //   queryOptions.returnDataFieldName = options.returnDataFieldName;
   // }
 
-  let query = "FOR d IN " + collection;
+  let query = 'FOR d IN ' + collection
 
-  if (options.hasOwnProperty("restrictTo")) {
-    query += " FILTER d." + options.restrictTo;
+  if (options.hasOwnProperty('restrictTo')) {
+    query += ` FILTER d. + ${options.restrictTo}`
   }
 
-  if (filter) {
+  if (filter?.match) {
     if (isListOfFilters(filter)) {
-      query += " FILTER ( ";
+      query += ' FILTER ( '
 
       for (let i = 0; i < filter.filters.length; i++) {
         if (i > 0) {
-          query += " " + MatchTypeOperator[filter.match] + " ";
+          query += ` ${MatchTypeOperator[filter.match]} `
         }
         if (options.prefixPropertyNames) {
-          query += _prefixPropertNameInFilterToken(filter.filters[i]);
+          query += _prefixPropertNameInFilterToken(filter.filters[i])
         } else {
-          query += filter.filters[i];
+          query += filter.filters[i]
         }
       }
 
-      query += " )";
+      query += ' )'
     } else {
       if (options.prefixPropertyNames) {
-        query += " FILTER ( " + _prefixPropertyNames(filter) + " )";
+        query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
       } else {
-        query += " FILTER ( " + filter + " )";
+        query += ' FILTER ( ' + filter + ' )'
       }
     }
   }
@@ -308,111 +307,143 @@ export function findByFilterCriteria(
     query += " RETURN d";
   }
   */
-  query += " RETURN d";
+  query += ' RETURN d'
 
   if (queryType === QueryType.STRING) {
-    return query;
+    return query
   }
 
-  return aql.literal(query);
+  return literal(query)
 }
 
 export function updateDocumentsByKeyValue(collection: string, identifier: PropertyValue, data: any): AqlLiteral {
-  return aql.literal(
+  return literal(
     `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
       data
     )} IN ${collection} RETURN { _key: NEW._key, _id: NEW._id, _rev: NEW._rev, _oldRev: OLD._rev }`
-  );
+  )
 }
 
 export function deleteDocumentsByKeyValue(collection: string, identifier: PropertyValue): AqlLiteral {
-  return aql.literal(
+  return literal(
     `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
-  );
+  )
 }
+
+/*
+if (graphDependencies && graphDependencies.length > 0) {
+  // query += ` LET group_users = (FOR v, e, p IN 1..1 ANY g GRAPH 'group_membership' RETURN { _key: e._key, edge: SPLIT( e._id, "/" )[0] })`;
+  // query += ` LET group_modules = (FOR v, e, p IN 1..1 ANY g GRAPH 'group_module_reg_graph' RETURN { _key: e._key, edge: SPLIT( e._id, "/" )[0] })`;
+  // query += " LET result1 = (FOR ref IN group_users REMOVE ref._key IN user_group)";
+  // query += " LET result2 = (FOR ref IN group_modules REMOVE ref._key IN group_module_reg)";
+  // query += ` RETURN { "${collection}": { _key: g._key }, "users": group_users, "modules": group_modules }`;
+
+  query += `FOR d IN ${collection} FILTER d._key == "${id}"`;
+  for (let link of graphDependencies) {
+      query += ` LET ${link.edge}_keys = (FOR v, e, p IN 1..1 ANY d GRAPH '${link.graph}' RETURN e._key)`;
+  }
+  for (let link of graphDependencies) {
+      query += ` LET ${link.edge}_del = (FOR key IN ${link.edge}_keys REMOVE key IN ${link.edge})`;
+  }
+  query += ` REMOVE d IN ${collection}`;
+  query += ` RETURN { "${collection}": { _key: d._key, _id: d._id, _rev: d._rev },`;
+  for (let i = 0; i < graphDependencies.length; i++) {
+      if (i === graphDependencies.length-1) {
+          query += ` "${graphDependencies[i].edge}": ${graphDependencies[i].edge}_keys`;
+      } else {
+          query += ` "${graphDependencies[i].edge}": ${graphDependencies[i].edge}_keys,`;
+      }
+  }
+  query += " }";
+
+} else {
+  query += `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}"`;
+  query += ` REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`;
+}
+*/
 
 export function uniqueConstraintQuery(
   constraints: UniqueConstraint,
   queryType: QueryType = QueryType.AQL
 ): string | AqlQuery {
   if (!constraints || constraints.constraints.length === 0) {
-    return;
+    throw new Error('No constraints specified')
   }
 
-  const params: any = {};
-  let query = `FOR d IN ${constraints.collection} FILTER`;
+  const params: any = {}
+  let query = `FOR d IN ${constraints.collection} FILTER`
 
   if (constraints.excludeDocumentKey) {
     if (queryType === QueryType.STRING) {
-      query += ` d._key != "${constraints.excludeDocumentKey}" FILTER`;
+      query += ` d._key != "${constraints.excludeDocumentKey}" FILTER`
     } else {
-      params["excludeDocumentKey"] = constraints.excludeDocumentKey;
-      query += ` d._key != @excludeDocumentKey FILTER`;
+      params.excludeDocumentKey = constraints.excludeDocumentKey
+      query += ' d._key != @excludeDocumentKey FILTER'
     }
   }
 
-  let constraintCount = 0;
+  let constraintCount = 0
 
   for (const constraint of constraints.constraints) {
-    constraintCount++;
+    constraintCount++
 
     if (constraintCount > 1) {
-      query += " ||";
+      query += ' ||'
     }
 
     if (isCompositeKey(constraint)) {
-      let keyCount = 0;
+      let keyCount = 0
 
-      query += " (";
+      query += ' ('
 
       for (const kv of constraint.composite) {
-        keyCount++;
+        keyCount++
 
         if (keyCount > 1) {
-          query += " &&";
+          query += ' &&'
         }
 
         if (queryType === QueryType.STRING) {
-          query += ` d.${kv.property} == "${kv.value}"`;
+          query += ` d.${kv.property} == "${kv.value}"`
         } else {
-          const keyParam = `${kv.property}_key_${keyCount}`;
-          const valueParam = `${kv.property}_val_${keyCount}`;
+          const keyParam = `${kv.property}_key_${keyCount}`
+          const valueParam = `${kv.property}_val_${keyCount}`
 
-          params[keyParam] = kv.property;
-          params[valueParam] = kv.value;
+          params[keyParam] = kv.property
+          params[valueParam] = kv.value
 
-          query += ` d.@${keyParam} == @${valueParam}`;
+          query += ` d.@${keyParam} == @${valueParam}`
         }
       }
 
-      query += " )";
+      query += ' )'
     }
 
     if (isUniqueValue(constraint)) {
       if (queryType === QueryType.STRING) {
-        query += ` d.${constraint.unique.property} == "${constraint.unique.value}"`;
+        query += ` d.${constraint.unique.property} == "${constraint.unique.value}"`
       } else {
-        const keyParam = `${constraint.unique.property}_key`;
-        const valueParam = `${constraint.unique.property}_val`;
+        const keyParam = `${constraint.unique.property}_key`
+        const valueParam = `${constraint.unique.property}_val`
 
-        params[keyParam] = constraint.unique.property;
-        params[valueParam] = constraint.unique.value;
+        params[keyParam] = constraint.unique.property
+        params[valueParam] = constraint.unique.value
 
-        query += ` d.@${keyParam} == @${valueParam}`;
+        query += ` d.@${keyParam} == @${valueParam}`
       }
     }
   }
 
-  query += " RETURN d._key";
+  query += ' RETURN d._key'
 
   if (queryType === QueryType.STRING) {
-    return query;
+    return query
   }
 
   return {
     query,
-    bindVars: params,
-  };
+    bindVars: params
+  }
 }
 
 export const Queries = {
@@ -421,5 +452,5 @@ export const Queries = {
   findByFilterCriteria,
   updateDocumentsByKeyValue,
   deleteDocumentsByKeyValue,
-  uniqueConstraintQuery,
-};
+  uniqueConstraintQuery
+}

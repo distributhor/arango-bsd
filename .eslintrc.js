@@ -1,44 +1,83 @@
 module.exports = {
+  root: true,
+
   env: {
-    es6: true,
     node: true,
     jest: true,
-    commonjs: true,
+    es2021: true,
+    'jest/globals': true
   },
+
+  extends: ['plugin:jest/recommended', 'plugin:jsonc/recommended-with-json', 'standard'],
+
   parserOptions: {
-    ecmaVersion: 2018,
-    sourceType: "module",
+    ecmaVersion: 12,
+    sourceType: 'module'
   },
-  plugins: ["prettier"],
-  extends: ["eslint:recommended", "plugin:prettier/recommended"],
+
+  rules: {
+    'space-before-function-paren': [
+      'error',
+      {
+        named: 'never',
+        anonymous: 'always',
+        asyncArrow: 'always'
+      }
+    ],
+
+    'max-len': [
+      'error',
+      {
+        code: 120,
+        ignoreUrls: true,
+        ignoreStrings: true,
+        ignoreComments: true,
+        ignoreTemplateLiterals: true,
+        ignoreRegExpLiterals: true,
+        ignoreTrailingComments: true
+      }
+    ]
+  },
+
   overrides: [
     {
-      files: ["src/**/*.ts", "test/**/*.ts"],
-      parser: "@typescript-eslint/parser",
-      plugins: ["@typescript-eslint", "prettier"],
-      extends: [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended",
-        "prettier/@typescript-eslint",
-        "plugin:prettier/recommended",
-      ],
-      // "settings": {
-      //     "import/parsers": {
-      //         "@typescript-eslint/parser": [".ts"]
-      //     },
-      //     "import/resolver": {
-      //         "typescript": {}
-      //     }
-      // },
-      rules: {
-        "@typescript-eslint/no-explicit-any": 0,
-        "@typescript-eslint/explicit-module-boundary-types": [
-          "error",
-          {
-            allowArgumentsExplicitlyTypedAsAny: true,
-          },
-        ],
-      },
+      files: ['*.json'],
+      parser: 'jsonc-eslint-parser'
     },
-  ],
-};
+    {
+      files: ['src/**/*.ts', 'test/**/*.ts'],
+      // the combination of 'files' and 'parserOptions.project'
+      // are used to determine which files to lint
+
+      extends: ['plugin:jest/recommended', 'standard-with-typescript'],
+
+      parserOptions: {
+        project: ['./tsconfig.eslint.json']
+      },
+
+      rules: {
+        '@typescript-eslint/no-explicit-any': 0,
+        '@typescript-eslint/no-dynamic-delete': 0,
+        '@typescript-eslint/strict-boolean-expressions': 0,
+        '@typescript-eslint/no-unnecessary-boolean-literal-compare': 0,
+        '@typescript-eslint/restrict-template-expressions': 0,
+
+        '@typescript-eslint/space-before-function-paren': [
+          'error',
+          {
+            named: 'never',
+            anonymous: 'always',
+            asyncArrow: 'always'
+          }
+        ],
+
+        '@typescript-eslint/explicit-module-boundary-types': [
+          'error',
+          {
+            allowArgumentsExplicitlyTypedAsAny: true
+          }
+        ]
+      }
+    }
+  ]
+}

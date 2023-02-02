@@ -1,0 +1,12 @@
+{
+    "out": "docs",
+    "name": "Guacamole Docs",
+    "includeVersion": false,
+    "categorizeByGroup": true,
+    "excludeInternal": true,
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "githubPages": true,
+    "entryPoints": ["./src/index.ts", "./src/types.ts", "./src/queries.ts"],
+    "titleLink": "https://distributhor.github.io/guacamole/index.html"
+}

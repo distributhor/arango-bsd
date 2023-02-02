@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "lib",
+    "outDir": "dist",
     "target": "es6",
     "lib": ["es6"],
     "module": "commonjs",
@@ -9,22 +9,12 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowJs": true,
+    "checkJs": false,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "strictNullChecks": true
   },
-  "typedocOptions": {
-    "out": "docs",
-    "mode": "modules",
-    "name": "Documentation",
-    "theme": "default",
-    "readme": "none",
-    "includeVersion": false,
-    "excludePrivate": true,
-    "stripInternal": true,
-    "disableSources": false,
-    "hideGenerator": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "lib", "dist", "test", "scripts", "docs", "md"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "docs"]
 }
