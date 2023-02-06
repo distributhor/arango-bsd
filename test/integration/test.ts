@@ -445,11 +445,11 @@ describe('Guacamole Integration Tests', () => {
 
     const result2I = await conn.db(db1).read(CONST.userCollection, result2A._key)
 
-    expect(result2I).toBeUndefined()
+    expect(result2I).toBeNull()
 
     const result2J = await conn.db(db1).read(CONST.userCollection, 'Evans', { idField: 'surname' })
 
-    expect(result2J).toBeUndefined()
+    expect(result2J).toBeNull()
 
     const result3A = await conn.db(db1).create(CONST.userCollection, {
       name: 'Thomas',
@@ -474,7 +474,7 @@ describe('Guacamole Integration Tests', () => {
 
     const result3D = await conn.db(db1).read(CONST.userCollection, result3A._key)
 
-    expect(result3D).toBeUndefined()
+    expect(result3D).toBeNull()
 
     const result4A = await conn.db(db1).update(
       CONST.userCollection,
@@ -507,7 +507,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result5B.data.length).toEqual(0)
   })
 
-  test('query, queryOne, fetch and fetchOne', async () => {
+  test('query, fetch, fetchOne', async () => {
     const result1A = await conn
       .db(db1)
       .fetch(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
@@ -579,17 +579,17 @@ describe('Guacamole Integration Tests', () => {
     expect(result2B.data.length).toEqual(0)
 
     const result3A = await conn.db(db1)
-      .queryOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
+      .fetchOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
 
-    expect(result3A).toBeUndefined()
+    expect(result3A).toBeNull()
 
     const result3B = await conn.db(db1)
       .fetchOneByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Trail Running' })
 
-    expect(result3B).toBeUndefined()
+    expect(result3B).toBeNull()
 
     const result4A = await conn.db(db1)
-      .queryOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
+      .fetchOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
 
     expect(result4A).toBeDefined()
     expect(result4A.surname).toBeDefined()
@@ -601,7 +601,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result4B.surname).toBeDefined()
 
     const result5A = await conn.db(db1)
-      .queryOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
+      .fetchOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
 
     expect(result5A).toBeDefined()
     expect(result5A.name).toEqual('Daryl')
@@ -676,7 +676,7 @@ describe('Guacamole Integration Tests', () => {
       { name: 'surname', value: 'Armstrong' }
     ])
 
-    expect(result7C).toBeUndefined()
+    expect(result7C).toBeNull()
   })
 
   /* */

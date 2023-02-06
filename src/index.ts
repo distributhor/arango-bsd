@@ -18,8 +18,8 @@ import {
   UpdateDocumentOptions,
   DeleteDocumentOptions,
   FetchOptions,
+  OmitOptions,
   QueryReturnType,
-  FetchOneOptions,
   QueryResult,
   NamedValue,
   ListOfFilters,
@@ -200,7 +200,7 @@ export class ArangoDB {
     const response = await this.query(query, options?.query)
     const documents = await response.all()
     return {
-      data: ArangoDB.trimDocuments(documents, options)
+      data: ArangoDB.trimDocuments(documents, options?.omit)
     }
   }
 
@@ -214,15 +214,15 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns an object
    */
-  public async queryOne(query: AqlQuery, options?: QueryOptions): Promise<any> {
-    const response = await this.query(query, options)
+  public async fetchOne(query: AqlQuery, options?: FetchOptions): Promise<any> {
+    const response = await this.query(query, options?.query)
     const documents = await response.all()
-    return documents.shift()
-  }
 
-  public async fetchOne(query: AqlQuery, options?: FetchOneOptions): Promise<any> {
-    const document = this.queryOne(query, options?.query ? options.query : undefined)
-    return ArangoDB.trimDocument(document, options)
+    if (!documents || documents.length === 0) {
+      return null
+    }
+
+    return ArangoDB.trimDocument(documents.shift(), options?.omit)
   }
 
   public async create(collection: string, document: any, options: CreateDocumentOptions = {}): Promise<any> {
@@ -252,14 +252,14 @@ export class ArangoDB {
       } catch (e) {
         // e.errorNum = 1202
         if (e.code && e.code === 404) {
-          return undefined
+          return null
         } else {
           throw e
         }
       }
     }
 
-    return ArangoDB.trimDocument(document, options)
+    return ArangoDB.trimDocument(document, options?.omit)
   }
 
   public async update(collection: string, id: string, data: any, options: UpdateDocumentOptions = {}): Promise<any> {
@@ -296,27 +296,17 @@ export class ArangoDB {
   public async fetchOneByPropertyValue(
     collection: string,
     identifier: NamedValue,
-    options: FetchOneOptions = {}
+    options: FetchOptions = {}
   ): Promise<any> {
-    const document = await this.queryOne(
-      Queries.fetchByPropertyValue(collection, identifier),
-      options.query
-    )
-
-    return ArangoDB.trimDocument(document, options)
+    return await this.fetchOne(Queries.fetchByPropertyValue(collection, identifier), options)
   }
 
   public async fetchOneByCompositeValue(
     collection: string,
     identifier: NamedValue[],
-    options: FetchOneOptions = {}
+    options: FetchOptions = {}
   ): Promise<any> {
-    const document = await this.queryOne(
-      Queries.fetchByCompositeValue(collection, identifier),
-      options.query
-    )
-
-    return ArangoDB.trimDocument(document, options)
+    return await this.fetchOne(Queries.fetchByCompositeValue(collection, identifier))
   }
 
   public async fetchAllByPropertyValue(
@@ -326,7 +316,7 @@ export class ArangoDB {
   ): Promise<ArrayCursor | QueryResult> {
     const result = await this.driver.query(
       Queries.fetchByPropertyValue(collection, identifier, options.sort),
-      options.query
+      options?.query
     )
 
     if (options.return && options.return === QueryReturnType.CURSOR) {
@@ -336,7 +326,7 @@ export class ArangoDB {
     const documents = await result.all()
 
     return {
-      data: ArangoDB.trimDocuments(documents, options)
+      data: ArangoDB.trimDocuments(documents, options?.omit)
     }
   }
 
@@ -347,7 +337,7 @@ export class ArangoDB {
   ): Promise<ArrayCursor | QueryResult> {
     const result = await this.driver.query(
       Queries.fetchByCompositeValue(collection, identifier, options.sort),
-      options.query
+      options?.query
     )
 
     if (options.return && options.return === QueryReturnType.CURSOR) {
@@ -357,7 +347,7 @@ export class ArangoDB {
     const documents = await result.all()
 
     return {
-      data: ArangoDB.trimDocuments(documents, options)
+      data: ArangoDB.trimDocuments(documents, options?.omit)
     }
   }
 
@@ -368,7 +358,7 @@ export class ArangoDB {
   ): Promise<ArrayCursor | QueryResult> {
     const result = await this.driver.query(
       Queries.findByFilterCriteria(collection, filter, options.filter),
-      options.query
+      options?.query
     )
 
     if (options.return && options.return === QueryReturnType.CURSOR) {
@@ -378,7 +368,7 @@ export class ArangoDB {
     const documents = await result.all()
 
     return {
-      data: ArangoDB.trimDocuments(documents, options)
+      data: ArangoDB.trimDocuments(documents, options?.omit)
     }
   }
 
@@ -416,12 +406,12 @@ export class ArangoDB {
     return await this.driver.exists()
   }
 
-  public static trimDocument(document: any, options: ReadDocumentOptions | FetchOneOptions = {}): any {
+  public static trimDocument(document: any, options: OmitOptions = {}): any {
     if (!document) {
       return document
     }
 
-    if (options.omit?.privateProps) {
+    if (options.privateProps) {
       stripUnderscoreProps(document, ['_key'])
       // stripProps(document, ['_id', '_rev'])
     }
@@ -429,8 +419,8 @@ export class ArangoDB {
     return document
   }
 
-  public static trimDocuments(documents: any[], options: FetchOptions = {}): any[] {
-    if (options.omit?.privateProps) {
+  public static trimDocuments(documents: any[], options: OmitOptions = {}): any[] {
+    if (options.privateProps) {
       documents.map((d) => {
         stripUnderscoreProps(d, ['_key'])
         return d

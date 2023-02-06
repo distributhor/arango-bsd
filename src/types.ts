@@ -109,16 +109,11 @@ export interface ReadDocumentOptions extends IdField {
 export interface UpdateDocumentOptions extends IdField {}
 export interface DeleteDocumentOptions extends IdField {}
 
-export interface FetchOneOptions {
-  omit?: OmitOptions
-  query?: QueryOptions
-}
-
 export interface FetchOptions {
-  return?: QueryReturnType
   omit?: OmitOptions
-  sort?: SortOptions
   query?: QueryOptions
+  sort?: SortOptions
+  return?: QueryReturnType
 }
 
 export interface FindOptions {
