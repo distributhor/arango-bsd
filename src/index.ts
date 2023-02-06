@@ -143,7 +143,7 @@ export class ArangoConnection {
  *
  * // the backseat driver method, which immediately calls cursor.all()
  * // on the results, returning all the documents, and not the cursor
- * db.queryAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ * db.fetch(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
  * ```
  */
 export class ArangoDB {
@@ -192,24 +192,15 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns a list of objects
    */
-  public async queryAll(query: AqlQuery, options?: QueryOptions): Promise<any[]> {
-    // const result = await this.driver.query(
-    //   Queries.fetchByPropertyValue(collection, identifier, options.sortOptions) as AqlQuery,
-    //   options.queryOptions
-    // )
-
-    const result = await this.driver.query(query, options)
-    return await result.all()
+  public async query<T = any>(query: AqlQuery, options?: QueryOptions): Promise<ArrayCursor<T>> {
+    return await this.driver.query(query, options)
   }
 
-  public async fetchAll(query: AqlQuery, options?: FetchOptions): Promise<any> {
-    // TODO : cannot trim documents if query return type is a cursor
-    const documents = await this.queryAll(query, options?.query ? options.query : undefined)
-
-    this.trimDocuments(documents, options)
-
+  public async fetch(query: AqlQuery, options?: FetchOptions): Promise<QueryResult> {
+    const response = await this.query(query, options?.query)
+    const documents = await response.all()
     return {
-      data: documents
+      data: ArangoDB.trimDocuments(documents, options)
     }
   }
 
@@ -224,12 +215,14 @@ export class ArangoDB {
    * @returns an object
    */
   public async queryOne(query: AqlQuery, options?: QueryOptions): Promise<any> {
-    return (await this.queryAll(query, options)).shift()
+    const response = await this.query(query, options)
+    const documents = await response.all()
+    return documents.shift()
   }
 
   public async fetchOne(query: AqlQuery, options?: FetchOneOptions): Promise<any> {
     const document = this.queryOne(query, options?.query ? options.query : undefined)
-    return this.trimDocument(document, options)
+    return ArangoDB.trimDocument(document, options)
   }
 
   public async create(collection: string, document: any, options: CreateDocumentOptions = {}): Promise<any> {
@@ -266,7 +259,7 @@ export class ArangoDB {
       }
     }
 
-    return this.trimDocument(document, options)
+    return ArangoDB.trimDocument(document, options)
   }
 
   public async update(collection: string, id: string, data: any, options: UpdateDocumentOptions = {}): Promise<any> {
@@ -300,33 +293,6 @@ export class ArangoDB {
     return await this.driver.collection(collection).remove(id)
   }
 
-  private trimDocument(document: any, options: ReadDocumentOptions | FetchOneOptions = {}): any {
-    if (!document) {
-      return document
-    }
-
-    if (options.omit?.privateProps) {
-      stripUnderscoreProps(document, ['_key'])
-      // stripProps(document, ['_id', '_rev'])
-    }
-
-    return document
-  }
-
-  private trimDocuments(documents: any[], options: FetchOptions = {}): void {
-    if (options.omit?.privateProps) {
-      documents.map((d) => {
-        stripUnderscoreProps(d, ['_key'])
-        return d
-      })
-    // } else if (options.stripInternalProps) {
-    //   documents.map((d) => {
-    //     stripProps(d, ['_id', '_rev'])
-    //     return d
-    //   })
-    }
-  }
-
   public async fetchOneByPropertyValue(
     collection: string,
     identifier: NamedValue,
@@ -337,7 +303,7 @@ export class ArangoDB {
       options.query
     )
 
-    return this.trimDocument(document, options)
+    return ArangoDB.trimDocument(document, options)
   }
 
   public async fetchOneByCompositeValue(
@@ -350,7 +316,7 @@ export class ArangoDB {
       options.query
     )
 
-    return this.trimDocument(document, options)
+    return ArangoDB.trimDocument(document, options)
   }
 
   public async fetchAllByPropertyValue(
@@ -369,10 +335,8 @@ export class ArangoDB {
 
     const documents = await result.all()
 
-    this.trimDocuments(documents, options)
-
     return {
-      data: documents
+      data: ArangoDB.trimDocuments(documents, options)
     }
   }
 
@@ -392,10 +356,8 @@ export class ArangoDB {
 
     const documents = await result.all()
 
-    this.trimDocuments(documents, options)
-
     return {
-      data: documents
+      data: ArangoDB.trimDocuments(documents, options)
     }
   }
 
@@ -415,10 +377,8 @@ export class ArangoDB {
 
     const documents = await result.all()
 
-    this.trimDocuments(documents, options)
-
     return {
-      data: documents
+      data: ArangoDB.trimDocuments(documents, options)
     }
   }
 
@@ -429,8 +389,7 @@ export class ArangoDB {
 
     // const query = Queries.uniqueConstraintQuery(constraints, QueryType.STRING) as string;
     const query = Queries.uniqueConstraintQuery(constraints)
-    // const documents = await (await this.driver.query(query)).all();
-    const documents = await this.queryAll(query)
+    const documents = await (await this.query(query)).all()
 
     return {
       violatesUniqueConstraint: documents.length > 0,
@@ -455,6 +414,35 @@ export class ArangoDB {
     // }
 
     return await this.driver.exists()
+  }
+
+  public static trimDocument(document: any, options: ReadDocumentOptions | FetchOneOptions = {}): any {
+    if (!document) {
+      return document
+    }
+
+    if (options.omit?.privateProps) {
+      stripUnderscoreProps(document, ['_key'])
+      // stripProps(document, ['_id', '_rev'])
+    }
+
+    return document
+  }
+
+  public static trimDocuments(documents: any[], options: FetchOptions = {}): any[] {
+    if (options.omit?.privateProps) {
+      documents.map((d) => {
+        stripUnderscoreProps(d, ['_key'])
+        return d
+      })
+    // } else if (options.stripInternalProps) {
+    //   documents.map((d) => {
+    //     stripProps(d, ['_id', '_rev'])
+    //     return d
+    //   })
+    }
+
+    return documents
   }
 
   public async clearDB(method: DBClearanceMethod = DBClearanceMethod.DELETE_DATA): Promise<void> {

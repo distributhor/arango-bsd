@@ -510,10 +510,10 @@ describe('Guacamole Integration Tests', () => {
   test('query, queryOne, fetch and fetchOne', async () => {
     const result1A = await conn
       .db(db1)
-      .queryAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
+      .fetch(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
 
-    expect(result1A.length).toEqual(3)
-    expect(result1A[0].surname).toBeDefined()
+    expect(result1A.data.length).toEqual(3)
+    expect(result1A.data[0].surname).toBeDefined()
 
     const result1B = (await conn
       .db(db1)
@@ -563,11 +563,11 @@ describe('Guacamole Integration Tests', () => {
     expect(allDocs[0].surname).toBeDefined()
 
     const result2A = await conn.db(db1)
-      .queryAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
+      .fetch(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
 
-    expect(result2A).toBeDefined()
-    expect(Array.isArray(result2A)).toBeTruthy()
-    expect(result2A.length).toEqual(0)
+    expect(result2A.data).toBeDefined()
+    expect(Array.isArray(result2A.data)).toBeTruthy()
+    expect(result2A.data.length).toEqual(0)
 
     const result2B = (await conn.db(db1).fetchAllByPropertyValue(CONST.userCollection, {
       name: 'speciality',
@@ -693,6 +693,13 @@ describe('Guacamole Integration Tests', () => {
         expect.objectContaining({ name: 'Chris', surname: 'Froome' })
       ])
     )
+
+    const result1B = await conn.db(db1)
+      .findByFilterCriteria(CONST.userCollection, 'name == "Lance" || name == "Chris"', {
+        return: QueryReturnType.CURSOR, filter: { prefixPropertyNames: true }
+      }) as ArrayCursor
+
+    expect(result1B instanceof ArrayCursor).toBeTruthy()
 
     const result2A = await conn.db(db1)
       .findByFilterCriteria(CONST.userCollection, 'country == "Italy" && speciality == "General Classification"', {

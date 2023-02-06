@@ -52,6 +52,13 @@ export enum QueryReturnType {
   CURSOR = 'cursor',
 }
 
+// export interface SearchResult {
+//   data: any[];
+//   size: number;
+//   total: number;
+//   options: any;
+// }
+
 export interface QueryResult {
   data: any
   meta?: QueryMeta
