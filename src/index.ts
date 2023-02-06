@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import { Database } from 'arangojs'
-import { AqlLiteral, AqlQuery } from 'arangojs/aql'
+import { AqlQuery } from 'arangojs/aql'
 import { QueryOptions } from 'arangojs/database'
 import {
   DatabaseConfig,
@@ -13,7 +13,6 @@ import {
   isGraphDefinitionArray,
   UniqueConstraint,
   UniqueConstraintResult,
-  QueryType,
   CreateDocumentOptions,
   ReadDocumentOptions,
   UpdateDocumentOptions,
@@ -22,20 +21,22 @@ import {
   QueryReturnType,
   FetchOneOptions,
   QueryResult,
-  PropertyValue,
+  NamedValue,
   ListOfFilters,
   FindOptions
 } from './types'
 import { Queries } from './queries'
 import { ArrayCursor } from 'arangojs/cursor'
+import { DocumentCollection, EdgeCollection } from 'arangojs/collection'
+import { Graph } from 'arangojs/graph'
 
 export * from './types'
 
 /** @internal */
-const debugInfo = Debug('arango-bsd:info')
+const debugInfo = Debug('guacamole:info')
 
 /** @internal */
-const debugError = Debug('arango-bsd:error')
+const debugError = Debug('guacamole:error')
 
 /** @internal */
 function toGraphNames(graphs: string[] | GraphDefinition[]): string[] {
@@ -60,77 +61,124 @@ function stripUnderscoreProps(obj: any, keep: string[]): void {
   })
 }
 
-function stripProps(obj: any, props: string[]): void {
-  Object.keys(obj).map((k) => {
-    if (props.includes(k)) {
-      delete obj[k]
-    }
+// function stripProps(obj: any, props: string[]): void {
+//   Object.keys(obj).map((k) => {
+//     if (props.includes(k)) {
+//       delete obj[k]
+//     }
 
-    return k
-  })
-}
+//     return k
+//   })
+// }
 
 /** @internal */
-export interface MemPool {
+interface InstancePool {
   [key: string]: ArangoDB
 }
 
-/**
- * A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/7.1.0/classes/_database_.database.html)
- * instance. It provides easy access to the ArangoJS instance itself, which can be used as per normal,
- * but also adds additional functionality and conenience methods, which can optionally be used.
- *
- * The constructor accepts an existing
- * `ArangoJS` [Database](https://arangodb.github.io/arangojs/7.1.0/classes/_database_.database.html) instance,
- * **or** an `ArangoJS` [Config](https://arangodb.github.io/arangojs/7.1.0/modules/_connection_.html#config)
- * **or** a [[DatabaseConfig]], which is an extension of the normal `Config`.
- *
- * ```typescript
- * import { aql } from "arangojs/aql";
- * import { ArangoDB } from "arango-bsd";
- *
- * const db = new ArangoDB({ databaseName: "name", url: "arangoURI" });
- *
- * // uses the regular ArangoJS driver instance, exposed on the
- * // `db.driver` property which returns the usual cursor
- * db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
- *
- * // uses the backseat driver method, which immediately calls cursor.all()
- * // on the results, returning all the documents, and not the cursor
- * db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
- * ```
- */
-export class ArangoDB {
-  private pool: MemPool
+export class ArangoConnection {
+  private readonly pool: InstancePool = {}
+  private readonly arangodb: ArangoDB
+  private readonly arangojs: Database
+  public readonly system: Database
 
-  /**
-   * A property that exposes the native `ArangoJS`
-   * [Database](https://arangodb.github.io/arangojs/7.1.0/classes/_database_.database.html) instance.
-   */
-  public driver: Database
-
-  /**
-   * The constructor accepts an existing
-   * `ArangoJS` [Database](https://arangodb.github.io/arangojs/7.1.0/classes/_database_.database.html) instance,
-   * **or** an `ArangoJS` [Config](https://arangodb.github.io/arangojs/7.1.0/modules/_connection_.html#config)
-   * **or** a [[DatabaseConfig]], which is an extension of the normal `Config`.
-   */
-  constructor(databaseOrConfig: Database | DatabaseConfig) {
-    if (databaseOrConfig instanceof Database) {
-      this.driver = databaseOrConfig
+  constructor(db: Database | DatabaseConfig) {
+    this.arangojs = db instanceof Database ? db : new Database(db)
+    this.arangodb = new ArangoDB(this.arangojs)
+    if (this.arangojs.name === '_system') {
+      this.system = this.arangojs
     } else {
-      this.driver = new Database(databaseOrConfig)
+      this.pool[this.arangojs.name] = this.arangodb
+      this.system = this.arangojs.database('_system')
     }
-
-    this.pool = {}
   }
 
   public db(db: string): ArangoDB {
-    return this.fromPool(db)
+    return this.getInstance(db)
   }
 
-  public getDriver(db?: string): Database {
-    return db ? this.fromPool(db).driver : this.driver
+  public driver(db: string): Database {
+    return this.getInstance(db).driver
+  }
+
+  public col(db: string, collection: string): DocumentCollection<any> | EdgeCollection<any> {
+    return this.driver(db).collection(collection)
+  }
+
+  public graph(db: string, graph: string): Graph {
+    return this.driver(db).graph(graph)
+  }
+
+  public listConnections(): string[] {
+    return Object.keys(this.pool)
+  }
+
+  /** @internal */
+  private getInstance(db: string): ArangoDB {
+    if (this.pool[db]) {
+      return this.pool[db]
+    }
+
+    debugInfo(`Adding '${db}' to pool`)
+    this.pool[db] = new ArangoDB(this.arangojs.database(db))
+    return this.pool[db]
+  }
+}
+
+/**
+ * A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html)
+ * instance. It provides easy access to the ArangoJS instance itself, which can be used as normal,
+ * but adds a few convenience methods, which can optionally be used.
+ *
+ * The constructor accepts an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html)
+ *
+ * ```typescript
+ * import { aql } from "arangojs/aql";
+ * import { ArangoDB } from "@distributhor/guacamole";
+ *
+ * const db = new ArangoDB({ databaseName: "name", url: "http://127.0.0.1:8529", auth: { username: "admin", password: "letmein" } });
+ *
+ * // the native ArangoJS driver instance is exposed on the `db.driver` property
+ * db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ *
+ * // the backseat driver method, which immediately calls cursor.all()
+ * // on the results, returning all the documents, and not the cursor
+ * db.queryAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ * ```
+ */
+export class ArangoDB {
+  /**
+   * A property that exposes the native `ArangoJS`
+   * [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
+   */
+  public driver: Database
+  public system: Database
+
+  /**
+   * The constructor accepts an existing
+   * `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance,
+   * **or** an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) configuration.
+   */
+  constructor(db: Database | DatabaseConfig) {
+    if (db instanceof Database) {
+      this.driver = db
+    } else {
+      this.driver = new Database(db)
+    }
+
+    this.system = this.driver.database('_system')
+  }
+
+  public get name(): string {
+    return this.driver.name
+  }
+
+  public col(collection: string): DocumentCollection<any> | EdgeCollection<any> {
+    return this.driver.collection(collection)
+  }
+
+  public graph(graph: string): Graph {
+    return this.driver.graph(graph)
   }
 
   /**
@@ -144,18 +192,19 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns a list of objects
    */
-  public async query(query: string | AqlQuery, options?: QueryOptions): Promise<any[]> {
-    // query(query: AqlQuery, options?: QueryOptions): Promise<ArrayCursor>
-    // query(query: string | AqlLiteral, bindVars?: Dict<any>, options?: QueryOptions): Promise<ArrayCursor>
-    if (typeof query === 'string') {
-      return await (await this.driver.query(query, undefined, options)).all()
-    }
-    return await (await this.driver.query(query, options)).all()
+  public async queryAll(query: AqlQuery, options?: QueryOptions): Promise<any[]> {
+    // const result = await this.driver.query(
+    //   Queries.fetchByPropertyValue(collection, identifier, options.sortOptions) as AqlQuery,
+    //   options.queryOptions
+    // )
+
+    const result = await this.driver.query(query, options)
+    return await result.all()
   }
 
-  public async fetchAll(query: string | AqlQuery, options?: FetchOptions): Promise<any> {
+  public async fetchAll(query: AqlQuery, options?: FetchOptions): Promise<any> {
     // TODO : cannot trim documents if query return type is a cursor
-    const documents = await this.query(query, options?.queryOptions ? options.queryOptions : undefined)
+    const documents = await this.queryAll(query, options?.query ? options.query : undefined)
 
     this.trimDocuments(documents, options)
 
@@ -174,17 +223,17 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns an object
    */
-  public async queryOne(query: string | AqlQuery, options?: QueryOptions): Promise<any> {
-    return (await this.query(query, options)).shift()
+  public async queryOne(query: AqlQuery, options?: QueryOptions): Promise<any> {
+    return (await this.queryAll(query, options)).shift()
   }
 
-  public async fetchOne(query: string | AqlQuery, options?: FetchOneOptions): Promise<any> {
-    const document = this.queryOne(query, options?.queryOptions ? options.queryOptions : undefined)
+  public async fetchOne(query: AqlQuery, options?: FetchOneOptions): Promise<any> {
+    const document = this.queryOne(query, options?.query ? options.query : undefined)
     return this.trimDocument(document, options)
   }
 
   public async create(collection: string, document: any, options: CreateDocumentOptions = {}): Promise<any> {
-    if (options.stripUnderscoreProps) {
+    if (options.omit?.privateProps) {
       if (Array.isArray(document)) {
         document.map((o) => {
           stripUnderscoreProps(o, ['_key'])
@@ -201,9 +250,9 @@ export class ArangoDB {
   public async read(collection: string, id: any, options: ReadDocumentOptions = {}): Promise<any> {
     let document
 
-    if (options.identifier) {
+    if (options.idField) {
       // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
-      document = await this.fetchOneByPropertyValue(collection, { property: options.identifier, value: id }, options)
+      document = await this.fetchOneByPropertyValue(collection, { name: options.idField, value: id }, options)
     } else {
       try {
         document = await this.driver.collection(collection).document(id)
@@ -221,10 +270,14 @@ export class ArangoDB {
   }
 
   public async update(collection: string, id: string, data: any, options: UpdateDocumentOptions = {}): Promise<any> {
-    if (options.identifier) {
-      const result = await this.driver.query(
-        Queries.updateDocumentsByKeyValue(collection, { property: options.identifier, value: id }, data)
+    if (options.idField) {
+      const query = Queries.updateDocumentsByKeyValue(
+        this.driver.collection(collection),
+        { name: options.idField, value: id },
+        data
       )
+
+      const result = await this.driver.query(query)
 
       return await result.all()
     }
@@ -233,10 +286,13 @@ export class ArangoDB {
   }
 
   public async delete(collection: string, id: string, options: DeleteDocumentOptions = {}): Promise<any> {
-    if (options.identifier) {
-      const result = await this.driver.query(
-        Queries.deleteDocumentsByKeyValue(collection, { property: options.identifier, value: id })
+    if (options.idField) {
+      const query = Queries.deleteDocumentsByKeyValue(
+        this.driver.collection(collection),
+        { name: options.idField, value: id }
       )
+
+      const result = await this.driver.query(query)
 
       return await result.all()
     }
@@ -249,37 +305,36 @@ export class ArangoDB {
       return document
     }
 
-    if (options.stripUnderscoreProps) {
+    if (options.omit?.privateProps) {
       stripUnderscoreProps(document, ['_key'])
-    } else if (options.stripInternalProps) {
-      stripProps(document, ['_id', '_rev'])
+      // stripProps(document, ['_id', '_rev'])
     }
 
     return document
   }
 
   private trimDocuments(documents: any[], options: FetchOptions = {}): void {
-    if (options.stripUnderscoreProps) {
+    if (options.omit?.privateProps) {
       documents.map((d) => {
         stripUnderscoreProps(d, ['_key'])
         return d
       })
-    } else if (options.stripInternalProps) {
-      documents.map((d) => {
-        stripProps(d, ['_id', '_rev'])
-        return d
-      })
+    // } else if (options.stripInternalProps) {
+    //   documents.map((d) => {
+    //     stripProps(d, ['_id', '_rev'])
+    //     return d
+    //   })
     }
   }
 
   public async fetchOneByPropertyValue(
     collection: string,
-    idenifier: PropertyValue,
+    identifier: NamedValue,
     options: FetchOneOptions = {}
   ): Promise<any> {
     const document = await this.queryOne(
-      Queries.fetchByPropertyValue(collection, idenifier) as AqlQuery,
-      options.queryOptions
+      Queries.fetchByPropertyValue(collection, identifier),
+      options.query
     )
 
     return this.trimDocument(document, options)
@@ -287,12 +342,12 @@ export class ArangoDB {
 
   public async fetchOneByCompositeValue(
     collection: string,
-    identifier: PropertyValue[],
+    identifier: NamedValue[],
     options: FetchOneOptions = {}
   ): Promise<any> {
     const document = await this.queryOne(
-      Queries.fetchByCompositeValue(collection, identifier) as AqlQuery,
-      options.queryOptions
+      Queries.fetchByCompositeValue(collection, identifier),
+      options.query
     )
 
     return this.trimDocument(document, options)
@@ -300,12 +355,12 @@ export class ArangoDB {
 
   public async fetchAllByPropertyValue(
     collection: string,
-    idenifier: PropertyValue,
+    identifier: NamedValue,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult> {
     const result = await this.driver.query(
-      Queries.fetchByPropertyValue(collection, idenifier, options.sortOptions) as AqlQuery,
-      options.queryOptions
+      Queries.fetchByPropertyValue(collection, identifier, options.sort),
+      options.query
     )
 
     if (options.return && options.return === QueryReturnType.CURSOR) {
@@ -323,12 +378,12 @@ export class ArangoDB {
 
   public async fetchAllByCompositeValue(
     collection: string,
-    identifier: PropertyValue[],
+    identifier: NamedValue[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult> {
     const result = await this.driver.query(
-      Queries.fetchByCompositeValue(collection, identifier, options.sortOptions) as AqlQuery,
-      options.queryOptions
+      Queries.fetchByCompositeValue(collection, identifier, options.sort),
+      options.query
     )
 
     if (options.return && options.return === QueryReturnType.CURSOR) {
@@ -350,8 +405,8 @@ export class ArangoDB {
     options: FindOptions = {}
   ): Promise<ArrayCursor | QueryResult> {
     const result = await this.driver.query(
-      Queries.findByFilterCriteria(collection, filter, options.filterOptions) as AqlLiteral,
-      options.queryOptions
+      Queries.findByFilterCriteria(collection, filter, options.filter),
+      options.query
     )
 
     if (options.return && options.return === QueryReturnType.CURSOR) {
@@ -373,9 +428,9 @@ export class ArangoDB {
     }
 
     // const query = Queries.uniqueConstraintQuery(constraints, QueryType.STRING) as string;
-    const query = Queries.uniqueConstraintQuery(constraints, QueryType.AQL) as AqlQuery
+    const query = Queries.uniqueConstraintQuery(constraints)
     // const documents = await (await this.driver.query(query)).all();
-    const documents = await this.query(query)
+    const documents = await this.queryAll(query)
 
     return {
       violatesUniqueConstraint: documents.length > 0,
@@ -384,75 +439,85 @@ export class ArangoDB {
   }
 
   public async collectionExists(collection: string): Promise<boolean> {
-    return (await this.driver.listCollections()).map((c) => c.name).includes(collection)
+    // return (await this.driver.listCollections()).map((c) => c.name).includes(collection)
+    return await this.driver.collection(collection).exists()
   }
 
   public async graphExists(graph: string): Promise<boolean> {
-    return (await this.driver.listGraphs()).map((g) => g.name).includes(graph)
+    // return (await this.driver.listGraphs()).map((g) => g.name).includes(graph)
+    return await this.driver.graph(graph).exists()
   }
 
-  // same as driver.exists, so not useful for checking if current instance exists,
-  // but usefull for checking if a different instance exists
-  public async databaseExists(db: string): Promise<boolean> {
-    return (await this.driver.listDatabases()).includes(db)
+  public async databaseExists(): Promise<boolean> {
+    // if (db) {
+    //   driver.listDatabases() will throw an error (database not found) if the db in question doesn't actually exist yet
+    //   return (await this.driver.listDatabases()).includes(db)
+    // }
+
+    return await this.driver.exists()
   }
 
-  public async clearDatabase(db: string, method: DBClearanceMethod = DBClearanceMethod.DELETE_DATA): Promise<void> {
-    const dbExists = await this.databaseExists(db)
+  public async clearDB(method: DBClearanceMethod = DBClearanceMethod.DELETE_DATA): Promise<void> {
+    const dbExists = await this.databaseExists()
     if (!dbExists) {
       return
     }
 
     if (method === DBClearanceMethod.RECREATE_DB) {
       try {
-        await this.driver.dropDatabase(db)
-        await this.driver.createDatabase(db)
-        debugInfo(`DB ${db} re-created`)
+        await this.driver.dropDatabase(this.driver.name)
+        await this.driver.createDatabase(this.driver.name)
+        debugInfo(`DB ${this.driver.name} re-created`)
         return
       } catch (e) {
-        throw new Error(`Failed to re-create DB ${db}`)
+        throw new Error(`Failed to re-create DB ${this.driver.name}`)
       }
     }
 
     // TODO: graphs are not cleared yet ?
 
-    (await this.getDriver(db).collections()).map(async (collection) => await collection.truncate())
-    debugInfo(`DB ${db} cleaned`)
+    (await this.driver.collections()).map(async (collection) => await collection.truncate())
+    debugInfo(`DB ${this.driver.name} cleaned`)
   }
 
-  public async createDBStructure(structure: DBStructure, clearDB?: DBClearanceMethod): Promise<DBStructureResult> {
-    if (!structure?.database) {
+  public async createDBStructure(
+    structure: DBStructure,
+    clearDB?: DBClearanceMethod
+  ): Promise<DBStructureResult> {
+    if (!structure?.collections) {
       throw new Error('No DB structure specified')
     }
 
     const response: DBStructureResult = {
       database: undefined,
       collections: [],
-      graphs: []
+      graphs: [],
+      error: false
     }
 
-    const dbExists = await this.databaseExists(structure.database)
+    const dbExists = await this.databaseExists()
 
     if (!dbExists) {
-      debugInfo(`Database '${structure.database}' not found`)
+      debugInfo(`Database '${this.driver.name}' not found`)
 
       try {
-        await this.driver.createDatabase(structure.database)
-        debugInfo(`Database '${structure.database}' created`)
+        await this.system.createDatabase(this.driver.name)
+        debugInfo(`Database '${this.driver.name}' created`)
         response.database = 'Database created'
       } catch (e) {
         response.database = 'Failed to create database'
-        debugInfo(`Failed to create database '${structure.database}'`)
+        response.error = e
+        debugInfo(`Failed to create database '${this.driver.name}'`)
         debugError(e)
         return response
       }
     } else {
       if (clearDB) {
-        await this.clearDatabase(structure.database, clearDB)
-        debugInfo(`Database '${structure.database}' cleared with method ${clearDB}`)
+        await this.clearDB(clearDB)
+        debugInfo(`Database '${this.driver.name}' cleared with method ${clearDB}`)
         response.database = `Database cleared with method ${clearDB}`
       } else {
-        debugInfo(`Database '${structure.database}' found`)
+        debugInfo(`Database '${this.driver.name}' found`)
         response.database = 'Database found'
       }
     }
@@ -467,12 +532,14 @@ export class ArangoDB {
       for (const entity of validation.collections) {
         if (!entity.exists) {
           try {
-            await this.getDriver(structure.database).collection(entity.name).create()
+            await this.driver.collection(entity.name).create()
             response.collections.push(`Collection '${entity.name}' created`)
           } catch (e) {
             response.collections.push(`Failed to create collection '${entity.name}'`)
+            response.error = e
             debugError(`Failed to create collection '${entity.name}'`)
             debugError(e)
+            return response
           }
         } else {
           response.collections.push(`Collection '${entity.name}' found`)
@@ -493,12 +560,14 @@ export class ArangoDB {
 
           if (graph?.edges && graph.edges.length > 0) {
             try {
-              await this.getDriver(structure.database).graph(graph.graph).create(graph.edges)
+              await this.driver.graph(graph.graph).create(graph.edges)
               response.graphs.push(`Graph '${entity.name}' created`)
             } catch (e) {
               response.graphs.push(`Failed to create graph '${entity.name}'`)
+              response.error = e
               debugError(`Failed to create graph '${entity.name}'`)
               debugError(e)
+              return response
             }
           }
         } else {
@@ -518,27 +587,27 @@ export class ArangoDB {
       graphs: []
     }
 
-    if (!structure?.database) {
+    if (!structure?.collections) {
       return response
     }
 
-    const dbExists = await this.databaseExists(structure.database)
+    const dbExists = await this.databaseExists()
     if (!dbExists) {
       response.message = 'Database does not exist'
-      response.database = { name: structure.database, exists: false }
+      response.database = { name: this.driver.name, exists: false }
       return response
     }
 
-    response.database = { name: structure.database, exists: true }
+    response.database = { name: this.driver.name, exists: true }
 
-    const collectionAvailability = await this.checkAvailableCollections(structure.database, structure.collections)
+    const collectionAvailability = await this.checkAvailableCollections(structure.collections)
     response.collections = collectionAvailability.all
 
     if (!collectionAvailability.allExist) {
       response.message = 'Required collections do not exist'
     }
 
-    const graphAvailability = await this.checkAvailableGraphs(structure.database, structure.graphs)
+    const graphAvailability = await this.checkAvailableGraphs(structure.graphs)
     response.graphs = graphAvailability.all
 
     if (!graphAvailability.allExist) {
@@ -553,7 +622,7 @@ export class ArangoDB {
   }
 
   /** @internal */
-  private async checkAvailableCollections(db: string, collections: string[] | undefined): Promise<EntityAvailability> {
+  private async checkAvailableCollections(collections: string[] | undefined): Promise<EntityAvailability> {
     const response: EntityAvailability = {
       all: [],
       missing: [],
@@ -565,7 +634,7 @@ export class ArangoDB {
       return response
     }
 
-    response.existing = (await this.getDriver(db).listCollections()).map((c) => c.name)
+    response.existing = (await this.driver.listCollections()).map((c) => c.name)
 
     for (const collection of collections) {
       if (response.existing.includes(collection)) {
@@ -584,10 +653,7 @@ export class ArangoDB {
   }
 
   /** @internal */
-  private async checkAvailableGraphs(
-    db: string,
-    graphs: string[] | GraphDefinition[] | undefined
-  ): Promise<EntityAvailability> {
+  private async checkAvailableGraphs(graphs: string[] | GraphDefinition[] | undefined): Promise<EntityAvailability> {
     const response: EntityAvailability = {
       all: [],
       missing: [],
@@ -599,7 +665,7 @@ export class ArangoDB {
       return response
     }
 
-    response.existing = (await this.getDriver(db).listGraphs()).map((c) => c.name)
+    response.existing = (await this.driver.listGraphs()).map((c) => c.name)
 
     for (const graph of toGraphNames(graphs)) {
       if (response.existing.includes(graph)) {
@@ -615,20 +681,5 @@ export class ArangoDB {
     }
 
     return response
-  }
-
-  /** @internal */
-  private fromPool(db: string): ArangoDB {
-    if (!this.pool) {
-      this.pool = {}
-    }
-
-    if (!this.pool[db]) {
-      debugInfo(`Adding '${db}' to pool`)
-      this.pool[db] = new ArangoDB(this.driver.database(db))
-    }
-
-    debugInfo(`Returning '${db}' from pool`)
-    return this.pool[db]
   }
 }

@@ -1,13 +1,13 @@
 /* eslint-disable no-prototype-builtins */
-import { literal, AqlLiteral, AqlQuery } from 'arangojs/aql'
+import { aql, AqlQuery } from 'arangojs/aql'
+import { DocumentCollection } from 'arangojs/collection'
 import {
   UniqueConstraint,
   isCompositeKey,
   isUniqueValue,
-  QueryType,
-  PropertyValue,
+  NamedValue,
   SortOptions,
-  IndexValue,
+  IndexedValue,
   ListOfFilters,
   MatchTypeOperator,
   MatchType,
@@ -24,9 +24,9 @@ export function _findAllIndicesOfSubString(
   subString: string | string[],
   targetString: string,
   caseInSensitive = true
-): IndexValue[] {
+): IndexedValue[] {
   if (Array.isArray(subString)) {
-    let indices: IndexValue[] = []
+    let indices: IndexedValue[] = []
 
     for (const s of subString) {
       indices = indices.concat(_findAllIndicesOfSubString(s, targetString, caseInSensitive))
@@ -46,7 +46,7 @@ export function _findAllIndicesOfSubString(
     subString = subString.toLowerCase()
   }
 
-  const indices: IndexValue[] = []
+  const indices: IndexedValue[] = []
 
   let index = targetString.indexOf(subString)
   while (index !== -1) {
@@ -117,11 +117,10 @@ export function _prefixPropertyNames(filterString: string): string {
 /** @internal */
 function _fetchByKeyValue(
   collection: string,
-  identifier: PropertyValue | PropertyValue[],
+  identifier: NamedValue | NamedValue[],
   options: SortOptions,
-  queryType: QueryType,
   keyValueMatchType: MatchType
-): string | AqlQuery {
+): AqlQuery {
   const params: any = {}
   let query = `FOR d IN ${collection} FILTER`
 
@@ -137,36 +136,20 @@ function _fetchByKeyValue(
         query += ` ${MatchTypeOperator[keyValueMatchType]}`
       }
 
-      if (queryType === QueryType.STRING) {
-        if (typeof kv.value === 'number') {
-          query += ` d.${kv.property} == ${kv.value}`
-        } else {
-          query += ` d.${kv.property} == "${kv.value}"`
-        }
-      } else {
-        const keyParam = `${kv.property}_key_${keyCount}`
-        const valueParam = `${kv.property}_val_${keyCount}`
+      const keyParam = `${kv.name}_key_${keyCount}`
+      const valueParam = `${kv.name}_val_${keyCount}`
 
-        params[keyParam] = kv.property
-        params[valueParam] = kv.value
+      params[keyParam] = kv.name
+      params[valueParam] = kv.value
 
-        query += ` d.@${keyParam} == @${valueParam}`
-      }
+      query += ` d.@${keyParam} == @${valueParam}`
     }
 
     // query += " )";
   } else {
-    if (queryType === QueryType.STRING) {
-      if (typeof identifier.value === 'number') {
-        query += ` d.${identifier.property} == ${identifier.value}`
-      } else {
-        query += ` d.${identifier.property} == "${identifier.value}"`
-      }
-    } else {
-      params.property = identifier.property
-      params.value = identifier.value
-      query += '  d.@property == @value'
-    }
+    params.property = identifier.name
+    params.value = identifier.value
+    query += '  d.@property == @value'
   }
 
   if (options?.hasOwnProperty('sortBy')) {
@@ -191,10 +174,6 @@ function _fetchByKeyValue(
 
   query += ' RETURN d'
 
-  if (queryType === QueryType.STRING) {
-    return query
-  }
-
   return {
     query,
     bindVars: params
@@ -203,36 +182,35 @@ function _fetchByKeyValue(
 
 export function fetchByPropertyValue(
   collection: string,
-  identifier: PropertyValue | PropertyValue[],
-  options: SortOptions = {},
-  queryType: QueryType = QueryType.AQL
-): string | AqlQuery {
-  return _fetchByKeyValue(collection, identifier, options, queryType, MatchType.ANY)
+  identifier: NamedValue | NamedValue[],
+  options: SortOptions = {}
+): AqlQuery {
+  return _fetchByKeyValue(collection, identifier, options, MatchType.ANY)
 }
 
 export function fetchByCompositeValue(
   collection: string,
-  identifier: PropertyValue[],
-  options: SortOptions = {},
-  queryType: QueryType = QueryType.AQL
-): string | AqlQuery {
-  return _fetchByKeyValue(collection, identifier, options, queryType, MatchType.ALL)
+  identifier: NamedValue[],
+  options: SortOptions = {}
+): AqlQuery {
+  return _fetchByKeyValue(collection, identifier, options, MatchType.ALL)
 }
 
 export function findByFilterCriteria(
   collection: string,
   filter: string | ListOfFilters,
-  options: FilterOptions = {},
-  queryType: QueryType = QueryType.AQL
-): string | AqlLiteral {
+  options: FilterOptions = {}
+): AqlQuery {
   // if (options.hasOwnProperty("returnDataFieldName")) {
   //   queryOptions.returnDataFieldName = options.returnDataFieldName;
   // }
 
+  const params: any = {}
   let query = 'FOR d IN ' + collection
 
-  if (options.hasOwnProperty('restrictTo')) {
-    query += ` FILTER d. + ${options.restrictTo}`
+  if (options.restrictTo) {
+    params.restrictTo = options.restrictTo
+    query += ' FILTER d.@restrictTo'
   }
 
   if (filter?.match) {
@@ -309,63 +287,65 @@ export function findByFilterCriteria(
   */
   query += ' RETURN d'
 
-  if (queryType === QueryType.STRING) {
-    return query
+  return {
+    query,
+    bindVars: params
   }
-
-  return literal(query)
 }
 
-export function updateDocumentsByKeyValue(collection: string, identifier: PropertyValue, data: any): AqlLiteral {
-  return literal(
-    `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
-      data
-    )} IN ${collection} RETURN { _key: NEW._key, _id: NEW._id, _rev: NEW._rev, _oldRev: OLD._rev }`
-  )
+export function updateDocumentsByKeyValue(collection: DocumentCollection, identifier: NamedValue, data: any): AqlQuery {
+  // return literal(
+  //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
+  //     data
+  //   )} IN ${collection} RETURN { _key: NEW._key, _id: NEW._id, _rev: NEW._rev, _oldRev: OLD._rev }`
+  // )
+
+  return aql`
+    FOR d IN ${collection}
+    FILTER d.${identifier.name} == ${identifier.value}
+    UPDATE d WITH ${data} IN ${collection}
+    RETURN { _key: NEW._key }`
+
+  //
+  // Some examples of using aql and helpers - from the docs
+  //
+  // var query = "FOR doc IN collection";
+  // var params = {};
+  // if (useFilter) {
+  //   query += " FILTER doc.value == @what";
+  //   params.what = req.params("searchValue");
+  // }
+
+  // const filter = aql`FILTER d.color == ${color}'`
+  // const result = await db.query(aql`
+  //   FOR d IN ${collection}
+  //   ${filter}
+  //   RETURN d
+  // `)
+
+  // const filters = []
+  // if (adminsOnly) filters.push(aql`FILTER user.admin`)
+  // if (activeOnly) filters.push(aql`FILTER user.active`)
+  // const result = await db.query(aql`
+  //   FOR user IN ${users}
+  //   ${join(filters)}
+  //   RETURN user
+  // `)
 }
 
-export function deleteDocumentsByKeyValue(collection: string, identifier: PropertyValue): AqlLiteral {
-  return literal(
-    `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
-  )
+export function deleteDocumentsByKeyValue(collection: DocumentCollection, identifier: NamedValue): AqlQuery {
+  // return literal(
+  //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
+  // )
+
+  return aql`
+    FOR d IN ${collection}
+    FILTER d.${identifier.name} == ${identifier.value}
+    REMOVE d IN ${collection}
+    RETURN { _key: d._key }`
 }
 
-/*
-if (graphDependencies && graphDependencies.length > 0) {
-  // query += ` LET group_users = (FOR v, e, p IN 1..1 ANY g GRAPH 'group_membership' RETURN { _key: e._key, edge: SPLIT( e._id, "/" )[0] })`;
-  // query += ` LET group_modules = (FOR v, e, p IN 1..1 ANY g GRAPH 'group_module_reg_graph' RETURN { _key: e._key, edge: SPLIT( e._id, "/" )[0] })`;
-  // query += " LET result1 = (FOR ref IN group_users REMOVE ref._key IN user_group)";
-  // query += " LET result2 = (FOR ref IN group_modules REMOVE ref._key IN group_module_reg)";
-  // query += ` RETURN { "${collection}": { _key: g._key }, "users": group_users, "modules": group_modules }`;
-
-  query += `FOR d IN ${collection} FILTER d._key == "${id}"`;
-  for (let link of graphDependencies) {
-      query += ` LET ${link.edge}_keys = (FOR v, e, p IN 1..1 ANY d GRAPH '${link.graph}' RETURN e._key)`;
-  }
-  for (let link of graphDependencies) {
-      query += ` LET ${link.edge}_del = (FOR key IN ${link.edge}_keys REMOVE key IN ${link.edge})`;
-  }
-  query += ` REMOVE d IN ${collection}`;
-  query += ` RETURN { "${collection}": { _key: d._key, _id: d._id, _rev: d._rev },`;
-  for (let i = 0; i < graphDependencies.length; i++) {
-      if (i === graphDependencies.length-1) {
-          query += ` "${graphDependencies[i].edge}": ${graphDependencies[i].edge}_keys`;
-      } else {
-          query += ` "${graphDependencies[i].edge}": ${graphDependencies[i].edge}_keys,`;
-      }
-  }
-  query += " }";
-
-} else {
-  query += `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}"`;
-  query += ` REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`;
-}
-*/
-
-export function uniqueConstraintQuery(
-  constraints: UniqueConstraint,
-  queryType: QueryType = QueryType.AQL
-): string | AqlQuery {
+export function uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
   if (!constraints || constraints.constraints.length === 0) {
     throw new Error('No constraints specified')
   }
@@ -374,12 +354,8 @@ export function uniqueConstraintQuery(
   let query = `FOR d IN ${constraints.collection} FILTER`
 
   if (constraints.excludeDocumentKey) {
-    if (queryType === QueryType.STRING) {
-      query += ` d._key != "${constraints.excludeDocumentKey}" FILTER`
-    } else {
-      params.excludeDocumentKey = constraints.excludeDocumentKey
-      query += ' d._key != @excludeDocumentKey FILTER'
-    }
+    params.excludeDocumentKey = constraints.excludeDocumentKey
+    query += ' d._key != @excludeDocumentKey FILTER'
   }
 
   let constraintCount = 0
@@ -403,42 +379,30 @@ export function uniqueConstraintQuery(
           query += ' &&'
         }
 
-        if (queryType === QueryType.STRING) {
-          query += ` d.${kv.property} == "${kv.value}"`
-        } else {
-          const keyParam = `${kv.property}_key_${keyCount}`
-          const valueParam = `${kv.property}_val_${keyCount}`
+        const keyParam = `${kv.name}_key_${keyCount}`
+        const valueParam = `${kv.name}_val_${keyCount}`
 
-          params[keyParam] = kv.property
-          params[valueParam] = kv.value
+        params[keyParam] = kv.name
+        params[valueParam] = kv.value
 
-          query += ` d.@${keyParam} == @${valueParam}`
-        }
+        query += ` d.@${keyParam} == @${valueParam}`
       }
 
       query += ' )'
     }
 
     if (isUniqueValue(constraint)) {
-      if (queryType === QueryType.STRING) {
-        query += ` d.${constraint.unique.property} == "${constraint.unique.value}"`
-      } else {
-        const keyParam = `${constraint.unique.property}_key`
-        const valueParam = `${constraint.unique.property}_val`
+      const keyParam = `${constraint.unique.name}_key`
+      const valueParam = `${constraint.unique.name}_val`
 
-        params[keyParam] = constraint.unique.property
-        params[valueParam] = constraint.unique.value
+      params[keyParam] = constraint.unique.name
+      params[valueParam] = constraint.unique.value
 
-        query += ` d.@${keyParam} == @${valueParam}`
-      }
+      query += ` d.@${keyParam} == @${valueParam}`
     }
   }
 
   query += ' RETURN d._key'
-
-  if (queryType === QueryType.STRING) {
-    return query
-  }
 
   return {
     query,

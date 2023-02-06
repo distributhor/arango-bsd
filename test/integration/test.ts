@@ -1,8 +1,9 @@
 /* eslint-disable jest/no-conditional-expect */
 import * as path from 'path'
 import * as dotenv from 'dotenv'
+import { aql } from 'arangojs/aql'
 import { ArrayCursor } from 'arangojs/cursor'
-import { ArangoDB } from '../../src/index'
+import { ArangoConnection } from '../../src/index'
 import { DBStructure, QueryResult, QueryReturnType } from '../../src/types'
 
 import cyclists from './cyclists.json'
@@ -10,8 +11,15 @@ import teams from './teams.json'
 
 dotenv.config({ path: path.join(__dirname, '.env') })
 
-const testDB1 = process.env.ARANGO_TEST_DB1_NAME ?? 'testDB1'
-const testDB2 = process.env.ARANGO_TEST_DB2_NAME ?? 'testDB2'
+const db1 = 'guacamole-test1'
+const db2 = 'guacamole-test2'
+
+const dbAdminUser = process.env.GUACAMOLE_TEST_DB_USER ?? 'admin'
+const dbAdminPassword = process.env.GUACAMOLE_TEST_DB_PASSWORD ?? 'letmein'
+
+// TODO: want to use a different restricted user for some tests in the future
+// const dbRestrictedUser = dbAdminUser // 'guacamole'
+// const dbRestrictePassword = dbAdminPassword // 'letmein'
 
 const CONST = {
   userCollection: 'cyclists',
@@ -21,7 +29,6 @@ const CONST = {
 }
 
 const dbStructure: DBStructure = {
-  database: '',
   collections: [CONST.userCollection, CONST.groupCollection],
   graphs: [
     {
@@ -37,44 +44,52 @@ const dbStructure: DBStructure = {
   ]
 }
 
-const arango = new ArangoDB({
-  url: process.env.ARANGO_TEST_DB_URI
+const conn = new ArangoConnection({
+  databaseName: db1,
+  url: process.env.GUACAMOLE_TEST_DB_URI,
+  auth: { username: dbAdminUser, password: dbAdminPassword }
 })
 
-describe('Arango Backseat Driver Integration Tests', () => {
-  /* */
+describe('Guacamole Integration Tests', () => {
+  test('Connection and instance management', async () => {
+    expect(conn.db(db1).name).toEqual(db1)
+    expect(conn.system.name).toEqual('_system')
+    expect(conn.listConnections()).toEqual([db1])
+
+    conn.db(db1) // should NOT create additional instance, because it already exists
+    conn.db(db2) // should create an additional instance, because it doesn't exist
+
+    expect(conn.db(db1).name).toEqual(db1)
+    expect(conn.db(db2).name).toEqual(db2)
+    expect(conn.listConnections()).toEqual([db1, db2])
+  })
+
   test('Create database', async () => {
-    expect.assertions(5)
-
     // confirm that at least one database is already present
-    const dbList = await arango.driver.listDatabases()
-    expect(dbList.length).toBeGreaterThanOrEqual(1)
+    const dbs = await conn.system.listDatabases()
+    expect(dbs.length).toBeGreaterThanOrEqual(1)
 
-    // TODO: JS version that tests what happens when no arg supplied
-    // confirm that neither of the test DBs exist
-    let testDB1Exists = await arango.databaseExists(testDB1)
-    let testDB2Exists = await arango.databaseExists(testDB2)
+    let db1Exists = await conn.db(db1).databaseExists()
+    let db2Exists = await conn.db(db2).databaseExists()
 
-    expect(testDB1Exists).toBeFalsy()
-    expect(testDB2Exists).toBeFalsy()
+    expect(db1Exists).toBeFalsy()
+    expect(db2Exists).toBeFalsy()
 
-    await arango.driver.createDatabase(testDB1)
+    await conn.system.createDatabase(db1)
 
-    testDB1Exists = await arango.databaseExists(testDB1)
-    testDB2Exists = await arango.databaseExists(testDB2)
+    db1Exists = await conn.db(db1).databaseExists()
+    db2Exists = await conn.db(db2).databaseExists()
 
-    expect(testDB1Exists).toBeTruthy()
-    expect(testDB2Exists).toBeFalsy()
+    expect(db1Exists).toBeTruthy()
+    expect(db2Exists).toBeFalsy()
   })
 
   test('Create database structure and test multi-driver behaviour', async () => {
     // create structure for existing DB
-    dbStructure.database = testDB1
-    const result1 = await arango.createDBStructure(dbStructure)
+    const result1 = await conn.db(db1).createDBStructure(dbStructure)
 
     // create structure for non-existing DB
-    dbStructure.database = testDB2
-    const result2 = await arango.createDBStructure(dbStructure)
+    const result2 = await conn.db(db2).createDBStructure(dbStructure)
 
     expect(result1.database).toEqual('Database found')
     expect(result1.graphs).toEqual(expect.arrayContaining([`Graph '${CONST.groupMembershipGraph}' created`]))
@@ -96,50 +111,33 @@ describe('Arango Backseat Driver Integration Tests', () => {
     )
 
     // confirm non-existent DB was created
-    const testDB2Exists = await arango.databaseExists(testDB2)
-    expect(testDB2Exists).toBeTruthy()
+    const db2Exists = await conn.db(db2).databaseExists()
+    expect(db2Exists).toBeTruthy()
 
     // check that expected collections exist and that different drivers behave as expected
-    const currentDriverNameBefore = arango.driver.name
-    const testDB1Driver = arango.driver.database(testDB1)
-    const testDB2Driver = arango.driver.database(testDB2)
-    const testDB1DriverName = testDB1Driver.name
-    const testDB2DriverName = testDB2Driver.name
-    const currentDriverNameAfter = arango.driver.name
+    const collecionList1 = await conn.driver(db1).listCollections()
+    const collecionList2 = await conn.driver(db2).listCollections()
 
-    const collecionListSystem = await arango.driver.listCollections()
-    const collecionList1 = await testDB1Driver.listCollections()
-    const collecionList2 = await testDB2Driver.listCollections()
-
-    expect(currentDriverNameBefore).toEqual('_system')
-    expect(testDB1DriverName).toEqual(testDB1)
-    expect(testDB2DriverName).toEqual(testDB2)
-    expect(currentDriverNameAfter).toEqual('_system')
-
-    expect(collecionListSystem.length).toEqual(0)
     expect(collecionList1.length).toEqual(3)
     expect(collecionList2.length).toEqual(3)
 
-    const usersCollectionOnSystemDB1 = await arango.driver.collection(CONST.userCollection).exists()
-    const usersCollectionOnSystemDB2 = await arango.collectionExists(CONST.userCollection)
+    const usersCollectionOnSystemDB1 = await conn.system.collection(CONST.userCollection).exists()
 
-    const usersCollectionExist = await arango.db(testDB1).collectionExists(CONST.userCollection)
-    const groupsCollectionExist = await arango.db(testDB1).collectionExists(CONST.groupCollection)
-    const userGroupsCollectionExist = await arango.db(testDB1).collectionExists(CONST.userToGroupEdge)
+    const usersCollectionExist = await conn.db(db1).collectionExists(CONST.userCollection)
+    const groupsCollectionExist = await conn.db(db1).collectionExists(CONST.groupCollection)
+    const userGroupsCollectionExist = await conn.db(db1).collectionExists(CONST.userToGroupEdge)
 
     expect(usersCollectionOnSystemDB1).toBeFalsy()
-    expect(usersCollectionOnSystemDB2).toBeFalsy()
     expect(usersCollectionExist).toBeTruthy()
     expect(groupsCollectionExist).toBeTruthy()
     expect(userGroupsCollectionExist).toBeTruthy()
 
     // remove a collection and recreate the structure
-    await testDB2Driver.collection(CONST.userCollection).drop()
-    const usersCollectionExist2 = await arango.db(testDB2).collectionExists(CONST.userCollection)
+    await conn.driver(db2).collection(CONST.userCollection).drop()
+    const usersCollectionExist2 = await conn.db(db2).collectionExists(CONST.userCollection)
     expect(usersCollectionExist2).toBeFalsy()
 
-    dbStructure.database = testDB2
-    const result3 = await arango.createDBStructure(dbStructure)
+    const result3 = await conn.db(db2).createDBStructure(dbStructure)
 
     expect(result3.database).toEqual('Database found')
     expect(result3.graphs).toEqual(expect.arrayContaining([`Graph '${CONST.groupMembershipGraph}' found`]))
@@ -150,13 +148,12 @@ describe('Arango Backseat Driver Integration Tests', () => {
       ])
     )
 
-    const usersCollectionExist3 = await arango.db(testDB2).collectionExists(CONST.userCollection)
+    const usersCollectionExist3 = await conn.db(db2).collectionExists(CONST.userCollection)
     expect(usersCollectionExist3).toBeTruthy()
 
     // confirm that empty array values do not break anything, ie, that they
     // are essentially unhandled and nothing happens, so it's a safe operation
     const dbStructureWithEmptyArrays: DBStructure = {
-      database: testDB2,
       collections: [],
       graphs: [
         {
@@ -166,7 +163,7 @@ describe('Arango Backseat Driver Integration Tests', () => {
       ]
     }
 
-    const result4 = await arango.createDBStructure(dbStructureWithEmptyArrays)
+    const result4 = await conn.db(db2).createDBStructure(dbStructureWithEmptyArrays)
 
     const collectionLength = result4.collections ? result4.collections.length : 99
     const graphLength = result4.graphs ? result4.graphs.length : 99
@@ -188,7 +185,7 @@ describe('Arango Backseat Driver Integration Tests', () => {
       })
     }
 
-    const result = await arango.validateDBStructure(dbStructure)
+    const result = await conn.db(db1).validateDBStructure(dbStructure)
 
     expect(result.collections).toEqual(
       expect.arrayContaining([
@@ -207,55 +204,55 @@ describe('Arango Backseat Driver Integration Tests', () => {
   })
 
   test('Import test data', async () => {
-    const result1 = await arango.db(testDB1).create(CONST.userCollection, cyclists)
-    const result2 = await arango.db(testDB1).create(CONST.groupCollection, teams)
+    const result1 = await conn.db(db1).create(CONST.userCollection, cyclists)
+    const result2 = await conn.db(db1).create(CONST.groupCollection, teams)
 
     expect(result1.length).toEqual(25)
     expect(result2.length).toEqual(16)
   })
 
   test('Unique constraint validation', async () => {
-    const result1 = await arango.db(testDB1).uniqueConstraintValidation({
+    const result1 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
-      constraints: [{ unique: { property: 'nickname', value: 'Chief Doper' } }]
+      constraints: [{ unique: { name: 'nickname', value: 'Chief Doper' } }]
     })
 
     expect(result1.violatesUniqueConstraint).toBeTruthy()
 
-    const result2 = await arango.db(testDB1).uniqueConstraintValidation({
+    const result2 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
-      constraints: [{ unique: { property: 'nickname', value: 'Tornado' } }]
+      constraints: [{ unique: { name: 'nickname', value: 'Tornado' } }]
     })
 
     expect(result2.violatesUniqueConstraint).toBeFalsy()
 
-    const result3 = await arango.db(testDB1).uniqueConstraintValidation({
+    const result3 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
       constraints: [
-        { unique: { property: 'nickname', value: 'Tornado' } },
-        { unique: { property: 'surname', value: 'Armstrong' } }
+        { unique: { name: 'nickname', value: 'Tornado' } },
+        { unique: { name: 'surname', value: 'Armstrong' } }
       ]
     })
 
     expect(result3.violatesUniqueConstraint).toBeTruthy()
 
-    const result4 = await arango.db(testDB1).uniqueConstraintValidation({
+    const result4 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
       constraints: [
-        { unique: { property: 'nickname', value: 'Tornado' } },
-        { unique: { property: 'surname', value: 'Voeckler' } }
+        { unique: { name: 'nickname', value: 'Tornado' } },
+        { unique: { name: 'surname', value: 'Voeckler' } }
       ]
     })
 
     expect(result4.violatesUniqueConstraint).toBeFalsy()
 
-    const result5 = await arango.db(testDB1).uniqueConstraintValidation({
+    const result5 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
       constraints: [
         {
           composite: [
-            { property: 'name', value: 'Thomas' },
-            { property: 'surname', value: 'de Ghent' }
+            { name: 'name', value: 'Thomas' },
+            { name: 'surname', value: 'de Ghent' }
           ]
         }
       ]
@@ -263,13 +260,13 @@ describe('Arango Backseat Driver Integration Tests', () => {
 
     expect(result5.violatesUniqueConstraint).toBeTruthy()
 
-    const result6 = await arango.db(testDB1).uniqueConstraintValidation({
+    const result6 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
       constraints: [
         {
           composite: [
-            { property: 'name', value: 'Thomas' },
-            { property: 'surname', value: 'Voeckler' }
+            { name: 'name', value: 'Thomas' },
+            { name: 'surname', value: 'Voeckler' }
           ]
         }
       ]
@@ -279,7 +276,7 @@ describe('Arango Backseat Driver Integration Tests', () => {
   })
 
   test('CRUD', async () => {
-    const result1A = await arango.db(testDB1).create(CONST.userCollection, {
+    const result1A = await conn.db(db1).create(CONST.userCollection, {
       name: 'Daryl',
       surname: 'Impey',
       country: 'South Africa',
@@ -303,7 +300,7 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(result1A).toBeDefined()
     expect(result1A._key).toBeDefined()
 
-    const result1B = await arango.db(testDB1).read(CONST.userCollection, result1A._key)
+    const result1B = await conn.db(db1).read(CONST.userCollection, result1A._key)
 
     expect(result1B.name).toEqual('Daryl')
     expect(result1B.surname).toEqual('Impey')
@@ -311,7 +308,10 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(result1B.results[2018].length).toEqual(3)
     expect(result1B.rating.timetrial).toEqual(8)
 
-    const result1C = await arango.db(testDB1).read(CONST.userCollection, result1A._key, { stripUnderscoreProps: true })
+    const result1C = await conn.db(db1).read(
+      CONST.userCollection,
+      result1A._key,
+      { omit: { privateProps: true } })
 
     expect(result1C.name).toEqual('Daryl')
     expect(result1C.surname).toEqual('Impey')
@@ -319,7 +319,7 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(result1C.results[2018].length).toEqual(3)
     expect(result1C.rating.timetrial).toEqual(8)
 
-    const result1D = await arango.db(testDB1).read(CONST.userCollection, 'Impey', { identifier: 'surname' })
+    const result1D = await conn.db(db1).read(CONST.userCollection, 'Impey', { idField: 'surname' })
 
     expect(result1D.name).toEqual('Daryl')
     expect(result1D.surname).toEqual('Impey')
@@ -327,9 +327,7 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(result1D.results[2018].length).toEqual(3)
     expect(result1D.rating.timetrial).toEqual(8)
 
-    const result1E = await arango
-      .db(testDB1)
-      .read(CONST.userCollection, 'Impey', { identifier: 'surname', stripUnderscoreProps: true })
+    const result1E = await conn.db(db1).read(CONST.userCollection, 'Impey', { idField: 'surname', omit: { privateProps: true } })
 
     expect(result1E.name).toEqual('Daryl')
     expect(result1E.surname).toEqual('Impey')
@@ -337,7 +335,7 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(result1E.results[2018].length).toEqual(3)
     expect(result1E.rating.timetrial).toEqual(8)
 
-    const result2A = await arango.db(testDB1).create(
+    const result2A = await conn.db(db1).create(
       CONST.userCollection,
       {
         name: 'Cadel',
@@ -359,13 +357,13 @@ describe('Arango Backseat Driver Integration Tests', () => {
           descend: 7
         }
       },
-      { stripUnderscoreProps: true }
+      { omit: { privateProps: true } }
     )
 
     expect(result2A).toBeDefined()
     expect(result2A._key).toBeDefined()
 
-    const result2B = await arango.db(testDB1).read(CONST.userCollection, result2A._key)
+    const result2B = await conn.db(db1).read(CONST.userCollection, result2A._key)
 
     expect(result2B.name).toEqual('Cadel')
     expect(result2B.surname).toEqual('Evans')
@@ -373,7 +371,7 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(result2B.results[2012].length).toEqual(1)
     expect(result2B.rating.sprint).toEqual(6)
 
-    const result2C = await arango.db(testDB1).update(CONST.userCollection, result2A._key, {
+    const result2C = await conn.db(db1).update(CONST.userCollection, result2A._key, {
       nickname: "G'day Mate",
       speciality: 'All Rounder',
       results: { 2012: ['3rd, Critérium du Dauphiné'] },
@@ -381,10 +379,8 @@ describe('Arango Backseat Driver Integration Tests', () => {
     })
 
     expect(result2C._key).toBeDefined()
-    expect(result2C._rev).toBeDefined()
-    expect(result2C._oldRev).toBeDefined()
 
-    const result2D = await arango.db(testDB1).read(CONST.userCollection, result2A._key)
+    const result2D = await conn.db(db1).read(CONST.userCollection, result2A._key)
     expect(result2D.name).toEqual('Cadel')
     expect(result2D.surname).toEqual('Evans')
     expect(result2D.nickname).toEqual("G'day Mate")
@@ -401,7 +397,7 @@ describe('Arango Backseat Driver Integration Tests', () => {
       })
     )
 
-    const result2E = await arango.db(testDB1).update(
+    const result2E = await conn.db(db1).update(
       CONST.userCollection,
       'Evans',
       {
@@ -410,17 +406,15 @@ describe('Arango Backseat Driver Integration Tests', () => {
         results: { 2009: ['1st, UCI Road Race World Champs'] },
         rating: { solo: 8 }
       },
-      { identifier: 'surname' }
+      { idField: 'surname' }
     )
 
     expect(result2E).toBeDefined()
     expect(Array.isArray(result2E)).toBeTruthy()
     expect(result2E.length).toEqual(1)
     expect(result2E[0]._key).toBeDefined()
-    expect(result2E[0]._rev).toBeDefined()
-    expect(result2E[0]._oldRev).toBeDefined()
 
-    const result2F = await arango.db(testDB1).read(CONST.userCollection, result2A._key)
+    const result2F = await conn.db(db1).read(CONST.userCollection, result2A._key)
 
     expect(result2F.name).toEqual('Cadel')
     expect(result2F.surname).toEqual('Evans')
@@ -440,25 +434,24 @@ describe('Arango Backseat Driver Integration Tests', () => {
       })
     )
 
-    const result2G = await arango.db(testDB1).read(CONST.userCollection, 'Evans', { identifier: 'surname' })
+    const result2G = await conn.db(db1).read(CONST.userCollection, 'Evans', { idField: 'surname' })
 
     expect(result2G.name).toEqual('Cadel')
     expect(result2G.surname).toEqual('Evans')
 
-    const result2H = await arango.db(testDB1).delete(CONST.userCollection, result2A._key)
+    const result2H = await conn.db(db1).delete(CONST.userCollection, result2A._key)
 
     expect(result2H._key).toBeDefined()
-    expect(result2H._rev).toBeDefined()
 
-    const result2I = await arango.db(testDB1).read(CONST.userCollection, result2A._key)
+    const result2I = await conn.db(db1).read(CONST.userCollection, result2A._key)
 
     expect(result2I).toBeUndefined()
 
-    const result2J = await arango.db(testDB1).read(CONST.userCollection, 'Evans', { identifier: 'surname' })
+    const result2J = await conn.db(db1).read(CONST.userCollection, 'Evans', { idField: 'surname' })
 
     expect(result2J).toBeUndefined()
 
-    const result3A = await arango.db(testDB1).create(CONST.userCollection, {
+    const result3A = await conn.db(db1).create(CONST.userCollection, {
       name: 'Thomas',
       surname: 'Voeckler',
       country: 'France'
@@ -467,83 +460,75 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(result3A).toBeDefined()
     expect(result3A._key).toBeDefined()
 
-    const result3B = await arango.db(testDB1).read(CONST.userCollection, result3A._key)
+    const result3B = await conn.db(db1).read(CONST.userCollection, result3A._key)
 
     expect(result3B.name).toEqual('Thomas')
     expect(result3B.surname).toEqual('Voeckler')
 
-    const result3C = await arango.db(testDB1).delete(CONST.userCollection, 'Voeckler', { identifier: 'surname' })
+    const result3C = await conn.db(db1).delete(CONST.userCollection, 'Voeckler', { idField: 'surname' })
 
     expect(result3C).toBeDefined()
     expect(Array.isArray(result3C)).toBeTruthy()
     expect(result3C.length).toEqual(1)
     expect(result3C[0]._key).toBeDefined()
-    expect(result3C[0]._rev).toBeDefined()
 
-    const result3D = await arango.db(testDB1).read(CONST.userCollection, result3A._key)
+    const result3D = await conn.db(db1).read(CONST.userCollection, result3A._key)
 
     expect(result3D).toBeUndefined()
 
-    const result4A = await arango.db(testDB1).update(
+    const result4A = await conn.db(db1).update(
       CONST.userCollection,
       'Time Trial',
       {
         rating: { timetrial: 9 }
       },
-      { identifier: 'speciality' }
+      { idField: 'speciality' }
     )
 
     expect(result4A).toBeDefined()
     expect(Array.isArray(result4A)).toBeTruthy()
     expect(result4A.length).toEqual(3)
     expect(result4A[0]._key).toBeDefined()
-    expect(result4A[0]._rev).toBeDefined()
-    expect(result4A[0]._oldRev).toBeDefined()
 
-    const result4B = (await arango
-      .db(testDB1)
-      .fetchAllByPropertyValue(CONST.userCollection, { property: 'speciality', value: 'Time Trial' })) as QueryResult
+    const result4B = (await conn.db(db1)
+      .fetchAllByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Time Trial' })) as QueryResult
 
     expect(result4B.data.length).toEqual(3)
     expect(result4B.data[0].rating.timetrial).toEqual(9)
 
-    const result5A = await arango.db(testDB1).delete(CONST.userCollection, 'Break Aways', { identifier: 'speciality' })
+    const result5A = await conn.db(db1).delete(CONST.userCollection, 'Break Aways', { idField: 'speciality' })
 
     expect(result5A).toBeDefined()
     expect(Array.isArray(result5A)).toBeTruthy()
     expect(result5A.length).toEqual(1)
 
-    const result5B = (await arango
-      .db(testDB1)
-      .fetchAllByPropertyValue(CONST.userCollection, { property: 'speciality', value: 'Break Aways' })) as QueryResult
+    const result5B = (await conn.db(db1).fetchAllByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Break Aways' })) as QueryResult
 
     expect(result5B.data.length).toEqual(0)
   })
 
   test('query, queryOne, fetch and fetchOne', async () => {
-    const result1A = await arango
-      .db(testDB1)
-      .query(`FOR d IN ${CONST.userCollection} FILTER d.speciality LIKE "Time Trial" RETURN d`)
+    const result1A = await conn
+      .db(db1)
+      .queryAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
 
     expect(result1A.length).toEqual(3)
     expect(result1A[0].surname).toBeDefined()
 
-    const result1B = (await arango
-      .db(testDB1)
-      .fetchAllByPropertyValue(CONST.userCollection, { property: 'speciality', value: 'Time Trial' })) as QueryResult
+    const result1B = (await conn
+      .db(db1)
+      .fetchAllByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Time Trial' })) as QueryResult
 
     expect(result1B.data.length).toEqual(3)
     expect(result1B.data[0].name).toBeDefined()
     expect(result1B.data[0].surname).toBeDefined()
     expect(result1B.data[0]._key).toBeDefined()
-    expect(result1B.data[0]._id).toBeDefined()
-    expect(result1B.data[0]._rev).toBeDefined()
 
-    const result1C = (await arango.db(testDB1).fetchAllByPropertyValue(
+    const result1C = (await conn.db(db1).fetchAllByPropertyValue(
       CONST.userCollection,
-      { property: 'speciality', value: 'Time Trial' },
+      { name: 'speciality', value: 'Time Trial' },
       {
-        stripUnderscoreProps: true
+        omit: { privateProps: true }
       }
     )) as QueryResult
 
@@ -551,14 +536,12 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(result1C.data[0].name).toBeDefined()
     expect(result1C.data[0].surname).toBeDefined()
     expect(result1C.data[0]._key).toBeDefined()
-    expect(result1C.data[0]._id).toBeUndefined()
-    expect(result1C.data[0]._rev).toBeUndefined()
 
-    const result1D = (await arango.db(testDB1).fetchAllByPropertyValue(
+    const result1D = (await conn.db(db1).fetchAllByPropertyValue(
       CONST.userCollection,
-      { property: 'speciality', value: 'Time Trial' },
+      { name: 'speciality', value: 'Time Trial' },
       {
-        stripInternalProps: true
+        omit: { privateProps: true }
       }
     )) as QueryResult
 
@@ -566,12 +549,10 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(result1D.data[0].name).toBeDefined()
     expect(result1D.data[0].surname).toBeDefined()
     expect(result1D.data[0]._key).toBeDefined()
-    expect(result1D.data[0]._id).toBeUndefined()
-    expect(result1D.data[0]._rev).toBeUndefined()
 
-    const result1E = (await arango.db(testDB1).fetchAllByPropertyValue(
+    const result1E = (await conn.db(db1).fetchAllByPropertyValue(
       CONST.userCollection,
-      { property: 'speciality', value: 'Time Trial' },
+      { name: 'speciality', value: 'Time Trial' },
       {
         return: QueryReturnType.CURSOR
       }
@@ -581,16 +562,15 @@ describe('Arango Backseat Driver Integration Tests', () => {
     const allDocs = await result1E.all()
     expect(allDocs[0].surname).toBeDefined()
 
-    const result2A = await arango
-      .db(testDB1)
-      .query(`FOR d IN ${CONST.userCollection} FILTER d.speciality LIKE "Trail Running" RETURN d`)
+    const result2A = await conn.db(db1)
+      .queryAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
 
     expect(result2A).toBeDefined()
     expect(Array.isArray(result2A)).toBeTruthy()
     expect(result2A.length).toEqual(0)
 
-    const result2B = (await arango.db(testDB1).fetchAllByPropertyValue(CONST.userCollection, {
-      property: 'speciality',
+    const result2B = (await conn.db(db1).fetchAllByPropertyValue(CONST.userCollection, {
+      name: 'speciality',
       value: 'Trail Running'
     })) as QueryResult
 
@@ -598,57 +578,48 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(Array.isArray(result2B.data)).toBeTruthy()
     expect(result2B.data.length).toEqual(0)
 
-    const result3A = await arango
-      .db(testDB1)
-      .queryOne(`FOR d IN ${CONST.userCollection} FILTER d.speciality LIKE "Trail Running" RETURN d`)
+    const result3A = await conn.db(db1)
+      .queryOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
 
     expect(result3A).toBeUndefined()
 
-    const result3B = await arango
-      .db(testDB1)
-      .fetchOneByPropertyValue(CONST.userCollection, { property: 'speciality', value: 'Trail Running' })
+    const result3B = await conn.db(db1)
+      .fetchOneByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Trail Running' })
 
     expect(result3B).toBeUndefined()
 
-    const result4A = await arango
-      .db(testDB1)
-      .queryOne(`FOR d IN ${CONST.userCollection} FILTER d.speciality LIKE "Time Trial" RETURN d`)
+    const result4A = await conn.db(db1)
+      .queryOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
 
     expect(result4A).toBeDefined()
     expect(result4A.surname).toBeDefined()
 
-    const result4B = await arango
-      .db(testDB1)
-      .fetchOneByPropertyValue(CONST.userCollection, { property: 'speciality', value: 'Time Trial' })
+    const result4B = await conn.db(db1)
+      .fetchOneByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Time Trial' })
 
     expect(result4B).toBeDefined()
     expect(result4B.surname).toBeDefined()
 
-    const result5A = await arango
-      .db(testDB1)
-      .queryOne(`FOR d IN ${CONST.userCollection} FILTER d.surname LIKE "Impey" RETURN d`)
+    const result5A = await conn.db(db1)
+      .queryOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
 
     expect(result5A).toBeDefined()
     expect(result5A.name).toEqual('Daryl')
 
-    const result5B = await arango
-      .db(testDB1)
-      .fetchOneByPropertyValue(CONST.userCollection, { property: 'surname', value: 'Impey' })
+    const result5B = await conn.db(db1)
+      .fetchOneByPropertyValue(CONST.userCollection, { name: 'surname', value: 'Impey' })
 
     expect(result5B).toBeDefined()
     expect(result5B.name).toEqual('Daryl')
     expect(result5B.surname).toEqual('Impey')
     expect(result5B._secret).toEqual('Rusks')
     expect(result5B._key).toBeDefined()
-    expect(result5B._id).toBeDefined()
-    expect(result5B._rev).toBeDefined()
 
-    const result5C = await arango
-      .db(testDB1)
+    const result5C = await conn.db(db1)
       .fetchOneByPropertyValue(
         CONST.userCollection,
-        { property: 'surname', value: 'Impey' },
-        { stripUnderscoreProps: true }
+        { name: 'surname', value: 'Impey' },
+        { omit: { privateProps: true } }
       )
 
     expect(result5C).toBeDefined()
@@ -656,15 +627,12 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(result5C.surname).toEqual('Impey')
     expect(result5C._secret).toBeUndefined()
     expect(result5C._key).toBeDefined()
-    expect(result5C._id).toBeUndefined()
-    expect(result5C._rev).toBeUndefined()
 
-    const result5D = await arango
-      .db(testDB1)
+    const result5D = await conn.db(db1)
       .fetchOneByPropertyValue(
         CONST.userCollection,
-        { property: 'surname', value: 'Impey' },
-        { stripInternalProps: true }
+        { name: 'surname', value: 'Impey' },
+        { omit: { privateProps: true } }
       )
 
     expect(result5D).toBeDefined()
@@ -672,83 +640,88 @@ describe('Arango Backseat Driver Integration Tests', () => {
     expect(result5D.surname).toEqual('Impey')
     expect(result5B._secret).toEqual('Rusks')
     expect(result5D._key).toBeDefined()
-    expect(result5D._id).toBeUndefined()
-    expect(result5D._rev).toBeUndefined()
 
-    const result6A = (await arango.db(testDB1).fetchAllByCompositeValue(CONST.userCollection, [
-      { property: 'country', value: 'Belgium' },
-      { property: 'speciality', value: 'Classics' }
+    const result6A = (await conn.db(db1).fetchAllByCompositeValue(CONST.userCollection, [
+      { name: 'country', value: 'Belgium' },
+      { name: 'speciality', value: 'Classics' }
     ])) as QueryResult
 
     expect(result6A.data.length).toEqual(2)
     expect(result6A.data[0].name === 'Wout' || result6A.data[0].name === 'Tim').toBeTruthy()
     expect(result6A.data[1].surname === 'van Aert' || result6A.data[1].surname === 'Wellens').toBeTruthy()
 
-    const result6B = (await arango.db(testDB1).fetchAllByCompositeValue(CONST.userCollection, [
-      { property: 'country', value: 'UK' },
-      { property: 'speciality', value: 'Classics' }
+    const result6B = (await conn.db(db1).fetchAllByCompositeValue(CONST.userCollection, [
+      { name: 'country', value: 'UK' },
+      { name: 'speciality', value: 'Classics' }
     ])) as QueryResult
 
     expect(result6B.data.length).toEqual(0)
 
-    const result7A = await arango.db(testDB1).fetchOneByCompositeValue(CONST.userCollection, [
-      { property: 'country', value: 'Belgium' },
-      { property: 'speciality', value: 'Classics' }
+    const result7A = await conn.db(db1).fetchOneByCompositeValue(CONST.userCollection, [
+      { name: 'country', value: 'Belgium' },
+      { name: 'speciality', value: 'Classics' }
     ])
 
     expect(result7A.surname === 'van Aert' || result7A.surname === 'Wellens').toBeTruthy()
 
-    const result7B = await arango.db(testDB1).fetchOneByCompositeValue(CONST.userCollection, [
-      { property: 'name', value: 'Jan' },
-      { property: 'surname', value: 'Ullrich' }
+    const result7B = await conn.db(db1).fetchOneByCompositeValue(CONST.userCollection, [
+      { name: 'name', value: 'Jan' },
+      { name: 'surname', value: 'Ullrich' }
     ])
 
     expect(result7B.surname).toEqual('Ullrich')
 
-    const result7C = await arango.db(testDB1).fetchOneByCompositeValue(CONST.userCollection, [
-      { property: 'name', value: 'Jan' },
-      { property: 'surname', value: 'Armstrong' }
+    const result7C = await conn.db(db1).fetchOneByCompositeValue(CONST.userCollection, [
+      { name: 'name', value: 'Jan' },
+      { name: 'surname', value: 'Armstrong' }
     ])
 
     expect(result7C).toBeUndefined()
   })
+
   /* */
   test('findByFilterCriteria', async () => {
-    const result1A = await arango
-      .db(testDB1)
+    const result1A = await conn.db(db1)
       .findByFilterCriteria(CONST.userCollection, 'name == "Lance" || name == "Chris"', {
-        filterOptions: { prefixPropertyNames: true }
-      })
+        filter: { prefixPropertyNames: true }
+      }) as QueryResult
 
-    console.log(result1A)
-    // expect(result1A.length).toEqual(3);
-    // expect(result1A[0].surname).toBeDefined();
+    expect(result1A.data.length).toEqual(2)
+    expect(result1A.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Lance', surname: 'Armstrong' }),
+        expect.objectContaining({ name: 'Chris', surname: 'Froome' })
+      ])
+    )
 
-    const result2A = await arango
-      .db(testDB1)
+    const result2A = await conn.db(db1)
       .findByFilterCriteria(CONST.userCollection, 'country == "Italy" && speciality == "General Classification"', {
-        filterOptions: { prefixPropertyNames: true }
-      })
+        filter: { prefixPropertyNames: true }
+      }) as QueryResult
 
-    console.log(result2A)
-    // expect(result1A.length).toEqual(3);
-    // expect(result1A[0].surname).toBeDefined();
+    expect(result2A.data.length).toEqual(2)
+    expect(result2A.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Ivan', surname: 'Basso' }),
+        expect.objectContaining({ name: 'Vincenzo', surname: 'Nibali' })
+      ])
+    )
   })
 
   test('Delete database', async () => {
     expect.assertions(5)
 
-    await arango.driver.dropDatabase(testDB1)
-    await arango.driver.dropDatabase(testDB2)
+    await conn.system.dropDatabase(db1)
+    await conn.system.dropDatabase(db2)
 
-    const testDB1Exists = await arango.databaseExists(testDB1)
-    const testDB2Exists = await arango.databaseExists(testDB2)
+    const testDB1Exists = await conn.db(db1).databaseExists()
+    const db2Exists = await conn.db(db2).databaseExists()
 
     expect(testDB1Exists).toBeFalsy()
-    expect(testDB2Exists).toBeFalsy()
+    expect(db2Exists).toBeFalsy()
 
     try {
-      await arango.driver.dropDatabase(testDB1)
+      await conn.system.dropDatabase(db1)
     } catch (e) {
       expect(e.response.body.code).toEqual(404)
       expect(e.response.body.errorNum).toEqual(1228)

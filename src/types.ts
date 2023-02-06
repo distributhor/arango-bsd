@@ -13,22 +13,22 @@ export interface UntypedObject {
   [key: string]: any
 }
 
-export interface PropertyValue {
-  property: string
+export interface NamedValue {
+  name: string
   value: any
 }
 
-export interface IndexValue {
+export interface IndexedValue {
   index: number
   value: string
 }
 
 export interface UniqueValue {
-  unique: PropertyValue
+  unique: NamedValue
 }
 
 export interface CompositeKey {
-  composite: PropertyValue[]
+  composite: NamedValue[]
 }
 
 export interface UniqueConstraint {
@@ -82,54 +82,49 @@ export interface DatabaseConfig extends Config {
   hello?: boolean
 }
 
-export interface IdentifierOption {
-  identifier?: string
+export interface IdField {
+  idField?: string
+}
+
+export interface OmitOptions {
+  privateProps?: boolean
+  listOfProps?: string[]
 }
 
 export interface CreateDocumentOptions {
-  stripUnderscoreProps?: boolean
+  omit?: OmitOptions
 }
 
-export interface ReadDocumentOptions {
-  identifier?: string
-  stripInternalProps?: boolean
-  stripUnderscoreProps?: boolean
+export interface ReadDocumentOptions extends IdField {
+  omit?: OmitOptions
 }
 
-export interface UpdateDocumentOptions {
-  identifier?: string
-}
-
-export interface DeleteDocumentOptions {
-  identifier?: string
-}
+export interface UpdateDocumentOptions extends IdField {}
+export interface DeleteDocumentOptions extends IdField {}
 
 export interface FetchOneOptions {
-  stripInternalProps?: boolean
-  stripUnderscoreProps?: boolean
-  queryOptions?: QueryOptions
+  omit?: OmitOptions
+  query?: QueryOptions
 }
 
 export interface FetchOptions {
   return?: QueryReturnType
-  stripInternalProps?: boolean
-  stripUnderscoreProps?: boolean
-  sortOptions?: SortOptions
-  queryOptions?: QueryOptions
+  omit?: OmitOptions
+  sort?: SortOptions
+  query?: QueryOptions
 }
 
 export interface FindOptions {
   return?: QueryReturnType
-  stripInternalProps?: boolean
-  stripUnderscoreProps?: boolean
-  queryOptions?: QueryOptions
-  filterOptions?: FilterOptions
+  omit?: OmitOptions
+  query?: QueryOptions
+  filter?: FilterOptions
 }
 
 export interface FilterOptions {
   prefixPropertyNames?: boolean
   restrictTo?: string
-  sortOptions?: SortOptions
+  sort?: SortOptions
 }
 
 export interface SortOptions {
@@ -149,7 +144,6 @@ export interface EdgeDefinition {
 }
 
 export interface DBStructure {
-  database: string
   collections?: string[]
   graphs?: GraphDefinition[]
 }
@@ -165,6 +159,7 @@ export interface DBStructureResult {
   database?: string
   collections?: string[]
   graphs?: string[]
+  error?: any
 }
 
 export const enum DBClearanceMethod {
