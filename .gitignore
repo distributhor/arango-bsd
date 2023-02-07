@@ -1,7 +1,5 @@
 .env
-.debug.env
-/dist
-/legacy
+
 node_modules
 
 package-lock.json
