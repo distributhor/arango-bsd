@@ -48,6 +48,7 @@ function toGraphNames(graphs: string[] | GraphDefinition[]): string[] {
   return graphs
 }
 
+/** @internal */
 function stripUnderscoreProps(obj: any, keep: string[]): void {
   Object.keys(obj).map((k) => {
     if (k.startsWith('_') && !keep.includes(k)) {
@@ -73,6 +74,38 @@ interface InstancePool {
   [key: string]: ArangoDB
 }
 
+/**
+ * A class that manages instances of {@link ArangoDB} classes.
+ *
+ * An `ArangoDB` instance strictly deals with one ArangoJS [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html)
+ * only. If you only need to work with one DB, then you can use the {@link ArangoDB} class instead, but if you want to use different databases
+ * interchangeably in the same code, then this class could potentially make that easier. It manages multiple database instances for the same
+ * [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) credentials.
+ *
+ * The constructor accepts an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html)
+ *
+ * ```typescript
+ * import { aql } from "arangojs/aql";
+ * import { ArangoConnection } from "@distributhor/guacamole";
+ *
+ * const conn = new ArangoConnection({
+ *  databaseName: db1,
+ *  url: process.env.GUACAMOLE_TEST_DB_URI,
+ *  auth: { username: dbAdminUser, password: dbAdminPassword }
+ * })
+ *
+ * const db1: ArangoDB = conn.db(dbName2)
+ * const db2: ArangoDB = conn.db(dbName2)
+ *
+ * const col1 = conn.db(dbName1).col(collectionName1)
+ * const doc1 = await conn.db(dbName2).read({ id: 12345678 })
+ * const result1: ArrayCursor = await conn.db(dbName3).query(aql)
+ *
+ * const arangojsDb1: Database = conn.db(dbName1).driver()
+ * const col1 = arangojsDb1.collection(collectionName1)
+ * const doc1 = conn.db(dbName2).driver().document(id)
+ * ```
+ */
 export class ArangoConnection {
   private readonly pool: InstancePool = {}
   private readonly arangodb: ArangoDB
@@ -123,8 +156,8 @@ export class ArangoConnection {
 
 /**
  * A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html)
- * instance. It provides easy access to the ArangoJS instance itself, which can be used as normal,
- * but adds a few convenience methods, which can optionally be used.
+ * instance. It provides easy access to the ArangoJS instance itself, which can be used as per usual,
+ * but it adds a few convenience methods, which can optionally be used.
  *
  * The constructor accepts an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html)
  *
@@ -139,7 +172,7 @@ export class ArangoConnection {
  *
  * // the backseat driver method, which immediately calls cursor.all()
  * // on the results, returning all the documents, and not the cursor
- * db.fetch(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ * db.returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
  * ```
  */
 export class ArangoDB {

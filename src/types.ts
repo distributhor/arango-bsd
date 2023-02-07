@@ -145,7 +145,6 @@ export const enum DBClearanceMethod {
   RECREATE_DB = 'RECREATE_DB',
 }
 
-/** @internal */
 export interface EntityExists {
   name: string
   exists: boolean
