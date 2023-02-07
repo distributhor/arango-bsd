@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import { Database } from 'arangojs'
-import { AqlQuery } from 'arangojs/aql'
+import { AqlQuery, literal } from 'arangojs/aql'
 import { QueryOptions } from 'arangojs/database'
 import {
   DatabaseConfig,
@@ -213,11 +213,16 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns a list of objects
    */
-  public async query<T = any>(query: AqlQuery, options?: QueryOptions): Promise<ArrayCursor<T>> {
+  public async query<T = any>(query: string | AqlQuery, options?: QueryOptions): Promise<ArrayCursor<T>> {
+    if (typeof query === 'string') {
+      console.log('FOUND LITERAL QUERY')
+      return await this.driver.query<T>(literal(query), options)
+    }
+
     return await this.driver.query<T>(query, options)
   }
 
-  public async returnAll<T = any>(query: AqlQuery, options?: FetchOptions): Promise<QueryResult<T>> {
+  public async returnAll<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<QueryResult<T>> {
     const response = await this.query<T>(query, options?.query)
     const documents = await response.all()
     return {
@@ -235,7 +240,7 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns an object
    */
-  public async returnOne<T = any>(query: AqlQuery, options?: FetchOptions): Promise<T | null> {
+  public async returnOne<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | null> {
     const response = await this.query<T>(query, options?.query)
     const documents = await response.all()
 

@@ -509,13 +509,20 @@ describe('Guacamole Integration Tests', () => {
     expect(result5B.data.length).toEqual(0)
   })
 
-  test('query, returnAll, returnOne', async () => {
+  test('returnAll, returnOne', async () => {
     const result1A = await conn
       .db(db1)
       .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
 
     expect(result1A.data.length).toEqual(3)
     expect(result1A.data[0].surname).toBeDefined()
+
+    const result1ALiteral = await conn
+      .db(db1)
+      .returnAll(`FOR d IN ${CONST.userCollection} FILTER d.speciality LIKE "Time Trial" RETURN d`)
+
+    expect(result1ALiteral.data.length).toEqual(3)
+    expect(result1ALiteral.data[0].surname).toBeDefined()
 
     const result1B = (await conn
       .db(db1)
