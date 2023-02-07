@@ -300,7 +300,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1A).toBeDefined()
     expect(result1A[0]._key).toBeDefined()
 
-    const result1B = await conn.db(db1).read(CONST.userCollection, result1A[0]._key)
+    const result1B = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key })
 
     expect(result1B.name).toEqual('Daryl')
     expect(result1B.surname).toEqual('Impey')
@@ -313,10 +313,7 @@ describe('Guacamole Integration Tests', () => {
     // }
     // const result1C = await conn.db(db1).read<Person>(
 
-    const result1C = await conn.db(db1).read(
-      CONST.userCollection,
-      result1A[0]._key,
-      { omit: { private: true } })
+    const result1C = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key, omit: { private: true } })
 
     expect(result1C.name).toEqual('Daryl')
     expect(result1C.surname).toEqual('Impey')
@@ -324,7 +321,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1C.results[2018].length).toEqual(3)
     expect(result1C.rating.timetrial).toEqual(8)
 
-    const result1D = await conn.db(db1).read(CONST.userCollection, 'Impey', { identifier: 'surname' })
+    const result1D = await conn.db(db1).read(CONST.userCollection, { id: 'Impey', identifier: 'surname' })
 
     expect(result1D.name).toEqual('Daryl')
     expect(result1D.surname).toEqual('Impey')
@@ -332,7 +329,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1D.results[2018].length).toEqual(3)
     expect(result1D.rating.timetrial).toEqual(8)
 
-    const result1E = await conn.db(db1).read(CONST.userCollection, 'Impey', { identifier: 'surname', omit: { private: true } })
+    const result1E = await conn.db(db1).read(CONST.userCollection, { id: 'Impey', identifier: 'surname', omit: { private: true } })
 
     expect(result1E.name).toEqual('Daryl')
     expect(result1E.surname).toEqual('Impey')
@@ -366,7 +363,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2A).toBeDefined()
     expect(result2A[0]._key).toBeDefined()
 
-    const result2B = await conn.db(db1).read(CONST.userCollection, result2A[0]._key)
+    const result2B = await conn.db(db1).read(CONST.userCollection, { id: result2A[0]._key })
 
     expect(result2B.name).toEqual('Cadel')
     expect(result2B.surname).toEqual('Evans')
@@ -386,7 +383,7 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2C[0]._key).toBeDefined()
 
-    const result2D = await conn.db(db1).read(CONST.userCollection, result2A[0]._key)
+    const result2D = await conn.db(db1).read(CONST.userCollection, { id: result2A[0]._key })
 
     expect(result2D.name).toEqual('Cadel')
     expect(result2D.surname).toEqual('Evans')
@@ -420,7 +417,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2E.length).toEqual(1)
     expect(result2E[0]._key).toBeDefined()
 
-    const result2F = await conn.db(db1).read(CONST.userCollection, result2A[0]._key)
+    const result2F = await conn.db(db1).read(CONST.userCollection, { id: result2A[0]._key })
 
     expect(result2F.name).toEqual('Cadel')
     expect(result2F.surname).toEqual('Evans')
@@ -440,7 +437,7 @@ describe('Guacamole Integration Tests', () => {
       })
     )
 
-    const result2G = await conn.db(db1).read(CONST.userCollection, 'Evans', { identifier: 'surname' })
+    const result2G = await conn.db(db1).read(CONST.userCollection, { id: 'Evans', identifier: 'surname' })
 
     expect(result2G.name).toEqual('Cadel')
     expect(result2G.surname).toEqual('Evans')
@@ -449,11 +446,11 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2H[0]._key).toBeDefined()
 
-    const result2I = await conn.db(db1).read(CONST.userCollection, result2A[0]._key)
+    const result2I = await conn.db(db1).read(CONST.userCollection, { id: result2A[0]._key })
 
     expect(result2I).toBeNull()
 
-    const result2J = await conn.db(db1).read(CONST.userCollection, 'Evans', { identifier: 'surname' })
+    const result2J = await conn.db(db1).read(CONST.userCollection, { id: 'Evans', identifier: 'surname' })
 
     expect(result2J).toBeNull()
 
@@ -466,7 +463,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result3A).toBeDefined()
     expect(result3A[0]._key).toBeDefined()
 
-    const result3B = await conn.db(db1).read(CONST.userCollection, result3A[0]._key)
+    const result3B = await conn.db(db1).read(CONST.userCollection, { id: result3A[0]._key })
 
     expect(result3B.name).toEqual('Thomas')
     expect(result3B.surname).toEqual('Voeckler')
@@ -478,7 +475,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result3C.length).toEqual(1)
     expect(result3C[0]._key).toBeDefined()
 
-    const result3D = await conn.db(db1).read(CONST.userCollection, result3A[0]._key)
+    const result3D = await conn.db(db1).read(CONST.userCollection, { id: result3A[0]._key })
 
     expect(result3D).toBeNull()
 

@@ -1,4 +1,3 @@
-import { CollectionReadOptions } from 'arangojs/collection'
 import { Config } from 'arangojs/connection'
 import { CursorExtras } from 'arangojs/cursor'
 import { QueryOptions } from 'arangojs/database'
@@ -100,7 +99,8 @@ export interface OmitOptions {
   props?: string[]
 }
 
-export interface ReadDocumentOptions extends CollectionReadOptions, Identifier {
+export interface ReadDocument extends Identifier {
+  id: DocumentSelector
   omit?: OmitOptions
 }
 

@@ -13,7 +13,6 @@ import {
   isGraphDefinitionArray,
   UniqueConstraint,
   UniqueConstraintResult,
-  ReadDocumentOptions,
   FetchOptions,
   OmitOptions,
   QueryReturnType,
@@ -21,11 +20,12 @@ import {
   NamedValue,
   ListOfFilters,
   UpdateDocument,
-  DeleteDocument
+  DeleteDocument,
+  ReadDocument
 } from './types'
 import { Queries } from './queries'
 import { ArrayCursor } from 'arangojs/cursor'
-import { CollectionInsertOptions, CollectionRemoveOptions, CollectionUpdateOptions, DocumentCollection, EdgeCollection } from 'arangojs/collection'
+import { CollectionInsertOptions, CollectionReadOptions, CollectionRemoveOptions, CollectionUpdateOptions, DocumentCollection, EdgeCollection } from 'arangojs/collection'
 import { Document, DocumentData, DocumentMetadata, ObjectWithKey } from 'arangojs/documents'
 
 export * from './types'
@@ -105,14 +105,6 @@ export class ArangoConnection {
   ): DocumentCollection<T> | EdgeCollection<T> {
     return this.db(db).col<T>(collection)
   }
-
-  // public async read<T extends Record<string, any> = any>(
-  //   db: string,
-  //   collection: string,
-  //   id: any, options: ReadDocumentOptions = {}
-  // ): Promise<Document<T> | null> {
-  //   return await this.db(db).read<T>(collection, id, options)
-  // }
 
   public listConnections(): string[] {
     return Object.keys(this.pool)
@@ -228,29 +220,27 @@ export class ArangoDB {
 
   public async read<T extends Record<string, any> = any>(
     collection: string,
-    id: any, options: ReadDocumentOptions = {}
+    document: ReadDocument,
+    options: CollectionReadOptions = {}
   ): Promise<Document<T> | null> {
-    let document
+    let d
 
-    if (options.identifier) {
+    if (document.identifier) {
       // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
-      document = await this.fetchOneByPropertyValue<T>(
-        collection,
-        { name: options.identifier, value: id },
-        options)
+      d = await this.fetchOneByPropertyValue<T>(collection, { name: document.identifier, value: document.id })
     } else {
       if (options.graceful !== false) {
         options.graceful = true
       }
 
-      document = await this.driver.collection<T>(collection).document(id, options)
+      d = await this.driver.collection<T>(collection).document(document.id, options)
     }
 
-    if (!document) {
+    if (!d) {
       return null
     }
 
-    return ArangoDB.trimDocument(document, options?.omit)
+    return ArangoDB.trimDocument(d, document?.omit)
   }
 
   public async create<T extends Record<string, any> = any>(
