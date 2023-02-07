@@ -11,7 +11,7 @@ import {
   ListOfFilters,
   MatchTypeOperator,
   MatchType,
-  FilterOptions
+  FetchOptions
 } from './index'
 
 /** @internal */
@@ -199,19 +199,22 @@ export function fetchByCompositeValue(
 export function findByFilterCriteria(
   collection: string,
   filter: string | ListOfFilters,
-  options: FilterOptions = {}
+  options: FetchOptions = {}
 ): AqlQuery {
   // if (options.hasOwnProperty("returnDataFieldName")) {
   //   queryOptions.returnDataFieldName = options.returnDataFieldName;
   // }
 
+  const prefixPropertyNames = true // options.prefixPropertyNames
+
   const params: any = {}
   let query = 'FOR d IN ' + collection
 
-  if (options.restrictTo) {
-    params.restrictTo = options.restrictTo
-    query += ' FILTER d.@restrictTo'
-  }
+  // TODO: enable and document this ??
+  // if (options.restrictTo) {
+  //   params.restrictTo = options.restrictTo
+  //   query += ' FILTER d.@restrictTo'
+  // }
 
   if (filter?.match) {
     if (isListOfFilters(filter)) {
@@ -221,7 +224,7 @@ export function findByFilterCriteria(
         if (i > 0) {
           query += ` ${MatchTypeOperator[filter.match]} `
         }
-        if (options.prefixPropertyNames) {
+        if (prefixPropertyNames) {
           query += _prefixPropertNameInFilterToken(filter.filters[i])
         } else {
           query += filter.filters[i]
@@ -230,7 +233,7 @@ export function findByFilterCriteria(
 
       query += ' )'
     } else {
-      if (options.prefixPropertyNames) {
+      if (prefixPropertyNames) {
         query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
       } else {
         query += ' FILTER ( ' + filter + ' )'

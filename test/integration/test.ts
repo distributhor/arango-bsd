@@ -300,7 +300,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1A).toBeDefined()
     expect(result1A._key).toBeDefined()
 
-    const result1B = await conn.db(db1).read(CONST.userCollection, result1A._key)
+    const result1B = await conn.db(db1).doc(CONST.userCollection, result1A._key)
 
     expect(result1B.name).toEqual('Daryl')
     expect(result1B.surname).toEqual('Impey')
@@ -308,10 +308,15 @@ describe('Guacamole Integration Tests', () => {
     expect(result1B.results[2018].length).toEqual(3)
     expect(result1B.rating.timetrial).toEqual(8)
 
-    const result1C = await conn.db(db1).read(
+    // interface Person {
+    //   name: string
+    // }
+    // const result1C = await conn.db(db1).doc<Person>(
+
+    const result1C = await conn.db(db1).doc(
       CONST.userCollection,
       result1A._key,
-      { omit: { privateProps: true } })
+      { omit: { private: true } })
 
     expect(result1C.name).toEqual('Daryl')
     expect(result1C.surname).toEqual('Impey')
@@ -319,7 +324,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1C.results[2018].length).toEqual(3)
     expect(result1C.rating.timetrial).toEqual(8)
 
-    const result1D = await conn.db(db1).read(CONST.userCollection, 'Impey', { idField: 'surname' })
+    const result1D = await conn.db(db1).doc(CONST.userCollection, 'Impey', { identifier: 'surname' })
 
     expect(result1D.name).toEqual('Daryl')
     expect(result1D.surname).toEqual('Impey')
@@ -327,7 +332,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1D.results[2018].length).toEqual(3)
     expect(result1D.rating.timetrial).toEqual(8)
 
-    const result1E = await conn.db(db1).read(CONST.userCollection, 'Impey', { idField: 'surname', omit: { privateProps: true } })
+    const result1E = await conn.db(db1).doc(CONST.userCollection, 'Impey', { identifier: 'surname', omit: { private: true } })
 
     expect(result1E.name).toEqual('Daryl')
     expect(result1E.surname).toEqual('Impey')
@@ -357,13 +362,13 @@ describe('Guacamole Integration Tests', () => {
           descend: 7
         }
       },
-      { omit: { privateProps: true } }
+      { omit: { private: true } }
     )
 
     expect(result2A).toBeDefined()
     expect(result2A._key).toBeDefined()
 
-    const result2B = await conn.db(db1).read(CONST.userCollection, result2A._key)
+    const result2B = await conn.db(db1).doc(CONST.userCollection, result2A._key)
 
     expect(result2B.name).toEqual('Cadel')
     expect(result2B.surname).toEqual('Evans')
@@ -380,7 +385,7 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2C._key).toBeDefined()
 
-    const result2D = await conn.db(db1).read(CONST.userCollection, result2A._key)
+    const result2D = await conn.db(db1).doc(CONST.userCollection, result2A._key)
     expect(result2D.name).toEqual('Cadel')
     expect(result2D.surname).toEqual('Evans')
     expect(result2D.nickname).toEqual("G'day Mate")
@@ -406,7 +411,7 @@ describe('Guacamole Integration Tests', () => {
         results: { 2009: ['1st, UCI Road Race World Champs'] },
         rating: { solo: 8 }
       },
-      { idField: 'surname' }
+      { identifier: 'surname' }
     )
 
     expect(result2E).toBeDefined()
@@ -414,7 +419,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2E.length).toEqual(1)
     expect(result2E[0]._key).toBeDefined()
 
-    const result2F = await conn.db(db1).read(CONST.userCollection, result2A._key)
+    const result2F = await conn.db(db1).doc(CONST.userCollection, result2A._key)
 
     expect(result2F.name).toEqual('Cadel')
     expect(result2F.surname).toEqual('Evans')
@@ -434,7 +439,7 @@ describe('Guacamole Integration Tests', () => {
       })
     )
 
-    const result2G = await conn.db(db1).read(CONST.userCollection, 'Evans', { idField: 'surname' })
+    const result2G = await conn.db(db1).doc(CONST.userCollection, 'Evans', { identifier: 'surname' })
 
     expect(result2G.name).toEqual('Cadel')
     expect(result2G.surname).toEqual('Evans')
@@ -443,11 +448,11 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2H._key).toBeDefined()
 
-    const result2I = await conn.db(db1).read(CONST.userCollection, result2A._key)
+    const result2I = await conn.db(db1).doc(CONST.userCollection, result2A._key)
 
     expect(result2I).toBeNull()
 
-    const result2J = await conn.db(db1).read(CONST.userCollection, 'Evans', { idField: 'surname' })
+    const result2J = await conn.db(db1).doc(CONST.userCollection, 'Evans', { identifier: 'surname' })
 
     expect(result2J).toBeNull()
 
@@ -460,19 +465,19 @@ describe('Guacamole Integration Tests', () => {
     expect(result3A).toBeDefined()
     expect(result3A._key).toBeDefined()
 
-    const result3B = await conn.db(db1).read(CONST.userCollection, result3A._key)
+    const result3B = await conn.db(db1).doc(CONST.userCollection, result3A._key)
 
     expect(result3B.name).toEqual('Thomas')
     expect(result3B.surname).toEqual('Voeckler')
 
-    const result3C = await conn.db(db1).delete(CONST.userCollection, 'Voeckler', { idField: 'surname' })
+    const result3C = await conn.db(db1).delete(CONST.userCollection, 'Voeckler', { identifier: 'surname' })
 
     expect(result3C).toBeDefined()
     expect(Array.isArray(result3C)).toBeTruthy()
     expect(result3C.length).toEqual(1)
     expect(result3C[0]._key).toBeDefined()
 
-    const result3D = await conn.db(db1).read(CONST.userCollection, result3A._key)
+    const result3D = await conn.db(db1).doc(CONST.userCollection, result3A._key)
 
     expect(result3D).toBeNull()
 
@@ -482,7 +487,7 @@ describe('Guacamole Integration Tests', () => {
       {
         rating: { timetrial: 9 }
       },
-      { idField: 'speciality' }
+      { identifier: 'speciality' }
     )
 
     expect(result4A).toBeDefined()
@@ -496,7 +501,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result4B.data.length).toEqual(3)
     expect(result4B.data[0].rating.timetrial).toEqual(9)
 
-    const result5A = await conn.db(db1).delete(CONST.userCollection, 'Break Aways', { idField: 'speciality' })
+    const result5A = await conn.db(db1).delete(CONST.userCollection, 'Break Aways', { identifier: 'speciality' })
 
     expect(result5A).toBeDefined()
     expect(Array.isArray(result5A)).toBeTruthy()
@@ -507,10 +512,10 @@ describe('Guacamole Integration Tests', () => {
     expect(result5B.data.length).toEqual(0)
   })
 
-  test('query, fetch, fetchOne', async () => {
+  test('query, returnAll, returnOne', async () => {
     const result1A = await conn
       .db(db1)
-      .fetch(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
+      .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
 
     expect(result1A.data.length).toEqual(3)
     expect(result1A.data[0].surname).toBeDefined()
@@ -528,7 +533,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       { name: 'speciality', value: 'Time Trial' },
       {
-        omit: { privateProps: true }
+        omit: { private: true }
       }
     )) as QueryResult
 
@@ -541,7 +546,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       { name: 'speciality', value: 'Time Trial' },
       {
-        omit: { privateProps: true }
+        omit: { private: true }
       }
     )) as QueryResult
 
@@ -563,7 +568,7 @@ describe('Guacamole Integration Tests', () => {
     expect(allDocs[0].surname).toBeDefined()
 
     const result2A = await conn.db(db1)
-      .fetch(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
+      .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
 
     expect(result2A.data).toBeDefined()
     expect(Array.isArray(result2A.data)).toBeTruthy()
@@ -579,7 +584,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2B.data.length).toEqual(0)
 
     const result3A = await conn.db(db1)
-      .fetchOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
+      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
 
     expect(result3A).toBeNull()
 
@@ -589,7 +594,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result3B).toBeNull()
 
     const result4A = await conn.db(db1)
-      .fetchOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
+      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
 
     expect(result4A).toBeDefined()
     expect(result4A.surname).toBeDefined()
@@ -601,7 +606,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result4B.surname).toBeDefined()
 
     const result5A = await conn.db(db1)
-      .fetchOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
+      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
 
     expect(result5A).toBeDefined()
     expect(result5A.name).toEqual('Daryl')
@@ -619,7 +624,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchOneByPropertyValue(
         CONST.userCollection,
         { name: 'surname', value: 'Impey' },
-        { omit: { privateProps: true } }
+        { omit: { private: true } }
       )
 
     expect(result5C).toBeDefined()
@@ -632,7 +637,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchOneByPropertyValue(
         CONST.userCollection,
         { name: 'surname', value: 'Impey' },
-        { omit: { privateProps: true } }
+        { omit: { private: true } }
       )
 
     expect(result5D).toBeDefined()
@@ -682,9 +687,7 @@ describe('Guacamole Integration Tests', () => {
   /* */
   test('findByFilterCriteria', async () => {
     const result1A = await conn.db(db1)
-      .findByFilterCriteria(CONST.userCollection, 'name == "Lance" || name == "Chris"', {
-        filter: { prefixPropertyNames: true }
-      }) as QueryResult
+      .findByFilterCriteria(CONST.userCollection, 'name == "Lance" || name == "Chris"') as QueryResult
 
     expect(result1A.data.length).toEqual(2)
     expect(result1A.data).toEqual(
@@ -696,15 +699,13 @@ describe('Guacamole Integration Tests', () => {
 
     const result1B = await conn.db(db1)
       .findByFilterCriteria(CONST.userCollection, 'name == "Lance" || name == "Chris"', {
-        return: QueryReturnType.CURSOR, filter: { prefixPropertyNames: true }
+        return: QueryReturnType.CURSOR
       }) as ArrayCursor
 
     expect(result1B instanceof ArrayCursor).toBeTruthy()
 
     const result2A = await conn.db(db1)
-      .findByFilterCriteria(CONST.userCollection, 'country == "Italy" && speciality == "General Classification"', {
-        filter: { prefixPropertyNames: true }
-      }) as QueryResult
+      .findByFilterCriteria(CONST.userCollection, 'country == "Italy" && speciality == "General Classification"') as QueryResult
 
     expect(result2A.data.length).toEqual(2)
     expect(result2A.data).toEqual(

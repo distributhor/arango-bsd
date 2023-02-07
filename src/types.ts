@@ -1,3 +1,4 @@
+import { CollectionReadOptions } from 'arangojs/collection'
 import { Config } from 'arangojs/connection'
 import { CursorExtras } from 'arangojs/cursor'
 import { QueryOptions } from 'arangojs/database'
@@ -59,8 +60,8 @@ export enum QueryReturnType {
 //   options: any;
 // }
 
-export interface QueryResult {
-  data: any
+export interface QueryResult<T = any> {
+  data: T[]
   meta?: QueryMeta
   extra?: CursorExtras
 }
@@ -89,44 +90,31 @@ export interface DatabaseConfig extends Config {
   hello?: boolean
 }
 
-export interface IdField {
-  idField?: string
+export interface Identifier {
+  identifier?: string
 }
 
 export interface OmitOptions {
-  privateProps?: boolean
-  listOfProps?: string[]
+  private?: boolean
+  props?: string[]
 }
 
 export interface CreateDocumentOptions {
   omit?: OmitOptions
 }
 
-export interface ReadDocumentOptions extends IdField {
+export interface ReadDocumentOptions extends CollectionReadOptions, Identifier {
   omit?: OmitOptions
 }
 
-export interface UpdateDocumentOptions extends IdField {}
-export interface DeleteDocumentOptions extends IdField {}
+export interface UpdateDocumentOptions extends Identifier {}
+export interface DeleteDocumentOptions extends Identifier {}
 
 export interface FetchOptions {
   omit?: OmitOptions
   query?: QueryOptions
   sort?: SortOptions
   return?: QueryReturnType
-}
-
-export interface FindOptions {
-  return?: QueryReturnType
-  omit?: OmitOptions
-  query?: QueryOptions
-  filter?: FilterOptions
-}
-
-export interface FilterOptions {
-  prefixPropertyNames?: boolean
-  restrictTo?: string
-  sort?: SortOptions
 }
 
 export interface SortOptions {
