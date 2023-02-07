@@ -43,11 +43,6 @@ export interface UniqueConstraintResult {
   documents?: any[]
 }
 
-export enum QueryType {
-  STRING = 'string',
-  AQL = 'aql',
-}
-
 export enum QueryReturnType {
   DOCUMENTS = 'documents',
   CURSOR = 'cursor',
@@ -92,29 +87,19 @@ export interface DatabaseConfig extends Config {
 
 export interface Identifier {
   identifier?: string
-}
-
-export interface OmitOptions {
-  private?: boolean
-  props?: string[]
-}
-
-export interface ReadDocument extends Identifier {
   id: DocumentSelector
-  omit?: OmitOptions
 }
 
-export interface UpdateDocument<T extends Record<string, any> = any> extends Identifier {
-  id: DocumentSelector
+export interface DocumentUpdate<T extends Record<string, any> = any> extends Identifier {
   data: Patch<DocumentData<T>>
 }
 
-export interface DeleteDocument extends Identifier {
-  id: DocumentSelector
+export interface DocumentTrimOptions {
+  trimPrivateProps?: boolean
+  trimProps?: string[]
 }
 
-export interface FetchOptions {
-  omit?: OmitOptions
+export interface FetchOptions extends DocumentTrimOptions {
   query?: QueryOptions
   sort?: SortOptions
   return?: QueryReturnType

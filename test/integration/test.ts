@@ -313,7 +313,7 @@ describe('Guacamole Integration Tests', () => {
     // }
     // const result1C = await conn.db(db1).read<Person>(
 
-    const result1C = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key, omit: { private: true } })
+    const result1C = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key }, { trimPrivateProps: true })
 
     expect(result1C.name).toEqual('Daryl')
     expect(result1C.surname).toEqual('Impey')
@@ -329,7 +329,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1D.results[2018].length).toEqual(3)
     expect(result1D.rating.timetrial).toEqual(8)
 
-    const result1E = await conn.db(db1).read(CONST.userCollection, { id: 'Impey', identifier: 'surname', omit: { private: true } })
+    const result1E = await conn.db(db1).read(CONST.userCollection, { id: 'Impey', identifier: 'surname' }, { trimPrivateProps: true })
 
     expect(result1E.name).toEqual('Daryl')
     expect(result1E.surname).toEqual('Impey')
@@ -357,7 +357,7 @@ describe('Guacamole Integration Tests', () => {
         descend: 7
       }
     }
-      // { omit: { private: true } }
+      // { omit: { trimPrivateProps: true } }
     )
 
     expect(result2A).toBeDefined()
@@ -530,7 +530,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       { name: 'speciality', value: 'Time Trial' },
       {
-        omit: { private: true }
+        trimPrivateProps: true
       }
     )) as QueryResult
 
@@ -543,7 +543,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       { name: 'speciality', value: 'Time Trial' },
       {
-        omit: { private: true }
+        trimPrivateProps: true
       }
     )) as QueryResult
 
@@ -621,7 +621,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchOneByPropertyValue(
         CONST.userCollection,
         { name: 'surname', value: 'Impey' },
-        { omit: { private: true } }
+        { trimPrivateProps: true }
       )
 
     expect(result5C).toBeDefined()
@@ -634,7 +634,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchOneByPropertyValue(
         CONST.userCollection,
         { name: 'surname', value: 'Impey' },
-        { omit: { private: true } }
+        { trimPrivateProps: true }
       )
 
     expect(result5D).toBeDefined()

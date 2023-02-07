@@ -14,14 +14,13 @@ import {
   UniqueConstraint,
   UniqueConstraintResult,
   FetchOptions,
-  OmitOptions,
+  DocumentTrimOptions,
   QueryReturnType,
   QueryResult,
   NamedValue,
   ListOfFilters,
-  UpdateDocument,
-  DeleteDocument,
-  ReadDocument
+  DocumentUpdate,
+  Identifier
 } from './types'
 import { Queries } from './queries'
 import { ArrayCursor } from 'arangojs/cursor'
@@ -189,7 +188,7 @@ export class ArangoDB {
     const response = await this.query<T>(query, options?.query)
     const documents = await response.all()
     return {
-      data: ArangoDB.trimDocuments(documents, options?.omit)
+      data: ArangoDB.trimDocuments(documents, options)
     }
   }
 
@@ -211,7 +210,7 @@ export class ArangoDB {
       return null
     }
 
-    return ArangoDB.trimDocument(documents.shift(), options?.omit)
+    return ArangoDB.trimDocument(documents.shift(), options)
   }
 
   public col<T extends Record<string, any> = any>(collection: string): DocumentCollection<T> | EdgeCollection<T> {
@@ -220,7 +219,8 @@ export class ArangoDB {
 
   public async read<T extends Record<string, any> = any>(
     collection: string,
-    document: ReadDocument,
+    document: Identifier,
+    trim: DocumentTrimOptions = {},
     options: CollectionReadOptions = {}
   ): Promise<Document<T> | null> {
     let d
@@ -240,14 +240,13 @@ export class ArangoDB {
       return null
     }
 
-    return ArangoDB.trimDocument(d, document?.omit)
+    return ArangoDB.trimDocument(d, trim)
   }
 
   public async create<T extends Record<string, any> = any>(
     collection: string,
     data: DocumentData<T> | Array<DocumentData<T>>,
     options?: CollectionInsertOptions
-  // ): Promise<DocumentMetadata & { new?: Document<T> } | Array<DocumentMetadata & { new?: Document<T> }>> {
   ): Promise<Array<DocumentMetadata & { new?: Document<T> }>> {
     if (Array.isArray(data)) {
       return await this.driver.collection(collection).saveAll(data, options)
@@ -260,7 +259,7 @@ export class ArangoDB {
 
   public async update<T extends Record<string, any> = any>(
     collection: string,
-    document: UpdateDocument | any[],
+    document: DocumentUpdate | any[],
     options: CollectionUpdateOptions = {}
   ): Promise<Array<DocumentMetadata & { new?: Document<T>, old?: Document<T> }>> {
     if (Array.isArray(document)) {
@@ -299,7 +298,7 @@ export class ArangoDB {
 
   public async delete<T extends Record<string, any> = any>(
     collection: string,
-    document: DeleteDocument | Array<string | ObjectWithKey>,
+    document: Identifier | Array<string | ObjectWithKey>,
     options: CollectionRemoveOptions = {}
   ): Promise<Array<DocumentMetadata & { old?: Document<T> }>> {
     if (Array.isArray(document)) {
@@ -355,7 +354,7 @@ export class ArangoDB {
     const documents = await result.all()
 
     return {
-      data: ArangoDB.trimDocuments(documents, options?.omit)
+      data: ArangoDB.trimDocuments(documents, options)
     }
   }
 
@@ -376,7 +375,7 @@ export class ArangoDB {
     const documents = await result.all()
 
     return {
-      data: ArangoDB.trimDocuments(documents, options?.omit)
+      data: ArangoDB.trimDocuments(documents, options)
     }
   }
 
@@ -394,7 +393,7 @@ export class ArangoDB {
     const documents = await result.all()
 
     return {
-      data: ArangoDB.trimDocuments(documents, options?.omit)
+      data: ArangoDB.trimDocuments(documents, options)
     }
   }
 
@@ -413,12 +412,12 @@ export class ArangoDB {
     }
   }
 
-  public static trimDocument(document: any, options: OmitOptions = {}): any {
+  public static trimDocument(document: any, options: DocumentTrimOptions = {}): any {
     if (!document) {
       return document
     }
 
-    if (options.private) {
+    if (options.trimPrivateProps) {
       stripUnderscoreProps(document, ['_key'])
       // stripProps(document, ['_id', '_rev'])
     }
@@ -426,8 +425,8 @@ export class ArangoDB {
     return document
   }
 
-  public static trimDocuments(documents: any[], options: OmitOptions = {}): any[] {
-    if (options.private) {
+  public static trimDocuments(documents: any[], options: DocumentTrimOptions = {}): any[] {
+    if (options.trimPrivateProps) {
       documents.map((d) => {
         stripUnderscoreProps(d, ['_key'])
         return d
