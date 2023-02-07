@@ -69,16 +69,16 @@ describe('Guacamole Integration Tests', () => {
     const dbs = await conn.system.listDatabases()
     expect(dbs.length).toBeGreaterThanOrEqual(1)
 
-    let db1Exists = await conn.db(db1).databaseExists()
-    let db2Exists = await conn.db(db2).databaseExists()
+    let db1Exists = await conn.db(db1).dbExists()
+    let db2Exists = await conn.db(db2).dbExists()
 
     expect(db1Exists).toBeFalsy()
     expect(db2Exists).toBeFalsy()
 
     await conn.system.createDatabase(db1)
 
-    db1Exists = await conn.db(db1).databaseExists()
-    db2Exists = await conn.db(db2).databaseExists()
+    db1Exists = await conn.db(db1).dbExists()
+    db2Exists = await conn.db(db2).dbExists()
 
     expect(db1Exists).toBeTruthy()
     expect(db2Exists).toBeFalsy()
@@ -111,7 +111,7 @@ describe('Guacamole Integration Tests', () => {
     )
 
     // confirm non-existent DB was created
-    const db2Exists = await conn.db(db2).databaseExists()
+    const db2Exists = await conn.db(db2).dbExists()
     expect(db2Exists).toBeTruthy()
 
     // check that expected collections exist and that different drivers behave as expected
@@ -123,9 +123,9 @@ describe('Guacamole Integration Tests', () => {
 
     const usersCollectionOnSystemDB1 = await conn.system.collection(CONST.userCollection).exists()
 
-    const usersCollectionExist = await conn.db(db1).collectionExists(CONST.userCollection)
-    const groupsCollectionExist = await conn.db(db1).collectionExists(CONST.groupCollection)
-    const userGroupsCollectionExist = await conn.db(db1).collectionExists(CONST.userToGroupEdge)
+    const usersCollectionExist = await conn.db(db1).col(CONST.userCollection).exists()
+    const groupsCollectionExist = await conn.db(db1).col(CONST.groupCollection).exists()
+    const userGroupsCollectionExist = await conn.db(db1).col(CONST.userToGroupEdge).exists()
 
     expect(usersCollectionOnSystemDB1).toBeFalsy()
     expect(usersCollectionExist).toBeTruthy()
@@ -134,7 +134,7 @@ describe('Guacamole Integration Tests', () => {
 
     // remove a collection and recreate the structure
     await conn.driver(db2).collection(CONST.userCollection).drop()
-    const usersCollectionExist2 = await conn.db(db2).collectionExists(CONST.userCollection)
+    const usersCollectionExist2 = await conn.db(db2).col(CONST.userCollection).exists()
     expect(usersCollectionExist2).toBeFalsy()
 
     const result3 = await conn.db(db2).createDBStructure(dbStructure)
@@ -148,7 +148,7 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const usersCollectionExist3 = await conn.db(db2).collectionExists(CONST.userCollection)
+    const usersCollectionExist3 = await conn.db(db2).col(CONST.userCollection).exists()
     expect(usersCollectionExist3).toBeTruthy()
 
     // confirm that empty array values do not break anything, ie, that they
@@ -298,9 +298,9 @@ describe('Guacamole Integration Tests', () => {
     })
 
     expect(result1A).toBeDefined()
-    expect(result1A._key).toBeDefined()
+    expect(result1A[0]._key).toBeDefined()
 
-    const result1B = await conn.db(db1).doc(CONST.userCollection, result1A._key)
+    const result1B = await conn.db(db1).read(CONST.userCollection, result1A[0]._key)
 
     expect(result1B.name).toEqual('Daryl')
     expect(result1B.surname).toEqual('Impey')
@@ -311,11 +311,11 @@ describe('Guacamole Integration Tests', () => {
     // interface Person {
     //   name: string
     // }
-    // const result1C = await conn.db(db1).doc<Person>(
+    // const result1C = await conn.db(db1).read<Person>(
 
-    const result1C = await conn.db(db1).doc(
+    const result1C = await conn.db(db1).read(
       CONST.userCollection,
-      result1A._key,
+      result1A[0]._key,
       { omit: { private: true } })
 
     expect(result1C.name).toEqual('Daryl')
@@ -324,7 +324,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1C.results[2018].length).toEqual(3)
     expect(result1C.rating.timetrial).toEqual(8)
 
-    const result1D = await conn.db(db1).doc(CONST.userCollection, 'Impey', { identifier: 'surname' })
+    const result1D = await conn.db(db1).read(CONST.userCollection, 'Impey', { identifier: 'surname' })
 
     expect(result1D.name).toEqual('Daryl')
     expect(result1D.surname).toEqual('Impey')
@@ -332,7 +332,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1D.results[2018].length).toEqual(3)
     expect(result1D.rating.timetrial).toEqual(8)
 
-    const result1E = await conn.db(db1).doc(CONST.userCollection, 'Impey', { identifier: 'surname', omit: { private: true } })
+    const result1E = await conn.db(db1).read(CONST.userCollection, 'Impey', { identifier: 'surname', omit: { private: true } })
 
     expect(result1E.name).toEqual('Daryl')
     expect(result1E.surname).toEqual('Impey')
@@ -340,52 +340,54 @@ describe('Guacamole Integration Tests', () => {
     expect(result1E.results[2018].length).toEqual(3)
     expect(result1E.rating.timetrial).toEqual(8)
 
-    const result2A = await conn.db(db1).create(
-      CONST.userCollection,
-      {
-        name: 'Cadel',
-        surname: 'Evans',
-        country: 'Australia',
-        speciality: 'GC',
-        _secret: 'Smiling',
-        results: {
-          2010: ['1st, La Flèche Wallonne', "5th, Giro d'Italia", '6th, Tour Down Under'],
-          2015: ['1st, Tour de France', '1st, Tirreno–Adriatico', '1st Tour de Romandie'],
-          2012: ['7th, Tour de France'],
-          2013: ["3rd, Giro d'Italia"]
-        },
-        rating: {
-          sprint: 6,
-          climb: 8,
-          timetrial: 9,
-          punch: 8,
-          descend: 7
-        }
+    const result2A = await conn.db(db1).create(CONST.userCollection, {
+      name: 'Cadel',
+      surname: 'Evans',
+      country: 'Australia',
+      speciality: 'GC',
+      _secret: 'Smiling',
+      results: {
+        2010: ['1st, La Flèche Wallonne', "5th, Giro d'Italia", '6th, Tour Down Under'],
+        2015: ['1st, Tour de France', '1st, Tirreno–Adriatico', '1st Tour de Romandie'],
+        2012: ['7th, Tour de France'],
+        2013: ["3rd, Giro d'Italia"]
       },
-      { omit: { private: true } }
+      rating: {
+        sprint: 6,
+        climb: 8,
+        timetrial: 9,
+        punch: 8,
+        descend: 7
+      }
+    }
+      // { omit: { private: true } }
     )
 
     expect(result2A).toBeDefined()
-    expect(result2A._key).toBeDefined()
+    expect(result2A[0]._key).toBeDefined()
 
-    const result2B = await conn.db(db1).doc(CONST.userCollection, result2A._key)
+    const result2B = await conn.db(db1).read(CONST.userCollection, result2A[0]._key)
 
     expect(result2B.name).toEqual('Cadel')
     expect(result2B.surname).toEqual('Evans')
-    expect(result2B._secret).toBeUndefined()
+    // expect(result2B._secret).toBeUndefined()
     expect(result2B.results[2012].length).toEqual(1)
     expect(result2B.rating.sprint).toEqual(6)
 
-    const result2C = await conn.db(db1).update(CONST.userCollection, result2A._key, {
-      nickname: "G'day Mate",
-      speciality: 'All Rounder',
-      results: { 2012: ['3rd, Critérium du Dauphiné'] },
-      rating: { sprint: 7 }
+    const result2C = await conn.db(db1).update(CONST.userCollection, {
+      id: result2A[0]._key,
+      data: {
+        nickname: "G'day Mate",
+        speciality: 'All Rounder',
+        results: { 2012: ['3rd, Critérium du Dauphiné'] },
+        rating: { sprint: 7 }
+      }
     })
 
-    expect(result2C._key).toBeDefined()
+    expect(result2C[0]._key).toBeDefined()
 
-    const result2D = await conn.db(db1).doc(CONST.userCollection, result2A._key)
+    const result2D = await conn.db(db1).read(CONST.userCollection, result2A[0]._key)
+
     expect(result2D.name).toEqual('Cadel')
     expect(result2D.surname).toEqual('Evans')
     expect(result2D.nickname).toEqual("G'day Mate")
@@ -402,24 +404,23 @@ describe('Guacamole Integration Tests', () => {
       })
     )
 
-    const result2E = await conn.db(db1).update(
-      CONST.userCollection,
-      'Evans',
-      {
+    const result2E = await conn.db(db1).update(CONST.userCollection, {
+      identifier: 'surname',
+      id: 'Evans',
+      data: {
         nickname: 'Too Nice',
         speciality: 'GC',
         results: { 2009: ['1st, UCI Road Race World Champs'] },
         rating: { solo: 8 }
-      },
-      { identifier: 'surname' }
-    )
+      }
+    })
 
     expect(result2E).toBeDefined()
     expect(Array.isArray(result2E)).toBeTruthy()
     expect(result2E.length).toEqual(1)
     expect(result2E[0]._key).toBeDefined()
 
-    const result2F = await conn.db(db1).doc(CONST.userCollection, result2A._key)
+    const result2F = await conn.db(db1).read(CONST.userCollection, result2A[0]._key)
 
     expect(result2F.name).toEqual('Cadel')
     expect(result2F.surname).toEqual('Evans')
@@ -439,20 +440,20 @@ describe('Guacamole Integration Tests', () => {
       })
     )
 
-    const result2G = await conn.db(db1).doc(CONST.userCollection, 'Evans', { identifier: 'surname' })
+    const result2G = await conn.db(db1).read(CONST.userCollection, 'Evans', { identifier: 'surname' })
 
     expect(result2G.name).toEqual('Cadel')
     expect(result2G.surname).toEqual('Evans')
 
-    const result2H = await conn.db(db1).delete(CONST.userCollection, result2A._key)
+    const result2H = await conn.db(db1).delete(CONST.userCollection, { id: result2A[0]._key })
 
-    expect(result2H._key).toBeDefined()
+    expect(result2H[0]._key).toBeDefined()
 
-    const result2I = await conn.db(db1).doc(CONST.userCollection, result2A._key)
+    const result2I = await conn.db(db1).read(CONST.userCollection, result2A[0]._key)
 
     expect(result2I).toBeNull()
 
-    const result2J = await conn.db(db1).doc(CONST.userCollection, 'Evans', { identifier: 'surname' })
+    const result2J = await conn.db(db1).read(CONST.userCollection, 'Evans', { identifier: 'surname' })
 
     expect(result2J).toBeNull()
 
@@ -463,32 +464,31 @@ describe('Guacamole Integration Tests', () => {
     })
 
     expect(result3A).toBeDefined()
-    expect(result3A._key).toBeDefined()
+    expect(result3A[0]._key).toBeDefined()
 
-    const result3B = await conn.db(db1).doc(CONST.userCollection, result3A._key)
+    const result3B = await conn.db(db1).read(CONST.userCollection, result3A[0]._key)
 
     expect(result3B.name).toEqual('Thomas')
     expect(result3B.surname).toEqual('Voeckler')
 
-    const result3C = await conn.db(db1).delete(CONST.userCollection, 'Voeckler', { identifier: 'surname' })
+    const result3C = await conn.db(db1).delete(CONST.userCollection, { id: 'Voeckler', identifier: 'surname' })
 
     expect(result3C).toBeDefined()
     expect(Array.isArray(result3C)).toBeTruthy()
     expect(result3C.length).toEqual(1)
     expect(result3C[0]._key).toBeDefined()
 
-    const result3D = await conn.db(db1).doc(CONST.userCollection, result3A._key)
+    const result3D = await conn.db(db1).read(CONST.userCollection, result3A[0]._key)
 
     expect(result3D).toBeNull()
 
-    const result4A = await conn.db(db1).update(
-      CONST.userCollection,
-      'Time Trial',
-      {
+    const result4A = await conn.db(db1).update(CONST.userCollection, {
+      identifier: 'speciality',
+      id: 'Time Trial',
+      data: {
         rating: { timetrial: 9 }
-      },
-      { identifier: 'speciality' }
-    )
+      }
+    })
 
     expect(result4A).toBeDefined()
     expect(Array.isArray(result4A)).toBeTruthy()
@@ -501,7 +501,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result4B.data.length).toEqual(3)
     expect(result4B.data[0].rating.timetrial).toEqual(9)
 
-    const result5A = await conn.db(db1).delete(CONST.userCollection, 'Break Aways', { identifier: 'speciality' })
+    const result5A = await conn.db(db1).delete(CONST.userCollection, { id: 'Break Aways', identifier: 'speciality' })
 
     expect(result5A).toBeDefined()
     expect(Array.isArray(result5A)).toBeTruthy()
@@ -722,8 +722,8 @@ describe('Guacamole Integration Tests', () => {
     await conn.system.dropDatabase(db1)
     await conn.system.dropDatabase(db2)
 
-    const testDB1Exists = await conn.db(db1).databaseExists()
-    const db2Exists = await conn.db(db2).databaseExists()
+    const testDB1Exists = await conn.db(db1).dbExists()
+    const db2Exists = await conn.db(db2).dbExists()
 
     expect(testDB1Exists).toBeFalsy()
     expect(db2Exists).toBeFalsy()

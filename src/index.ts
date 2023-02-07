@@ -13,22 +13,20 @@ import {
   isGraphDefinitionArray,
   UniqueConstraint,
   UniqueConstraintResult,
-  CreateDocumentOptions,
   ReadDocumentOptions,
-  UpdateDocumentOptions,
-  DeleteDocumentOptions,
   FetchOptions,
   OmitOptions,
   QueryReturnType,
   QueryResult,
   NamedValue,
-  ListOfFilters
+  ListOfFilters,
+  UpdateDocument,
+  DeleteDocument
 } from './types'
 import { Queries } from './queries'
 import { ArrayCursor } from 'arangojs/cursor'
-import { DocumentCollection, EdgeCollection } from 'arangojs/collection'
-import { Graph } from 'arangojs/graph'
-import { Document } from 'arangojs/documents'
+import { CollectionInsertOptions, CollectionRemoveOptions, CollectionUpdateOptions, DocumentCollection, EdgeCollection } from 'arangojs/collection'
+import { Document, DocumentData, DocumentMetadata, ObjectWithKey } from 'arangojs/documents'
 
 export * from './types'
 
@@ -93,21 +91,28 @@ export class ArangoConnection {
     }
   }
 
-  public db(db: string): ArangoDB {
-    return this.getInstance(db)
-  }
-
   public driver(db: string): Database {
     return this.getInstance(db).driver
   }
 
-  public col(db: string, collection: string): DocumentCollection<any> | EdgeCollection<any> {
-    return this.driver(db).collection(collection)
+  public db(db: string): ArangoDB {
+    return this.getInstance(db)
   }
 
-  public graph(db: string, graph: string): Graph {
-    return this.driver(db).graph(graph)
+  public col<T extends Record<string, any> = any>(
+    db: string,
+    collection: string
+  ): DocumentCollection<T> | EdgeCollection<T> {
+    return this.db(db).col<T>(collection)
   }
+
+  // public async read<T extends Record<string, any> = any>(
+  //   db: string,
+  //   collection: string,
+  //   id: any, options: ReadDocumentOptions = {}
+  // ): Promise<Document<T> | null> {
+  //   return await this.db(db).read<T>(collection, id, options)
+  // }
 
   public listConnections(): string[] {
     return Object.keys(this.pool)
@@ -173,14 +178,6 @@ export class ArangoDB {
     return this.driver.name
   }
 
-  public col<T extends Record<string, any> = any>(collection: string): DocumentCollection<T> | EdgeCollection<T> {
-    return this.driver.collection(collection)
-  }
-
-  public graph(graph: string): Graph {
-    return this.driver.graph(graph)
-  }
-
   /**
    * The regular `driver.query` method will return a database cursor. If you wish to just
    * return all the documents in the result at once (same as invoking cursor.all()),
@@ -225,7 +222,11 @@ export class ArangoDB {
     return ArangoDB.trimDocument(documents.shift(), options?.omit)
   }
 
-  public async doc<T extends Record<string, any> = any>(
+  public col<T extends Record<string, any> = any>(collection: string): DocumentCollection<T> | EdgeCollection<T> {
+    return this.driver.collection(collection)
+  }
+
+  public async read<T extends Record<string, any> = any>(
     collection: string,
     id: any, options: ReadDocumentOptions = {}
   ): Promise<Document<T> | null> {
@@ -252,42 +253,73 @@ export class ArangoDB {
     return ArangoDB.trimDocument(document, options?.omit)
   }
 
-  public async create(collection: string, document: any, options: CreateDocumentOptions = {}): Promise<any> {
-    if (options.omit?.private) {
-      if (Array.isArray(document)) {
-        document.map((o) => {
-          stripUnderscoreProps(o, ['_key'])
-          return o
-        })
-      } else {
-        stripUnderscoreProps(document, ['_key'])
-      }
+  public async create<T extends Record<string, any> = any>(
+    collection: string,
+    data: DocumentData<T> | Array<DocumentData<T>>,
+    options?: CollectionInsertOptions
+  // ): Promise<DocumentMetadata & { new?: Document<T> } | Array<DocumentMetadata & { new?: Document<T> }>> {
+  ): Promise<Array<DocumentMetadata & { new?: Document<T> }>> {
+    if (Array.isArray(data)) {
+      return await this.driver.collection(collection).saveAll(data, options)
     }
 
-    return await this.driver.collection(collection).save(document)
+    const result = await this.driver.collection(collection).save(data, options)
+
+    return [result]
   }
 
-  public async update(collection: string, id: string, data: any, options: UpdateDocumentOptions = {}): Promise<any> {
-    if (options.identifier) {
+  public async update<T extends Record<string, any> = any>(
+    collection: string,
+    document: UpdateDocument | any[],
+    options: CollectionUpdateOptions = {}
+  ): Promise<Array<DocumentMetadata & { new?: Document<T>, old?: Document<T> }>> {
+    if (Array.isArray(document)) {
+      return await this.driver.collection(collection).updateAll(document, options)
+    }
+
+    if (document.identifier) {
       const query = Queries.updateDocumentsByKeyValue(
         this.driver.collection(collection),
-        { name: options.identifier, value: id },
-        data
+        { name: document.identifier, value: document.id },
+        document.data
       )
 
       const result = await this.driver.query(query)
 
+      // [
+      //   {
+      //     _key: '270228543'
+      //   }
+      // ]
       return await result.all()
     }
 
-    return await this.driver.collection(collection).update(id, data)
+    const result = await this.driver.collection(collection).update(document.id, document.data, options)
+
+    // [
+    //   {
+    //     _id: 'cyclists/270226544',
+    //     _key: '270226544',
+    //     _rev: '_fgqsdT----',
+    //     _oldRev: '_fgqsdS2---'
+    //   }
+    // ]
+    return [result]
   }
 
-  public async delete(collection: string, id: string, options: DeleteDocumentOptions = {}): Promise<any> {
-    if (options.identifier) {
+  public async delete<T extends Record<string, any> = any>(
+    collection: string,
+    document: DeleteDocument | Array<string | ObjectWithKey>,
+    options: CollectionRemoveOptions = {}
+  ): Promise<Array<DocumentMetadata & { old?: Document<T> }>> {
+    if (Array.isArray(document)) {
+      return await this.driver.collection(collection).removeAll(document, options)
+    }
+
+    if (document.identifier) {
       const query = Queries.deleteDocumentsByKeyValue(
         this.driver.collection(collection),
-        { name: options.identifier, value: id }
+        { name: document.identifier, value: document.id }
       )
 
       const result = await this.driver.query(query)
@@ -295,7 +327,9 @@ export class ArangoDB {
       return await result.all()
     }
 
-    return await this.driver.collection(collection).remove(id)
+    const response = await this.driver.collection(collection).remove(document.id, options)
+
+    return [response]
   }
 
   public async fetchOneByPropertyValue<T = any>(
@@ -389,25 +423,6 @@ export class ArangoDB {
     }
   }
 
-  public async collectionExists(collection: string): Promise<boolean> {
-    // return (await this.driver.listCollections()).map((c) => c.name).includes(collection)
-    return await this.driver.collection(collection).exists()
-  }
-
-  public async graphExists(graph: string): Promise<boolean> {
-    // return (await this.driver.listGraphs()).map((g) => g.name).includes(graph)
-    return await this.driver.graph(graph).exists()
-  }
-
-  public async databaseExists(): Promise<boolean> {
-    // if (db) {
-    //   driver.listDatabases() will throw an error (database not found) if the db in question doesn't actually exist yet
-    //   return (await this.driver.listDatabases()).includes(db)
-    // }
-
-    return await this.driver.exists()
-  }
-
   public static trimDocument(document: any, options: OmitOptions = {}): any {
     if (!document) {
       return document
@@ -438,7 +453,7 @@ export class ArangoDB {
   }
 
   public async clearDB(method: DBClearanceMethod = DBClearanceMethod.DELETE_DATA): Promise<void> {
-    const dbExists = await this.databaseExists()
+    const dbExists = await this.dbExists()
     if (!dbExists) {
       return
     }
@@ -460,6 +475,15 @@ export class ArangoDB {
     debugInfo(`DB ${this.driver.name} cleaned`)
   }
 
+  public async dbExists(): Promise<boolean> {
+    // if (db) {
+    //   driver.listDatabases() will throw an error (database not found) if the db in question doesn't actually exist yet
+    //   return (await this.driver.listDatabases()).includes(db)
+    // }
+
+    return await this.driver.exists()
+  }
+
   public async createDBStructure(
     structure: DBStructure,
     clearDB?: DBClearanceMethod
@@ -475,7 +499,7 @@ export class ArangoDB {
       error: false
     }
 
-    const dbExists = await this.databaseExists()
+    const dbExists = await this.dbExists()
 
     if (!dbExists) {
       debugInfo(`Database '${this.driver.name}' not found`)
@@ -571,7 +595,7 @@ export class ArangoDB {
       return response
     }
 
-    const dbExists = await this.databaseExists()
+    const dbExists = await this.dbExists()
     if (!dbExists) {
       response.message = 'Database does not exist'
       response.database = { name: this.driver.name, exists: false }

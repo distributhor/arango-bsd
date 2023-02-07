@@ -2,6 +2,7 @@ import { CollectionReadOptions } from 'arangojs/collection'
 import { Config } from 'arangojs/connection'
 import { CursorExtras } from 'arangojs/cursor'
 import { QueryOptions } from 'arangojs/database'
+import { DocumentData, DocumentSelector, Patch } from 'arangojs/documents'
 
 // export interface SearchResult {
 //   data: any[];
@@ -99,16 +100,18 @@ export interface OmitOptions {
   props?: string[]
 }
 
-export interface CreateDocumentOptions {
-  omit?: OmitOptions
-}
-
 export interface ReadDocumentOptions extends CollectionReadOptions, Identifier {
   omit?: OmitOptions
 }
 
-export interface UpdateDocumentOptions extends Identifier {}
-export interface DeleteDocumentOptions extends Identifier {}
+export interface UpdateDocument<T extends Record<string, any> = any> extends Identifier {
+  id: DocumentSelector
+  data: Patch<DocumentData<T>>
+}
+
+export interface DeleteDocument extends Identifier {
+  id: DocumentSelector
+}
 
 export interface FetchOptions {
   omit?: OmitOptions
