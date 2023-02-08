@@ -718,7 +718,6 @@ describe('Guacamole Integration Tests', () => {
     expect(result7C).toBeNull()
   })
 
-  /* */
   test('findByFilterCriteria', async () => {
     const result1A = await conn.db(db1)
       .findByFilterCriteria(CONST.userCollection, 'name == "Lance" || name == "Chris"') as QueryResult
@@ -746,6 +745,31 @@ describe('Guacamole Integration Tests', () => {
       expect.arrayContaining([
         expect.objectContaining({ name: 'Ivan', surname: 'Basso' }),
         expect.objectContaining({ name: 'Vincenzo', surname: 'Nibali' })
+      ])
+    )
+  })
+
+  test('findWhereFieldsMatch', async () => {
+    const result1A = await conn.db(db1)
+      .findWhereFieldsMatch(CONST.userCollection, 'name', ['lance', 'chris']) as QueryResult
+
+    const result2A = await conn.db(db1)
+      .findWhereFieldsMatch(CONST.userCollection, 'name', ['mar']) as QueryResult
+
+    expect(result1A.data.length).toEqual(2)
+    expect(result1A.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Lance', surname: 'Armstrong' }),
+        expect.objectContaining({ name: 'Chris', surname: 'Froome' })
+      ])
+    )
+
+    expect(result2A.data.length).toEqual(3)
+    expect(result2A.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Marco', surname: 'Pantani' }),
+        expect.objectContaining({ name: 'Mark', surname: 'Cavendish' }),
+        expect.objectContaining({ name: 'Marc', surname: 'Soler' })
       ])
     )
   })

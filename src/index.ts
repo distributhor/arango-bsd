@@ -19,7 +19,8 @@ import {
   NamedValue,
   ListOfFilters,
   DocumentUpdate,
-  Identifier
+  Identifier,
+  MatchType
 } from './types'
 import { Queries } from './queries'
 import { ArrayCursor } from 'arangojs/cursor'
@@ -478,6 +479,41 @@ export class ArangoDB {
     }
 
     return response
+  }
+
+  public async findWhereFieldsMatch<T = any>(
+    collection: string,
+    fields: string | string[],
+    matches: string | string[],
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor<T> | QueryResult<T>> {
+    const filter: ListOfFilters = {
+      match: MatchType.ANY,
+      filters: []
+    }
+
+    if (typeof fields === 'string') {
+      fields = fields.split(',')
+    }
+
+    if (typeof matches === 'string') {
+      matches = matches.split(',')
+    }
+
+    for (let i = 0; i < fields.length; i++) {
+      for (let j = 0; j < matches.length; j++) {
+        if (matches[j].trim().toLowerCase() === 'null') {
+          filter.filters.push(fields[i].trim() + ' == null')
+        } else if (matches[j].trim().toLowerCase() === '!null') {
+          filter.filters.push(fields[i].trim() + ' != null')
+        } else {
+          // filters.push(fields[i].trim() + ' LIKE "%' + matches.trim() + '%"');
+          filter.filters.push('LIKE(' + fields[i].trim() + ', "%' + matches[j].trim() + '%", true)')
+        }
+      }
+    }
+
+    return await this.findByFilterCriteria(collection, filter, options)
   }
 
   public async uniqueConstraintValidation(constraints: UniqueConstraint): Promise<UniqueConstraintResult> {
