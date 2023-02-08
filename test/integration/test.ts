@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv'
 import { aql } from 'arangojs/aql'
 import { ArrayCursor } from 'arangojs/cursor'
 import { ArangoConnection } from '../../src/index'
-import { DBStructure, QueryResult, QueryReturnType } from '../../src/types'
+import { DBStructure, QueryResult } from '../../src/types'
 
 import cyclists from './cyclists.json'
 import teams from './teams.json'
@@ -498,6 +498,38 @@ describe('Guacamole Integration Tests', () => {
     expect(result4B.data.length).toEqual(3)
     expect(result4B.data[0].rating.timetrial).toEqual(9)
 
+    const result4BWithLimit1 = (await conn.db(db1)
+      .fetchAllByPropertyValue(
+        CONST.userCollection,
+        { name: 'speciality', value: 'Time Trial' },
+        { limit: 2, sortBy: 'name', sortOrder: 'descending' }
+      )) as QueryResult
+
+    const result4BWithLimit2 = (await conn.db(db1)
+      .fetchAllByPropertyValue(
+        CONST.userCollection,
+        { name: 'speciality', value: 'Time Trial' },
+        { limit: 2, offset: 1, sortBy: 'name', sortOrder: 'descending' }
+      )) as QueryResult
+
+    expect(result4BWithLimit1.data.length).toEqual(2)
+    expect(result4BWithLimit2.size).toEqual(2)
+    expect(result4BWithLimit2.total).toEqual(3)
+
+    expect(result4BWithLimit1.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Tony' }),
+        expect.objectContaining({ name: 'Rohan' })
+      ])
+    )
+
+    expect(result4BWithLimit2.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Rohan' }),
+        expect.objectContaining({ name: 'Fabian' })
+      ])
+    )
+
     const result5A = await conn.db(db1).delete(CONST.userCollection, { id: 'Break Aways', identifier: 'speciality' })
 
     expect(result5A).toBeDefined()
@@ -562,9 +594,7 @@ describe('Guacamole Integration Tests', () => {
     const result1E = (await conn.db(db1).fetchAllByPropertyValue(
       CONST.userCollection,
       { name: 'speciality', value: 'Time Trial' },
-      {
-        return: QueryReturnType.CURSOR
-      }
+      { returnCursor: true }
     )) as ArrayCursor
 
     expect(result1E instanceof ArrayCursor).toBeTruthy()
@@ -703,7 +733,7 @@ describe('Guacamole Integration Tests', () => {
 
     const result1B = await conn.db(db1)
       .findByFilterCriteria(CONST.userCollection, 'name == "Lance" || name == "Chris"', {
-        return: QueryReturnType.CURSOR
+        returnCursor: true
       }) as ArrayCursor
 
     expect(result1B instanceof ArrayCursor).toBeTruthy()

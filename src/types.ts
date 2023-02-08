@@ -1,14 +1,7 @@
 import { Config } from 'arangojs/connection'
-import { CursorExtras } from 'arangojs/cursor'
+import { CursorStats } from 'arangojs/cursor'
 import { QueryOptions } from 'arangojs/database'
 import { DocumentData, DocumentSelector, Patch } from 'arangojs/documents'
-
-// export interface SearchResult {
-//   data: any[];
-//   size: number;
-//   total: number;
-//   options: any;
-// }
 
 export interface UntypedObject {
   [key: string]: any
@@ -41,29 +34,6 @@ export interface UniqueConstraint {
 export interface UniqueConstraintResult {
   violatesUniqueConstraint: boolean
   documents?: any[]
-}
-
-export enum QueryReturnType {
-  DOCUMENTS = 'documents',
-  CURSOR = 'cursor',
-}
-
-// export interface SearchResult {
-//   data: any[];
-//   size: number;
-//   total: number;
-//   options: any;
-// }
-
-export interface QueryResult<T = any> {
-  data: T[]
-  meta?: QueryMeta
-  extra?: CursorExtras
-}
-
-export interface QueryMeta {
-  count?: number
-  fullCount?: number
 }
 
 export enum MatchType {
@@ -99,15 +69,24 @@ export interface DocumentTrimOptions {
   trimProps?: string[]
 }
 
-export interface FetchOptions extends DocumentTrimOptions {
+export interface ArangoJSOptions {
   query?: QueryOptions
-  sort?: SortOptions
-  return?: QueryReturnType
 }
 
-export interface SortOptions {
+export interface FetchOptions extends DocumentTrimOptions {
+  arangojs?: ArangoJSOptions
+  limit?: number
+  offset?: number
   sortBy?: string
   sortOrder?: string
+  returnCursor?: boolean
+}
+
+export interface QueryResult<T = any> {
+  data: T[]
+  size?: number | undefined
+  total?: number | undefined
+  stats?: CursorStats | undefined
 }
 
 export interface GraphDefinition {

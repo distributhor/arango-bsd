@@ -6,7 +6,6 @@ import {
   isCompositeKey,
   isUniqueValue,
   NamedValue,
-  SortOptions,
   IndexedValue,
   ListOfFilters,
   MatchTypeOperator,
@@ -118,7 +117,7 @@ export function _prefixPropertyNames(filterString: string): string {
 function _fetchByKeyValue(
   collection: string,
   identifier: NamedValue | NamedValue[],
-  options: SortOptions,
+  options: FetchOptions,
   keyValueMatchType: MatchType
 ): AqlQuery {
   const params: any = {}
@@ -172,6 +171,14 @@ function _fetchByKeyValue(
   //   query += " RETURN d";
   // }
 
+  if (options.limit && options.limit > 0) {
+    if (options.offset) {
+      query += ` LIMIT ${options.offset}, ${options.limit}`
+    } else {
+      query += ` LIMIT ${options.limit}`
+    }
+  }
+
   query += ' RETURN d'
 
   return {
@@ -183,7 +190,7 @@ function _fetchByKeyValue(
 export function fetchByPropertyValue(
   collection: string,
   identifier: NamedValue | NamedValue[],
-  options: SortOptions = {}
+  options: FetchOptions = {}
 ): AqlQuery {
   return _fetchByKeyValue(collection, identifier, options, MatchType.ANY)
 }
@@ -191,7 +198,7 @@ export function fetchByPropertyValue(
 export function fetchByCompositeValue(
   collection: string,
   identifier: NamedValue[],
-  options: SortOptions = {}
+  options: FetchOptions = {}
 ): AqlQuery {
   return _fetchByKeyValue(collection, identifier, options, MatchType.ALL)
 }
@@ -266,28 +273,22 @@ export function findByFilterCriteria(
       resultMeta.sortOrder = options.sortOrder;
     }
   }
-
-  if (options.hasOwnProperty("limit") && options.limit > 0) {
-    resultMeta.limit = options.limit;
-    if (options.hasOwnProperty("fullCount") && options.fullCount) {
-      queryOptions.count = false;
-      queryOptions.options = { fullCount: true };
-    }
-    if (options.hasOwnProperty("offset")) {
-      resultMeta.offset = options.offset;
-      query += " LIMIT " + options.offset + ", " + options.limit;
-    } else {
-      resultMeta.offset = 0;
-      query += " LIMIT " + options.limit;
-    }
-  }
-
-  if (this._hasOmitOption(options)) {
-    query += " RETURN UNSET_RECURSIVE( d, [" + this._getOmitInstruction(options) + "])";
-  } else {
-    query += " RETURN d";
-  }
   */
+
+  if (options.limit && options.limit > 0) {
+    if (options.offset) {
+      query += ` LIMIT ${options.offset}, ${options.limit}`
+    } else {
+      query += ` LIMIT ${options.limit}`
+    }
+  }
+
+  // if (this._hasOmitOption(options)) {
+  //   query += " RETURN UNSET_RECURSIVE( d, [" + this._getOmitInstruction(options) + "])";
+  // } else {
+  //   query += " RETURN d";
+  // }
+
   query += ' RETURN d'
 
   return {

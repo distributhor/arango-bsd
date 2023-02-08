@@ -15,7 +15,6 @@ import {
   UniqueConstraintResult,
   FetchOptions,
   DocumentTrimOptions,
-  QueryReturnType,
   QueryResult,
   NamedValue,
   ListOfFilters,
@@ -215,7 +214,6 @@ export class ArangoDB {
    */
   public async query<T = any>(query: string | AqlQuery, options?: QueryOptions): Promise<ArrayCursor<T>> {
     if (typeof query === 'string') {
-      console.log('FOUND LITERAL QUERY')
       return await this.driver.query<T>(literal(query), options)
     }
 
@@ -223,7 +221,7 @@ export class ArangoDB {
   }
 
   public async returnAll<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<QueryResult<T>> {
-    const response = await this.query<T>(query, options?.query)
+    const response = await this.query<T>(query, options?.arangojs?.query)
     const documents = await response.all()
     return {
       data: ArangoDB.trimDocuments(documents, options)
@@ -241,7 +239,7 @@ export class ArangoDB {
    * @returns an object
    */
   public async returnOne<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | null> {
-    const response = await this.query<T>(query, options?.query)
+    const response = await this.query<T>(query, options?.arangojs?.query)
     const documents = await response.all()
 
     if (!documents || documents.length === 0) {
@@ -380,20 +378,35 @@ export class ArangoDB {
     identifier: NamedValue,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
+    let arangojsQueryOptions = options?.arangojs?.query
+
+    if (options.limit) {
+      if (!arangojsQueryOptions) {
+        arangojsQueryOptions = {}
+      }
+      arangojsQueryOptions.count = true
+      arangojsQueryOptions.fullCount = true
+    }
+
     const result = await this.driver.query(
-      Queries.fetchByPropertyValue(collection, identifier, options.sort),
-      options?.query
+      Queries.fetchByPropertyValue(collection, identifier, options),
+      arangojsQueryOptions
     )
 
-    if (options.return && options.return === QueryReturnType.CURSOR) {
+    if (options.returnCursor) {
       return result
     }
 
     const documents = await result.all()
 
-    return {
-      data: ArangoDB.trimDocuments(documents, options)
+    const response = {
+      data: ArangoDB.trimDocuments(documents, options),
+      size: result.count,
+      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
+      // stats: result.extra.stats
     }
+
+    return response
   }
 
   public async fetchAllByCompositeValue<T = any>(
@@ -401,20 +414,35 @@ export class ArangoDB {
     identifier: NamedValue[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
+    let arangojsQueryOptions = options?.arangojs?.query
+
+    if (options.limit) {
+      if (!arangojsQueryOptions) {
+        arangojsQueryOptions = {}
+      }
+      arangojsQueryOptions.count = true
+      arangojsQueryOptions.fullCount = true
+    }
+
     const result = await this.driver.query(
-      Queries.fetchByCompositeValue(collection, identifier, options.sort),
-      options?.query
+      Queries.fetchByCompositeValue(collection, identifier, options),
+      arangojsQueryOptions
     )
 
-    if (options.return && options.return === QueryReturnType.CURSOR) {
+    if (options.returnCursor) {
       return result
     }
 
     const documents = await result.all()
 
-    return {
-      data: ArangoDB.trimDocuments(documents, options)
+    const response = {
+      data: ArangoDB.trimDocuments(documents, options),
+      size: result.count,
+      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
+      // stats: result.extra.stats
     }
+
+    return response
   }
 
   public async findByFilterCriteria<T = any>(
@@ -422,17 +450,34 @@ export class ArangoDB {
     filter: string | ListOfFilters,
     options: FetchOptions = {}
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
-    const result = await this.driver.query(Queries.findByFilterCriteria(collection, filter, options), options?.query)
+    let arangojsQueryOptions = options?.arangojs?.query
 
-    if (options.return && options.return === QueryReturnType.CURSOR) {
+    if (options.limit) {
+      if (!arangojsQueryOptions) {
+        arangojsQueryOptions = {}
+      }
+      arangojsQueryOptions.count = true
+      arangojsQueryOptions.fullCount = true
+    }
+
+    const result = await this.driver.query(
+      Queries.findByFilterCriteria(collection, filter, options), arangojsQueryOptions
+    )
+
+    if (options.returnCursor) {
       return result
     }
 
     const documents = await result.all()
 
-    return {
-      data: ArangoDB.trimDocuments(documents, options)
+    const response = {
+      data: ArangoDB.trimDocuments(documents, options),
+      size: result.count,
+      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
+      // stats: result.extra.stats
     }
+
+    return response
   }
 
   public async uniqueConstraintValidation(constraints: UniqueConstraint): Promise<UniqueConstraintResult> {
