@@ -117,8 +117,9 @@ export function _prefixPropertyNames(filterString: string): string {
 function _fetchByKeyValue(
   collection: string,
   identifier: NamedValue | NamedValue[],
+  keyValueMatchType: MatchType,
   options: FetchOptions,
-  keyValueMatchType: MatchType
+  filter?: string | ListOfFilters
 ): AqlQuery {
   const params: any = {}
   let query = `FOR d IN ${collection} FILTER`
@@ -151,6 +152,32 @@ function _fetchByKeyValue(
     query += '  d.@property == @value'
   }
 
+  if (filter?.match) {
+    const prefixPropertyNames = true // options.prefixPropertyNames
+    if (isListOfFilters(filter)) {
+      query += ' AND FILTER ( '
+
+      for (let i = 0; i < filter.filters.length; i++) {
+        if (i > 0) {
+          query += ` ${MatchTypeOperator[filter.match]} `
+        }
+        if (prefixPropertyNames) {
+          query += _prefixPropertNameInFilterToken(filter.filters[i])
+        } else {
+          query += filter.filters[i]
+        }
+      }
+
+      query += ' )'
+    } else {
+      if (prefixPropertyNames) {
+        query += ' AND FILTER ( ' + _prefixPropertyNames(filter) + ' )'
+      } else {
+        query += ' AND FILTER ( ' + filter + ' )'
+      }
+    }
+  }
+
   if (options?.hasOwnProperty('sortBy')) {
     query += ` SORT d.${options.sortBy}`
 
@@ -162,14 +189,6 @@ function _fetchByKeyValue(
       }
     }
   }
-
-  // if (this._hasKeepOption(options)) {
-  //   query += " RETURN KEEP( d, [" + this._getKeepInstruction(options) + "])";
-  // } else if (this._hasOmitOption(options)) {
-  //   query += " RETURN UNSET_RECURSIVE( d, [" + this._getOmitInstruction(options) + "])";
-  // } else {
-  //   query += " RETURN d";
-  // }
 
   if (options.limit && options.limit > 0) {
     if (options.offset) {
@@ -187,33 +206,29 @@ function _fetchByKeyValue(
   }
 }
 
-export function fetchByPropertyValue(
+export function fetchMatchingAnyPropertyValue(
   collection: string,
   identifier: NamedValue | NamedValue[],
-  options: FetchOptions = {}
+  options: FetchOptions = {},
+  filter?: string | ListOfFilters
 ): AqlQuery {
-  return _fetchByKeyValue(collection, identifier, options, MatchType.ANY)
+  return _fetchByKeyValue(collection, identifier, MatchType.ANY, options, filter)
 }
 
-export function fetchByCompositeValue(
+export function fetchMatchingAllPropertyValues(
   collection: string,
   identifier: NamedValue[],
-  options: FetchOptions = {}
+  options: FetchOptions = {},
+  filter?: string | ListOfFilters
 ): AqlQuery {
-  return _fetchByKeyValue(collection, identifier, options, MatchType.ALL)
+  return _fetchByKeyValue(collection, identifier, MatchType.ALL, options, filter)
 }
 
-export function findByFilterCriteria(
+export function fetchByFilterCriteria(
   collection: string,
   filter: string | ListOfFilters,
   options: FetchOptions = {}
 ): AqlQuery {
-  // if (options.hasOwnProperty("returnDataFieldName")) {
-  //   queryOptions.returnDataFieldName = options.returnDataFieldName;
-  // }
-
-  const prefixPropertyNames = true // options.prefixPropertyNames
-
   const params: any = {}
   let query = 'FOR d IN ' + collection
 
@@ -224,6 +239,7 @@ export function findByFilterCriteria(
   // }
 
   if (filter?.match) {
+    const prefixPropertyNames = true // options.prefixPropertyNames
     if (isListOfFilters(filter)) {
       query += ' FILTER ( '
 
@@ -250,30 +266,17 @@ export function findByFilterCriteria(
 
   // TODO: Support sorting by multiple criteria ...
   // SORT u.lastName, u.firstName, u.id DESC
-  /*
-  if (options.hasOwnProperty("sortBy")) {
-    query += " SORT d." + options.sortBy;
-    resultMeta.sortBy = options.sortBy;
+  if (options?.hasOwnProperty('sortBy')) {
+    query += ` SORT d.${options.sortBy}`
 
-    if (options.hasOwnProperty("sortDirection")) {
-      if (options.sortDirection === "ascending") {
-        query += " ASC";
-      } else if (options.sortDirection === "descending") {
-        query += " DESC";
+    if (options.hasOwnProperty('sortOrder')) {
+      if (options.sortOrder === 'ascending') {
+        query += ' ASC'
+      } else if (options.sortOrder === 'descending') {
+        query += ' DESC'
       }
-      resultMeta.sortDirection = options.sortDirection;
-    }
-
-    if (options.hasOwnProperty("sortOrder")) {
-      if (options.sortOrder === "ascending") {
-        query += " ASC";
-      } else if (options.sortOrder === "descending") {
-        query += " DESC";
-      }
-      resultMeta.sortOrder = options.sortOrder;
     }
   }
-  */
 
   if (options.limit && options.limit > 0) {
     if (options.offset) {
@@ -415,10 +418,10 @@ export function uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
 }
 
 export const Queries = {
-  fetchByPropertyValue,
-  fetchByCompositeValue,
-  findByFilterCriteria,
-  updateDocumentsByKeyValue,
   deleteDocumentsByKeyValue,
-  uniqueConstraintQuery
+  fetchMatchingAnyPropertyValue,
+  fetchMatchingAllPropertyValues,
+  fetchByFilterCriteria,
+  uniqueConstraintQuery,
+  updateDocumentsByKeyValue
 }
