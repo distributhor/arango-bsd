@@ -155,7 +155,10 @@ function _fetchByKeyValue(
   if (filter?.match) {
     const prefixPropertyNames = true // options.prefixPropertyNames
     if (isListOfFilters(filter)) {
-      query += ' AND FILTER ( '
+      // 'FOR d IN users FILTER  d.@property == @value AND FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
+      // 'FOR d IN users FILTER  d.@property == @value FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
+      // query += ' AND ( '
+      query += ' FILTER ( '
 
       for (let i = 0; i < filter.filters.length; i++) {
         if (i > 0) {
@@ -171,9 +174,9 @@ function _fetchByKeyValue(
       query += ' )'
     } else {
       if (prefixPropertyNames) {
-        query += ' AND FILTER ( ' + _prefixPropertyNames(filter) + ' )'
+        query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
       } else {
-        query += ' AND FILTER ( ' + filter + ' )'
+        query += ' FILTER ( ' + filter + ' )'
       }
     }
   }
