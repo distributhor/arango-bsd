@@ -136,10 +136,14 @@ function _fetchByKeyValue(
         query += ` ${MatchTypeOperator[keyValueMatchType]}`
       }
 
-      const keyParam = `${kv.name}_key_${keyCount}`
-      const valueParam = `${kv.name}_val_${keyCount}`
+      const keyParam = `p${keyCount}`
+      const valueParam = `v${keyCount}`
 
-      params[keyParam] = kv.name
+      if (kv.name.indexOf('.') > 0) {
+        params[keyParam] = kv.name.split('.')
+      } else {
+        params[keyParam] = kv.name
+      }
       params[valueParam] = kv.value
 
       query += ` d.@${keyParam} == @${valueParam}`
@@ -147,9 +151,14 @@ function _fetchByKeyValue(
 
     // query += " )";
   } else {
-    params.property = identifier.name
-    params.value = identifier.value
-    query += '  d.@property == @value'
+    if (identifier.name.indexOf('.') > 0) {
+      params.p = identifier.name.split('.')
+    } else {
+      params.p = identifier.name
+    }
+
+    params.v = identifier.value
+    query += '  d.@p == @v'
   }
 
   if (filter?.match) {

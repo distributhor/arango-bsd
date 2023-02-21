@@ -434,7 +434,7 @@ export class ArangoDB {
       arangojsQueryOptions.count = true
       arangojsQueryOptions.fullCount = true
     }
-
+    console.log(Queries.fetchMatchingAllPropertyValues(collection, identifier, options, additionalFilters))
     const result = await this.driver.query(
       Queries.fetchMatchingAllPropertyValues(collection, identifier, options, additionalFilters),
       arangojsQueryOptions

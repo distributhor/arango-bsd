@@ -294,6 +294,15 @@ describe('Guacamole Integration Tests', () => {
         timetrial: 8,
         punch: 8,
         descend: 7
+      },
+      favoriteRoads: {
+        SouthAfrica: {
+          CapeTown: 'Chapmans Peak'
+        },
+        Portugal: {
+          Lisbon: 'Sintra'
+        },
+        France: 'Col du Galibier'
       }
     })
 
@@ -539,6 +548,42 @@ describe('Guacamole Integration Tests', () => {
     const result5B = (await conn.db(db1).fetchByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Break Aways' })) as QueryResult
 
     expect(result5B.data.length).toEqual(0)
+  })
+
+  test('fetchByPropertyValue', async () => {
+    const result1A = (await conn.db(db1)
+      .fetchByPropertyValue(CONST.userCollection, { name: 'name', value: 'Daryl' })) as QueryResult
+
+    expect(result1A.data.length).toEqual(1)
+
+    const result1B = (await conn.db(db1)
+      .fetchByPropertyValue(CONST.userCollection, { name: 'favoriteRoads.Portugal.Lisbon', value: 'Sintra' })) as QueryResult
+
+    expect(result1B.data.length).toEqual(1)
+
+    const result1C = (await conn.db(db1)
+      .fetchMatchingAllPropertyValues(CONST.userCollection, [
+        { name: 'favoriteRoads.SouthAfrica.CapeTown', value: 'Chapmans Peak' },
+        { name: 'favoriteRoads.Portugal.Lisbon', value: 'Sintra' }
+      ])) as QueryResult
+
+    expect(result1C.data.length).toEqual(1)
+
+    const result1D = (await conn.db(db1)
+      .fetchMatchingAllPropertyValues(CONST.userCollection, [
+        { name: 'favoriteRoads.SouthAfrica.CapeTown', value: 'Chappies' },
+        { name: 'favoriteRoads.Portugal.Lisbon', value: 'Sintra' }
+      ])) as QueryResult
+
+    expect(result1D.data.length).toEqual(0)
+
+    const result1E = (await conn.db(db1)
+      .fetchMatchingAnyPropertyValue(CONST.userCollection, [
+        { name: 'favoriteRoads.SouthAfrica.CapeTown', value: 'Chappies' },
+        { name: 'favoriteRoads.Portugal.Lisbon', value: 'Sintra' }
+      ])) as QueryResult
+
+    expect(result1E.data.length).toEqual(1)
   })
 
   test('returnAll, returnOne', async () => {
