@@ -434,7 +434,7 @@ export class ArangoDB {
       arangojsQueryOptions.count = true
       arangojsQueryOptions.fullCount = true
     }
-    console.log(Queries.fetchMatchingAllPropertyValues(collection, identifier, options, additionalFilters))
+
     const result = await this.driver.query(
       Queries.fetchMatchingAllPropertyValues(collection, identifier, options, additionalFilters),
       arangojsQueryOptions
@@ -473,6 +473,41 @@ export class ArangoDB {
 
     const result = await this.driver.query(
       Queries.fetchByFilterCriteria(collection, filter, options),
+      arangojsQueryOptions
+    )
+
+    if (options.returnCursor) {
+      return result
+    }
+
+    const documents = await result.all()
+
+    const response = {
+      data: ArangoDB.trimDocuments(documents, options),
+      size: result.count,
+      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
+      // stats: result.extra.stats
+    }
+
+    return response
+  }
+
+  public async fetchAll<T = any>(
+    collection: string,
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor<T> | QueryResult<T>> {
+    let arangojsQueryOptions = options?.arangojs?.query
+
+    if (options.limit) {
+      if (!arangojsQueryOptions) {
+        arangojsQueryOptions = {}
+      }
+      arangojsQueryOptions.count = true
+      arangojsQueryOptions.fullCount = true
+    }
+
+    const result = await this.driver.query(
+      Queries.fetchAll(collection, options),
       arangojsQueryOptions
     )
 

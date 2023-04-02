@@ -312,6 +312,55 @@ export function fetchByFilterCriteria(
   }
 }
 
+export function fetchAll(
+  collection: string,
+  options: FetchOptions = {}
+): AqlQuery {
+  const params: any = {}
+  let query = 'FOR d IN ' + collection
+
+  // TODO: enable and document this ??
+  // if (options.restrictTo) {
+  //   params.restrictTo = options.restrictTo
+  //   query += ' FILTER d.@restrictTo'
+  // }
+
+  // TODO: Support sorting by multiple criteria ...
+  // SORT u.lastName, u.firstName, u.id DESC
+  if (options?.hasOwnProperty('sortBy')) {
+    query += ` SORT d.${options.sortBy}`
+
+    if (options.hasOwnProperty('sortOrder')) {
+      if (options.sortOrder === 'ascending') {
+        query += ' ASC'
+      } else if (options.sortOrder === 'descending') {
+        query += ' DESC'
+      }
+    }
+  }
+
+  if (options.limit && options.limit > 0) {
+    if (options.offset) {
+      query += ` LIMIT ${options.offset}, ${options.limit}`
+    } else {
+      query += ` LIMIT ${options.limit}`
+    }
+  }
+
+  // if (this._hasOmitOption(options)) {
+  //   query += " RETURN UNSET_RECURSIVE( d, [" + this._getOmitInstruction(options) + "])";
+  // } else {
+  //   query += " RETURN d";
+  // }
+
+  query += ' RETURN d'
+
+  return {
+    query,
+    bindVars: params
+  }
+}
+
 export function updateDocumentsByKeyValue(collection: DocumentCollection, identifier: NamedValue, data: any): AqlQuery {
   // return literal(
   //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
@@ -434,6 +483,7 @@ export const Queries = {
   fetchMatchingAnyPropertyValue,
   fetchMatchingAllPropertyValues,
   fetchByFilterCriteria,
+  fetchAll,
   uniqueConstraintQuery,
   updateDocumentsByKeyValue
 }
