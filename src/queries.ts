@@ -447,13 +447,23 @@ export function uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
           query += ' &&'
         }
 
-        const keyParam = `${kv.name}_key_${keyCount}`
-        const valueParam = `${kv.name}_val_${keyCount}`
+        if (constraints.caseInsensitive) {
+          const keyParam = `${kv.name}_key_${keyCount}`
+          const valueParam = `${kv.name}_val_${keyCount}`
 
-        params[keyParam] = kv.name
-        params[valueParam] = kv.value
+          params[keyParam] = kv.name
+          params[valueParam] = kv.value
 
-        query += ` d.@${keyParam} == @${valueParam}`
+          query += ` d.@${keyParam} == @${valueParam}`
+        } else {
+          const keyParam = `${kv.name}_key_${keyCount}`
+          const valueParam = `${kv.name}_val_${keyCount}`
+
+          params[keyParam] = kv.name
+          params[valueParam] = kv.value.toLowerCase()
+
+          query += ` LOWER(d.@${keyParam}) == @${valueParam}`
+        }
       }
 
       query += ' )'
@@ -463,10 +473,17 @@ export function uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
       const keyParam = `${constraint.unique.name}_key`
       const valueParam = `${constraint.unique.name}_val`
 
-      params[keyParam] = constraint.unique.name
-      params[valueParam] = constraint.unique.value
+      if (constraints.caseInsensitive) {
+        params[keyParam] = constraint.unique.name
+        params[valueParam] = constraint.unique.value
 
-      query += ` d.@${keyParam} == @${valueParam}`
+        query += ` d.@${keyParam} == @${valueParam}`
+      } else {
+        params[keyParam] = constraint.unique.name
+        params[valueParam] = constraint.unique.value.toLowerCase()
+
+        query += ` LOWER(d.@${keyParam}) == @${valueParam}`
+      }
     }
   }
 

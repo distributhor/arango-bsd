@@ -28,6 +28,7 @@ export interface CompositeKey {
 export interface UniqueConstraint {
   collection: string
   constraints: Array<UniqueValue | CompositeKey>
+  caseInsensitive?: boolean
   excludeDocumentKey?: string
 }
 

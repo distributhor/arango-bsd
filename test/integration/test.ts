@@ -14,7 +14,7 @@ dotenv.config({ path: path.join(__dirname, '.env') })
 const db1 = 'guacamole-test1'
 const db2 = 'guacamole-test2'
 
-const dbAdminUser = process.env.GUACAMOLE_TEST_DB_USER ?? 'admin'
+const dbAdminUser = process.env.GUACAMOLE_TEST_DB_USER ?? 'root'
 const dbAdminPassword = process.env.GUACAMOLE_TEST_DB_PASSWORD ?? 'letmein'
 
 // TODO: want to use a different restricted user for some tests in the future
@@ -212,12 +212,30 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('Unique constraint validation', async () => {
+    // should be case insensitive PT1
     const result1 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
       constraints: [{ unique: { name: 'nickname', value: 'Chief Doper' } }]
     })
 
     expect(result1.violatesUniqueConstraint).toBeTruthy()
+
+    // should be case insensitive PT2
+    const result1DifferentCase1 = await conn.db(db1).uniqueConstraintValidation({
+      collection: CONST.userCollection,
+      constraints: [{ unique: { name: 'nickname', value: 'Chief DOPER' } }]
+    })
+
+    expect(result1DifferentCase1.violatesUniqueConstraint).toBeTruthy()
+
+    // should be case sensitive
+    const result1DifferentCase2 = await conn.db(db1).uniqueConstraintValidation({
+      caseInsensitive: true,
+      collection: CONST.userCollection,
+      constraints: [{ unique: { name: 'nickname', value: 'Chief DOPER' } }]
+    })
+
+    expect(result1DifferentCase2.violatesUniqueConstraint).toBeFalsy()
 
     const result2 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
@@ -235,6 +253,27 @@ describe('Guacamole Integration Tests', () => {
     })
 
     expect(result3.violatesUniqueConstraint).toBeTruthy()
+
+    const result3DifferentCase1 = await conn.db(db1).uniqueConstraintValidation({
+      collection: CONST.userCollection,
+      constraints: [
+        { unique: { name: 'nickname', value: 'TORNADO' } },
+        { unique: { name: 'surname', value: 'ArmSTRONG' } }
+      ]
+    })
+
+    expect(result3DifferentCase1.violatesUniqueConstraint).toBeTruthy()
+
+    const result3DifferentCase2 = await conn.db(db1).uniqueConstraintValidation({
+      caseInsensitive: true,
+      collection: CONST.userCollection,
+      constraints: [
+        { unique: { name: 'nickname', value: 'TORNADO' } },
+        { unique: { name: 'surname', value: 'ArmSTRONG' } }
+      ]
+    })
+
+    expect(result3DifferentCase2.violatesUniqueConstraint).toBeFalsy()
 
     const result4 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
@@ -259,6 +298,35 @@ describe('Guacamole Integration Tests', () => {
     })
 
     expect(result5.violatesUniqueConstraint).toBeTruthy()
+
+    const result5DifferentCase1 = await conn.db(db1).uniqueConstraintValidation({
+      collection: CONST.userCollection,
+      constraints: [
+        {
+          composite: [
+            { name: 'name', value: 'THOMAS' },
+            { name: 'surname', value: 'DE Ghent' }
+          ]
+        }
+      ]
+    })
+
+    expect(result5DifferentCase1.violatesUniqueConstraint).toBeTruthy()
+
+    const result5DifferentCase2 = await conn.db(db1).uniqueConstraintValidation({
+      collection: CONST.userCollection,
+      caseInsensitive: true,
+      constraints: [
+        {
+          composite: [
+            { name: 'name', value: 'THOMAS' },
+            { name: 'surname', value: 'DE Ghent' }
+          ]
+        }
+      ]
+    })
+
+    expect(result5DifferentCase2.violatesUniqueConstraint).toBeFalsy()
 
     const result6 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
