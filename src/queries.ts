@@ -67,6 +67,10 @@ export function _prefixPropertNameInFilterToken(filterStringToken: string): stri
     return 'd.' + filterStringToken.replace(/\s*\)/, ')')
   }
 
+  if (filterStringToken.includes(' IN_PROP ')) {
+    return filterStringToken.replace(/\s*IN_PROP\s*/, ' IN d.')
+  }
+
   return 'd.' + filterStringToken
 }
 
