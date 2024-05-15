@@ -1,7 +1,7 @@
 import { Config } from 'arangojs/connection'
 import { CursorStats } from 'arangojs/cursor'
 import { QueryOptions } from 'arangojs/database'
-import { DocumentData, DocumentSelector, Patch } from 'arangojs/documents'
+import { DocumentData, DocumentMetadata, DocumentSelector, Patch } from 'arangojs/documents'
 
 export interface UntypedObject {
   [key: string]: any
@@ -65,6 +65,10 @@ export interface DocumentUpdate<T extends Record<string, any> = any> extends Ide
   data: Patch<DocumentData<T>>
 }
 
+export interface DocumentMeta extends DocumentMetadata {
+  [key: string]: any
+}
+
 export interface DocumentTrimOptions {
   trimPrivateProps?: boolean
   trimProps?: string[]
@@ -81,6 +85,7 @@ export interface FetchOptions extends DocumentTrimOptions {
   sortBy?: string
   sortOrder?: string
   returnCursor?: boolean
+  prefixPropNames?: boolean
 }
 
 export interface QueryResult<T = any> {

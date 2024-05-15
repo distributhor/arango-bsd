@@ -13,6 +13,8 @@ import {
   FetchOptions
 } from './index'
 
+const PREFIX_PROP_NAMES = false
+
 /** @internal */
 export function isListOfFilters(x: any): x is ListOfFilters {
   return x.filters
@@ -118,6 +120,19 @@ export function _prefixPropertyNames(filterString: string): string {
 }
 
 /** @internal */
+function _shouldPrefixPropNames(options: FetchOptions): boolean {
+  if (options && options.prefixPropNames === false) {
+    return false
+  }
+
+  if (options && options.prefixPropNames === true) {
+    return true
+  }
+
+  return PREFIX_PROP_NAMES
+}
+
+/** @internal */
 function _fetchByKeyValue(
   collection: string,
   identifier: NamedValue | NamedValue[],
@@ -166,7 +181,6 @@ function _fetchByKeyValue(
   }
 
   if (filter?.match) {
-    const prefixPropertyNames = true // options.prefixPropertyNames
     if (isListOfFilters(filter)) {
       // 'FOR d IN users FILTER  d.@property == @value AND FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
       // 'FOR d IN users FILTER  d.@property == @value FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
@@ -177,7 +191,7 @@ function _fetchByKeyValue(
         if (i > 0) {
           query += ` ${MatchTypeOperator[filter.match]} `
         }
-        if (prefixPropertyNames) {
+        if (_shouldPrefixPropNames(options)) {
           query += _prefixPropertNameInFilterToken(filter.filters[i])
         } else {
           query += filter.filters[i]
@@ -186,7 +200,7 @@ function _fetchByKeyValue(
 
       query += ' )'
     } else {
-      if (prefixPropertyNames) {
+      if (_shouldPrefixPropNames(options)) {
         query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
       } else {
         query += ' FILTER ( ' + filter + ' )'
@@ -255,7 +269,6 @@ export function fetchByFilterCriteria(
   // }
 
   if (filter?.match) {
-    const prefixPropertyNames = true // options.prefixPropertyNames
     if (isListOfFilters(filter)) {
       query += ' FILTER ( '
 
@@ -263,7 +276,7 @@ export function fetchByFilterCriteria(
         if (i > 0) {
           query += ` ${MatchTypeOperator[filter.match]} `
         }
-        if (prefixPropertyNames) {
+        if (_shouldPrefixPropNames(options)) {
           query += _prefixPropertNameInFilterToken(filter.filters[i])
         } else {
           query += filter.filters[i]
@@ -272,7 +285,7 @@ export function fetchByFilterCriteria(
 
       query += ' )'
     } else {
-      if (prefixPropertyNames) {
+      if (_shouldPrefixPropNames(options)) {
         query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
       } else {
         query += ' FILTER ( ' + filter + ' )'

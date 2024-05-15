@@ -1,3 +1,5 @@
+/* eslint-disable no-prototype-builtins */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Debug from 'debug'
 import { Database } from 'arangojs'
 import { AqlQuery, literal } from 'arangojs/aql'
@@ -20,12 +22,13 @@ import {
   ListOfFilters,
   DocumentUpdate,
   Identifier,
-  MatchType
+  MatchType,
+  DocumentMeta
 } from './types'
 import { Queries } from './queries'
 import { ArrayCursor } from 'arangojs/cursor'
 import { CollectionInsertOptions, CollectionReadOptions, CollectionRemoveOptions, CollectionUpdateOptions, DocumentCollection, EdgeCollection } from 'arangojs/collection'
-import { Document, DocumentData, DocumentMetadata, ObjectWithKey } from 'arangojs/documents'
+import { Document, DocumentData, ObjectWithKey } from 'arangojs/documents'
 
 export * from './types'
 
@@ -49,7 +52,22 @@ function toGraphNames(graphs: string[] | GraphDefinition[]): string[] {
 }
 
 /** @internal */
+function isObject(val: any): boolean {
+  if (!val) {
+    return false
+  }
+
+  if (typeof val === 'object' && !Array.isArray(val)) {
+    return true
+  }
+
+  return false
+}
+
+/** @internal */
 function stripUnderscoreProps(obj: any, keep: string[]): void {
+  // the check for whether this is an object is handled
+  // by the functions that call this utility
   Object.keys(obj).map((k) => {
     if (k.startsWith('_') && !keep.includes(k)) {
       delete obj[k]
@@ -59,15 +77,18 @@ function stripUnderscoreProps(obj: any, keep: string[]): void {
   })
 }
 
-// function stripProps(obj: any, props: string[]): void {
-//   Object.keys(obj).map((k) => {
-//     if (props.includes(k)) {
-//       delete obj[k]
-//     }
+/** @internal */
+function stripProps(obj: any, props: string[]): void {
+  // the check for whether this is an object is handled
+  // by the functions that call this utility
+  Object.keys(obj).map((k) => {
+    if (props.includes(k)) {
+      delete obj[k]
+    }
 
-//     return k
-//   })
-// }
+    return k
+  })
+}
 
 /** @internal */
 interface InstancePool {
@@ -230,24 +251,28 @@ export class ArangoDB {
   }
 
   /**
-   * Will simply return the first value only of a query. One can quite easily handle
+   * Will only return the first value of a query result. One can quite easily handle
    * this via the `AQL` query itself, but in cases where you have issued a query where
-   * you would typically expect either no result or exactly one result, it may convenient
-   * to simply use use this function instead
+   * you would typically expect either no result or exactly one result, or are only interested
+   * in the first result, it may convenient to simply use use this function instead
    *
    * @param query  A query, as create by the `aql` function
    * @param options  Driver options that may be passed in along with the query
    * @returns an object
    */
-  public async returnOne<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | null> {
+  public async returnSingle<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | T[] | null> {
     const response = await this.query<T>(query, options?.arangojs?.query)
     const documents = await response.all()
 
-    if (!documents || documents.length === 0) {
+    if (!documents || documents.length === 0 || !documents[0]) {
       return null
     }
 
-    return ArangoDB.trimDocument(documents.shift(), options)
+    if (Array.isArray(documents[0])) {
+      return ArangoDB.trimDocuments(documents[0], options)
+    }
+
+    return ArangoDB.trimDocument(documents[0], options)
   }
 
   public col<T extends Record<string, any> = any>(collection: string): DocumentCollection<T> | EdgeCollection<T> {
@@ -284,7 +309,7 @@ export class ArangoDB {
     collection: string,
     data: DocumentData<T> | Array<DocumentData<T>>,
     options?: CollectionInsertOptions
-  ): Promise<Array<DocumentMetadata & { new?: Document<T> }>> {
+  ): Promise<Array<DocumentMeta & { new?: Document<T> }>> {
     if (Array.isArray(data)) {
       return await this.driver.collection(collection).saveAll(data, options)
     }
@@ -298,7 +323,7 @@ export class ArangoDB {
     collection: string,
     document: DocumentUpdate | any[],
     options: CollectionUpdateOptions = {}
-  ): Promise<Array<DocumentMetadata & { new?: Document<T>, old?: Document<T> }>> {
+  ): Promise<Array<DocumentMeta & { new?: Document<T>, old?: Document<T> }>> {
     if (Array.isArray(document)) {
       return await this.driver.collection(collection).updateAll(document, options)
     }
@@ -337,7 +362,7 @@ export class ArangoDB {
     collection: string,
     document: Identifier | Array<string | ObjectWithKey>,
     options: CollectionRemoveOptions = {}
-  ): Promise<Array<DocumentMetadata & { old?: Document<T> }>> {
+  ): Promise<Array<DocumentMeta & { old?: Document<T> }>> {
     if (Array.isArray(document)) {
       return await this.driver.collection(collection).removeAll(document, options)
     }
@@ -362,16 +387,16 @@ export class ArangoDB {
     collection: string,
     identifier: NamedValue,
     options: FetchOptions = {}
-  ): Promise<T | null> {
-    return await this.returnOne<T>(Queries.fetchMatchingAnyPropertyValue(collection, identifier), options)
+  ): Promise<T | T[] | null> {
+    return await this.returnSingle<T>(Queries.fetchMatchingAnyPropertyValue(collection, identifier), options)
   }
 
   public async fetchOneByCompositeValue<T = any>(
     collection: string,
     identifier: NamedValue[],
     options: FetchOptions = {}
-  ): Promise<T | null> {
-    return await this.returnOne<T>(Queries.fetchMatchingAllPropertyValues(collection, identifier), options)
+  ): Promise<T | T[] | null> {
+    return await this.returnSingle<T>(Queries.fetchMatchingAllPropertyValues(collection, identifier), options)
   }
 
   public async fetchByPropertyValue<T = any>(
@@ -527,7 +552,7 @@ export class ArangoDB {
     return response
   }
 
-  private buildFilterList(props: string | string[], matches: string | string[]): ListOfFilters {
+  private buildPropMatchFilter(props: string | string[], matches: string | string[]): ListOfFilters {
     const filter: ListOfFilters = {
       match: MatchType.ANY,
       filters: []
@@ -536,6 +561,8 @@ export class ArangoDB {
     if (typeof props === 'string') {
       props = props.split(',')
     }
+
+    props = props.map(p => `d.${p}`)
 
     if (typeof matches === 'string') {
       matches = matches.split(',')
@@ -563,7 +590,7 @@ export class ArangoDB {
     matches: string | string[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
-    const filter: ListOfFilters = this.buildFilterList(props, matches)
+    const filter: ListOfFilters = this.buildPropMatchFilter(props, matches)
     return await this.fetchByFilterCriteria(collection, filter, options)
   }
 
@@ -574,7 +601,7 @@ export class ArangoDB {
     matches: string | string[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
-    const filters: ListOfFilters = this.buildFilterList(props, matches)
+    const filters: ListOfFilters = this.buildPropMatchFilter(props, matches)
     return await this.fetchMatchingAnyPropertyValue(collection, identifier, options, filters)
   }
 
@@ -585,7 +612,7 @@ export class ArangoDB {
     matches: string | string[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
-    const filters: ListOfFilters = this.buildFilterList(props, matches)
+    const filters: ListOfFilters = this.buildPropMatchFilter(props, matches)
     return await this.fetchMatchingAllPropertyValues(collection, identifier, options, filters)
   }
 
@@ -604,31 +631,398 @@ export class ArangoDB {
     }
   }
 
+  public async getField<T = any>(collection: string, key: string, field: string): Promise<T | T[] | null> {
+    return await this.returnSingle(`LET d = DOCUMENT("${collection}/${key}") RETURN d.${field}`)
+  }
+
+  public async updateField(
+    collection: string,
+    key: string,
+    field: string,
+    value: any
+  ): Promise<DocumentMeta[]> {
+    let query = `LET d = DOCUMENT("${collection}/${key}") `
+
+    if (field.includes('.')) {
+      const nestedFields = field.split('.')
+
+      query += 'UPDATE d WITH '
+
+      for (const nf of nestedFields) { query += `{ ${nf}: ` }
+
+      query += JSON.stringify(value)
+
+      for (const _nf of nestedFields) { query += ' }' }
+
+      query += ` IN ${collection} OPTIONS { keepNull: false } `
+    } else {
+      query += `UPDATE d WITH { ${field}: ${JSON.stringify(value)} } IN ${collection} OPTIONS { keepNull: false } `
+    }
+
+    query += ' LET updated = NEW RETURN { "_key": updated._key, "' + field + '": updated.' + field + ' }'
+
+    const results = await this.query(query)
+
+    return await results.all()
+  }
+
+  public async addArrayValue(
+    collection: string,
+    key: string,
+    arrayField: string,
+    arrayValue: any,
+    options: any = {}
+  ): Promise<DocumentMeta[]> {
+    const arr = await this.getField(collection, key, arrayField)
+
+    if (arr && !Array.isArray(arr)) {
+      throw new Error('Cannot add array value to an existing field that is not already of type array')
+    }
+
+    let unique = !!((options.hasOwnProperty('allowDuplicates') && options.allowDuplicates === true))
+
+    if (isObject(arrayValue) && !options.allowDuplicates) {
+      if (!options.uniqueObjectField || !arrayValue[options.uniqueObjectField]) {
+        throw new Error(
+          "The array object must be unique, no 'uniqueObjectField' was provided, or the array object is missing that field"
+        )
+      }
+
+      // we are manually performing a uniqueness check,
+      // so for the arango query this can be set to false
+      unique = false
+
+      if (arr && arr.length > 0) {
+        const matchingObject = arr.find(
+          o => o[options.uniqueObjectField] && o[options.uniqueObjectField] === arrayValue[options.uniqueObjectField]
+        )
+
+        if (matchingObject) {
+          throw new Error('The array object being added is not unique')
+        }
+      }
+    }
+
+    let query = `LET d = DOCUMENT("${collection}/${key}") `
+
+    if (arrayField.includes('.')) {
+      const nestedFields = arrayField.split('.')
+
+      query += 'UPDATE d WITH '
+
+      for (const field of nestedFields) { query += '{ ' + field + ': ' }
+
+      if (Array.isArray(arrayValue)) {
+        query += `APPEND(d.${arrayField}, ${JSON.stringify(arrayValue)}, ${unique})`
+      } else {
+        query += `PUSH(d.${arrayField}, ${JSON.stringify(arrayValue)}, ${unique})`
+      }
+
+      for (const _f of nestedFields) { query += ' }' }
+
+      query += ` IN ${collection} LET updated = NEW RETURN { "_key": updated._key, `
+
+      let countA = 0
+      let countB = 0
+
+      for (const field of nestedFields) {
+        countA++
+        if (countA === nestedFields.length) {
+          query += `"${field}": updated.${arrayField}`
+        } else {
+          query += `"${field}": { `
+        }
+      }
+
+      for (const _f of nestedFields) {
+        if (countB > 0) { query += ' }' }
+        countB++
+      }
+
+      query += ' }'
+    } else {
+      if (Array.isArray(arrayValue)) {
+        query += `UPDATE d WITH { ${arrayField}: APPEND(d.${arrayField}, ${JSON.stringify(arrayValue)}, ${unique}) } `
+        query += `IN ${collection} LET updated = NEW RETURN { "_key": updated._key, "${arrayField}": updated.${arrayField} }`
+      } else {
+        query += `UPDATE d WITH { ${arrayField}: PUSH(d.${arrayField}, ${JSON.stringify(arrayValue)}, ${unique}) } `
+        query += `IN ${collection} LET updated = NEW RETURN { "_key": updated._key, "${arrayField}": updated.${arrayField} }`
+      }
+    }
+
+    const results = await this.query(query)
+
+    return await results.all()
+  }
+
+  public async removeArrayValue(
+    collection: string,
+    key: string,
+    arrayField: string,
+    arrayValue: any
+  ): Promise<DocumentMeta[] | null> {
+    const arr = await this.getField(collection, key, arrayField)
+
+    if (arr && !Array.isArray(arr)) {
+      throw new Error('Cannot remove array value from an existing field that is not already of type array')
+    }
+
+    if (!arr || arr.length === 0) {
+      return null
+    }
+
+    let query = `LET d = DOCUMENT("${collection}/${key}") `
+
+    if (arrayField.includes('.')) {
+      const nestedFields = arrayField.split('.')
+
+      query += 'UPDATE d WITH '
+
+      for (const field of nestedFields) { query += `{ ${field}: ` }
+
+      query += `REMOVE_VALUE(d.${arrayField}, ${JSON.stringify(arrayValue)})`
+
+      for (const _f of nestedFields) { query += ' }' }
+
+      query += ` IN ${collection} LET updated = NEW RETURN { "_key": updated._key, `
+
+      let countA = 0
+      let countB = 0
+
+      for (const field of nestedFields) {
+        countA++
+        if (countA === nestedFields.length) {
+          query += `"${field}": updated.${arrayField}`
+        } else {
+          query += `"${field}": { `
+        }
+      }
+
+      for (const _f of nestedFields) {
+        if (countB > 0) { query += ' }' }
+        countB++
+      }
+
+      query += ' }'
+    } else {
+      query += `UPDATE d WITH { ${arrayField}: REMOVE_VALUE(d.${arrayField}, ${JSON.stringify(arrayValue)}) } `
+      query += `IN ${collection} LET updated = NEW RETURN { "_key": updated._key, "${arrayField}": updated.${arrayField} }`
+    }
+
+    const results = await this.query(query)
+
+    return await results.all()
+  }
+
+  public async addArrayObject(
+    collection: string,
+    key: string,
+    arrayField: string,
+    arrayObject: any,
+    uniqueObjectField?: string,
+    options: any = {}
+  ): Promise<DocumentMeta[]> {
+    if (!isObject(arrayObject)) {
+      throw new Error('Array value is not an object')
+    }
+
+    if (uniqueObjectField) {
+      options.uniqueObjectField = uniqueObjectField
+    } else {
+      options.allowDuplicates = true
+    }
+
+    return await this.addArrayValue(collection, key, arrayField, arrayObject, options)
+  }
+
+  public async removeArrayObject(
+    collection: string,
+    key: string,
+    arrayField: string,
+    objectIdField: string,
+    objectIdValue: any
+  ): Promise<DocumentMeta[] | null> {
+    const arr = await this.getField(collection, key, arrayField)
+
+    if (arr && !Array.isArray(arr)) {
+      throw new Error('Cannot remove array value from an existing field that is not already of type array')
+    }
+
+    if (!arr || arr.length === 0) {
+      return null
+    }
+
+    let arrayUpdated = false
+
+    const alteredArray = arr.filter(o => {
+      if (o[objectIdField] && o[objectIdField] === objectIdValue) {
+        arrayUpdated = true
+        return false
+      }
+
+      return o
+    })
+
+    if (arrayUpdated) {
+      return await this.updateField(collection, key, arrayField, alteredArray)
+    }
+
+    return null
+  }
+
+  public async updateArrayObject(
+    collection: string,
+    key: string,
+    arrayField: string,
+    objectIdField: string,
+    objectIdValue: any,
+    updatedObject: any,
+    options: any = {}
+  ): Promise<DocumentMeta[] | null> {
+    // FOR document in complexCollection
+    //   LET alteredList = (
+    //     FOR element IN document.subList LET newItem = (
+    //       !element.filterByMe ? element : MERGE(element, { attributeToAlter: "shiny New Value" })
+    //     )
+    //     RETURN newItem
+    //   )
+    // UPDATE document WITH { subList: alteredList } IN complexCollection
+
+    // var query = 'LET d = DOCUMENT("' + collection + '/' + id + '") ';
+    // query += 'LET alteredArray = (';
+    // query += '  FOR element IN d.' + arrayField + ' LET newElement = element RETURN newElement';
+    // query += ') RETURN alteredArray';
+    // query += ') UPDATE document WITH { arrayField:  alteredArray } IN collection'
+    // console.log('UPDATE ARRAY QUERY: ' + query);
+
+    const arr = await this.getField(collection, key, arrayField)
+
+    if (arr && !Array.isArray(arr)) {
+      throw new Error('Cannot update array value from an existing field that is not already of type array')
+    }
+
+    if (!updatedObject[objectIdField]) {
+      updatedObject[objectIdField] = objectIdValue
+    }
+
+    if (!arr || arr.length === 0) {
+      if (options.hasOwnProperty('addIfMissing') && options.addIfMissing === true) {
+        if (updatedObject[objectIdField] && updatedObject[objectIdField] !== objectIdValue) {
+          throw new Error('Specified ID does not match the one provided in the object instance')
+        }
+
+        if (options.hasOwnProperty('allowDuplicates') && options.allowDuplicates === true) {
+          return await this.addArrayObject(collection, key, arrayField, updatedObject)
+        }
+
+        return await this.addArrayObject(collection, key, arrayField, updatedObject, objectIdField)
+      }
+
+      return null
+    }
+
+    let arrayUpdated = false
+
+    const alteredArray = arr.map(o => {
+      if (o[objectIdField] && o[objectIdField] === objectIdValue) {
+        arrayUpdated = true
+
+        if (options?.strategy && options.strategy === 'replace') {
+          return updatedObject
+        }
+
+        // else strategy default = merge (the changes into the existing object)
+        return Object.assign(o, updatedObject)
+      }
+
+      return o
+    })
+
+    if (arrayUpdated) {
+      return await this.updateField(collection, key, arrayField, alteredArray)
+    }
+
+    if (options.hasOwnProperty('addIfMissing') && options.addIfMissing === true) {
+      if (updatedObject[objectIdField] && updatedObject[objectIdField] !== objectIdValue) {
+        throw new Error('Specified ID does not match the one provided in the object instance')
+      }
+
+      if (options.hasOwnProperty('allowDuplicates') && options.allowDuplicates === true) {
+        return await this.addArrayObject(collection, key, arrayField, updatedObject)
+      }
+
+      return await this.addArrayObject(collection, key, arrayField, updatedObject, objectIdField)
+    }
+
+    return null
+  }
+
+  public async replaceArrayObject(
+    collection: string,
+    key: string,
+    arrayField: string,
+    objectIdField: string,
+    objectIdValue: any,
+    updatedObject: any,
+    options: any = {}
+  ): Promise<DocumentMeta[] | null> {
+    options.strategy = 'replace'
+    return await this.updateArrayObject(
+      collection,
+      key,
+      arrayField,
+      objectIdField,
+      objectIdValue,
+      updatedObject,
+      options
+    )
+  }
+
+  public async replaceArray(
+    collection: string,
+    key: string,
+    arrayField: string,
+    updatedArray: any[]
+  ): Promise<DocumentMeta[] | null> {
+    return await this.updateField(collection, key, arrayField, updatedArray)
+  }
+
   public static trimDocument(document: any, options: DocumentTrimOptions = {}): any {
-    if (!document) {
+    if (!document || !isObject(document)) {
       return document
     }
 
     if (options.trimPrivateProps) {
-      stripUnderscoreProps(document, ['_key'])
-      // stripProps(document, ['_id', '_rev'])
+      stripUnderscoreProps(document, ['_key', '_id', '_rev'])
+    }
+
+    if (options.trimProps) {
+      stripProps(document, options.trimProps)
     }
 
     return document
   }
 
   public static trimDocuments(documents: any[], options: DocumentTrimOptions = {}): any[] {
-    if (options.trimPrivateProps) {
-      documents.map((d) => {
-        stripUnderscoreProps(d, ['_key'])
-        return d
-      })
-    // } else if (options.stripInternalProps) {
-    //   documents.map((d) => {
-    //     stripProps(d, ['_id', '_rev'])
-    //     return d
-    //   })
+    if (!documents) {
+      return documents
     }
+
+    documents.map((document) => {
+      if (!isObject(document)) {
+        return document
+      }
+
+      if (options.trimPrivateProps) {
+        stripUnderscoreProps(document, ['_key', '_id', '_rev'])
+      }
+
+      if (options.trimProps) {
+        stripProps(document, options.trimProps)
+      }
+
+      return document
+    })
 
     return documents
   }

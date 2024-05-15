@@ -133,6 +133,9 @@ describe('Guacamole Integration Tests', () => {
     expect(userGroupsCollectionExist).toBeTruthy()
 
     // remove a collection and recreate the structure
+    // await conn.driver(db2).graph(CONST.groupMembershipGraph).drop()
+    await conn.driver(db2).graph(CONST.groupMembershipGraph).removeEdgeDefinition(CONST.userToGroupEdge)
+    await conn.driver(db2).graph(CONST.groupMembershipGraph).removeVertexCollection(CONST.userCollection)
     await conn.driver(db2).collection(CONST.userCollection).drop()
     const usersCollectionExist2 = await conn.db(db2).col(CONST.userCollection).exists()
     expect(usersCollectionExist2).toBeFalsy()
@@ -344,6 +347,8 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('CRUD', async () => {
+    expect.assertions(184)
+
     const result1A = await conn.db(db1).create(CONST.userCollection, {
       name: 'Daryl',
       surname: 'Impey',
@@ -354,7 +359,8 @@ describe('Guacamole Integration Tests', () => {
         2014: ['1st, Tour of Alberta', '1st, SA Champs TT', '2nd, SA Champs Road Race'],
         2015: ['2nd, Vuelta a La Rioja'],
         2017: ['1st, 94.7 Cycle Challenge'],
-        2018: ['1st, SA Champs TT', '1st, SA Champs Road Race', '1st, Tour Down Under']
+        2018: ['1st, SA Champs TT', '1st, SA Champs Road Race', '1st, Tour Down Under'],
+        amateur: ['7th, Cape Argus Cycle Tour']
       },
       rating: {
         sprint: 8,
@@ -413,6 +419,262 @@ describe('Guacamole Integration Tests', () => {
     expect(result1E._secret).toBeUndefined()
     expect(result1E.results[2018].length).toEqual(3)
     expect(result1E.rating.timetrial).toEqual(8)
+
+    const result1F = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key })
+
+    expect(result1F.name).toEqual('Daryl')
+    expect(result1F.surname).toEqual('Impey')
+    expect(result1F.results[2017].length).toEqual(1)
+    expect(result1F.results[2018].length).toEqual(3)
+
+    const result1GA = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'results[2017]')
+    expect(Array.isArray(result1GA)).toBeTruthy()
+    expect(result1GA.length).toEqual(1)
+
+    const result1GB = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'results[2018]')
+    expect(Array.isArray(result1GB)).toBeTruthy()
+    expect(result1GB.length).toEqual(3)
+
+    const result1GC = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'country')
+    expect(result1GC).toEqual('South Africa')
+
+    const result1GD = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'favoriteRoads')
+    expect(result1GD).toBeDefined()
+    expect(result1GD.SouthAfrica).toBeDefined()
+
+    const result1GE = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'blah')
+    expect(result1GE).toBeNull()
+
+    const result1HA = await conn.db(db1).addArrayValue(CONST.userCollection, result1A[0]._key, 'blah', 'one')
+    const result1HB = await conn.db(db1).addArrayValue(CONST.userCollection, result1A[0]._key, 'blah', 2)
+    const result1HC = await conn.db(db1).addArrayValue(CONST.userCollection, result1A[0]._key, 'nested.blah', 'one')
+    const result1HD = await conn.db(db1).addArrayValue(CONST.userCollection, result1A[0]._key, 'nested.blah', 2)
+
+    try {
+      await conn.db(db1).addArrayValue(CONST.userCollection, result1A[0]._key, 'country', 'Australia')
+    } catch (e) {
+      expect(e.message).toEqual('Cannot add array value to an existing field that is not already of type array')
+    }
+
+    expect(result1HA[0].blah).toBeDefined()
+    expect(result1HB[0].blah).toBeDefined()
+    expect(result1HC[0].nested).toBeDefined()
+    expect(result1HD[0].nested).toBeDefined()
+
+    const result1J = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key })
+    expect(result1J.blah.length).toBe(2)
+    expect(result1J.blah[0]).toBe('one')
+    expect(result1J.nested.blah.length).toBe(2)
+    expect(result1J.nested.blah[1]).toBe(2)
+
+    const result1KA = await conn.db(db1).removeArrayValue(CONST.userCollection, result1A[0]._key, 'blah', 'one')
+    const result1KB = await conn.db(db1).removeArrayValue(CONST.userCollection, result1A[0]._key, 'nested.blah', 2)
+    const result1KC = await conn.db(db1).removeArrayValue(CONST.userCollection, result1A[0]._key, 'bleh', 'one')
+
+    try {
+      await conn.db(db1).removeArrayValue(CONST.userCollection, result1A[0]._key, 'country', 'South Africa')
+    } catch (e) {
+      expect(e.message).toEqual('Cannot remove array value from an existing field that is not already of type array')
+    }
+
+    expect(result1KA).not.toBeNull()
+    expect(result1KB).not.toBeNull()
+    expect(result1KC).toBeNull()
+
+    const result1L = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key })
+    expect(result1L.blah.length).toBe(1)
+    expect(result1L.blah[0]).toBe(2)
+    expect(result1L.nested.blah.length).toBe(1)
+    expect(result1L.nested.blah[0]).toBe('one')
+    expect(result1L.bleh).toBeUndefined()
+    expect(result1L.country).toBe('South Africa')
+
+    const result1MA = await conn.db(db1).addArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', { id: 'a', val: 'one' }, 'id')
+    const result1MB = await conn.db(db1).addArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', { id: 'b', val: 2 }, 'id')
+    const result1MC = await conn.db(db1).addArrayObject(CONST.userCollection, result1A[0]._key, 'nested.oblah', { id: 'a', val: 'one' }, 'id')
+    const result1MD = await conn.db(db1).addArrayObject(CONST.userCollection, result1A[0]._key, 'nested.oblah', { id: 'b', val: 2 }, 'id')
+
+    // add an array object without specifying a unique object field, should result in the object being added,
+    // even though there is an existing object with the same id
+    const result1ME = await conn.db(db1).addArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', { id: 'b', val: '3.0' })
+
+    expect(result1MA).not.toBeNull()
+    expect(result1MB).not.toBeNull()
+    expect(result1MC).not.toBeNull()
+    expect(result1MD).not.toBeNull()
+    expect(result1ME).not.toBeNull()
+
+    try {
+      await conn.db(db1).addArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', { id: 'a', val: 'three' }, 'idz')
+    } catch (e) {
+      expect(e.message).toEqual("The array object must be unique, no 'uniqueObjectField' was provided, or the array object is missing that field")
+    }
+
+    try {
+      await conn.db(db1).addArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', { idz: 'a', val: 'three' }, 'id')
+    } catch (e) {
+      expect(e.message).toEqual("The array object must be unique, no 'uniqueObjectField' was provided, or the array object is missing that field")
+    }
+
+    try {
+      await conn.db(db1).addArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', { id: 'b', val: 'three' }, 'id')
+    } catch (e) {
+      expect(e.message).toEqual('The array object being added is not unique')
+    }
+
+    try {
+      await conn.db(db1).addArrayObject(CONST.userCollection, result1A[0]._key, 'nested.oblah', { id: 'a', val: 3 }, 'id')
+    } catch (e) {
+      expect(e.message).toEqual('The array object being added is not unique')
+    }
+
+    try {
+      await conn.db(db1).addArrayObject(CONST.userCollection, result1A[0]._key, 'country', { id: 'z', val: 'Australia' }, 'id')
+    } catch (e) {
+      expect(e.message).toEqual('Cannot add array value to an existing field that is not already of type array')
+    }
+
+    const result1N = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key })
+
+    expect(result1N.oblah.length).toEqual(3)
+    expect(result1N.nested.oblah.length).toEqual(2)
+
+    const result1PA = await conn.db(db1).removeArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', 'id', 'b')
+    const result1PB = await conn.db(db1).removeArrayObject(CONST.userCollection, result1A[0]._key, 'nested.oblah', 'id', 'a')
+    const result1PC = await conn.db(db1).removeArrayObject(CONST.userCollection, result1A[0]._key, 'blah', 'idz', 'a')
+    const result1PD = await conn.db(db1).removeArrayObject(CONST.userCollection, result1A[0]._key, 'blah', 'id', 'c')
+    const result1PF = await conn.db(db1).removeArrayObject(CONST.userCollection, result1A[0]._key, 'bleh', 'id', 'a')
+
+    expect(result1PA).not.toBeNull()
+    expect(result1PB).not.toBeNull()
+    expect(result1PC).toBeNull()
+    expect(result1PD).toBeNull()
+    expect(result1PF).toBeNull()
+
+    try {
+      await conn.db(db1).removeArrayObject(CONST.userCollection, result1A[0]._key, 'country', 'id', 'a')
+    } catch (e) {
+      expect(e.message).toEqual('Cannot remove array value from an existing field that is not already of type array')
+    }
+
+    const result1Q = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key })
+
+    expect(result1Q.oblah.length).toEqual(1)
+    expect(result1Q.oblah[0].id).toEqual('a')
+    expect(result1Q.oblah[0].val).toEqual('one')
+    expect(result1Q.nested.oblah.length).toEqual(1)
+    expect(result1Q.nested.oblah[0].id).toEqual('b')
+    expect(result1Q.nested.oblah[0].val).toEqual(2)
+
+    const result1RA = await conn.db(db1).updateArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', 'id', 'a', {
+      val: 'AAA'
+    })
+
+    const result1RB = await conn.db(db1).updateArrayObject(CONST.userCollection, result1A[0]._key, 'nested.oblah', 'id', 'b', {
+      val: 33
+    })
+
+    expect(result1RA).not.toBeNull()
+    expect(result1RB).not.toBeNull()
+
+    const result1RC = await conn.db(db1).updateArrayObject(CONST.userCollection, result1A[0]._key, 'foo', 'id', 'a', {
+      val: 'XYZ'
+    })
+
+    const result1RE = await conn.db(db1).updateArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', 'id', 'x', {
+      val: 'ZZZ'
+    })
+
+    expect(result1RC).toBeNull()
+    expect(result1RE).toBeNull()
+
+    const result1S = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key })
+
+    expect(result1S.foo).toBeUndefined()
+    expect(result1S.oblah.length).toEqual(1)
+    expect(result1S.oblah[0].id).toEqual('a')
+    expect(result1S.oblah[0].val).toEqual('AAA')
+    expect(result1S.oblah[0].message).toBeUndefined()
+    expect(result1S.nested.oblah.length).toEqual(1)
+    expect(result1S.nested.oblah[0].id).toEqual('b')
+    expect(result1S.nested.oblah[0].val).toEqual(33)
+
+    const result1TA = await conn.db(db1).updateArrayObject(CONST.userCollection, result1A[0]._key, 'foo', 'id', 'a', {
+      val: 'XYZ'
+    }, { addIfMissing: true })
+
+    const result1TB = await conn.db(db1).updateArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', 'id', 'x', {
+      id: 'x',
+      val: 'ZZZ'
+    }, { addIfMissing: true })
+
+    expect(result1TA).not.toBeNull()
+    expect(result1TB).not.toBeNull()
+
+    // confirm the merging of objects work
+    await conn.db(db1).updateArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', 'id', 'a', {
+      message: 'Hello World'
+    })
+
+    // confirm that replacing an entire array object works
+    await conn.db(db1).updateArrayObject(CONST.userCollection, result1A[0]._key, 'nested.oblah', 'id', 'b', {
+      message: 'Replaced'
+    }, { strategy: 'replace' })
+
+    try {
+      await conn.db(db1).updateArrayObject(CONST.userCollection, result1A[0]._key, 'country', 'id', 'a', {
+        val: 'Australia'
+      })
+    } catch (e) {
+      expect(e.message).toEqual('Cannot update array value from an existing field that is not already of type array')
+    }
+
+    const result1U = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key })
+
+    expect(result1U.foo).toBeDefined()
+    expect(result1U.foo[0].id).toEqual('a')
+    expect(result1U.foo[0].val).toEqual('XYZ')
+    expect(result1U.oblah.length).toEqual(2)
+    expect(result1U.oblah[0].id).toEqual('a')
+    expect(result1U.oblah[0].val).toEqual('AAA')
+    expect(result1U.oblah[0].message).toEqual('Hello World')
+    expect(result1U.oblah[1].id).toEqual('x')
+    expect(result1U.oblah[1].val).toEqual('ZZZ')
+    expect(result1U.nested.oblah.length).toEqual(1)
+    expect(result1U.nested.oblah[0].id).toEqual('b')
+    expect(result1U.nested.oblah[0].val).toBeUndefined()
+    expect(result1U.nested.oblah[0].message).toEqual('Replaced')
+
+    // confirm that replacing an entire array object works
+    await conn.db(db1).replaceArrayObject(CONST.userCollection, result1A[0]._key, 'nested.oblah', 'id', 'b', {
+      msg: 'Replaced Again!',
+      val: 'BLAH'
+    })
+
+    await conn.db(db1).replaceArray(CONST.userCollection, result1A[0]._key, 'blah', ['one', 'two', 'three'])
+    await conn.db(db1).replaceArray(CONST.userCollection, result1A[0]._key, 'oblah', [{
+      id: 123,
+      text: '123'
+    }, {
+      id: 'ABC',
+      text: 321
+    }])
+
+    const result1Z = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key })
+
+    console.log(result1Z)
+
+    expect(result1Z.blah.length).toEqual(3)
+    expect(result1Z.blah[0]).toEqual('one')
+    expect(result1Z.oblah.length).toEqual(2)
+    expect(result1Z.oblah[0].id).toEqual(123)
+    expect(result1Z.oblah[0].val).toBeUndefined()
+    expect(result1Z.oblah[0].text).toEqual('123')
+    expect(result1Z.nested.oblah.length).toEqual(1)
+    expect(result1Z.nested.oblah[0].id).toEqual('b')
+    expect(result1Z.nested.oblah[0].val).toEqual('BLAH')
+    expect(result1Z.nested.oblah[0].message).toBeUndefined()
+    expect(result1Z.nested.oblah[0].msg).toEqual('Replaced Again!')
 
     const result2A = await conn.db(db1).create(CONST.userCollection, {
       name: 'Cadel',
@@ -573,7 +835,9 @@ describe('Guacamole Integration Tests', () => {
       .fetchByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Time Trial' })) as QueryResult
 
     expect(result4B.data.length).toEqual(3)
-    expect(result4B.data[0].rating.timetrial).toEqual(9)
+
+    const rohanDennisv1 = result4B.data.find(i => i.surname === 'Dennis')
+    expect(rohanDennisv1.rating.timetrial).toEqual(9)
 
     const result4BWithLimit1 = (await conn.db(db1)
       .fetchByPropertyValue(
@@ -606,6 +870,43 @@ describe('Guacamole Integration Tests', () => {
         expect.objectContaining({ name: 'Fabian' })
       ])
     )
+
+    const result4C = await conn.db(db1).update(CONST.userCollection, {
+      identifier: 'surname',
+      id: 'Dennis',
+      data: {
+        rating: { timetrial: 8 }
+      }
+    })
+
+    expect(result4C).toBeDefined()
+    expect(Array.isArray(result4C)).toBeTruthy()
+    expect(result4C.length).toEqual(1)
+    expect(result4C[0]._key).toBeDefined()
+
+    const result4D = (await conn.db(db1)
+      .fetchByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Time Trial' })) as QueryResult
+
+    expect(result4D.data.length).toEqual(3)
+
+    const rohanDennisv2 = result4D.data.find(i => i.surname === 'Dennis')
+    expect(rohanDennisv2.rating.timetrial).toEqual(8)
+
+    const result4E = await conn.db(db1).updateField(CONST.userCollection, rohanDennisv2._key, 'rating.timetrial', 7)
+
+    expect(result4E).toBeDefined()
+    expect(Array.isArray(result4E)).toBeTruthy()
+    expect(result4E.length).toEqual(1)
+    expect(result4E[0]._key).toBeDefined()
+    expect(result4E[0]['rating.timetrial']).toBeDefined()
+
+    const result4F = (await conn.db(db1)
+      .fetchByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Time Trial' })) as QueryResult
+
+    expect(result4F.data.length).toEqual(3)
+
+    const rohanDennisv3 = result4F.data.find(i => i.surname === 'Dennis')
+    expect(rohanDennisv3.rating.timetrial).toEqual(7)
 
     const result5A = await conn.db(db1).delete(CONST.userCollection, { id: 'Break Aways', identifier: 'speciality' })
 
@@ -654,7 +955,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1E.data.length).toEqual(1)
   })
 
-  test('returnAll, returnOne', async () => {
+  test('returnAll, returnSingle', async () => {
     const result1A = await conn
       .db(db1)
       .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
@@ -731,7 +1032,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2B.data.length).toEqual(0)
 
     const result3A = await conn.db(db1)
-      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
+      .returnSingle(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
 
     expect(result3A).toBeNull()
 
@@ -741,7 +1042,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result3B).toBeNull()
 
     const result4A = await conn.db(db1)
-      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
+      .returnSingle(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
 
     expect(result4A).toBeDefined()
     expect(result4A.surname).toBeDefined()
@@ -753,7 +1054,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result4B.surname).toBeDefined()
 
     const result5A = await conn.db(db1)
-      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
+      .returnSingle(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
 
     expect(result5A).toBeDefined()
     expect(result5A.name).toEqual('Daryl')
@@ -833,7 +1134,7 @@ describe('Guacamole Integration Tests', () => {
 
   test('fetchByFilterCriteria', async () => {
     const result1A = await conn.db(db1)
-      .fetchByFilterCriteria(CONST.userCollection, 'name == "Lance" || name == "Chris"') as QueryResult
+      .fetchByFilterCriteria(CONST.userCollection, 'd.name == "Lance" || d.name == "Chris"') as QueryResult
 
     expect(result1A.data.length).toEqual(2)
     expect(result1A.data).toEqual(
@@ -844,14 +1145,14 @@ describe('Guacamole Integration Tests', () => {
     )
 
     const result1B = await conn.db(db1)
-      .fetchByFilterCriteria(CONST.userCollection, 'name == "Lance" || name == "Chris"', {
+      .fetchByFilterCriteria(CONST.userCollection, 'd.name == "Lance" || d.name == "Chris"', {
         returnCursor: true
       }) as ArrayCursor
 
     expect(result1B instanceof ArrayCursor).toBeTruthy()
 
     const result2A = await conn.db(db1)
-      .fetchByFilterCriteria(CONST.userCollection, 'country == "Italy" && speciality == "General Classification"') as QueryResult
+      .fetchByFilterCriteria(CONST.userCollection, 'd.country == "Italy" && d.speciality == "General Classification"') as QueryResult
 
     expect(result2A.data.length).toEqual(2)
     expect(result2A.data).toEqual(
@@ -862,7 +1163,7 @@ describe('Guacamole Integration Tests', () => {
     )
   })
 
-  test('findWhereFieldsMatch', async () => {
+  test('findWhereAnyPropertyContains', async () => {
     const result1A = await conn.db(db1)
       // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) ) RETURN d',
       // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) || LIKE(d.surname, "%lance%", true) || LIKE(d.surname, "%chris%", true) ) RETURN d'
