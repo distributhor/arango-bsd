@@ -5,9 +5,9 @@ import {
   UniqueConstraint,
   isCompositeKey,
   isUniqueValue,
-  NamedValue,
+  KeyValue,
   IndexedValue,
-  ListOfFilters,
+  FilterCriteria,
   MatchTypeOperator,
   MatchType,
   FetchOptions
@@ -16,7 +16,7 @@ import {
 const PREFIX_PROP_NAMES = false
 
 /** @internal */
-export function isListOfFilters(x: any): x is ListOfFilters {
+export function isListOfFilters(x: any): x is FilterCriteria {
   return x.filters
 }
 
@@ -133,12 +133,12 @@ function _shouldPrefixPropNames(options: FetchOptions): boolean {
 }
 
 /** @internal */
-function _fetchByKeyValue(
+function _fetchByKeyValues(
   collection: string,
-  identifier: NamedValue | NamedValue[],
+  identifier: KeyValue | KeyValue[],
   keyValueMatchType: MatchType,
   options: FetchOptions,
-  filter?: string | ListOfFilters
+  filter?: string | FilterCriteria
 ): AqlQuery {
   const params: any = {}
   let query = `FOR d IN ${collection} FILTER`
@@ -236,27 +236,36 @@ function _fetchByKeyValue(
   }
 }
 
-export function fetchMatchingAnyPropertyValue(
+export function fetchByMatchingProperty(
   collection: string,
-  identifier: NamedValue | NamedValue[],
+  identifier: KeyValue,
   options: FetchOptions = {},
-  filter?: string | ListOfFilters
+  filter?: string | FilterCriteria
 ): AqlQuery {
-  return _fetchByKeyValue(collection, identifier, MatchType.ANY, options, filter)
+  return _fetchByKeyValues(collection, identifier, MatchType.ANY, options, filter)
 }
 
-export function fetchMatchingAllPropertyValues(
+export function fetchByMatchingAnyProperty(
   collection: string,
-  identifier: NamedValue[],
+  identifier: KeyValue[],
   options: FetchOptions = {},
-  filter?: string | ListOfFilters
+  filter?: string | FilterCriteria
 ): AqlQuery {
-  return _fetchByKeyValue(collection, identifier, MatchType.ALL, options, filter)
+  return _fetchByKeyValues(collection, identifier, MatchType.ANY, options, filter)
+}
+
+export function fetchByMatchingAllProperties(
+  collection: string,
+  identifier: KeyValue[],
+  options: FetchOptions = {},
+  filter?: string | FilterCriteria
+): AqlQuery {
+  return _fetchByKeyValues(collection, identifier, MatchType.ALL, options, filter)
 }
 
 export function fetchByFilterCriteria(
   collection: string,
-  filter: string | ListOfFilters,
+  filter: string | FilterCriteria,
   options: FetchOptions = {}
 ): AqlQuery {
   const params: any = {}
@@ -378,7 +387,7 @@ export function fetchAll(
   }
 }
 
-export function updateDocumentsByKeyValue(collection: DocumentCollection, identifier: NamedValue, data: any): AqlQuery {
+export function updateDocumentsByKeyValue(collection: DocumentCollection, identifier: KeyValue, data: any): AqlQuery {
   // return literal(
   //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
   //     data
@@ -418,7 +427,7 @@ export function updateDocumentsByKeyValue(collection: DocumentCollection, identi
   // `)
 }
 
-export function deleteDocumentsByKeyValue(collection: DocumentCollection, identifier: NamedValue): AqlQuery {
+export function deleteDocumentsByKeyValue(collection: DocumentCollection, identifier: KeyValue): AqlQuery {
   // return literal(
   //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
   // )
@@ -513,11 +522,12 @@ export function uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
 }
 
 export const Queries = {
-  deleteDocumentsByKeyValue,
-  fetchMatchingAnyPropertyValue,
-  fetchMatchingAllPropertyValues,
+  fetchByMatchingProperty,
+  fetchByMatchingAnyProperty,
+  fetchByMatchingAllProperties,
   fetchByFilterCriteria,
   fetchAll,
+  deleteDocumentsByKeyValue,
   uniqueConstraintQuery,
   updateDocumentsByKeyValue
 }

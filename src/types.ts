@@ -7,7 +7,7 @@ export interface UntypedObject {
   [key: string]: any
 }
 
-export interface NamedValue {
+export interface KeyValue {
   name: string
   value: any
 }
@@ -18,11 +18,11 @@ export interface IndexedValue {
 }
 
 export interface UniqueValue {
-  unique: NamedValue
+  unique: KeyValue
 }
 
 export interface CompositeKey {
-  composite: NamedValue[]
+  composite: KeyValue[]
 }
 
 export interface UniqueConstraint {
@@ -47,7 +47,7 @@ export enum MatchTypeOperator {
   ALL = '&&',
 }
 
-export interface ListOfFilters {
+export interface FilterCriteria {
   filters: string[]
   match?: MatchType
 }

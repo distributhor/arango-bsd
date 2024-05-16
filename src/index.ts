@@ -18,8 +18,8 @@ import {
   FetchOptions,
   DocumentTrimOptions,
   QueryResult,
-  NamedValue,
-  ListOfFilters,
+  KeyValue,
+  FilterCriteria,
   DocumentUpdate,
   Identifier,
   MatchType,
@@ -260,7 +260,7 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns an object
    */
-  public async returnSingle<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | T[] | null> {
+  public async returnFirst<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | T[] | null> {
     const response = await this.query<T>(query, options?.arangojs?.query)
     const documents = await response.all()
 
@@ -383,140 +383,6 @@ export class ArangoDB {
     return [response]
   }
 
-  public async fetchOneByPropertyValue<T = any>(
-    collection: string,
-    identifier: NamedValue,
-    options: FetchOptions = {}
-  ): Promise<T | T[] | null> {
-    return await this.returnSingle<T>(Queries.fetchMatchingAnyPropertyValue(collection, identifier), options)
-  }
-
-  public async fetchOneByCompositeValue<T = any>(
-    collection: string,
-    identifier: NamedValue[],
-    options: FetchOptions = {}
-  ): Promise<T | T[] | null> {
-    return await this.returnSingle<T>(Queries.fetchMatchingAllPropertyValues(collection, identifier), options)
-  }
-
-  public async fetchByPropertyValue<T = any>(
-    collection: string,
-    identifier: NamedValue,
-    options: FetchOptions = {}
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    return await this.fetchMatchingAnyPropertyValue(collection, identifier, options)
-  }
-
-  public async fetchMatchingAnyPropertyValue<T = any>(
-    collection: string,
-    identifier: NamedValue | NamedValue[],
-    options: FetchOptions = {},
-    additionalFilters?: ListOfFilters
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    let arangojsQueryOptions = options?.arangojs?.query
-
-    if (options.limit) {
-      if (!arangojsQueryOptions) {
-        arangojsQueryOptions = {}
-      }
-      arangojsQueryOptions.count = true
-      arangojsQueryOptions.fullCount = true
-    }
-
-    const result = await this.driver.query(
-      Queries.fetchMatchingAnyPropertyValue(collection, identifier, options, additionalFilters),
-      arangojsQueryOptions
-    )
-
-    if (options.returnCursor) {
-      return result
-    }
-
-    const documents = await result.all()
-
-    const response = {
-      data: ArangoDB.trimDocuments(documents, options),
-      size: result.count,
-      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
-      // stats: result.extra.stats
-    }
-
-    return response
-  }
-
-  public async fetchMatchingAllPropertyValues<T = any>(
-    collection: string,
-    identifier: NamedValue[],
-    options: FetchOptions = {},
-    additionalFilters?: ListOfFilters
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    let arangojsQueryOptions = options?.arangojs?.query
-
-    if (options.limit) {
-      if (!arangojsQueryOptions) {
-        arangojsQueryOptions = {}
-      }
-      arangojsQueryOptions.count = true
-      arangojsQueryOptions.fullCount = true
-    }
-
-    const result = await this.driver.query(
-      Queries.fetchMatchingAllPropertyValues(collection, identifier, options, additionalFilters),
-      arangojsQueryOptions
-    )
-
-    if (options.returnCursor) {
-      return result
-    }
-
-    const documents = await result.all()
-
-    const response = {
-      data: ArangoDB.trimDocuments(documents, options),
-      size: result.count,
-      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
-      // stats: result.extra.stats
-    }
-
-    return response
-  }
-
-  public async fetchByFilterCriteria<T = any>(
-    collection: string,
-    filter: string | ListOfFilters,
-    options: FetchOptions = {}
-  ): Promise<ArrayCursor<T> | QueryResult<T>> {
-    let arangojsQueryOptions = options?.arangojs?.query
-
-    if (options.limit) {
-      if (!arangojsQueryOptions) {
-        arangojsQueryOptions = {}
-      }
-      arangojsQueryOptions.count = true
-      arangojsQueryOptions.fullCount = true
-    }
-
-    const result = await this.driver.query(
-      Queries.fetchByFilterCriteria(collection, filter, options),
-      arangojsQueryOptions
-    )
-
-    if (options.returnCursor) {
-      return result
-    }
-
-    const documents = await result.all()
-
-    const response = {
-      data: ArangoDB.trimDocuments(documents, options),
-      size: result.count,
-      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
-      // stats: result.extra.stats
-    }
-
-    return response
-  }
-
   public async fetchAll<T = any>(
     collection: string,
     options: FetchOptions = {}
@@ -552,31 +418,133 @@ export class ArangoDB {
     return response
   }
 
-  private buildPropMatchFilter(props: string | string[], matches: string | string[]): ListOfFilters {
-    const filter: ListOfFilters = {
+  public async fetchOneByPropertyValue<T = any>(
+    collection: string,
+    propValue: KeyValue,
+    options: FetchOptions = {}
+  ): Promise<T | T[] | null> {
+    return await this.returnFirst<T>(Queries.fetchByMatchingProperty(collection, propValue), options)
+  }
+
+  public async fetchOneByAllPropertyValues<T = any>(
+    collection: string,
+    propValue: KeyValue[],
+    options: FetchOptions = {}
+  ): Promise<T | T[] | null> {
+    return await this.returnFirst<T>(Queries.fetchByMatchingAllProperties(collection, propValue), options)
+  }
+
+  public async fetchByPropertyValue<T = any>(
+    collection: string,
+    propValue: KeyValue,
+    options: FetchOptions = {},
+    filters?: FilterCriteria
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    return await this._fetchByPropValues(collection, propValue, MatchType.ANY, options, filters)
+  }
+
+  public async fetchByAnyPropertyValue<T = any>(
+    collection: string,
+    propValue: KeyValue[],
+    options: FetchOptions = {},
+    filters?: FilterCriteria
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    return await this._fetchByPropValues(collection, propValue, MatchType.ANY, options, filters)
+  }
+
+  public async fetchByAllPropertyValues<T = any>(
+    collection: string,
+    propValues: KeyValue[],
+    options: FetchOptions = {},
+    filters?: FilterCriteria
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    return await this._fetchByPropValues(collection, propValues, MatchType.ALL, options, filters)
+  }
+
+  /** @internal */
+  private async _fetchByPropValues<T = any>(
+    collection: string,
+    propValues: KeyValue | KeyValue[],
+    matchType: MatchType,
+    options: FetchOptions = {},
+    filters?: FilterCriteria
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    let arangojsQueryOptions = options?.arangojs?.query
+
+    if (options.limit) {
+      if (!arangojsQueryOptions) {
+        arangojsQueryOptions = {}
+      }
+      arangojsQueryOptions.count = true
+      arangojsQueryOptions.fullCount = true
+    }
+
+    let result: ArrayCursor<any> | QueryResult<T> | PromiseLike<ArrayCursor<any> | QueryResult<T>>
+
+    if (Array.isArray(propValues)) {
+      if (matchType === MatchType.ANY) {
+        result = await this.driver.query(
+          Queries.fetchByMatchingAnyProperty(collection, propValues, options, filters),
+          arangojsQueryOptions
+        )
+      } else {
+        result = await this.driver.query(
+          Queries.fetchByMatchingAllProperties(collection, propValues, options, filters),
+          arangojsQueryOptions
+        )
+      }
+    } else {
+      result = await this.driver.query(
+        Queries.fetchByMatchingProperty(collection, propValues, options, filters),
+        arangojsQueryOptions
+      )
+    }
+
+    if (options.returnCursor) {
+      return result
+    }
+
+    const documents = await result.all()
+
+    const response = {
+      data: ArangoDB.trimDocuments(documents, options),
+      size: result.count,
+      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
+      // stats: result.extra.stats
+    }
+
+    return response
+  }
+
+  /** @internal */
+  private _toPropSearchFilter(
+    searchProps: string | string[],
+    searchTerms: string | string[]
+  ): FilterCriteria {
+    const filter: FilterCriteria = {
       match: MatchType.ANY,
       filters: []
     }
 
-    if (typeof props === 'string') {
-      props = props.split(',')
+    if (typeof searchProps === 'string') {
+      searchProps = searchProps.split(',')
     }
 
-    props = props.map(p => `d.${p}`)
+    searchProps = searchProps.map(p => `d.${p}`)
 
-    if (typeof matches === 'string') {
-      matches = matches.split(',')
+    if (typeof searchTerms === 'string') {
+      searchTerms = searchTerms.split(',')
     }
 
-    for (let i = 0; i < props.length; i++) {
-      for (let j = 0; j < matches.length; j++) {
-        if (matches[j].trim().toLowerCase() === 'null') {
-          filter.filters.push(props[i].trim() + ' == null')
-        } else if (matches[j].trim().toLowerCase() === '!null') {
-          filter.filters.push(props[i].trim() + ' != null')
+    for (let i = 0; i < searchProps.length; i++) {
+      for (let j = 0; j < searchTerms.length; j++) {
+        if (searchTerms[j].trim().toLowerCase() === 'null') {
+          filter.filters.push(searchProps[i].trim() + ' == null')
+        } else if (searchTerms[j].trim().toLowerCase() === '!null') {
+          filter.filters.push(searchProps[i].trim() + ' != null')
         } else {
-          // filters.push(fields[i].trim() + ' LIKE "%' + matches.trim() + '%"');
-          filter.filters.push('LIKE(' + props[i].trim() + ', "%' + matches[j].trim() + '%", true)')
+          // filters.push(fields[i].trim() + ' LIKE "%' + searchTerms.trim() + '%"');
+          filter.filters.push('LIKE(' + searchProps[i].trim() + ', "%' + searchTerms[j].trim() + '%", true)')
         }
       }
     }
@@ -584,36 +552,83 @@ export class ArangoDB {
     return filter
   }
 
-  public async findWhereAnyPropertyContains<T = any>(
+  public async fetchByFilterCriteria<T = any>(
     collection: string,
-    props: string | string[],
-    matches: string | string[],
+    filter: string | FilterCriteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
-    const filter: ListOfFilters = this.buildPropMatchFilter(props, matches)
+    let arangojsQueryOptions = options?.arangojs?.query
+
+    if (options.limit) {
+      if (!arangojsQueryOptions) {
+        arangojsQueryOptions = {}
+      }
+      arangojsQueryOptions.count = true
+      arangojsQueryOptions.fullCount = true
+    }
+
+    const result = await this.driver.query(
+      Queries.fetchByFilterCriteria(collection, filter, options),
+      arangojsQueryOptions
+    )
+
+    if (options.returnCursor) {
+      return result
+    }
+
+    const documents = await result.all()
+
+    const response = {
+      data: ArangoDB.trimDocuments(documents, options),
+      size: result.count,
+      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
+      // stats: result.extra.stats
+    }
+
+    return response
+  }
+
+  public async fetchByPropertySearch<T = any>(
+    collection: string,
+    searchProps: string | string[],
+    searchTerms: string | string[],
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor<T> | QueryResult<T>> {
+    const filter: FilterCriteria = this._toPropSearchFilter(searchProps, searchTerms)
     return await this.fetchByFilterCriteria(collection, filter, options)
   }
 
-  public async fetchByPropertyValueAndWhereAnyPropertyContains<T = any>(
+  public async fetchByPropertyValueAndSearch<T = any>(
     collection: string,
-    identifier: NamedValue,
-    props: string | string[],
-    matches: string | string[],
+    propValue: KeyValue,
+    searchProps: string | string[],
+    searchTerms: string | string[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
-    const filters: ListOfFilters = this.buildPropMatchFilter(props, matches)
-    return await this.fetchMatchingAnyPropertyValue(collection, identifier, options, filters)
+    const filters: FilterCriteria = this._toPropSearchFilter(searchProps, searchTerms)
+    return await this.fetchByPropertyValue(collection, propValue, options, filters)
   }
 
-  public async fetchMatchingAllPropertyValuesAndWhereAnyPropertyContains<T = any>(
+  public async fetchByAnyPropertyValueAndSearch<T = any>(
     collection: string,
-    identifier: NamedValue[],
-    props: string | string[],
-    matches: string | string[],
+    propValue: KeyValue[],
+    searchProps: string | string[],
+    searchTerms: string | string[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
-    const filters: ListOfFilters = this.buildPropMatchFilter(props, matches)
-    return await this.fetchMatchingAllPropertyValues(collection, identifier, options, filters)
+    const filters: FilterCriteria = this._toPropSearchFilter(searchProps, searchTerms)
+    return await this.fetchByAnyPropertyValue(collection, propValue, options, filters)
+  }
+
+  public async fetchByAllPropertyValuesAndSearch<T = any>(
+    collection: string,
+    propValue: KeyValue[],
+    searchProps: string | string[],
+    searchTerms: string | string[],
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    const filters: FilterCriteria = this._toPropSearchFilter(searchProps, searchTerms)
+    return await this.fetchByAllPropertyValues(collection, propValue, options, filters)
   }
 
   public async uniqueConstraintValidation(constraints: UniqueConstraint): Promise<UniqueConstraintResult> {
@@ -632,7 +647,7 @@ export class ArangoDB {
   }
 
   public async getField<T = any>(collection: string, key: string, field: string): Promise<T | T[] | null> {
-    return await this.returnSingle(`LET d = DOCUMENT("${collection}/${key}") RETURN d.${field}`)
+    return await this.returnFirst(`LET d = DOCUMENT("${collection}/${key}") RETURN d.${field}`)
   }
 
   public async updateField(

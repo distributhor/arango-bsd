@@ -931,7 +931,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1B.data.length).toEqual(1)
 
     const result1C = (await conn.db(db1)
-      .fetchMatchingAllPropertyValues(CONST.userCollection, [
+      .fetchByAllPropertyValues(CONST.userCollection, [
         { name: 'favoriteRoads.SouthAfrica.CapeTown', value: 'Chapmans Peak' },
         { name: 'favoriteRoads.Portugal.Lisbon', value: 'Sintra' }
       ])) as QueryResult
@@ -939,7 +939,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1C.data.length).toEqual(1)
 
     const result1D = (await conn.db(db1)
-      .fetchMatchingAllPropertyValues(CONST.userCollection, [
+      .fetchByAllPropertyValues(CONST.userCollection, [
         { name: 'favoriteRoads.SouthAfrica.CapeTown', value: 'Chappies' },
         { name: 'favoriteRoads.Portugal.Lisbon', value: 'Sintra' }
       ])) as QueryResult
@@ -947,7 +947,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1D.data.length).toEqual(0)
 
     const result1E = (await conn.db(db1)
-      .fetchMatchingAnyPropertyValue(CONST.userCollection, [
+      .fetchByAnyPropertyValue(CONST.userCollection, [
         { name: 'favoriteRoads.SouthAfrica.CapeTown', value: 'Chappies' },
         { name: 'favoriteRoads.Portugal.Lisbon', value: 'Sintra' }
       ])) as QueryResult
@@ -1032,7 +1032,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2B.data.length).toEqual(0)
 
     const result3A = await conn.db(db1)
-      .returnSingle(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
+      .returnFirst(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
 
     expect(result3A).toBeNull()
 
@@ -1042,7 +1042,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result3B).toBeNull()
 
     const result4A = await conn.db(db1)
-      .returnSingle(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
+      .returnFirst(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
 
     expect(result4A).toBeDefined()
     expect(result4A.surname).toBeDefined()
@@ -1054,7 +1054,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result4B.surname).toBeDefined()
 
     const result5A = await conn.db(db1)
-      .returnSingle(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
+      .returnFirst(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
 
     expect(result5A).toBeDefined()
     expect(result5A.name).toEqual('Daryl')
@@ -1094,7 +1094,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result5B._secret).toEqual('Rusks')
     expect(result5D._key).toBeDefined()
 
-    const result6A = (await conn.db(db1).fetchMatchingAllPropertyValues(CONST.userCollection, [
+    const result6A = (await conn.db(db1).fetchByAllPropertyValues(CONST.userCollection, [
       { name: 'country', value: 'Belgium' },
       { name: 'speciality', value: 'Classics' }
     ])) as QueryResult
@@ -1103,28 +1103,28 @@ describe('Guacamole Integration Tests', () => {
     expect(result6A.data[0].name === 'Wout' || result6A.data[0].name === 'Tim').toBeTruthy()
     expect(result6A.data[1].surname === 'van Aert' || result6A.data[1].surname === 'Wellens').toBeTruthy()
 
-    const result6B = (await conn.db(db1).fetchMatchingAllPropertyValues(CONST.userCollection, [
+    const result6B = (await conn.db(db1).fetchByAllPropertyValues(CONST.userCollection, [
       { name: 'country', value: 'UK' },
       { name: 'speciality', value: 'Classics' }
     ])) as QueryResult
 
     expect(result6B.data.length).toEqual(0)
 
-    const result7A = await conn.db(db1).fetchOneByCompositeValue(CONST.userCollection, [
+    const result7A = await conn.db(db1).fetchOneByAllPropertyValues(CONST.userCollection, [
       { name: 'country', value: 'Belgium' },
       { name: 'speciality', value: 'Classics' }
     ])
 
     expect(result7A.surname === 'van Aert' || result7A.surname === 'Wellens').toBeTruthy()
 
-    const result7B = await conn.db(db1).fetchOneByCompositeValue(CONST.userCollection, [
+    const result7B = await conn.db(db1).fetchOneByAllPropertyValues(CONST.userCollection, [
       { name: 'name', value: 'Jan' },
       { name: 'surname', value: 'Ullrich' }
     ])
 
     expect(result7B.surname).toEqual('Ullrich')
 
-    const result7C = await conn.db(db1).fetchOneByCompositeValue(CONST.userCollection, [
+    const result7C = await conn.db(db1).fetchOneByAllPropertyValues(CONST.userCollection, [
       { name: 'name', value: 'Jan' },
       { name: 'surname', value: 'Armstrong' }
     ])
@@ -1163,14 +1163,14 @@ describe('Guacamole Integration Tests', () => {
     )
   })
 
-  test('findWhereAnyPropertyContains', async () => {
+  test('fetchByPropertySearch', async () => {
     const result1A = await conn.db(db1)
       // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) ) RETURN d',
       // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) || LIKE(d.surname, "%lance%", true) || LIKE(d.surname, "%chris%", true) ) RETURN d'
-      .findWhereAnyPropertyContains(CONST.userCollection, 'name', ['lance', 'chris']) as QueryResult
+      .fetchByPropertySearch(CONST.userCollection, 'name', ['lance', 'chris']) as QueryResult
 
     const result2A = await conn.db(db1)
-      .findWhereAnyPropertyContains(CONST.userCollection, 'name', ['mar']) as QueryResult
+      .fetchByPropertySearch(CONST.userCollection, 'name', ['mar']) as QueryResult
 
     expect(result1A.data.length).toEqual(2)
     expect(result1A.data).toEqual(
