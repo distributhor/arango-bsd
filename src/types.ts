@@ -49,11 +49,18 @@ export enum MatchTypeOperator {
 
 export interface FilterCriteria {
   filters: string[]
-  match?: MatchType
+  match: MatchType // WK: used to be optional
 }
 
-export interface DatabaseConfig extends Config {
-  hello?: boolean
+export interface SearchTerms {
+  props: string | string[]
+  terms: string | string[]
+}
+
+export interface DatabaseConfig extends Config {}
+
+export interface GuacamoleOptions {
+  autoPrefixPropNamesInFilters?: boolean
 }
 
 export interface Identifier {
@@ -85,7 +92,7 @@ export interface FetchOptions extends DocumentTrimOptions {
   sortBy?: string
   sortOrder?: string
   returnCursor?: boolean
-  prefixPropNames?: boolean
+  autoPrefixPropNamesInFilters?: boolean
 }
 
 export interface QueryResult<T = any> {

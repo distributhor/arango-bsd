@@ -7,17 +7,22 @@ import {
   isUniqueValue,
   KeyValue,
   IndexedValue,
+  SearchTerms,
   FilterCriteria,
   MatchTypeOperator,
   MatchType,
-  FetchOptions
+  FetchOptions,
+  GuacamoleOptions
 } from './index'
 
-const PREFIX_PROP_NAMES = false
+/** @internal */
+export function isFilterCriteria(x: any): x is FilterCriteria {
+  return x.filters
+}
 
 /** @internal */
-export function isListOfFilters(x: any): x is FilterCriteria {
-  return x.filters
+export function isSearchTerms(x: any): x is SearchTerms {
+  return x.terms
 }
 
 /** @internal */
@@ -119,415 +124,457 @@ export function _prefixPropertyNames(filterString: string): string {
   return modifiedFilter
 }
 
-/** @internal */
-function _shouldPrefixPropNames(options: FetchOptions): boolean {
-  if (options && options.prefixPropNames === false) {
-    return false
+export class Queries {
+  private readonly gc: GuacamoleOptions
+
+  constructor(options: GuacamoleOptions = {}) {
+    this.gc = options
   }
 
-  if (options && options.prefixPropNames === true) {
+  /** @internal */
+  private _shouldPrefixPropNames(options?: FetchOptions): boolean {
+    if (options?.autoPrefixPropNamesInFilters === true || options?.autoPrefixPropNamesInFilters === false) {
+      return options.autoPrefixPropNamesInFilters
+    }
+
+    if (this.gc && this.gc.autoPrefixPropNamesInFilters === false) {
+      return false
+    }
+
     return true
   }
 
-  return PREFIX_PROP_NAMES
-}
-
-/** @internal */
-function _fetchByKeyValues(
-  collection: string,
-  identifier: KeyValue | KeyValue[],
-  keyValueMatchType: MatchType,
-  options: FetchOptions,
-  filter?: string | FilterCriteria
-): AqlQuery {
-  const params: any = {}
-  let query = `FOR d IN ${collection} FILTER`
-
-  if (Array.isArray(identifier)) {
-    let keyCount = 0
-
-    // query += " (";
-
-    for (const kv of identifier) {
-      keyCount++
-
-      if (keyCount > 1) {
-        query += ` ${MatchTypeOperator[keyValueMatchType]}`
-      }
-
-      const keyParam = `p${keyCount}`
-      const valueParam = `v${keyCount}`
-
-      if (kv.name.indexOf('.') > 0) {
-        params[keyParam] = kv.name.split('.')
-      } else {
-        params[keyParam] = kv.name
-      }
-      params[valueParam] = kv.value
-
-      query += ` d.@${keyParam} == @${valueParam}`
+  /** @internal */
+  private _toFilterCriteria(search: SearchTerms, options?: FetchOptions): FilterCriteria {
+    const filter: FilterCriteria = {
+      match: MatchType.ANY,
+      filters: []
     }
 
-    // query += " )";
-  } else {
-    if (identifier.name.indexOf('.') > 0) {
-      params.p = identifier.name.split('.')
-    } else {
-      params.p = identifier.name
+    if (typeof search.props === 'string') {
+      search.props = search.props.split(',')
     }
 
-    params.v = identifier.value
-    query += '  d.@p == @v'
-  }
+    if (!this._shouldPrefixPropNames(options)) {
+      search.props = search.props.map(p => `d.${p}`)
+    }
 
-  if (filter?.match) {
-    if (isListOfFilters(filter)) {
-      // 'FOR d IN users FILTER  d.@property == @value AND FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
-      // 'FOR d IN users FILTER  d.@property == @value FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
-      // query += ' AND ( '
-      query += ' FILTER ( '
+    if (typeof search.terms === 'string') {
+      search.terms = search.terms.split(',')
+    }
 
-      for (let i = 0; i < filter.filters.length; i++) {
-        if (i > 0) {
-          query += ` ${MatchTypeOperator[filter.match]} `
-        }
-        if (_shouldPrefixPropNames(options)) {
-          query += _prefixPropertNameInFilterToken(filter.filters[i])
+    for (let i = 0; i < search.props.length; i++) {
+      for (let j = 0; j < search.terms.length; j++) {
+        if (search.terms[j].trim().toLowerCase() === 'null') {
+          filter.filters.push(search.props[i].trim() + ' == null')
+        } else if (search.terms[j].trim().toLowerCase() === '!null') {
+          filter.filters.push(search.props[i].trim() + ' != null')
         } else {
-          query += filter.filters[i]
+        // filters.push(fields[i].trim() + ' LIKE "%' + searchTerms.trim() + '%"');
+          filter.filters.push('LIKE(' + search.props[i].trim() + ', "%' + search.terms[j].trim() + '%", true)')
         }
       }
-
-      query += ' )'
-    } else {
-      if (_shouldPrefixPropNames(options)) {
-        query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
-      } else {
-        query += ' FILTER ( ' + filter + ' )'
-      }
-    }
-  }
-
-  if (options?.hasOwnProperty('sortBy')) {
-    query += ` SORT d.${options.sortBy}`
-
-    if (options.hasOwnProperty('sortOrder')) {
-      if (options.sortOrder === 'ascending') {
-        query += ' ASC'
-      } else if (options.sortOrder === 'descending') {
-        query += ' DESC'
-      }
-    }
-  }
-
-  if (options.limit && options.limit > 0) {
-    if (options.offset) {
-      query += ` LIMIT ${options.offset}, ${options.limit}`
-    } else {
-      query += ` LIMIT ${options.limit}`
-    }
-  }
-
-  query += ' RETURN d'
-
-  return {
-    query,
-    bindVars: params
-  }
-}
-
-export function fetchByMatchingProperty(
-  collection: string,
-  identifier: KeyValue,
-  options: FetchOptions = {},
-  filter?: string | FilterCriteria
-): AqlQuery {
-  return _fetchByKeyValues(collection, identifier, MatchType.ANY, options, filter)
-}
-
-export function fetchByMatchingAnyProperty(
-  collection: string,
-  identifier: KeyValue[],
-  options: FetchOptions = {},
-  filter?: string | FilterCriteria
-): AqlQuery {
-  return _fetchByKeyValues(collection, identifier, MatchType.ANY, options, filter)
-}
-
-export function fetchByMatchingAllProperties(
-  collection: string,
-  identifier: KeyValue[],
-  options: FetchOptions = {},
-  filter?: string | FilterCriteria
-): AqlQuery {
-  return _fetchByKeyValues(collection, identifier, MatchType.ALL, options, filter)
-}
-
-export function fetchByFilterCriteria(
-  collection: string,
-  filter: string | FilterCriteria,
-  options: FetchOptions = {}
-): AqlQuery {
-  const params: any = {}
-  let query = 'FOR d IN ' + collection
-
-  // TODO: enable and document this ??
-  // if (options.restrictTo) {
-  //   params.restrictTo = options.restrictTo
-  //   query += ' FILTER d.@restrictTo'
-  // }
-
-  if (filter?.match) {
-    if (isListOfFilters(filter)) {
-      query += ' FILTER ( '
-
-      for (let i = 0; i < filter.filters.length; i++) {
-        if (i > 0) {
-          query += ` ${MatchTypeOperator[filter.match]} `
-        }
-        if (_shouldPrefixPropNames(options)) {
-          query += _prefixPropertNameInFilterToken(filter.filters[i])
-        } else {
-          query += filter.filters[i]
-        }
-      }
-
-      query += ' )'
-    } else {
-      if (_shouldPrefixPropNames(options)) {
-        query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
-      } else {
-        query += ' FILTER ( ' + filter + ' )'
-      }
-    }
-  }
-
-  // TODO: Support sorting by multiple criteria ...
-  // SORT u.lastName, u.firstName, u.id DESC
-  if (options?.hasOwnProperty('sortBy')) {
-    query += ` SORT d.${options.sortBy}`
-
-    if (options.hasOwnProperty('sortOrder')) {
-      if (options.sortOrder === 'ascending') {
-        query += ' ASC'
-      } else if (options.sortOrder === 'descending') {
-        query += ' DESC'
-      }
-    }
-  }
-
-  if (options.limit && options.limit > 0) {
-    if (options.offset) {
-      query += ` LIMIT ${options.offset}, ${options.limit}`
-    } else {
-      query += ` LIMIT ${options.limit}`
-    }
-  }
-
-  // if (this._hasOmitOption(options)) {
-  //   query += " RETURN UNSET_RECURSIVE( d, [" + this._getOmitInstruction(options) + "])";
-  // } else {
-  //   query += " RETURN d";
-  // }
-
-  query += ' RETURN d'
-
-  return {
-    query,
-    bindVars: params
-  }
-}
-
-export function fetchAll(
-  collection: string,
-  options: FetchOptions = {}
-): AqlQuery {
-  const params: any = {}
-  let query = 'FOR d IN ' + collection
-
-  // TODO: enable and document this ??
-  // if (options.restrictTo) {
-  //   params.restrictTo = options.restrictTo
-  //   query += ' FILTER d.@restrictTo'
-  // }
-
-  // TODO: Support sorting by multiple criteria ...
-  // SORT u.lastName, u.firstName, u.id DESC
-  if (options?.hasOwnProperty('sortBy')) {
-    query += ` SORT d.${options.sortBy}`
-
-    if (options.hasOwnProperty('sortOrder')) {
-      if (options.sortOrder === 'ascending') {
-        query += ' ASC'
-      } else if (options.sortOrder === 'descending') {
-        query += ' DESC'
-      }
-    }
-  }
-
-  if (options.limit && options.limit > 0) {
-    if (options.offset) {
-      query += ` LIMIT ${options.offset}, ${options.limit}`
-    } else {
-      query += ` LIMIT ${options.limit}`
-    }
-  }
-
-  // if (this._hasOmitOption(options)) {
-  //   query += " RETURN UNSET_RECURSIVE( d, [" + this._getOmitInstruction(options) + "])";
-  // } else {
-  //   query += " RETURN d";
-  // }
-
-  query += ' RETURN d'
-
-  return {
-    query,
-    bindVars: params
-  }
-}
-
-export function updateDocumentsByKeyValue(collection: DocumentCollection, identifier: KeyValue, data: any): AqlQuery {
-  // return literal(
-  //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
-  //     data
-  //   )} IN ${collection} RETURN { _key: NEW._key, _id: NEW._id, _rev: NEW._rev, _oldRev: OLD._rev }`
-  // )
-
-  return aql`
-    FOR d IN ${collection}
-    FILTER d.${identifier.name} == ${identifier.value}
-    UPDATE d WITH ${data} IN ${collection}
-    RETURN { _key: NEW._key }`
-
-  //
-  // Some examples of using aql and helpers - from the docs
-  //
-  // var query = "FOR doc IN collection";
-  // var params = {};
-  // if (useFilter) {
-  //   query += " FILTER doc.value == @what";
-  //   params.what = req.params("searchValue");
-  // }
-
-  // const filter = aql`FILTER d.color == ${color}'`
-  // const result = await db.query(aql`
-  //   FOR d IN ${collection}
-  //   ${filter}
-  //   RETURN d
-  // `)
-
-  // const filters = []
-  // if (adminsOnly) filters.push(aql`FILTER user.admin`)
-  // if (activeOnly) filters.push(aql`FILTER user.active`)
-  // const result = await db.query(aql`
-  //   FOR user IN ${users}
-  //   ${join(filters)}
-  //   RETURN user
-  // `)
-}
-
-export function deleteDocumentsByKeyValue(collection: DocumentCollection, identifier: KeyValue): AqlQuery {
-  // return literal(
-  //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
-  // )
-
-  return aql`
-    FOR d IN ${collection}
-    FILTER d.${identifier.name} == ${identifier.value}
-    REMOVE d IN ${collection}
-    RETURN { _key: d._key }`
-}
-
-export function uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
-  if (!constraints || constraints.constraints.length === 0) {
-    throw new Error('No constraints specified')
-  }
-
-  const params: any = {}
-  let query = `FOR d IN ${constraints.collection} FILTER`
-
-  if (constraints.excludeDocumentKey) {
-    params.excludeDocumentKey = constraints.excludeDocumentKey
-    query += ' d._key != @excludeDocumentKey FILTER'
-  }
-
-  let constraintCount = 0
-
-  for (const constraint of constraints.constraints) {
-    constraintCount++
-
-    if (constraintCount > 1) {
-      query += ' ||'
     }
 
-    if (isCompositeKey(constraint)) {
+    return filter
+  }
+
+  /** @internal */
+  private _fetchByKeyValues(
+    collection: string,
+    identifier: KeyValue | KeyValue[],
+    keyValueMatchType: MatchType,
+    options: FetchOptions,
+    filter?: string | FilterCriteria | SearchTerms
+  ): AqlQuery {
+    const params: any = {}
+    let query = `FOR d IN ${collection} FILTER`
+
+    if (Array.isArray(identifier)) {
       let keyCount = 0
 
-      query += ' ('
+      // query += " (";
 
-      for (const kv of constraint.composite) {
+      for (const kv of identifier) {
         keyCount++
 
         if (keyCount > 1) {
-          query += ' &&'
+          query += ` ${MatchTypeOperator[keyValueMatchType]}`
         }
 
-        if (constraints.caseInsensitive) {
-          const keyParam = `${kv.name}_key_${keyCount}`
-          const valueParam = `${kv.name}_val_${keyCount}`
+        const keyParam = `p${keyCount}`
+        const valueParam = `v${keyCount}`
 
+        if (kv.name.indexOf('.') > 0) {
+          params[keyParam] = kv.name.split('.')
+        } else {
           params[keyParam] = kv.name
-          params[valueParam] = kv.value
+        }
+        params[valueParam] = kv.value
+
+        query += ` d.@${keyParam} == @${valueParam}`
+      }
+
+    // query += " )";
+    } else {
+      if (identifier.name.indexOf('.') > 0) {
+        params.p = identifier.name.split('.')
+      } else {
+        params.p = identifier.name
+      }
+
+      params.v = identifier.value
+      query += '  d.@p == @v'
+    }
+
+    if (filter) {
+      if (isFilterCriteria(filter) || isSearchTerms(filter)) {
+        const criteria: FilterCriteria = isSearchTerms(filter) ? this._toFilterCriteria(filter, options) : filter
+        const matchType: MatchType = criteria.match ? criteria.match : MatchType.ANY
+        // if (criteria?.match) {}
+
+        // 'FOR d IN users FILTER  d.@property == @value AND FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
+        // 'FOR d IN users FILTER  d.@property == @value FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
+        // query += ' AND ( '
+        query += ' FILTER ( '
+
+        for (let i = 0; i < criteria.filters.length; i++) {
+          if (i > 0) {
+            query += ` ${MatchTypeOperator[matchType]} `
+          }
+          if (this._shouldPrefixPropNames(options)) {
+            query += _prefixPropertNameInFilterToken(criteria.filters[i])
+          } else {
+            query += criteria.filters[i]
+          }
+        }
+
+        query += ' )'
+      } else {
+        if (this._shouldPrefixPropNames(options)) {
+          query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
+        } else {
+          query += ' FILTER ( ' + filter + ' )'
+        }
+      }
+    }
+
+    if (options?.hasOwnProperty('sortBy')) {
+      query += ` SORT d.${options.sortBy}`
+
+      if (options.hasOwnProperty('sortOrder')) {
+        if (options.sortOrder === 'ascending') {
+          query += ' ASC'
+        } else if (options.sortOrder === 'descending') {
+          query += ' DESC'
+        }
+      }
+    }
+
+    if (options.limit && options.limit > 0) {
+      if (options.offset) {
+        query += ` LIMIT ${options.offset}, ${options.limit}`
+      } else {
+        query += ` LIMIT ${options.limit}`
+      }
+    }
+
+    query += ' RETURN d'
+
+    return {
+      query,
+      bindVars: params
+    }
+  }
+
+  public fetchByMatchingProperty(
+    collection: string,
+    identifier: KeyValue,
+    options: FetchOptions = {},
+    filter?: string | FilterCriteria | SearchTerms
+  ): AqlQuery {
+    return this._fetchByKeyValues(collection, identifier, MatchType.ANY, options, filter)
+  }
+
+  public fetchByMatchingAnyProperty(
+    collection: string,
+    identifier: KeyValue[],
+    options: FetchOptions = {},
+    filter?: string | FilterCriteria | SearchTerms
+  ): AqlQuery {
+    return this._fetchByKeyValues(collection, identifier, MatchType.ANY, options, filter)
+  }
+
+  public fetchByMatchingAllProperties(
+    collection: string,
+    identifier: KeyValue[],
+    options: FetchOptions = {},
+    filter?: string | FilterCriteria | SearchTerms
+  ): AqlQuery {
+    return this._fetchByKeyValues(collection, identifier, MatchType.ALL, options, filter)
+  }
+
+  public fetchByFilterCriteria(
+    collection: string,
+    filter: string | FilterCriteria | SearchTerms,
+    options: FetchOptions = {}
+  ): AqlQuery {
+    const params: any = {}
+
+    let query = 'FOR d IN ' + collection
+
+    // TODO: enable and document this ??
+    // if (options.restrictTo) {
+    //   params.restrictTo = options.restrictTo
+    //   query += ' FILTER d.@restrictTo'
+    // }
+
+    if (isFilterCriteria(filter) || isSearchTerms(filter)) {
+      const criteria: FilterCriteria = isSearchTerms(filter) ? this._toFilterCriteria(filter, options) : filter
+      if (isSearchTerms(filter)) {
+        console.log(criteria)
+      }
+      const matchType: MatchType = criteria.match ? criteria.match : MatchType.ANY
+      // if (criteria?.match) {}
+
+      query += ' FILTER ( '
+
+      for (let i = 0; i < criteria.filters.length; i++) {
+        if (i > 0) {
+          query += ` ${MatchTypeOperator[matchType]} `
+        }
+        if (this._shouldPrefixPropNames(options)) {
+          query += _prefixPropertNameInFilterToken(criteria.filters[i])
+        } else {
+          query += criteria.filters[i]
+        }
+      }
+
+      query += ' )'
+    } else {
+      if (this._shouldPrefixPropNames(options)) {
+        query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
+      } else {
+        query += ' FILTER ( ' + filter + ' )'
+      }
+    }
+
+    // TODO: Support sorting by multiple criteria ...
+    // SORT u.lastName, u.firstName, u.id DESC
+    if (options?.hasOwnProperty('sortBy')) {
+      query += ` SORT d.${options.sortBy}`
+
+      if (options.hasOwnProperty('sortOrder')) {
+        if (options.sortOrder === 'ascending') {
+          query += ' ASC'
+        } else if (options.sortOrder === 'descending') {
+          query += ' DESC'
+        }
+      }
+    }
+
+    if (options.limit && options.limit > 0) {
+      if (options.offset) {
+        query += ` LIMIT ${options.offset}, ${options.limit}`
+      } else {
+        query += ` LIMIT ${options.limit}`
+      }
+    }
+
+    // if (this._hasOmitOption(options)) {
+    //   query += " RETURN UNSET_RECURSIVE( d, [" + this._getOmitInstruction(options) + "])";
+    // } else {
+    //   query += " RETURN d";
+    // }
+
+    query += ' RETURN d'
+
+    return {
+      query,
+      bindVars: params
+    }
+  }
+
+  public fetchAll(
+    collection: string,
+    options: FetchOptions = {}
+  ): AqlQuery {
+    const params: any = {}
+    let query = 'FOR d IN ' + collection
+
+    // TODO: enable and document this ??
+    // if (options.restrictTo) {
+    //   params.restrictTo = options.restrictTo
+    //   query += ' FILTER d.@restrictTo'
+    // }
+
+    // TODO: Support sorting by multiple criteria ...
+    // SORT u.lastName, u.firstName, u.id DESC
+    if (options?.hasOwnProperty('sortBy')) {
+      query += ` SORT d.${options.sortBy}`
+
+      if (options.hasOwnProperty('sortOrder')) {
+        if (options.sortOrder === 'ascending') {
+          query += ' ASC'
+        } else if (options.sortOrder === 'descending') {
+          query += ' DESC'
+        }
+      }
+    }
+
+    if (options.limit && options.limit > 0) {
+      if (options.offset) {
+        query += ` LIMIT ${options.offset}, ${options.limit}`
+      } else {
+        query += ` LIMIT ${options.limit}`
+      }
+    }
+
+    // if (this._hasOmitOption(options)) {
+    //   query += " RETURN UNSET_RECURSIVE( d, [" + this._getOmitInstruction(options) + "])";
+    // } else {
+    //   query += " RETURN d";
+    // }
+
+    query += ' RETURN d'
+
+    return {
+      query,
+      bindVars: params
+    }
+  }
+
+  public updateDocumentsByKeyValue(collection: DocumentCollection, identifier: KeyValue, data: any): AqlQuery {
+    // return literal(
+    //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
+    //     data
+    //   )} IN ${collection} RETURN { _key: NEW._key, _id: NEW._id, _rev: NEW._rev, _oldRev: OLD._rev }`
+    // )
+
+    return aql`
+      FOR d IN ${collection}
+      FILTER d.${identifier.name} == ${identifier.value}
+      UPDATE d WITH ${data} IN ${collection}
+      RETURN { _key: NEW._key }`
+
+    //
+    // Some examples of using aql and helpers - from the docs
+    //
+    // var query = "FOR doc IN collection";
+    // var params = {};
+    // if (useFilter) {
+    //   query += " FILTER doc.value == @what";
+    //   params.what = req.params("searchValue");
+    // }
+
+    // const filter = aql`FILTER d.color == ${color}'`
+    // const result = await db.query(aql`
+    //   FOR d IN ${collection}
+    //   ${filter}
+    //   RETURN d
+    // `)
+
+    // const filters = []
+    // if (adminsOnly) filters.push(aql`FILTER user.admin`)
+    // if (activeOnly) filters.push(aql`FILTER user.active`)
+    // const result = await db.query(aql`
+    //   FOR user IN ${users}
+    //   ${join(filters)}
+    //   RETURN user
+    // `)
+  }
+
+  public deleteDocumentsByKeyValue(collection: DocumentCollection, identifier: KeyValue): AqlQuery {
+    // return literal(
+    //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
+    // )
+
+    return aql`
+      FOR d IN ${collection}
+      FILTER d.${identifier.name} == ${identifier.value}
+      REMOVE d IN ${collection}
+      RETURN { _key: d._key }`
+  }
+
+  public uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
+    if (!constraints || constraints.constraints.length === 0) {
+      throw new Error('No constraints specified')
+    }
+
+    const params: any = {}
+    let query = `FOR d IN ${constraints.collection} FILTER`
+
+    if (constraints.excludeDocumentKey) {
+      params.excludeDocumentKey = constraints.excludeDocumentKey
+      query += ' d._key != @excludeDocumentKey FILTER'
+    }
+
+    let constraintCount = 0
+
+    for (const constraint of constraints.constraints) {
+      constraintCount++
+
+      if (constraintCount > 1) {
+        query += ' ||'
+      }
+
+      if (isCompositeKey(constraint)) {
+        let keyCount = 0
+
+        query += ' ('
+
+        for (const kv of constraint.composite) {
+          keyCount++
+
+          if (keyCount > 1) {
+            query += ' &&'
+          }
+
+          if (constraints.caseInsensitive) {
+            const keyParam = `${kv.name}_key_${keyCount}`
+            const valueParam = `${kv.name}_val_${keyCount}`
+
+            params[keyParam] = kv.name
+            params[valueParam] = kv.value
+
+            query += ` d.@${keyParam} == @${valueParam}`
+          } else {
+            const keyParam = `${kv.name}_key_${keyCount}`
+            const valueParam = `${kv.name}_val_${keyCount}`
+
+            params[keyParam] = kv.name
+            params[valueParam] = kv.value.toLowerCase()
+
+            query += ` LOWER(d.@${keyParam}) == @${valueParam}`
+          }
+        }
+
+        query += ' )'
+      }
+
+      if (isUniqueValue(constraint)) {
+        const keyParam = `${constraint.unique.name}_key`
+        const valueParam = `${constraint.unique.name}_val`
+
+        if (constraints.caseInsensitive) {
+          params[keyParam] = constraint.unique.name
+          params[valueParam] = constraint.unique.value
 
           query += ` d.@${keyParam} == @${valueParam}`
         } else {
-          const keyParam = `${kv.name}_key_${keyCount}`
-          const valueParam = `${kv.name}_val_${keyCount}`
-
-          params[keyParam] = kv.name
-          params[valueParam] = kv.value.toLowerCase()
+          params[keyParam] = constraint.unique.name
+          params[valueParam] = constraint.unique.value.toLowerCase()
 
           query += ` LOWER(d.@${keyParam}) == @${valueParam}`
         }
       }
-
-      query += ' )'
     }
 
-    if (isUniqueValue(constraint)) {
-      const keyParam = `${constraint.unique.name}_key`
-      const valueParam = `${constraint.unique.name}_val`
+    query += ' RETURN d._key'
 
-      if (constraints.caseInsensitive) {
-        params[keyParam] = constraint.unique.name
-        params[valueParam] = constraint.unique.value
-
-        query += ` d.@${keyParam} == @${valueParam}`
-      } else {
-        params[keyParam] = constraint.unique.name
-        params[valueParam] = constraint.unique.value.toLowerCase()
-
-        query += ` LOWER(d.@${keyParam}) == @${valueParam}`
-      }
+    return {
+      query,
+      bindVars: params
     }
   }
-
-  query += ' RETURN d._key'
-
-  return {
-    query,
-    bindVars: params
-  }
-}
-
-export const Queries = {
-  fetchByMatchingProperty,
-  fetchByMatchingAnyProperty,
-  fetchByMatchingAllProperties,
-  fetchByFilterCriteria,
-  fetchAll,
-  deleteDocumentsByKeyValue,
-  uniqueConstraintQuery,
-  updateDocumentsByKeyValue
 }
