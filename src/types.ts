@@ -61,6 +61,8 @@ export interface DatabaseConfig extends Config {}
 
 export interface GuacamoleOptions {
   autoPrefixPropNamesInFilters?: boolean
+  debugQueries?: boolean
+  debugFunctions?: boolean
 }
 
 export interface Identifier {
@@ -93,6 +95,7 @@ export interface FetchOptions extends DocumentTrimOptions {
   sortOrder?: string
   returnCursor?: boolean
   autoPrefixPropNamesInFilters?: boolean
+  printQuery?: boolean
 }
 
 export interface QueryResult<T = any> {

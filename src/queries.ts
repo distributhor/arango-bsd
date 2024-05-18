@@ -132,6 +132,15 @@ export class Queries {
   }
 
   /** @internal */
+  private _debug(options?: FetchOptions): boolean {
+    if (options?.printQuery) {
+      return true
+    }
+
+    return !!(this.gc?.debugQueries)
+  }
+
+  /** @internal */
   private _shouldPrefixPropNames(options?: FetchOptions): boolean {
     if (options?.autoPrefixPropNamesInFilters === true || options?.autoPrefixPropNamesInFilters === false) {
       return options.autoPrefixPropNamesInFilters
@@ -187,6 +196,12 @@ export class Queries {
     options: FetchOptions,
     filter?: string | FilterCriteria | SearchTerms
   ): AqlQuery {
+    if (this._debug()) {
+      console.log('_fetchByKeyValues')
+      console.log(identifier)
+      console.log(filter)
+    }
+
     const params: any = {}
     let query = `FOR d IN ${collection} FILTER`
 
@@ -281,6 +296,10 @@ export class Queries {
 
     query += ' RETURN d'
 
+    if (this._debug(options)) {
+      console.log(query)
+    }
+
     return {
       query,
       bindVars: params
@@ -293,6 +312,10 @@ export class Queries {
     options: FetchOptions = {},
     filter?: string | FilterCriteria | SearchTerms
   ): AqlQuery {
+    if (this._debug()) {
+      console.log('fetchByMatchingProperty')
+    }
+
     return this._fetchByKeyValues(collection, identifier, MatchType.ANY, options, filter)
   }
 
@@ -302,6 +325,10 @@ export class Queries {
     options: FetchOptions = {},
     filter?: string | FilterCriteria | SearchTerms
   ): AqlQuery {
+    if (this._debug()) {
+      console.log('fetchByMatchingAnyProperty')
+    }
+
     return this._fetchByKeyValues(collection, identifier, MatchType.ANY, options, filter)
   }
 
@@ -311,6 +338,10 @@ export class Queries {
     options: FetchOptions = {},
     filter?: string | FilterCriteria | SearchTerms
   ): AqlQuery {
+    if (this._debug()) {
+      console.log('fetchByMatchingAllProperties')
+    }
+
     return this._fetchByKeyValues(collection, identifier, MatchType.ALL, options, filter)
   }
 
@@ -319,6 +350,11 @@ export class Queries {
     filter: string | FilterCriteria | SearchTerms,
     options: FetchOptions = {}
   ): AqlQuery {
+    if (this._debug()) {
+      console.log('fetchByFilterCriteria')
+      console.log(filter)
+    }
+
     const params: any = {}
 
     let query = 'FOR d IN ' + collection
@@ -331,9 +367,6 @@ export class Queries {
 
     if (isFilterCriteria(filter) || isSearchTerms(filter)) {
       const criteria: FilterCriteria = isSearchTerms(filter) ? this._toFilterCriteria(filter, options) : filter
-      if (isSearchTerms(filter)) {
-        console.log(criteria)
-      }
       const matchType: MatchType = criteria.match ? criteria.match : MatchType.ANY
       // if (criteria?.match) {}
 
@@ -388,6 +421,10 @@ export class Queries {
     // }
 
     query += ' RETURN d'
+
+    if (this._debug(options)) {
+      console.log(query)
+    }
 
     return {
       query,
