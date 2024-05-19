@@ -61,8 +61,9 @@ export interface DatabaseConfig extends Config {}
 
 export interface GuacamoleOptions {
   autoPrefixPropNamesInFilters?: boolean
-  debugQueries?: boolean
   debugFunctions?: boolean
+  debugParams?: boolean
+  printQueries?: boolean
 }
 
 export interface Identifier {

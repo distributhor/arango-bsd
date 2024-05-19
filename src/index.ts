@@ -133,12 +133,11 @@ export class ArangoConnection {
   private readonly pool: InstancePool = {}
   private readonly arangodb: ArangoDB
   private readonly arangojs: Database
-  private readonly options: GuacamoleOptions
-
+  private readonly go: GuacamoleOptions
   public readonly system: Database
 
   constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
-    this.options = options
+    this.go = options
     this.arangojs = db instanceof Database ? db : new Database(db)
     this.arangodb = new ArangoDB(this.arangojs, options)
     if (this.arangojs.name === '_system') {
@@ -175,7 +174,7 @@ export class ArangoConnection {
     }
 
     debugInfo(`Adding '${db}' to pool`)
-    this.pool[db] = new ArangoDB(this.arangojs.database(db), this.options)
+    this.pool[db] = new ArangoDB(this.arangojs.database(db), this.go)
 
     return this.pool[db]
   }
@@ -210,10 +209,9 @@ export class ArangoDB {
   public driver: Database
   public system: Database
   public queries: Queries
-  public options: GuacamoleOptions
 
   private readonly q: Queries
-  private readonly o: GuacamoleOptions
+  private readonly go: GuacamoleOptions
 
   /**
    * The constructor accepts an existing
@@ -221,16 +219,14 @@ export class ArangoDB {
    * **or** an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) configuration.
    */
   constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
-    this.options = options
+    this.go = options
 
-    if (!this.options?.hasOwnProperty('autoPrefixPropNamesInFilters')) {
-      this.options.autoPrefixPropNamesInFilters = true
+    if (!this.go?.hasOwnProperty('autoPrefixPropNamesInFilters')) {
+      this.go.autoPrefixPropNamesInFilters = true
     }
 
-    this.queries = new Queries(this.options)
-
-    this.o = this.options
-    this.q = this.queries
+    this.q = new Queries(this.go)
+    this.queries = this.q
 
     if (db instanceof Database) {
       this.driver = db
@@ -242,8 +238,13 @@ export class ArangoDB {
   }
 
   /** @internal */
-  private _debug(): boolean {
-    return !!(this.o?.debugFunctions)
+  private _debugFunctions(): boolean {
+    return !!(this.go?.debugFunctions)
+  }
+
+  /** @internal */
+  private _debugParams(): boolean {
+    return !!(this.go?.debugParams)
   }
 
   public get name(): string {
@@ -450,8 +451,11 @@ export class ArangoDB {
     propValue: KeyValue,
     options: FetchOptions = {}
   ): Promise<T | T[] | null> {
-    if (this._debug()) {
-      console.log('fetchOneByPropertyValue')
+    if (this._debugFunctions()) {
+      console.log(`fetchOneByPropertyValue: ${collection}`)
+    }
+
+    if (this._debugParams()) {
       console.log(propValue)
     }
 
@@ -463,8 +467,11 @@ export class ArangoDB {
     propValues: KeyValue[],
     options: FetchOptions = {}
   ): Promise<T | T[] | null> {
-    if (this._debug()) {
-      console.log('fetchOneByAllPropertyValues')
+    if (this._debugFunctions()) {
+      console.log(`fetchOneByAllPropertyValues: ${collection}`)
+    }
+
+    if (this._debugParams()) {
       console.log(propValues)
     }
 
@@ -477,8 +484,11 @@ export class ArangoDB {
     options: FetchOptions = {},
     filters?: FilterCriteria | SearchTerms
   ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debug()) {
-      console.log('fetchByPropertyValue')
+    if (this._debugFunctions()) {
+      console.log(`fetchByPropertyValue: ${collection}`)
+    }
+
+    if (this._debugParams()) {
       console.log(propValue)
       console.log(filters)
     }
@@ -492,8 +502,11 @@ export class ArangoDB {
     options: FetchOptions = {},
     filters?: FilterCriteria | SearchTerms
   ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debug()) {
-      console.log('fetchByAnyPropertyValue')
+    if (this._debugFunctions()) {
+      console.log(`fetchByAnyPropertyValue: ${collection}`)
+    }
+
+    if (this._debugParams()) {
       console.log(propValue)
       console.log(filters)
     }
@@ -507,8 +520,11 @@ export class ArangoDB {
     options: FetchOptions = {},
     filters?: FilterCriteria | SearchTerms
   ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debug()) {
-      console.log('fetchByAllPropertyValues')
+    if (this._debugFunctions()) {
+      console.log(`fetchByAllPropertyValues: ${collection}`)
+    }
+
+    if (this._debugParams()) {
       console.log(propValues)
       console.log(filters)
     }
@@ -576,8 +592,11 @@ export class ArangoDB {
     filters: string | FilterCriteria | SearchTerms,
     options: FetchOptions = {}
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
-    if (this._debug()) {
-      console.log('fetchByFilterCriteria')
+    if (this._debugFunctions()) {
+      console.log(`fetchByFilterCriteria: ${collection}`)
+    }
+
+    if (this._debugParams()) {
       console.log(filters)
     }
 
@@ -617,8 +636,11 @@ export class ArangoDB {
     searchTerms: SearchTerms,
     options: FetchOptions = {}
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
-    if (this._debug()) {
-      console.log('fetchByPropertySearch')
+    if (this._debugFunctions()) {
+      console.log(`fetchByPropertySearch: ${collection}`)
+    }
+
+    if (this._debugParams()) {
       console.log(searchTerms)
     }
 
@@ -631,8 +653,11 @@ export class ArangoDB {
     searchTerms: SearchTerms,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debug()) {
-      console.log('fetchByPropertyValueAndSearch')
+    if (this._debugFunctions()) {
+      console.log(`fetchByPropertyValueAndSearch: ${collection}`)
+    }
+
+    if (this._debugParams()) {
       console.log(propValue)
       console.log(searchTerms)
     }
@@ -646,8 +671,11 @@ export class ArangoDB {
     searchTerms: SearchTerms,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debug()) {
-      console.log('fetchByAnyPropertyValueAndSearch')
+    if (this._debugFunctions()) {
+      console.log(`fetchByAnyPropertyValueAndSearch: ${collection}`)
+    }
+
+    if (this._debugParams()) {
       console.log(propValue)
       console.log(searchTerms)
     }
@@ -661,8 +689,11 @@ export class ArangoDB {
     searchTerms: SearchTerms,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debug()) {
-      console.log('fetchByAllPropertyValuesAndSearch')
+    if (this._debugFunctions()) {
+      console.log(`fetchByAllPropertyValuesAndSearch: ${collection}`)
+    }
+
+    if (this._debugParams()) {
       console.log(propValues)
       console.log(searchTerms)
     }

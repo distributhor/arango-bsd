@@ -125,19 +125,23 @@ export function _prefixPropertyNames(filterString: string): string {
 }
 
 export class Queries {
-  private readonly gc: GuacamoleOptions
+  private readonly go: GuacamoleOptions
 
   constructor(options: GuacamoleOptions = {}) {
-    this.gc = options
+    this.go = options
   }
 
   /** @internal */
-  private _debug(options?: FetchOptions): boolean {
+  private _debugFunctions(): boolean {
+    return !!(this.go?.debugFunctions)
+  }
+
+  private _printQuery(options?: FetchOptions): boolean {
     if (options?.printQuery) {
       return true
     }
 
-    return !!(this.gc?.debugQueries)
+    return !!(this.go?.printQueries)
   }
 
   /** @internal */
@@ -146,7 +150,7 @@ export class Queries {
       return options.autoPrefixPropNamesInFilters
     }
 
-    if (this.gc && this.gc.autoPrefixPropNamesInFilters === false) {
+    if (this.go && this.go.autoPrefixPropNamesInFilters === false) {
       return false
     }
 
@@ -189,15 +193,15 @@ export class Queries {
   }
 
   /** @internal */
-  private _fetchByKeyValues(
+  private _fetchByKeyValue(
     collection: string,
     identifier: KeyValue | KeyValue[],
     keyValueMatchType: MatchType,
     options: FetchOptions,
     filter?: string | FilterCriteria | SearchTerms
   ): AqlQuery {
-    if (this._debug()) {
-      console.log('_fetchByKeyValues')
+    if (this._printQuery(options) || this._debugFunctions()) {
+      console.log(`_fetchByKeyValue: ${collection}`)
       console.log(identifier)
       console.log(filter)
     }
@@ -296,8 +300,9 @@ export class Queries {
 
     query += ' RETURN d'
 
-    if (this._debug(options)) {
+    if (this._printQuery(options)) {
       console.log(query)
+      console.log('')
     }
 
     return {
@@ -312,11 +317,11 @@ export class Queries {
     options: FetchOptions = {},
     filter?: string | FilterCriteria | SearchTerms
   ): AqlQuery {
-    if (this._debug()) {
-      console.log('fetchByMatchingProperty')
+    if (this._debugFunctions()) {
+      console.log(`fetchByMatchingProperty: ${collection}`)
     }
 
-    return this._fetchByKeyValues(collection, identifier, MatchType.ANY, options, filter)
+    return this._fetchByKeyValue(collection, identifier, MatchType.ANY, options, filter)
   }
 
   public fetchByMatchingAnyProperty(
@@ -325,11 +330,11 @@ export class Queries {
     options: FetchOptions = {},
     filter?: string | FilterCriteria | SearchTerms
   ): AqlQuery {
-    if (this._debug()) {
-      console.log('fetchByMatchingAnyProperty')
+    if (this._debugFunctions()) {
+      console.log(`fetchByMatchingAnyProperty: ${collection}`)
     }
 
-    return this._fetchByKeyValues(collection, identifier, MatchType.ANY, options, filter)
+    return this._fetchByKeyValue(collection, identifier, MatchType.ANY, options, filter)
   }
 
   public fetchByMatchingAllProperties(
@@ -338,11 +343,11 @@ export class Queries {
     options: FetchOptions = {},
     filter?: string | FilterCriteria | SearchTerms
   ): AqlQuery {
-    if (this._debug()) {
-      console.log('fetchByMatchingAllProperties')
+    if (this._debugFunctions()) {
+      console.log(`fetchByMatchingAllProperties: ${collection}`)
     }
 
-    return this._fetchByKeyValues(collection, identifier, MatchType.ALL, options, filter)
+    return this._fetchByKeyValue(collection, identifier, MatchType.ALL, options, filter)
   }
 
   public fetchByFilterCriteria(
@@ -350,8 +355,8 @@ export class Queries {
     filter: string | FilterCriteria | SearchTerms,
     options: FetchOptions = {}
   ): AqlQuery {
-    if (this._debug()) {
-      console.log('fetchByFilterCriteria')
+    if (this._printQuery(options) || this._debugFunctions()) {
+      console.log(`fetchByFilterCriteria: ${collection}`)
       console.log(filter)
     }
 
@@ -422,8 +427,9 @@ export class Queries {
 
     query += ' RETURN d'
 
-    if (this._debug(options)) {
+    if (this._printQuery(options)) {
       console.log(query)
+      console.log('')
     }
 
     return {

@@ -55,7 +55,10 @@ const conn2 = new ArangoConnection({
   url: process.env.GUACAMOLE_TEST_DB_URI,
   auth: { username: dbAdminUser, password: dbAdminPassword }
 }, {
-  autoPrefixPropNamesInFilters: false
+  autoPrefixPropNamesInFilters: false,
+  debugFunctions: false,
+  debugParams: false,
+  printQueries: false
 })
 
 describe('Guacamole Integration Tests', () => {
