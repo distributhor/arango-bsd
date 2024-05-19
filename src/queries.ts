@@ -203,7 +203,9 @@ export class Queries {
     if (this._printQuery(options) || this._debugFunctions()) {
       console.log(`_fetchByKeyValue: ${collection}`)
       console.log(identifier)
-      console.log(filter)
+      if (filter) {
+        console.log(filter)
+      }
     }
 
     const params: any = {}
