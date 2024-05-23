@@ -198,17 +198,22 @@ export class Queries {
     identifier: KeyValue | KeyValue[],
     keyValueMatchType: MatchType,
     options: FetchOptions,
-    filter?: string | FilterCriteria | SearchTerms
+    searchTerms?: SearchTerms,
+    filter?: string | FilterCriteria
   ): AqlQuery {
     if (this._printQuery(options) || this._debugFunctions()) {
       console.log(`_fetchByKeyValue: ${collection}`)
       console.log(identifier)
+      if (searchTerms) {
+        console.log(searchTerms)
+      }
       if (filter) {
         console.log(filter)
       }
     }
 
     const params: any = {}
+
     let query = `FOR d IN ${collection} FILTER`
 
     if (Array.isArray(identifier)) {
@@ -249,9 +254,8 @@ export class Queries {
     }
 
     if (filter) {
-      if (isFilterCriteria(filter) || isSearchTerms(filter)) {
-        const criteria: FilterCriteria = isSearchTerms(filter) ? this._toFilterCriteria(filter, options) : filter
-        const matchType: MatchType = criteria.match ? criteria.match : MatchType.ANY
+      if (isFilterCriteria(filter)) {
+        const matchType: MatchType = filter.match ? filter.match : MatchType.ANY
         // if (criteria?.match) {}
 
         // 'FOR d IN users FILTER  d.@property == @value AND FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
@@ -259,14 +263,14 @@ export class Queries {
         // query += ' AND ( '
         query += ' FILTER ( '
 
-        for (let i = 0; i < criteria.filters.length; i++) {
+        for (let i = 0; i < filter.filters.length; i++) {
           if (i > 0) {
             query += ` ${MatchTypeOperator[matchType]} `
           }
           if (this._shouldPrefixPropNames(options)) {
-            query += _prefixPropertNameInFilterToken(criteria.filters[i])
+            query += _prefixPropertNameInFilterToken(filter.filters[i])
           } else {
-            query += criteria.filters[i]
+            query += filter.filters[i]
           }
         }
 
@@ -278,6 +282,32 @@ export class Queries {
           query += ' FILTER ( ' + filter + ' )'
         }
       }
+    }
+
+    // if (filter && searchTerms) {
+    //   query += ' AND (...)'
+    // }
+
+    if (searchTerms) {
+      const criteria: FilterCriteria = this._toFilterCriteria(searchTerms, options)
+
+      // 'FOR d IN users FILTER  d.@property == @value AND FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
+      // 'FOR d IN users FILTER  d.@property == @value FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
+      // query += ' AND ( '
+      query += ' FILTER ( '
+
+      for (let i = 0; i < criteria.filters.length; i++) {
+        if (i > 0) {
+          query += ` ${MatchTypeOperator[MatchType.ANY]} `
+        }
+        if (this._shouldPrefixPropNames(options)) {
+          query += _prefixPropertNameInFilterToken(criteria.filters[i])
+        } else {
+          query += criteria.filters[i]
+        }
+      }
+
+      query += ' )'
     }
 
     if (options?.hasOwnProperty('sortBy')) {
@@ -317,49 +347,58 @@ export class Queries {
     collection: string,
     identifier: KeyValue,
     options: FetchOptions = {},
-    filter?: string | FilterCriteria | SearchTerms
+    searchTerms?: SearchTerms,
+    filter?: string | FilterCriteria
   ): AqlQuery {
     if (this._debugFunctions()) {
       console.log(`fetchByMatchingProperty: ${collection}`)
     }
 
-    return this._fetchByKeyValue(collection, identifier, MatchType.ANY, options, filter)
+    return this._fetchByKeyValue(collection, identifier, MatchType.ANY, options, searchTerms, filter)
   }
 
   public fetchByMatchingAnyProperty(
     collection: string,
     identifier: KeyValue[],
     options: FetchOptions = {},
-    filter?: string | FilterCriteria | SearchTerms
+    searchTerms?: SearchTerms,
+    filter?: string | FilterCriteria
   ): AqlQuery {
     if (this._debugFunctions()) {
       console.log(`fetchByMatchingAnyProperty: ${collection}`)
     }
 
-    return this._fetchByKeyValue(collection, identifier, MatchType.ANY, options, filter)
+    return this._fetchByKeyValue(collection, identifier, MatchType.ANY, options, searchTerms, filter)
   }
 
   public fetchByMatchingAllProperties(
     collection: string,
     identifier: KeyValue[],
     options: FetchOptions = {},
-    filter?: string | FilterCriteria | SearchTerms
+    searchTerms?: SearchTerms,
+    filter?: string | FilterCriteria
   ): AqlQuery {
     if (this._debugFunctions()) {
       console.log(`fetchByMatchingAllProperties: ${collection}`)
     }
 
-    return this._fetchByKeyValue(collection, identifier, MatchType.ALL, options, filter)
+    return this._fetchByKeyValue(collection, identifier, MatchType.ALL, options, searchTerms, filter)
   }
 
   public fetchByFilterCriteria(
     collection: string,
-    filter: string | FilterCriteria | SearchTerms,
+    filter?: string | FilterCriteria,
+    searchTerms?: SearchTerms,
     options: FetchOptions = {}
   ): AqlQuery {
     if (this._printQuery(options) || this._debugFunctions()) {
       console.log(`fetchByFilterCriteria: ${collection}`)
-      console.log(filter)
+      if (searchTerms) {
+        console.log(searchTerms)
+      }
+      if (filter) {
+        console.log(filter)
+      }
     }
 
     const params: any = {}
@@ -372,16 +411,46 @@ export class Queries {
     //   query += ' FILTER d.@restrictTo'
     // }
 
-    if (isFilterCriteria(filter) || isSearchTerms(filter)) {
-      const criteria: FilterCriteria = isSearchTerms(filter) ? this._toFilterCriteria(filter, options) : filter
-      const matchType: MatchType = criteria.match ? criteria.match : MatchType.ANY
-      // if (criteria?.match) {}
+    if (filter) {
+      if (isFilterCriteria(filter)) {
+        const matchType: MatchType = filter.match ? filter.match : MatchType.ANY
+        // if (criteria?.match) {}
+
+        query += ' FILTER ( '
+
+        for (let i = 0; i < filter.filters.length; i++) {
+          if (i > 0) {
+            query += ` ${MatchTypeOperator[matchType]} `
+          }
+          if (this._shouldPrefixPropNames(options)) {
+            query += _prefixPropertNameInFilterToken(filter.filters[i])
+          } else {
+            query += filter.filters[i]
+          }
+        }
+
+        query += ' )'
+      } else {
+        if (this._shouldPrefixPropNames(options)) {
+          query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
+        } else {
+          query += ' FILTER ( ' + filter + ' )'
+        }
+      }
+    }
+
+    // if (filter && searchTerms) {
+    //   query += ' AND (...)'
+    // }
+
+    if (searchTerms) {
+      const criteria: FilterCriteria = this._toFilterCriteria(searchTerms, options)
 
       query += ' FILTER ( '
 
       for (let i = 0; i < criteria.filters.length; i++) {
         if (i > 0) {
-          query += ` ${MatchTypeOperator[matchType]} `
+          query += ` ${MatchTypeOperator[MatchType.ANY]} `
         }
         if (this._shouldPrefixPropNames(options)) {
           query += _prefixPropertNameInFilterToken(criteria.filters[i])
@@ -391,12 +460,6 @@ export class Queries {
       }
 
       query += ' )'
-    } else {
-      if (this._shouldPrefixPropNames(options)) {
-        query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
-      } else {
-        query += ' FILTER ( ' + filter + ' )'
-      }
     }
 
     // TODO: Support sorting by multiple criteria ...

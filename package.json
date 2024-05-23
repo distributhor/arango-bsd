@@ -1,6 +1,6 @@
 {
   "name": "@distributhor/guacamole",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "A backseat driver for ArangoDB",
   "homepage": "https://distributhor.github.io/guacamole/",
   "license": "MIT",

@@ -1397,6 +1397,50 @@ describe('Guacamole Integration Tests', () => {
     )
   })
 
+  test('fetchByFilterCriteriaAndSearch', async () => {
+    const result1A = await conn.db(db1)
+      .fetchByFilterCriteriaAndSearch(
+        CONST.userCollection,
+        'speciality == "Climbing"',
+        { props: 'name', terms: 'mar' }
+      ) as QueryResult
+
+    expect(result1A.data.length).toEqual(2)
+    expect(result1A.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Marco', surname: 'Pantani' }),
+        expect.objectContaining({ name: 'Marc', surname: 'Soler' })
+      ])
+    )
+
+    const result1B = await conn.db(db1)
+      .fetchByFilterCriteriaAndSearch(
+        CONST.userCollection,
+        'speciality != NULL',
+        { props: 'name', terms: 'mar' }
+      ) as QueryResult
+
+    expect(result1B.data.length).toEqual(3)
+
+    const result2A = await conn.db(db1)
+      .fetchByFilterCriteriaAndSearch(
+        CONST.userCollection,
+        'speciality == "Zooming"',
+        { props: 'name', terms: 'mar' }
+      ) as QueryResult
+
+    expect(result2A.data.length).toEqual(0)
+
+    const result2B = await conn.db(db1)
+      .fetchByFilterCriteriaAndSearch(
+        CONST.userCollection,
+        'speciality != "Zooming"',
+        { props: 'name', terms: 'mar' }
+      ) as QueryResult
+
+    expect(result2B.data.length).toEqual(3)
+  })
+
   test('fetchByPropertySearch', async () => {
     const result1A = await conn.db(db1)
       // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) ) RETURN d',
@@ -1453,11 +1497,12 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const result1B = await conn2.db(db1)
+    const result1B = await conn.db(db1)
       .fetchByPropertyValueAndSearch(
         CONST.userCollection,
         { name: 'speciality', value: 'Climbing' },
-        { props: 'name', terms: 'mar' }
+        undefined,
+        'LIKE(name, "%mar%", true)'
       ) as QueryResult
 
     expect(result1B.data.length).toEqual(2)
@@ -1471,20 +1516,50 @@ describe('Guacamole Integration Tests', () => {
     const result1C = await conn.db(db1)
       .fetchByPropertyValueAndSearch(
         CONST.userCollection,
+        { name: 'speciality', value: 'Climbing' },
+        { props: 'name', terms: 'mar' },
+        'surname == "Pantani"'
+      ) as QueryResult
+
+    expect(result1C.data.length).toEqual(1)
+    expect(result1C.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Marco', surname: 'Pantani' })
+      ])
+    )
+
+    const result1Z = await conn2.db(db1)
+      .fetchByPropertyValueAndSearch(
+        CONST.userCollection,
+        { name: 'speciality', value: 'Climbing' },
+        { props: 'name', terms: 'mar' }
+      ) as QueryResult
+
+    expect(result1Z.data.length).toEqual(2)
+    expect(result1Z.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Marco', surname: 'Pantani' }),
+        expect.objectContaining({ name: 'Marc', surname: 'Soler' })
+      ])
+    )
+
+    const result2A = await conn.db(db1)
+      .fetchByPropertyValueAndSearch(
+        CONST.userCollection,
         { name: 'speciality', value: 'Zooming' },
         { props: 'name', terms: 'mar' }
       ) as QueryResult
 
-    expect(result1C.data.length).toEqual(0)
+    expect(result2A.data.length).toEqual(0)
 
-    const result1D = await conn.db(db1)
+    const result3A = await conn.db(db1)
       .fetchByPropertyValueAndSearch(
         CONST.userCollection,
         { name: 'speciality', value: 'Climbing' },
         { props: 'name', terms: 'wil' }
       ) as QueryResult
 
-    expect(result1D.data.length).toEqual(0)
+    expect(result3A.data.length).toEqual(0)
   })
 
   test('fetchBy[Any/All]PropertyValuesAndSearch', async () => {
