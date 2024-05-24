@@ -20,12 +20,13 @@ import {
   DocumentTrimOptions,
   QueryResult,
   KeyValue,
-  FilterCriteria,
-  SearchTerms,
-  DocumentUpdate,
+  Filter,
+  Search,
+  Criteria,
   Identifier,
   MatchType,
-  DocumentMeta
+  DocumentMeta,
+  DocumentUpdate
 } from './types'
 import { Queries } from './queries'
 import { ArrayCursor } from 'arangojs/cursor'
@@ -491,7 +492,7 @@ export class ArangoDB {
       console.log(propValue)
     }
 
-    return await this.fetchByPropertyValueAndSearch(collection, propValue, undefined, undefined, options)
+    return await this.fetchByPropertyValueAndCriteria(collection, propValue, undefined, options)
   }
 
   public async fetchByAnyPropertyValue<T = any>(
@@ -507,7 +508,7 @@ export class ArangoDB {
       console.log(propValue)
     }
 
-    return await this.fetchByAnyPropertyValueAndSearch(collection, propValue, undefined, undefined, options)
+    return await this.fetchByAnyPropertyValueAndCriteria(collection, propValue, undefined, options)
   }
 
   public async fetchByAllPropertyValues<T = any>(
@@ -523,12 +524,12 @@ export class ArangoDB {
       console.log(propValues)
     }
 
-    return await this.fetchByAllPropertyValuesAndSearch(collection, propValues, undefined, undefined, options)
+    return await this.fetchByAllPropertyValuesAndCriteria(collection, propValues, undefined, options)
   }
 
   public async fetchByPropertySearch<T = any>(
     collection: string,
-    searchTerms: SearchTerms,
+    search: Search,
     options: FetchOptions = {}
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -536,104 +537,96 @@ export class ArangoDB {
     }
 
     if (this._debugParams()) {
-      console.log(searchTerms)
+      console.log(search)
     }
 
-    return await this._fetchByFilters(collection, undefined, searchTerms, options)
+    return await this._fetchByCriteria(collection, { search }, options)
   }
 
-  public async fetchByPropertyValueAndSearch<T = any>(
+  public async fetchByPropertyValueAndCriteria<T = any>(
     collection: string,
     propValue: KeyValue,
-    searchTerms?: SearchTerms,
-    filters?: string | FilterCriteria,
+    criteria?: Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
-      console.log(`fetchByPropertyValueAndSearch: ${collection}`)
+      console.log(`fetchByPropertyValueAndCriteria: ${collection}`)
     }
 
     if (this._debugParams()) {
       console.log(propValue)
-      console.log(searchTerms)
-      console.log(filters)
+      console.log(criteria)
     }
 
-    return await this._fetchByPropValues(collection, propValue, MatchType.ANY, searchTerms, filters, options)
+    return await this._fetchByPropValues(collection, propValue, MatchType.ANY, criteria, options)
   }
 
-  public async fetchByAnyPropertyValueAndSearch<T = any>(
+  public async fetchByAnyPropertyValueAndCriteria<T = any>(
     collection: string,
     propValue: KeyValue[],
-    searchTerms?: SearchTerms,
-    filters?: string | FilterCriteria,
+    criteria?: Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
-      console.log(`fetchByAnyPropertyValueAndSearch: ${collection}`)
+      console.log(`fetchByAnyPropertyValueAndCriteria: ${collection}`)
     }
 
     if (this._debugParams()) {
       console.log(propValue)
-      console.log(searchTerms)
-      console.log(filters)
+      console.log(criteria)
     }
 
-    return await this._fetchByPropValues(collection, propValue, MatchType.ANY, searchTerms, filters, options)
+    return await this._fetchByPropValues(collection, propValue, MatchType.ANY, criteria, options)
   }
 
-  public async fetchByAllPropertyValuesAndSearch<T = any>(
+  public async fetchByAllPropertyValuesAndCriteria<T = any>(
     collection: string,
     propValues: KeyValue[],
-    searchTerms?: SearchTerms,
-    filters?: string | FilterCriteria,
+    criteria?: Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
-      console.log(`fetchByAllPropertyValuesAndSearch: ${collection}`)
+      console.log(`fetchByAllPropertyValuesAndCriteria: ${collection}`)
     }
 
     if (this._debugParams()) {
       console.log(propValues)
-      console.log(searchTerms)
-      console.log(filters)
+      console.log(criteria)
     }
 
-    return await this._fetchByPropValues(collection, propValues, MatchType.ALL, searchTerms, filters, options)
+    return await this._fetchByPropValues(collection, propValues, MatchType.ALL, criteria, options)
   }
 
-  public async fetchByFilterCriteria<T = any>(
+  public async fetchByFilters<T = any>(
     collection: string,
-    filters: string | FilterCriteria,
+    filters: string | Filter,
     options: FetchOptions = {}
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
     if (this._debugFunctions()) {
-      console.log(`fetchByFilterCriteria: ${collection}`)
+      console.log(`fetchByFilters: ${collection}`)
     }
 
     if (this._debugParams()) {
       console.log(filters)
     }
 
-    return await this._fetchByFilters(collection, filters, undefined, options)
+    return await this._fetchByCriteria(collection, { filter: filters }, options)
   }
 
-  public async fetchByFilterCriteriaAndSearch<T = any>(
+  public async fetchByCriteria<T = any>(
     collection: string,
-    filters: string | FilterCriteria,
-    searchTerms: SearchTerms,
+    criteria: Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
     if (this._debugFunctions()) {
-      console.log(`fetchByFilterCriteria: ${collection}`)
+      console.log(`fetchByCriteria: ${collection}`)
     }
 
     if (this._debugParams()) {
-      console.log(filters)
-      console.log(searchTerms)
+      console.log(criteria)
     }
 
-    return await this._fetchByFilters(collection, filters, searchTerms, options)
+    return await this._fetchByCriteria(collection, criteria, options)
   }
 
   /** @internal */
@@ -641,8 +634,7 @@ export class ArangoDB {
     collection: string,
     propValues: KeyValue | KeyValue[],
     matchType: MatchType,
-    searchTerms?: SearchTerms,
-    filters?: string | FilterCriteria,
+    criteria?: Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     let arangojsQueryOptions = options?.arangojs?.query
@@ -660,18 +652,18 @@ export class ArangoDB {
     if (Array.isArray(propValues)) {
       if (matchType === MatchType.ANY) {
         result = await this.driver.query(
-          this.q.fetchByMatchingAnyProperty(collection, propValues, options, searchTerms, filters),
+          this.q.fetchByMatchingAnyProperty(collection, propValues, options, criteria),
           arangojsQueryOptions
         )
       } else {
         result = await this.driver.query(
-          this.q.fetchByMatchingAllProperties(collection, propValues, options, searchTerms, filters),
+          this.q.fetchByMatchingAllProperties(collection, propValues, options, criteria),
           arangojsQueryOptions
         )
       }
     } else {
       result = await this.driver.query(
-        this.q.fetchByMatchingProperty(collection, propValues, options, searchTerms, filters),
+        this.q.fetchByMatchingProperty(collection, propValues, options, criteria),
         arangojsQueryOptions
       )
     }
@@ -692,10 +684,9 @@ export class ArangoDB {
     return response
   }
 
-  public async _fetchByFilters<T = any>(
+  public async _fetchByCriteria<T = any>(
     collection: string,
-    filters?: string | FilterCriteria,
-    searchTerms?: SearchTerms,
+    criteria: Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
     let arangojsQueryOptions = options?.arangojs?.query
@@ -709,7 +700,7 @@ export class ArangoDB {
     }
 
     const result = await this.driver.query(
-      this.q.fetchByFilterCriteria(collection, filters, searchTerms, options),
+      this.q.fetchByCriteria(collection, criteria, options),
       arangojsQueryOptions
     )
 

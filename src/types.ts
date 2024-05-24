@@ -47,14 +47,20 @@ export enum MatchTypeOperator {
   ALL = '&&',
 }
 
-export interface FilterCriteria {
-  filters: string[]
-  match: MatchType // WK: used to be optional
-}
-
-export interface SearchTerms {
+export interface Search {
   props: string | string[]
   terms: string | string[]
+}
+
+export interface Filter {
+  filters: string[]
+  match?: MatchType
+}
+
+export interface Criteria {
+  search?: Search
+  filter?: string | Filter
+  match?: MatchType
 }
 
 export interface DatabaseConfig extends Config {}

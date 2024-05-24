@@ -7,8 +7,9 @@ import {
   isUniqueValue,
   KeyValue,
   IndexedValue,
-  SearchTerms,
-  FilterCriteria,
+  Search,
+  Filter,
+  Criteria,
   MatchTypeOperator,
   MatchType,
   FetchOptions,
@@ -16,12 +17,12 @@ import {
 } from './index'
 
 /** @internal */
-export function isFilterCriteria(x: any): x is FilterCriteria {
+export function isFilter(x: any): x is Filter {
   return x.filters
 }
 
 /** @internal */
-export function isSearchTerms(x: any): x is SearchTerms {
+export function isSearch(x: any): x is Search {
   return x.terms
 }
 
@@ -158,8 +159,8 @@ export class Queries {
   }
 
   /** @internal */
-  private _toFilterCriteria(search: SearchTerms, options?: FetchOptions): FilterCriteria {
-    const filter: FilterCriteria = {
+  private _toFilter(search: Search, options?: FetchOptions): Filter {
+    const filter: Filter = {
       match: MatchType.ANY,
       filters: []
     }
@@ -183,7 +184,7 @@ export class Queries {
         } else if (search.terms[j].trim().toLowerCase() === '!null') {
           filter.filters.push(search.props[i].trim() + ' != null')
         } else {
-        // filters.push(fields[i].trim() + ' LIKE "%' + searchTerms.trim() + '%"');
+        // filters.push(fields[i].trim() + ' LIKE "%' + search.trim() + '%"');
           filter.filters.push('LIKE(' + search.props[i].trim() + ', "%' + search.terms[j].trim() + '%", true)')
         }
       }
@@ -197,24 +198,24 @@ export class Queries {
     collection: string,
     identifier: KeyValue | KeyValue[],
     keyValueMatchType: MatchType,
-    options: FetchOptions,
-    searchTerms?: SearchTerms,
-    filter?: string | FilterCriteria
+    criteria?: Criteria,
+    options: FetchOptions = {}
   ): AqlQuery {
     if (this._printQuery(options) || this._debugFunctions()) {
       console.log(`_fetchByKeyValue: ${collection}`)
       console.log(identifier)
-      if (searchTerms) {
-        console.log(searchTerms)
-      }
-      if (filter) {
-        console.log(filter)
+      if (criteria) {
+        console.dir(criteria)
       }
     }
 
     const params: any = {}
 
-    let query = `FOR d IN ${collection} FILTER`
+    let query = `FOR d IN ${collection} FILTER (`
+
+    if (criteria && (criteria.filter ?? criteria.search)) {
+      query += ' ('
+    }
 
     if (Array.isArray(identifier)) {
       let keyCount = 0
@@ -250,22 +251,58 @@ export class Queries {
       }
 
       params.v = identifier.value
-      query += '  d.@p == @v'
+      query += ' d.@p == @v'
     }
 
-    if (filter) {
-      if (isFilterCriteria(filter)) {
-        const matchType: MatchType = filter.match ? filter.match : MatchType.ANY
-        // if (criteria?.match) {}
+    if (criteria?.filter && criteria.search) {
+      query += ' ) AND ( ( '
+    } else if (criteria && (criteria.filter ?? criteria.search)) {
+      query += ' ) AND ( '
+    }
 
-        // 'FOR d IN users FILTER  d.@property == @value AND FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
-        // 'FOR d IN users FILTER  d.@property == @value FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
-        // query += ' AND ( '
-        query += ' FILTER ( '
+    if (criteria) {
+      if (criteria.filter) {
+        if (isFilter(criteria.filter)) {
+          const matchType: MatchType = criteria.filter.match ? criteria.filter.match : MatchType.ANY
+
+          // query += ' ( '
+
+          for (let i = 0; i < criteria.filter.filters.length; i++) {
+            if (i > 0) {
+              query += ` ${MatchTypeOperator[matchType]} `
+            }
+            if (this._shouldPrefixPropNames(options)) {
+              query += _prefixPropertNameInFilterToken(criteria.filter.filters[i])
+            } else {
+              query += criteria.filter.filters[i]
+            }
+          }
+
+          // query += ' )'
+        } else {
+          if (this._shouldPrefixPropNames(options)) {
+            // query += ' ( ' + _prefixPropertyNames(criteria.filter) + ' )'
+            query += _prefixPropertyNames(criteria.filter)
+          } else {
+            // query += ' ( ' + criteria.filter + ' )'
+            query += criteria.filter
+          }
+        }
+      }
+
+      if (criteria.filter && criteria.search) {
+        const matchType: MatchType = criteria.match ? criteria.match : MatchType.ANY
+        query += ` ) ${MatchTypeOperator[matchType]} ( `
+      }
+
+      if (criteria.search) {
+        const filter: Filter = this._toFilter(criteria.search, options)
+
+        // query += ' ( '
 
         for (let i = 0; i < filter.filters.length; i++) {
           if (i > 0) {
-            query += ` ${MatchTypeOperator[matchType]} `
+            query += ` ${MatchTypeOperator[MatchType.ANY]} `
           }
           if (this._shouldPrefixPropNames(options)) {
             query += _prefixPropertNameInFilterToken(filter.filters[i])
@@ -274,43 +311,19 @@ export class Queries {
           }
         }
 
-        query += ' )'
-      } else {
-        if (this._shouldPrefixPropNames(options)) {
-          query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
-        } else {
-          query += ' FILTER ( ' + filter + ' )'
-        }
+        // query += ' )'
       }
     }
 
-    // if (filter && searchTerms) {
-    //   query += ' AND (...)'
-    // }
-
-    if (searchTerms) {
-      const criteria: FilterCriteria = this._toFilterCriteria(searchTerms, options)
-
-      // 'FOR d IN users FILTER  d.@property == @value AND FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
-      // 'FOR d IN users FILTER  d.@property == @value FILTER ( LIKE(d.name, "%ba%", true) ) RETURN d'
-      // query += ' AND ( '
-      query += ' FILTER ( '
-
-      for (let i = 0; i < criteria.filters.length; i++) {
-        if (i > 0) {
-          query += ` ${MatchTypeOperator[MatchType.ANY]} `
-        }
-        if (this._shouldPrefixPropNames(options)) {
-          query += _prefixPropertNameInFilterToken(criteria.filters[i])
-        } else {
-          query += criteria.filters[i]
-        }
-      }
-
+    if (criteria?.filter && criteria.search) {
+      query += ' ) )'
+    } else if (criteria && (criteria.filter ?? criteria.search)) {
       query += ' )'
     }
 
-    if (options?.hasOwnProperty('sortBy')) {
+    query += ' )'
+
+    if (options.hasOwnProperty('sortBy')) {
       query += ` SORT d.${options.sortBy}`
 
       if (options.hasOwnProperty('sortOrder')) {
@@ -334,6 +347,7 @@ export class Queries {
 
     if (this._printQuery(options)) {
       console.log(query)
+      console.log(params)
       console.log('')
     }
 
@@ -347,120 +361,119 @@ export class Queries {
     collection: string,
     identifier: KeyValue,
     options: FetchOptions = {},
-    searchTerms?: SearchTerms,
-    filter?: string | FilterCriteria
+    criteria?: Criteria
   ): AqlQuery {
     if (this._debugFunctions()) {
       console.log(`fetchByMatchingProperty: ${collection}`)
     }
 
-    return this._fetchByKeyValue(collection, identifier, MatchType.ANY, options, searchTerms, filter)
+    return this._fetchByKeyValue(collection, identifier, MatchType.ANY, criteria, options)
   }
 
   public fetchByMatchingAnyProperty(
     collection: string,
     identifier: KeyValue[],
     options: FetchOptions = {},
-    searchTerms?: SearchTerms,
-    filter?: string | FilterCriteria
+    criteria?: Criteria
   ): AqlQuery {
     if (this._debugFunctions()) {
       console.log(`fetchByMatchingAnyProperty: ${collection}`)
     }
 
-    return this._fetchByKeyValue(collection, identifier, MatchType.ANY, options, searchTerms, filter)
+    return this._fetchByKeyValue(collection, identifier, MatchType.ANY, criteria, options)
   }
 
   public fetchByMatchingAllProperties(
     collection: string,
     identifier: KeyValue[],
     options: FetchOptions = {},
-    searchTerms?: SearchTerms,
-    filter?: string | FilterCriteria
+    criteria?: Criteria
   ): AqlQuery {
     if (this._debugFunctions()) {
       console.log(`fetchByMatchingAllProperties: ${collection}`)
     }
 
-    return this._fetchByKeyValue(collection, identifier, MatchType.ALL, options, searchTerms, filter)
+    return this._fetchByKeyValue(collection, identifier, MatchType.ALL, criteria, options)
   }
 
-  public fetchByFilterCriteria(
+  public fetchByCriteria(
     collection: string,
-    filter?: string | FilterCriteria,
-    searchTerms?: SearchTerms,
+    criteria: Criteria,
     options: FetchOptions = {}
   ): AqlQuery {
     if (this._printQuery(options) || this._debugFunctions()) {
-      console.log(`fetchByFilterCriteria: ${collection}`)
-      if (searchTerms) {
-        console.log(searchTerms)
-      }
-      if (filter) {
-        console.log(filter)
+      console.log(`fetchByCriteria: ${collection}`)
+      if (criteria) {
+        console.dir(criteria)
       }
     }
 
     const params: any = {}
 
-    let query = 'FOR d IN ' + collection
+    let query = `FOR d IN ${collection} FILTER ( `
 
-    // TODO: enable and document this ??
-    // if (options.restrictTo) {
-    //   params.restrictTo = options.restrictTo
-    //   query += ' FILTER d.@restrictTo'
-    // }
+    if (criteria.filter && criteria.search) {
+      query += '( '
+    }
 
-    if (filter) {
-      if (isFilterCriteria(filter)) {
-        const matchType: MatchType = filter.match ? filter.match : MatchType.ANY
-        // if (criteria?.match) {}
+    if (criteria.filter) {
+      if (isFilter(criteria.filter)) {
+        const matchType: MatchType = criteria.filter.match ? criteria.filter.match : MatchType.ANY
 
-        query += ' FILTER ( '
+        // query += ' FILTER ( '
 
-        for (let i = 0; i < filter.filters.length; i++) {
+        for (let i = 0; i < criteria.filter.filters.length; i++) {
           if (i > 0) {
             query += ` ${MatchTypeOperator[matchType]} `
           }
           if (this._shouldPrefixPropNames(options)) {
-            query += _prefixPropertNameInFilterToken(filter.filters[i])
+            query += _prefixPropertNameInFilterToken(criteria.filter.filters[i])
           } else {
-            query += filter.filters[i]
+            query += criteria.filter.filters[i]
           }
         }
 
-        query += ' )'
+        // query += ' )'
       } else {
         if (this._shouldPrefixPropNames(options)) {
-          query += ' FILTER ( ' + _prefixPropertyNames(filter) + ' )'
+          // query += ' FILTER ( ' + _prefixPropertyNames(criteria.filter) + ' )'
+          query += _prefixPropertyNames(criteria.filter)
         } else {
-          query += ' FILTER ( ' + filter + ' )'
+          // query += ' FILTER ( ' + criteria.filter + ' )'
+          query += criteria.filter
         }
       }
     }
 
-    // if (filter && searchTerms) {
-    //   query += ' AND (...)'
-    // }
+    if (criteria.filter && criteria.search) {
+      const matchType: MatchType = criteria.match ? criteria.match : MatchType.ANY
+      query += ` ) ${MatchTypeOperator[matchType]} ( `
+    }
 
-    if (searchTerms) {
-      const criteria: FilterCriteria = this._toFilterCriteria(searchTerms, options)
+    if (criteria.search) {
+      const filter: Filter = this._toFilter(criteria.search, options)
 
-      query += ' FILTER ( '
+      // query += ' FILTER ( '
 
-      for (let i = 0; i < criteria.filters.length; i++) {
+      for (let i = 0; i < filter.filters.length; i++) {
         if (i > 0) {
           query += ` ${MatchTypeOperator[MatchType.ANY]} `
         }
         if (this._shouldPrefixPropNames(options)) {
-          query += _prefixPropertNameInFilterToken(criteria.filters[i])
+          query += _prefixPropertNameInFilterToken(filter.filters[i])
         } else {
-          query += criteria.filters[i]
+          query += filter.filters[i]
         }
       }
 
+      // query += ' )'
+    }
+
+    if (criteria.filter && criteria.search) {
       query += ' )'
     }
+
+    query += ' )'
 
     // TODO: Support sorting by multiple criteria ...
     // SORT u.lastName, u.firstName, u.id DESC
@@ -494,6 +507,7 @@ export class Queries {
 
     if (this._printQuery(options)) {
       console.log(query)
+      console.log(params)
       console.log('')
     }
 
