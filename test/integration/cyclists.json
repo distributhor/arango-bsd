@@ -454,6 +454,12 @@
     "results": [
       {
         "year": "2022",
+        "race": "UCI World Champs Gravel",
+        "position": "3rd",
+        "result": 3
+      },
+      {
+        "year": "2022",
         "race": "Tour de France",
         "position": "DNF",
         "result": -1
@@ -697,6 +703,51 @@
     }
   },
   {
+    "name": "Greg",
+    "surname": "van Avermaet",
+    "fame": "Golden Boy",
+    "country": "Belgium",
+    "strength": "Classics",
+    "disciplines": "Road, Gravel",
+    "results": [
+      {
+        "year": "2016",
+        "race": "Olympic Games Road Race",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2016",
+        "race": "Tirreno - Adriatico",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2017",
+        "race": "Paris - Roubaix",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2023",
+        "race": "Paris - Roubaix",
+        "position": "37st",
+        "result": 37
+      },
+      {
+        "year": "2024",
+        "race": "The Traka 200",
+        "position": "7th",
+        "result": 7
+      }
+    ],
+    "stats": {
+      "wins": 42,
+      "grandTours": 12,
+      "classics": 56
+    }
+  },
+  {
     "name": "Peter",
     "surname": "Sagan",
     "fame": "The Hulk",
@@ -745,6 +796,12 @@
         "race": "Paris - Roubaix",
         "position": "1st",
         "result": 1
+      },
+      {
+        "year": "2022",
+        "race": "UCI World Champs Gravel",
+        "position": "14th",
+        "result": 14
       }
     ],
     "stats": {
@@ -1087,6 +1144,47 @@
     "surname": "Beers",
     "country": "South Africa",
     "strength": "Marathon",
-    "disciplines": "MTB, Gravel"
+    "disciplines": "MTB, Gravel",
+    "results": [
+      {
+        "year": "2022",
+        "race": "UCI World Champs Gravel",
+        "position": "17th",
+        "result": 17
+      },
+      {
+        "year": "2023",
+        "race": "Unbound Gravel",
+        "position": "11th",
+        "result": 11
+      },
+      {
+        "year": "2024",
+        "race": "Cape Epic",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2024",
+        "race": "Belgian Waffle Ride",
+        "position": "1st",
+        "result": 1
+      }
+    ]
+  },
+  {
+    "name": "Kevin",
+    "surname": "Benkenstein",
+    "country": "South Africa",
+    "strength": "Ultra Marathon",
+    "disciplines": "Gravel",
+    "results": [
+      {
+        "year": "2021",
+        "race": "Tanka Trek",
+        "position": "1st",
+        "result": 1
+      }
+    ]
   }
 ]

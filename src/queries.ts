@@ -17,6 +17,15 @@ import {
 } from './index'
 
 /** @internal */
+// function _debugFilters(options: FetchOptions, debugVal: string): string | undefined {
+//   if (options.debugFilters) {
+//     return debugVal
+//   }
+
+//   return undefined
+// }
+
+/** @internal */
 export function isFilter(x: any): x is Filter {
   return x.filters
 }
@@ -154,11 +163,11 @@ export class Queries {
       return options.autoPrefixPropNamesInFilters
     }
 
-    if (this.go && this.go.autoPrefixPropNamesInFilters === false) {
-      return false
+    if (this.go && this.go.autoPrefixPropNamesInFilters === true) {
+      return true
     }
 
-    return true
+    return false
   }
 
   /** @internal */
@@ -223,8 +232,6 @@ export class Queries {
     if (Array.isArray(identifier)) {
       let keyCount = 0
 
-      // query += " (";
-
       for (const kv of identifier) {
         keyCount++
 
@@ -244,8 +251,6 @@ export class Queries {
 
         query += ` d.@${keyParam} == @${valueParam}`
       }
-
-    // query += " )";
     } else {
       if (identifier.name.indexOf('.') > 0) {
         params.p = identifier.name.split('.')
@@ -268,8 +273,6 @@ export class Queries {
         if (isFilter(criteria.filter)) {
           const matchType: MatchType = criteria.filter.match ? criteria.filter.match : MatchType.ANY
 
-          // query += ' ( '
-
           for (let i = 0; i < criteria.filter.filters.length; i++) {
             if (i > 0) {
               query += ` ${MatchTypeOperator[matchType]} `
@@ -280,14 +283,10 @@ export class Queries {
               query += criteria.filter.filters[i]
             }
           }
-
-          // query += ' )'
         } else {
           if (this._shouldPrefixPropNames(options)) {
-            // query += ' ( ' + _prefixPropertyNames(criteria.filter) + ' )'
             query += _prefixPropertyNames(criteria.filter)
           } else {
-            // query += ' ( ' + criteria.filter + ' )'
             query += criteria.filter
           }
         }
@@ -301,8 +300,6 @@ export class Queries {
       if (criteria.search) {
         const filter: Filter = this._toFilter(criteria.search, options)
 
-        // query += ' ( '
-
         for (let i = 0; i < filter.filters.length; i++) {
           if (i > 0) {
             query += ` ${MatchTypeOperator[MatchType.ANY]} `
@@ -313,8 +310,6 @@ export class Queries {
             query += filter.filters[i]
           }
         }
-
-        // query += ' )'
       }
     }
 
@@ -422,9 +417,6 @@ export class Queries {
     if (criteria.filter) {
       if (isFilter(criteria.filter)) {
         const matchType: MatchType = criteria.filter.match ? criteria.filter.match : MatchType.ANY
-
-        // query += ' FILTER ( '
-
         for (let i = 0; i < criteria.filter.filters.length; i++) {
           if (i > 0) {
             query += ` ${MatchTypeOperator[matchType]} `
@@ -435,14 +427,10 @@ export class Queries {
             query += criteria.filter.filters[i]
           }
         }
-
-        // query += ' )'
       } else {
         if (this._shouldPrefixPropNames(options)) {
-          // query += ' FILTER ( ' + _prefixPropertyNames(criteria.filter) + ' )'
           query += _prefixPropertyNames(criteria.filter)
         } else {
-          // query += ' FILTER ( ' + criteria.filter + ' )'
           query += criteria.filter
         }
       }
@@ -456,8 +444,6 @@ export class Queries {
     if (criteria.search) {
       const filter: Filter = this._toFilter(criteria.search, options)
 
-      // query += ' FILTER ( '
-
       for (let i = 0; i < filter.filters.length; i++) {
         if (i > 0) {
           query += ` ${MatchTypeOperator[MatchType.ANY]} `
@@ -468,8 +454,6 @@ export class Queries {
           query += filter.filters[i]
         }
       }
-
-      // query += ' )'
     }
 
     if (criteria.filter && criteria.search) {

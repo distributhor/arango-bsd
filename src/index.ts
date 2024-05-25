@@ -222,7 +222,7 @@ export class ArangoDB {
   constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
     this.go = options
 
-    if (!this.go?.hasOwnProperty('autoPrefixPropNamesInFilters')) {
+    if (this.go?.hasOwnProperty('autoPrefixPropNamesInFilters')) {
       this.go.autoPrefixPropNamesInFilters = true
     }
 
