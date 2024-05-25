@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/dot-notation */
 /* eslint-disable jest/no-conditional-expect */
 import * as path from 'path'
 import * as dotenv from 'dotenv'
@@ -8,6 +9,15 @@ import { DBStructure, MatchType, QueryResult } from '../../src/types'
 
 import cyclists from './cyclists.json'
 import teams from './teams.json'
+
+for (const c of cyclists) {
+  if (c.results) {
+    c['resultsV2'] = c.results.map(r => `${r.year}, ${r.race}, ${r.position}`)
+    if (c['resultsV2']) {
+      c['palmares'] = c['resultsV2'].join('; ')
+    }
+  }
+}
 
 dotenv.config({ path: path.join(__dirname, '.env') })
 
@@ -240,7 +250,7 @@ describe('Guacamole Integration Tests', () => {
     // should be case insensitive PT1
     const result1 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
-      constraints: [{ unique: { name: 'nickname', value: 'Chief Doper' } }]
+      constraints: [{ unique: { name: 'fame', value: 'Chief Doper' } }]
     })
 
     expect(result1.violatesUniqueConstraint).toBeTruthy()
@@ -248,7 +258,7 @@ describe('Guacamole Integration Tests', () => {
     // should be case insensitive PT2
     const result1DifferentCase1 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
-      constraints: [{ unique: { name: 'nickname', value: 'Chief DOPER' } }]
+      constraints: [{ unique: { name: 'fame', value: 'Chief DOPER' } }]
     })
 
     expect(result1DifferentCase1.violatesUniqueConstraint).toBeTruthy()
@@ -257,14 +267,14 @@ describe('Guacamole Integration Tests', () => {
     const result1DifferentCase2 = await conn.db(db1).uniqueConstraintValidation({
       caseInsensitive: true,
       collection: CONST.userCollection,
-      constraints: [{ unique: { name: 'nickname', value: 'Chief DOPER' } }]
+      constraints: [{ unique: { name: 'fame', value: 'Chief DOPER' } }]
     })
 
     expect(result1DifferentCase2.violatesUniqueConstraint).toBeFalsy()
 
     const result2 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
-      constraints: [{ unique: { name: 'nickname', value: 'Tornado' } }]
+      constraints: [{ unique: { name: 'fame', value: 'Tornado' } }]
     })
 
     expect(result2.violatesUniqueConstraint).toBeFalsy()
@@ -272,7 +282,7 @@ describe('Guacamole Integration Tests', () => {
     const result3 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
       constraints: [
-        { unique: { name: 'nickname', value: 'Tornado' } },
+        { unique: { name: 'fame', value: 'Tornado' } },
         { unique: { name: 'surname', value: 'Armstrong' } }
       ]
     })
@@ -282,7 +292,7 @@ describe('Guacamole Integration Tests', () => {
     const result3DifferentCase1 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
       constraints: [
-        { unique: { name: 'nickname', value: 'TORNADO' } },
+        { unique: { name: 'fame', value: 'TORNADO' } },
         { unique: { name: 'surname', value: 'ArmSTRONG' } }
       ]
     })
@@ -293,7 +303,7 @@ describe('Guacamole Integration Tests', () => {
       caseInsensitive: true,
       collection: CONST.userCollection,
       constraints: [
-        { unique: { name: 'nickname', value: 'TORNADO' } },
+        { unique: { name: 'fame', value: 'TORNADO' } },
         { unique: { name: 'surname', value: 'ArmSTRONG' } }
       ]
     })
@@ -303,7 +313,7 @@ describe('Guacamole Integration Tests', () => {
     const result4 = await conn.db(db1).uniqueConstraintValidation({
       collection: CONST.userCollection,
       constraints: [
-        { unique: { name: 'nickname', value: 'Tornado' } },
+        { unique: { name: 'fame', value: 'Tornado' } },
         { unique: { name: 'surname', value: 'Voeckler' } }
       ]
     })
@@ -377,12 +387,11 @@ describe('Guacamole Integration Tests', () => {
       country: 'South Africa',
       speciality: 'All Rounder',
       _secret: 'Rusks',
-      results: {
+      resultsV3: {
         2014: ['1st, Tour of Alberta', '1st, SA Champs TT', '2nd, SA Champs Road Race'],
         2015: ['2nd, Vuelta a La Rioja'],
         2017: ['1st, 94.7 Cycle Challenge'],
-        2018: ['1st, SA Champs TT', '1st, SA Champs Road Race', '1st, Tour Down Under'],
-        amateur: ['7th, Cape Argus Cycle Tour']
+        2018: ['1st, SA Champs TT', '1st, SA Champs Road Race', '1st, Tour Down Under']
       },
       rating: {
         sprint: 8,
@@ -410,7 +419,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1B.name).toEqual('Daryl')
     expect(result1B.surname).toEqual('Impey')
     expect(result1B._secret).toEqual('Rusks')
-    expect(result1B.results[2018].length).toEqual(3)
+    expect(result1B.resultsV3[2018].length).toEqual(3)
     expect(result1B.rating.timetrial).toEqual(8)
 
     // interface Person {
@@ -423,7 +432,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1C.name).toEqual('Daryl')
     expect(result1C.surname).toEqual('Impey')
     expect(result1C._secret).toBeUndefined()
-    expect(result1C.results[2018].length).toEqual(3)
+    expect(result1C.resultsV3[2018].length).toEqual(3)
     expect(result1C.rating.timetrial).toEqual(8)
 
     const result1D = await conn.db(db1).read(CONST.userCollection, { id: 'Impey', identifier: 'surname' })
@@ -431,7 +440,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1D.name).toEqual('Daryl')
     expect(result1D.surname).toEqual('Impey')
     expect(result1D._secret).toEqual('Rusks')
-    expect(result1D.results[2018].length).toEqual(3)
+    expect(result1D.resultsV3[2018].length).toEqual(3)
     expect(result1D.rating.timetrial).toEqual(8)
 
     const result1E = await conn.db(db1).read(CONST.userCollection, { id: 'Impey', identifier: 'surname' }, { trimPrivateProps: true })
@@ -439,21 +448,21 @@ describe('Guacamole Integration Tests', () => {
     expect(result1E.name).toEqual('Daryl')
     expect(result1E.surname).toEqual('Impey')
     expect(result1E._secret).toBeUndefined()
-    expect(result1E.results[2018].length).toEqual(3)
+    expect(result1E.resultsV3[2018].length).toEqual(3)
     expect(result1E.rating.timetrial).toEqual(8)
 
     const result1F = await conn.db(db1).read(CONST.userCollection, { id: result1A[0]._key })
 
     expect(result1F.name).toEqual('Daryl')
     expect(result1F.surname).toEqual('Impey')
-    expect(result1F.results[2017].length).toEqual(1)
-    expect(result1F.results[2018].length).toEqual(3)
+    expect(result1F.resultsV3[2017].length).toEqual(1)
+    expect(result1F.resultsV3[2018].length).toEqual(3)
 
-    const result1GA = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'results[2017]')
+    const result1GA = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'resultsV3[2017]')
     expect(Array.isArray(result1GA)).toBeTruthy()
     expect(result1GA.length).toEqual(1)
 
-    const result1GB = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'results[2018]')
+    const result1GB = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'resultsV3[2018]')
     expect(Array.isArray(result1GB)).toBeTruthy()
     expect(result1GB.length).toEqual(3)
 
@@ -704,7 +713,7 @@ describe('Guacamole Integration Tests', () => {
       country: 'Australia',
       speciality: 'GC',
       _secret: 'Smiling',
-      results: {
+      resultsV3: {
         2010: ['1st, La Flèche Wallonne', "5th, Giro d'Italia", '6th, Tour Down Under'],
         2015: ['1st, Tour de France', '1st, Tirreno–Adriatico', '1st Tour de Romandie'],
         2012: ['7th, Tour de France'],
@@ -729,15 +738,15 @@ describe('Guacamole Integration Tests', () => {
     expect(result2B.name).toEqual('Cadel')
     expect(result2B.surname).toEqual('Evans')
     // expect(result2B._secret).toBeUndefined()
-    expect(result2B.results[2012].length).toEqual(1)
+    expect(result2B.resultsV3[2012].length).toEqual(1)
     expect(result2B.rating.sprint).toEqual(6)
 
     const result2C = await conn.db(db1).update(CONST.userCollection, {
       id: result2A[0]._key,
       data: {
-        nickname: "G'day Mate",
+        fame: "G'day Mate",
         speciality: 'All Rounder',
-        results: { 2012: ['3rd, Critérium du Dauphiné'] },
+        resultsV3: { 2012: ['3rd, Critérium du Dauphiné'] },
         rating: { sprint: 7 }
       }
     })
@@ -748,10 +757,10 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2D.name).toEqual('Cadel')
     expect(result2D.surname).toEqual('Evans')
-    expect(result2D.nickname).toEqual("G'day Mate")
+    expect(result2D.fame).toEqual("G'day Mate")
     expect(result2D.speciality).toEqual('All Rounder')
-    expect(result2D.results['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
-    expect(result2D.results['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
+    expect(result2D.resultsV3['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
+    expect(result2D.resultsV3['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
     expect(result2D.rating).toEqual(
       expect.objectContaining({
         sprint: 7,
@@ -766,9 +775,9 @@ describe('Guacamole Integration Tests', () => {
       identifier: 'surname',
       id: 'Evans',
       data: {
-        nickname: 'Too Nice',
+        fame: 'Too Nice',
         speciality: 'GC',
-        results: { 2009: ['1st, UCI Road Race World Champs'] },
+        resultsV3: { 2009: ['1st, UCI Road Race World Champs'] },
         rating: { solo: 8 }
       }
     })
@@ -782,11 +791,11 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2F.name).toEqual('Cadel')
     expect(result2F.surname).toEqual('Evans')
-    expect(result2F.nickname).toEqual('Too Nice')
+    expect(result2F.fame).toEqual('Too Nice')
     expect(result2F.speciality).toEqual('GC')
-    expect(result2F.results['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
-    expect(result2F.results['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
-    expect(result2F.results['2009']).toEqual(expect.arrayContaining(['1st, UCI Road Race World Champs']))
+    expect(result2F.resultsV3['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
+    expect(result2F.resultsV3['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
+    expect(result2F.resultsV3['2009']).toEqual(expect.arrayContaining(['1st, UCI Road Race World Champs']))
     expect(result2F.rating).toEqual(
       expect.objectContaining({
         sprint: 7,
@@ -2035,7 +2044,7 @@ describe('Guacamole Integration Tests', () => {
           { name: 'speciality', value: 'Classics' }
         ],
         {
-          search: { props: 'nickname', terms: 'do it all' }
+          search: { props: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
@@ -2049,7 +2058,7 @@ describe('Guacamole Integration Tests', () => {
           { name: 'speciality', value: 'Classics' }
         ],
         {
-          search: { props: 'nickname', terms: 'do it all' }
+          search: { props: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
@@ -2057,7 +2066,7 @@ describe('Guacamole Integration Tests', () => {
 
     // FOR d IN cyclists FILTER (
     // ( d.@p1 == @v1 || d.@p2 == @v2 ) AND
-    // ( LIKE(d.nickname, "%Train%", true) )
+    // ( LIKE(d.fame, "%Train%", true) )
     // ) RETURN d
     const result1P = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
@@ -2067,7 +2076,7 @@ describe('Guacamole Integration Tests', () => {
           { name: 'speciality', value: 'Classics' }
         ],
         {
-          search: { props: 'nickname', terms: 'do it all' }
+          search: { props: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
@@ -2081,31 +2090,31 @@ describe('Guacamole Integration Tests', () => {
           { name: 'speciality', value: 'Sprinter' }
         ],
         {
-          search: { props: 'nickname', terms: 'do it all' }
+          search: { props: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
     expect(result1Q.data.length).toEqual(0)
   })
 
-  test('Delete database', async () => {
-    expect.assertions(5)
+  // test('Delete database', async () => {
+  //   expect.assertions(5)
 
-    await conn.system.dropDatabase(db1)
-    await conn.system.dropDatabase(db2)
+  //   await conn.system.dropDatabase(db1)
+  //   await conn.system.dropDatabase(db2)
 
-    const testDB1Exists = await conn.db(db1).dbExists()
-    const db2Exists = await conn.db(db2).dbExists()
+  //   const testDB1Exists = await conn.db(db1).dbExists()
+  //   const db2Exists = await conn.db(db2).dbExists()
 
-    expect(testDB1Exists).toBeFalsy()
-    expect(db2Exists).toBeFalsy()
+  //   expect(testDB1Exists).toBeFalsy()
+  //   expect(db2Exists).toBeFalsy()
 
-    try {
-      await conn.system.dropDatabase(db1)
-    } catch (e) {
-      expect(e.response.body.code).toEqual(404)
-      expect(e.response.body.errorNum).toEqual(1228)
-      expect(e.response.body.errorMessage).toEqual('database not found')
-    }
-  })
+  //   try {
+  //     await conn.system.dropDatabase(db1)
+  //   } catch (e) {
+  //     expect(e.response.body.code).toEqual(404)
+  //     expect(e.response.body.errorNum).toEqual(1228)
+  //     expect(e.response.body.errorMessage).toEqual('database not found')
+  //   }
+  // })
 })

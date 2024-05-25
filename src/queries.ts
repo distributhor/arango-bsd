@@ -75,6 +75,9 @@ export function _prefixPropertNameInFilterToken(filterStringToken: string): stri
     return 'd.' + filterStringToken.replace(/\s*\)/, ')')
   }
 
+  // check for a value in an array property
+  // the opposite would be to check that the value of a property is found in a passed array,
+  // d.propval IN ['my','array']
   if (filterStringToken.includes(' IN_PROP ')) {
     return filterStringToken.replace(/\s*IN_PROP\s*/, ' IN d.')
   }

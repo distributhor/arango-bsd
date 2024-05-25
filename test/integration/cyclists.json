@@ -2,158 +2,1041 @@
   {
     "name": "Lance",
     "surname": "Armstrong",
-    "nickname": "Chief Doper",
+    "fame": "Chief Doper",
     "country": "USA",
-    "speciality": "General Classification"
+    "speciality": "General Classification",
+    "results": [
+      {
+        "year": "1993",
+        "race": "UCI World Champs Road",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "1996",
+        "race": "Liège - Bastogne - Liège",
+        "position": "2nd",
+        "result": 2
+      },
+      {
+        "year": "1996",
+        "race": "Paris - Nice",
+        "position": "2nd",
+        "result": 2
+      },
+      {
+        "year": "1998",
+        "race": "La Vuelta a España",
+        "position": "4th",
+        "result": 4
+      },
+      {
+        "year": "2001",
+        "race": "Tour de Suisse",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2003",
+        "race": "Critérium du Dauphiné",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2005",
+        "race": "Tour de France",
+        "position": "1st",
+        "result": 1
+      }
+    ],
+    "stats": {
+      "wins": 71,
+      "grandTours": 15,
+      "classics": 18
+    }
   },
   {
     "name": "George",
     "surname": "Hincapie",
-    "nickname": "Super Domestique",
+    "fame": "Super Domestique",
     "country": "USA",
-    "speciality": "Domestique"
+    "speciality": "Domestique",
+    "results": [
+      {
+        "year": "2001",
+        "race": "Gent - Wevelgem",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2006",
+        "race": "Eneco Tour of Benelux",
+        "position": "2nd",
+        "result": 2
+      },
+      {
+        "year": "2012",
+        "race": "Tour de France",
+        "position": "38th",
+        "result": 38
+      },
+      {
+        "year": "2012",
+        "race": "Paris - Roubaix",
+        "position": "43rd",
+        "result": 43
+      },
+      {
+        "year": "2012",
+        "race": "Tirreno - Adriatico",
+        "position": "42nd",
+        "result": 42
+      }
+    ],
+    "stats": {
+      "wins": 19,
+      "grandTours": 20,
+      "classics": 49
+    }
   },
   {
     "name": "Ivan",
     "surname": "Basso",
-    "nickname": "Close But Not Quite",
+    "fame": "Close But Not Quite",
     "country": "Italy",
-    "speciality": "General Classification"
+    "speciality": "General Classification",
+    "results": [
+      {
+        "year": "2005",
+        "race": "Tour de France",
+        "position": "2nd",
+        "result": 2
+      },
+      {
+        "year": "2006",
+        "race": "Giro d'Italia",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2010",
+        "race": "Giro d'Italia",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2012",
+        "race": "Tour of Britain",
+        "position": "18th",
+        "result": 18
+      },
+      {
+        "year": "2012",
+        "race": "Tour de France",
+        "position": "25th",
+        "result": 25
+      },
+      {
+        "year": "2012",
+        "race": "Giro d'Italia",
+        "position": "5th",
+        "result": 5
+      },
+      {
+        "year": "2012",
+        "race": "Paris - Nice",
+        "position": "DNF",
+        "result": -1
+      },
+      {
+        "year": "2015",
+        "race": "Tour de France",
+        "position": "DNF",
+        "result": -1
+      },
+      {
+        "year": "2015",
+        "race": "Giro d'Italia",
+        "position": "51st",
+        "result": 51
+      },
+      {
+        "year": "2015",
+        "race": "Volta Ciclista a Catalunya",
+        "position": "DNF",
+        "result": -1
+      },
+      {
+        "year": "2015",
+        "race": "Tirreno - Adriatico",
+        "position": "40th",
+        "result": 40
+      }
+    ],
+    "stats": {
+      "wins": 30,
+      "grandTours": 20,
+      "classics": 21
+    }
   },
   {
     "name": "Marco",
     "surname": "Pantani",
     "country": "Italy",
-    "speciality": "Climbing"
+    "speciality": "Climbing",
+    "results": [
+      {
+        "year": "1994",
+        "race": "Giro d'Italia",
+        "position": "2nd",
+        "result": 2
+      },
+      {
+        "year": "1994",
+        "race": "Tour de France",
+        "position": "3rd",
+        "result": 3
+      },
+      {
+        "year": "1997",
+        "race": "Tour de France",
+        "position": "2nd",
+        "result": 2
+      },
+      {
+        "year": "1998",
+        "race": "Tour de France",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "1998",
+        "race": "Giro d'Italia",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2003",
+        "race": "Giro d'Italia",
+        "position": "14th",
+        "result": 14
+      }
+    ],
+    "stats": {
+      "wins": 26,
+      "grandTours": 16,
+      "classics": 11
+    }
   },
   {
     "name": "Jan",
     "surname": "Ullrich",
-    "nickname": "Wish I Was 3kg Lighter",
+    "fame": "Wish I Was 3kg Lighter",
     "country": "Germany",
-    "speciality": "General Classification"
+    "speciality": "General Classification",
+    "results": [
+      {
+        "year": "1997",
+        "race": "Tour de France",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2000",
+        "race": "Olympic Games Road Race",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2004",
+        "race": "Tour de Suisse",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2004",
+        "race": "Tour de France",
+        "position": "4th",
+        "result": 4
+      },
+      {
+        "year": "2005",
+        "race": "Tour de France",
+        "position": "3rd",
+        "result": 3
+      },
+      {
+        "year": "2005",
+        "race": "Volta Ciclista a Catalunya",
+        "position": "18th",
+        "result": 18
+      }
+    ],
+    "stats": {
+      "wins": 32,
+      "grandTours": 13,
+      "classics": 4
+    }
   },
   {
     "name": "Alberto",
     "surname": "Contador",
-    "nickname": "El Pistolero",
+    "fame": "El Pistolero",
     "country": "Spain",
-    "speciality": "General Classification"
+    "speciality": "General Classification",
+    "results": [
+      {
+        "year": "2007",
+        "race": "Tour de France",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2008",
+        "race": "Giro d'Italia",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2008",
+        "race": "La Vuelta a España",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2009",
+        "race": "Tour de France",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2010",
+        "race": "Paris - Nice",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2014",
+        "race": "Tirreno - Adriatico",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2014",
+        "race": "La Vuelta a España",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2015",
+        "race": "Tour de France",
+        "position": "5th",
+        "result": 5
+      },
+      {
+        "year": "2015",
+        "race": "Giro d'Italia",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2015",
+        "race": "Volta Ciclista a Catalunya",
+        "position": "4th",
+        "result": 4
+      },
+      {
+        "year": "2015",
+        "race": "Tirreno - Adriatico",
+        "position": "5th",
+        "result": 5
+      }
+    ],
+    "stats": {
+      "wins": 68,
+      "grandTours": 18,
+      "classics": 8
+    }
   },
   {
     "name": "Alejandro",
     "surname": "Valverde",
-    "nickname": "Still Going",
-    "country": "Spain"
+    "fame": "Still Going",
+    "country": "Spain",
+    "results": [
+      {
+        "year": "2006",
+        "race": "Liège - Bastogne - Liège",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2009",
+        "race": "La Vuelta a España",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2009",
+        "race": "Critérium du Dauphiné",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2015",
+        "race": "Critérium du Dauphiné",
+        "position": "9th",
+        "result": 9
+      },
+      {
+        "year": "2015",
+        "race": "Liège - Bastogne - Liège",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2015",
+        "race": "Tour de France",
+        "position": "3rd",
+        "result": 3
+      },
+      {
+        "year": "2015",
+        "race": "La Vuelta a España",
+        "position": "7th",
+        "result": 7
+      },
+      {
+        "year": "2017",
+        "race": "Liège - Bastogne - Liège",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2023",
+        "race": "UCI World Champs Gravel",
+        "position": "4th",
+        "result": 4
+      },
+      {
+        "year": "2024",
+        "race": "Castellon Gravel Race",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2024",
+        "race": "Belgian Waffle Ride",
+        "position": "25th",
+        "result": 25
+      }
+    ],
+    "stats": {
+      "wins": 133,
+      "grandTours": 32,
+      "classics": 35
+    }
   },
   {
     "name": "Mathieu",
     "surname": "van der Poel",
-    "nickname": "Boss Of Cross",
+    "fame": "Boss Of Cross",
     "country": "Netherlands",
-    "speciality": "Classics"
+    "speciality": "Classics",
+    "results": [
+      {
+        "year": "2022",
+        "race": "Tour de France",
+        "position": "DNF",
+        "result": -1
+      },
+      {
+        "year": "2023",
+        "race": "Tour de France",
+        "position": "57th",
+        "result": 57
+      },
+      {
+        "year": "2023",
+        "race": "UCI World Champs Road",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2024",
+        "race": "Ronde van Vlaanderen",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2024",
+        "race": "Paris - Roubaix",
+        "position": "1st",
+        "result": 1
+      }
+    ],
+    "stats": {
+      "wins": 49,
+      "grandTours": 4,
+      "classics": 18
+    }
   },
   {
     "name": "Wout",
     "surname": "van Aert",
-    "nickname": "Can Do It All",
+    "fame": "Can Do It All",
     "country": "Belgium",
-    "speciality": "Classics"
+    "speciality": "Classics",
+    "results": [
+      {
+        "year": "2021",
+        "race": "Amstel Gold",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2022",
+        "race": "Critérium du Dauphiné",
+        "position": "49th",
+        "result": 49
+      },
+      {
+        "year": "2022",
+        "race": "Tour de France",
+        "position": "21st",
+        "result": 21
+      },
+      {
+        "year": "2023",
+        "race": "Tour of Britain",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2023",
+        "race": "Tour de Suisse",
+        "position": "31st",
+        "result": 31
+      },
+      {
+        "year": "2023",
+        "race": "Paris - Roubaix",
+        "position": "3rd",
+        "result": 3
+      },
+      {
+        "year": "2023",
+        "race": "Tirreno - Adriatico",
+        "position": "53rd",
+        "result": 53
+      }
+    ],
+    "stats": {
+      "wins": 46,
+      "grandTours": 5,
+      "classics": 16
+    }
   },
   {
     "name": "Tadej",
     "surname": "Pogačar",
-    "nickname": "Podgy",
+    "fame": "Podgy",
     "country": "Slovenia",
-    "speciality": "General Classification"
+    "speciality": "General Classification",
+    "results": [
+      {
+        "year": "2015",
+        "race": "UCI World Champs Road",
+        "position": "DNF",
+        "result": -1
+      },
+      {
+        "year": "2017",
+        "race": "UCI World Champs Road",
+        "position": "17th",
+        "result": 17
+      },
+      {
+        "year": "2017",
+        "race": "Tour of Slovenia",
+        "position": "5th",
+        "result": 5
+      },
+      {
+        "year": "2019",
+        "race": "La Vuelta a España",
+        "position": "3rd",
+        "result": 3
+      },
+      {
+        "year": "2019",
+        "race": "Tour of Slovenia",
+        "position": "4th",
+        "result": 4
+      },
+      {
+        "year": "2019",
+        "race": "Strade Bianche",
+        "position": "30th",
+        "result": 30
+      },
+      {
+        "year": "2021",
+        "race": "Tour de France",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2021",
+        "race": "Liège - Bastogne - Liège",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2021",
+        "race": "Tirreno - Adriatico",
+        "position": "53rd",
+        "result": 53
+      },
+      {
+        "year": "2022",
+        "race": "Strade Bianche",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2023",
+        "race": "Paris - Nice",
+        "position": "1st",
+        "result": 1
+      }
+    ],
+    "stats": {
+      "wins": 75,
+      "grandTours": 6,
+      "classics": 14
+    }
   },
   {
     "name": "Vincenzo",
     "surname": "Nibali",
-    "nickname": "The Shark",
+    "fame": "The Shark",
     "country": "Italy",
-    "speciality": "General Classification"
+    "speciality": "General Classification",
+    "results": [
+      {
+        "year": "2014",
+        "race": "Tour de France",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2015",
+        "race": "Tour de France",
+        "position": "4th",
+        "result": 4
+      },
+      {
+        "year": "2015",
+        "race": "Liège - Bastogne - Liège",
+        "position": "13th",
+        "result": 13
+      },
+      {
+        "year": "2015",
+        "race": "Critérium du Dauphiné",
+        "position": "12th",
+        "result": 12
+      },
+      {
+        "year": "2016",
+        "race": "Giro d'Italia",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2017",
+        "race": "La Vuelta a España",
+        "position": "2nd",
+        "result": 2
+      },
+      {
+        "year": "2017",
+        "race": "Giro d'Italia",
+        "position": "3rd",
+        "result": 3
+      },
+      {
+        "year": "2022",
+        "race": "La Vuelta a España",
+        "position": "45th",
+        "result": 45
+      },
+      {
+        "year": "2022",
+        "race": "Giro d'Italia",
+        "position": "4th",
+        "result": 4
+      }
+    ],
+    "stats": {
+      "wins": 52,
+      "grandTours": 27,
+      "classics": 44
+    }
   },
   {
     "name": "Peter",
     "surname": "Sagan",
-    "nickname": "The Hulk",
+    "fame": "The Hulk",
     "country": "Slovakia",
-    "speciality": "Sprinter"
+    "speciality": "Sprinter",
+    "results": [
+      {
+        "year": "2015",
+        "race": "Strade Bianche",
+        "position": "31st",
+        "result": 31
+      },
+      {
+        "year": "2015",
+        "race": "Paris - Roubaix",
+        "position": "23rd",
+        "result": 23
+      },
+      {
+        "year": "2015",
+        "race": "Tour de France",
+        "position": "46th",
+        "result": 46
+      },
+      {
+        "year": "2015",
+        "race": "UCI World Champs Road",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2016",
+        "race": "UCI World Champs Road",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2017",
+        "race": "UCI World Champs Road",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2018",
+        "race": "Paris - Roubaix",
+        "position": "1st",
+        "result": 1
+      }
+    ],
+    "stats": {
+      "wins": 121,
+      "grandTours": 18,
+      "classics": 36
+    }
   },
   {
     "name": "Arnaud",
     "surname": "Démare",
     "country": "France",
-    "speciality": "Sprinter"
+    "speciality": "Sprinter",
+    "results": [
+      {
+        "year": "2016",
+        "race": "Milano - Sanremo",
+        "position": "1st",
+        "result": 1
+      }
+    ],
+    "stats": {
+      "wins": 95,
+      "grandTours": 11,
+      "classics": 26
+    }
   },
   {
     "name": "Thibaut",
     "surname": "Pinot",
     "country": "France",
-    "speciality": "General Classification"
+    "speciality": "General Classification",
+    "results": [
+      {
+        "year": "2015",
+        "race": "Tour de France",
+        "position": "16th",
+        "result": 16
+      },
+      {
+        "year": "2015",
+        "race": "Tour de Suisse",
+        "position": "4th",
+        "result": 4
+      },
+      {
+        "year": "2017",
+        "race": "Tour de France",
+        "position": "DNF",
+        "result": -1
+      },
+      {
+        "year": "2017",
+        "race": "Giro d'Italia",
+        "position": "4th",
+        "result": 4
+      },
+      {
+        "year": "2017",
+        "race": "Tirreno - Adriatico",
+        "position": "3rd",
+        "result": 3
+      }
+    ],
+    "stats": {
+      "wins": 33,
+      "grandTours": 18,
+      "classics": 9
+    }
   },
   {
     "name": "Mark",
     "surname": "Cavendish",
     "country": "UK",
-    "speciality": "Sprinter"
+    "speciality": "Sprinter",
+    "results": [
+      {
+        "year": "2009",
+        "race": "Milano - Sanremo",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2011",
+        "race": "UCI World Champs Road",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2015",
+        "race": "Milano - Sanremo",
+        "position": "46th",
+        "result": 46
+      }
+    ],
+    "stats": {
+      "wins": 164,
+      "grandTours": 23,
+      "classics": 16
+    }
   },
   {
     "name": "Chris",
     "surname": "Froome",
     "country": "UK",
-    "speciality": "General Classification"
+    "speciality": "General Classification",
+    "results": [
+      {
+        "year": "2015",
+        "race": "Tour de France",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2015",
+        "race": "Critérium du Dauphiné",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2017",
+        "race": "Tour de France",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2017",
+        "race": "La Vuelta a España",
+        "position": "1st",
+        "result": 1
+      }
+    ],
+    "stats": {
+      "wins": 46,
+      "grandTours": 21,
+      "classics": 9
+    }
   },
   {
     "name": "Geraint",
     "surname": "Thomas",
     "country": "UK",
-    "speciality": "General Classification"
+    "speciality": "General Classification",
+    "results": [],
+    "stats": {
+      "wins": 25,
+      "grandTours": 20,
+      "classics": 19
+    }
   },
   {
     "name": "Marc",
     "surname": "Soler",
     "country": "Spain",
-    "speciality": "Climbing"
+    "speciality": "Climbing",
+    "results": [],
+    "stats": {
+      "wins": 6,
+      "grandTours": 12,
+      "classics": 6
+    }
   },
   {
     "name": "Rohan",
     "surname": "Dennis",
     "country": "Australia",
-    "speciality": "Time Trial"
+    "speciality": "Time Trial",
+    "results": [],
+    "stats": {
+      "wins": 33,
+      "grandTours": 12,
+      "classics": 0
+    }
   },
   {
     "name": "Thomas",
     "surname": "de Ghent",
     "country": "Belgium",
-    "nickname": "The Train",
-    "speciality": "Break Aways"
+    "fame": "The Train",
+    "speciality": "Break Aways",
+    "stats": {
+      "wins": 17,
+      "grandTours": 24,
+      "classics": 17
+    }
   },
   {
     "name": "Caleb",
     "surname": "Ewan",
     "country": "Australia",
-    "speciality": "Sprinter"
+    "speciality": "Sprinter",
+    "results": [
+      {
+        "year": "2018",
+        "race": "Milano - Sanremo",
+        "position": "2nd",
+        "result": 2
+      }
+    ],
+    "stats": {
+      "wins": 68,
+      "grandTours": 12,
+      "classics": 7
+    }
   },
   {
     "name": "Tony",
     "surname": "Martin",
     "country": "Germany",
     "speciality": "Time Trial",
-    "nickname": "Pantzerwagen"
+    "fame": "Pantzerwagen",
+    "results": [
+      {
+        "year": "2011",
+        "race": "UCI World Champs ITT",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2016",
+        "race": "UCI World Champs ITT",
+        "position": "1st",
+        "result": 1
+      }
+    ],
+    "stats": {
+      "wins": 67,
+      "grandTours": 21,
+      "classics": 10
+    }
   },
   {
     "name": "Fabian",
     "surname": "Cancellara",
     "country": "Switzerland",
-    "speciality": "Time Trial"
+    "speciality": "Time Trial",
+    "results": [
+      {
+        "year": "2008",
+        "race": "Tirreno - Adriatico",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2009",
+        "race": "Tour de Suisse",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2010",
+        "race": "UCI World Champs ITT",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2010",
+        "race": "Paris - Roubaix",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2015",
+        "race": "Tour de Suisse",
+        "position": "113th",
+        "result": 113
+      },
+      {
+        "year": "2015",
+        "race": "Milano - Sanremo",
+        "position": "7th",
+        "result": 7
+      },
+      {
+        "year": "2016",
+        "race": "Olympic Games ITT",
+        "position": "1st",
+        "result": 1
+      }
+    ],
+    "stats": {
+      "wins": 88,
+      "grandTours": 21,
+      "classics": 35
+    }
   },
   {
     "name": "Julian",
     "surname": "Alaphilippe",
     "country": "France",
-    "speciality": "Classics"
+    "speciality": "Classics",
+    "results": [
+      {
+        "year": "2021",
+        "race": "UCI World Champs Road",
+        "position": "1st",
+        "result": 1
+      }
+    ],
+    "stats": {
+      "wins": 88,
+      "grandTours": 21,
+      "classics": 35
+    }
   },
   {
     "name": "Tim",
