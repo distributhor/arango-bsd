@@ -6,7 +6,6 @@ import {
   isCompositeKey,
   isUniqueValue,
   KeyValue,
-  IndexedValue,
   Search,
   Filter,
   Criteria,
@@ -36,42 +35,42 @@ export function isSearch(x: any): x is Search {
 }
 
 /** @internal */
-export function _findAllIndicesOfSubString(
-  subString: string | string[],
-  targetString: string,
-  caseInSensitive = true
-): IndexedValue[] {
-  if (Array.isArray(subString)) {
-    let indices: IndexedValue[] = []
+// export function _findAllIndicesOfSubString(
+//   subString: string | string[],
+//   targetString: string,
+//   caseInSensitive = true
+// ): IndexedValue[] {
+//   if (Array.isArray(subString)) {
+//     let indices: IndexedValue[] = []
 
-    for (const s of subString) {
-      indices = indices.concat(_findAllIndicesOfSubString(s, targetString, caseInSensitive))
-    }
+//     for (const s of subString) {
+//       indices = indices.concat(_findAllIndicesOfSubString(s, targetString, caseInSensitive))
+//     }
 
-    return indices.sort(function (a: any, b: any) {
-      return a.index > b.index ? 1 : -1
-    })
-  }
+//     return indices.sort(function (a: any, b: any) {
+//       return a.index > b.index ? 1 : -1
+//     })
+//   }
 
-  if (targetString.length === 0) {
-    return []
-  }
+//   if (targetString.length === 0) {
+//     return []
+//   }
 
-  if (caseInSensitive) {
-    targetString = targetString.toLowerCase()
-    subString = subString.toLowerCase()
-  }
+//   if (caseInSensitive) {
+//     targetString = targetString.toLowerCase()
+//     subString = subString.toLowerCase()
+//   }
 
-  const indices: IndexedValue[] = []
+//   const indices: IndexedValue[] = []
 
-  let index = targetString.indexOf(subString)
-  while (index !== -1) {
-    indices.push({ index, value: subString })
-    index = targetString.indexOf(subString, index + 1)
-  }
+//   let index = targetString.indexOf(subString)
+//   while (index !== -1) {
+//     indices.push({ index, value: subString })
+//     index = targetString.indexOf(subString, index + 1)
+//   }
 
-  return indices
-}
+//   return indices
+// }
 
 export class Queries {
   private readonly go: GuacamoleOptions
@@ -124,6 +123,29 @@ export class Queries {
     }
 
     return filter
+  }
+
+  /** @internal */
+  private _toFilterString(filter: string | Filter | Search): string {
+    if (typeof filter === 'string' || (!isFilter(filter) && !isSearch(filter))) {
+      return filter
+    }
+
+    if (isSearch(filter)) {
+      return this._toFilterString(this._toSearchFilter(filter))
+    }
+
+    let filterString = ''
+
+    const matchType: MatchType = filter.match ? filter.match : MatchType.ANY
+    for (let i = 0; i < filter.filters.length; i++) {
+      if (i > 0) {
+        filterString += ` ${MatchTypeOperator[matchType]} `
+      }
+      filterString += filter.filters[i]
+    }
+
+    return filterString
   }
 
   /** @internal */
@@ -191,32 +213,15 @@ export class Queries {
 
     if (criteria) {
       if (criteria.filter) {
-        if (isFilter(criteria.filter)) {
-          const matchType: MatchType = criteria.filter.match ? criteria.filter.match : MatchType.ANY
-          for (let i = 0; i < criteria.filter.filters.length; i++) {
-            if (i > 0) {
-              query += ` ${MatchTypeOperator[matchType]} `
-            }
-            query += criteria.filter.filters[i]
-          }
-        } else {
-          query += criteria.filter
-        }
+        query += this._toFilterString(criteria.filter)
       }
 
       if (criteria.filter && criteria.search) {
-        const matchType: MatchType = criteria.match ? criteria.match : MatchType.ANY
-        query += ` ) ${MatchTypeOperator[matchType]} ( `
+        query += ` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `
       }
 
       if (criteria.search) {
-        const filter: Filter = this._toSearchFilter(criteria.search)
-        for (let i = 0; i < filter.filters.length; i++) {
-          if (i > 0) {
-            query += ` ${MatchTypeOperator[MatchType.ANY]} `
-          }
-          query += filter.filters[i]
-        }
+        query += this._toFilterString(criteria.search)
       }
     }
 
@@ -322,32 +327,15 @@ export class Queries {
     }
 
     if (criteria.filter) {
-      if (isFilter(criteria.filter)) {
-        const matchType: MatchType = criteria.filter.match ? criteria.filter.match : MatchType.ANY
-        for (let i = 0; i < criteria.filter.filters.length; i++) {
-          if (i > 0) {
-            query += ` ${MatchTypeOperator[matchType]} `
-          }
-          query += criteria.filter.filters[i]
-        }
-      } else {
-        query += criteria.filter
-      }
+      query += this._toFilterString(criteria.filter)
     }
 
     if (criteria.filter && criteria.search) {
-      const matchType: MatchType = criteria.match ? criteria.match : MatchType.ANY
-      query += ` ) ${MatchTypeOperator[matchType]} ( `
+      query += ` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `
     }
 
     if (criteria.search) {
-      const filter: Filter = this._toSearchFilter(criteria.search)
-      for (let i = 0; i < filter.filters.length; i++) {
-        if (i > 0) {
-          query += ` ${MatchTypeOperator[MatchType.ANY]} `
-        }
-        query += filter.filters[i]
-      }
+      query += this._toFilterString(criteria.search)
     }
 
     if (criteria.filter && criteria.search) {
@@ -356,8 +344,6 @@ export class Queries {
 
     query += ' )'
 
-    // TODO: Support sorting by multiple criteria ...
-    // SORT u.lastName, u.firstName, u.id DESC
     if (options?.hasOwnProperty('sortBy')) {
       query += ` SORT d.${options.sortBy}`
 
