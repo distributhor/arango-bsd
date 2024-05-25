@@ -242,7 +242,7 @@ describe('Guacamole Integration Tests', () => {
     const result1 = await conn.db(db1).create(CONST.userCollection, cyclists)
     const result2 = await conn.db(db1).create(CONST.groupCollection, teams)
 
-    expect(result1.length).toEqual(25)
+    expect(result1.length).toEqual(28)
     expect(result2.length).toEqual(16)
   })
 
@@ -385,7 +385,7 @@ describe('Guacamole Integration Tests', () => {
       name: 'Daryl',
       surname: 'Impey',
       country: 'South Africa',
-      speciality: 'All Rounder',
+      strength: 'All Rounder',
       _secret: 'Rusks',
       resultsV3: {
         2014: ['1st, Tour of Alberta', '1st, SA Champs TT', '2nd, SA Champs Road Race'],
@@ -711,7 +711,7 @@ describe('Guacamole Integration Tests', () => {
       name: 'Cadel',
       surname: 'Evans',
       country: 'Australia',
-      speciality: 'GC',
+      strength: 'GC',
       _secret: 'Smiling',
       resultsV3: {
         2010: ['1st, La Flèche Wallonne', "5th, Giro d'Italia", '6th, Tour Down Under'],
@@ -745,7 +745,7 @@ describe('Guacamole Integration Tests', () => {
       id: result2A[0]._key,
       data: {
         fame: "G'day Mate",
-        speciality: 'All Rounder',
+        strength: 'All Rounder',
         resultsV3: { 2012: ['3rd, Critérium du Dauphiné'] },
         rating: { sprint: 7 }
       }
@@ -758,7 +758,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2D.name).toEqual('Cadel')
     expect(result2D.surname).toEqual('Evans')
     expect(result2D.fame).toEqual("G'day Mate")
-    expect(result2D.speciality).toEqual('All Rounder')
+    expect(result2D.strength).toEqual('All Rounder')
     expect(result2D.resultsV3['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
     expect(result2D.resultsV3['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
     expect(result2D.rating).toEqual(
@@ -776,7 +776,7 @@ describe('Guacamole Integration Tests', () => {
       id: 'Evans',
       data: {
         fame: 'Too Nice',
-        speciality: 'GC',
+        strength: 'GC',
         resultsV3: { 2009: ['1st, UCI Road Race World Champs'] },
         rating: { solo: 8 }
       }
@@ -792,7 +792,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2F.name).toEqual('Cadel')
     expect(result2F.surname).toEqual('Evans')
     expect(result2F.fame).toEqual('Too Nice')
-    expect(result2F.speciality).toEqual('GC')
+    expect(result2F.strength).toEqual('GC')
     expect(result2F.resultsV3['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
     expect(result2F.resultsV3['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
     expect(result2F.resultsV3['2009']).toEqual(expect.arrayContaining(['1st, UCI Road Race World Champs']))
@@ -850,7 +850,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result3D).toBeNull()
 
     const result4A = await conn.db(db1).update(CONST.userCollection, {
-      identifier: 'speciality',
+      identifier: 'strength',
       id: 'Time Trial',
       data: {
         rating: { timetrial: 9 }
@@ -863,7 +863,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result4A[0]._key).toBeDefined()
 
     const result4B = (await conn.db(db1)
-      .fetchByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Time Trial' })) as QueryResult
+      .fetchByPropertyValue(CONST.userCollection, { name: 'strength', value: 'Time Trial' })) as QueryResult
 
     expect(result4B.data.length).toEqual(3)
 
@@ -873,14 +873,14 @@ describe('Guacamole Integration Tests', () => {
     const result4BWithLimit1 = (await conn.db(db1)
       .fetchByPropertyValue(
         CONST.userCollection,
-        { name: 'speciality', value: 'Time Trial' },
+        { name: 'strength', value: 'Time Trial' },
         { limit: 2, sortBy: 'name', sortOrder: 'descending' }
       )) as QueryResult
 
     const result4BWithLimit2 = (await conn.db(db1)
       .fetchByPropertyValue(
         CONST.userCollection,
-        { name: 'speciality', value: 'Time Trial' },
+        { name: 'strength', value: 'Time Trial' },
         { limit: 2, offset: 1, sortBy: 'name', sortOrder: 'descending' }
       )) as QueryResult
 
@@ -916,7 +916,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result4C[0]._key).toBeDefined()
 
     const result4D = (await conn.db(db1)
-      .fetchByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Time Trial' })) as QueryResult
+      .fetchByPropertyValue(CONST.userCollection, { name: 'strength', value: 'Time Trial' })) as QueryResult
 
     expect(result4D.data.length).toEqual(3)
 
@@ -932,22 +932,199 @@ describe('Guacamole Integration Tests', () => {
     expect(result4E[0]['rating.timetrial']).toBeDefined()
 
     const result4F = (await conn.db(db1)
-      .fetchByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Time Trial' })) as QueryResult
+      .fetchByPropertyValue(CONST.userCollection, { name: 'strength', value: 'Time Trial' })) as QueryResult
 
     expect(result4F.data.length).toEqual(3)
 
     const rohanDennisv3 = result4F.data.find(i => i.surname === 'Dennis')
     expect(rohanDennisv3.rating.timetrial).toEqual(7)
 
-    const result5A = await conn.db(db1).delete(CONST.userCollection, { id: 'Break Aways', identifier: 'speciality' })
+    const result5A = await conn.db(db1).delete(CONST.userCollection, { id: 'Break Aways', identifier: 'strength' })
 
     expect(result5A).toBeDefined()
     expect(Array.isArray(result5A)).toBeTruthy()
     expect(result5A.length).toEqual(1)
 
-    const result5B = (await conn.db(db1).fetchByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Break Aways' })) as QueryResult
+    const result5B = (await conn.db(db1).fetchByPropertyValue(CONST.userCollection, { name: 'strength', value: 'Break Aways' })) as QueryResult
 
     expect(result5B.data.length).toEqual(0)
+  })
+
+  test('returnAll, returnFirst', async () => {
+    const result1A = await conn
+      .db(db1)
+      .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`)
+
+    expect(result1A.data.length).toEqual(3)
+    expect(result1A.data[0].surname).toBeDefined()
+
+    const result1ALiteral = await conn
+      .db(db1)
+      .returnAll(`FOR d IN ${CONST.userCollection} FILTER d.strength LIKE "Time Trial" RETURN d`)
+
+    expect(result1ALiteral.data.length).toEqual(3)
+    expect(result1ALiteral.data[0].surname).toBeDefined()
+
+    const result1B = (await conn
+      .db(db1)
+      .fetchByPropertyValue(CONST.userCollection, { name: 'strength', value: 'Time Trial' })) as QueryResult
+
+    expect(result1B.data.length).toEqual(3)
+    expect(result1B.data[0].name).toBeDefined()
+    expect(result1B.data[0].surname).toBeDefined()
+    expect(result1B.data[0]._key).toBeDefined()
+
+    const result1C = (await conn.db(db1).fetchByPropertyValue(
+      CONST.userCollection,
+      { name: 'strength', value: 'Time Trial' },
+      {
+        trimPrivateProps: true
+      }
+    )) as QueryResult
+
+    expect(result1C.data.length).toEqual(3)
+    expect(result1C.data[0].name).toBeDefined()
+    expect(result1C.data[0].surname).toBeDefined()
+    expect(result1C.data[0]._key).toBeDefined()
+
+    const result1D = (await conn.db(db1).fetchByPropertyValue(
+      CONST.userCollection,
+      { name: 'strength', value: 'Time Trial' },
+      {
+        trimPrivateProps: true
+      }
+    )) as QueryResult
+
+    expect(result1D.data.length).toEqual(3)
+    expect(result1D.data[0].name).toBeDefined()
+    expect(result1D.data[0].surname).toBeDefined()
+    expect(result1D.data[0]._key).toBeDefined()
+
+    const result1E = (await conn.db(db1).fetchByPropertyValue(
+      CONST.userCollection,
+      { name: 'strength', value: 'Time Trial' },
+      { returnCursor: true }
+    )) as ArrayCursor
+
+    expect(result1E instanceof ArrayCursor).toBeTruthy()
+    const allDocs = await result1E.all()
+    expect(allDocs[0].surname).toBeDefined()
+
+    const result2A = await conn.db(db1)
+      .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
+
+    expect(result2A.data).toBeDefined()
+    expect(Array.isArray(result2A.data)).toBeTruthy()
+    expect(result2A.data.length).toEqual(0)
+
+    const result2B = (await conn.db(db1).fetchByPropertyValue(CONST.userCollection, {
+      name: 'strength',
+      value: 'Trail Running'
+    })) as QueryResult
+
+    expect(result2B.data).toBeDefined()
+    expect(Array.isArray(result2B.data)).toBeTruthy()
+    expect(result2B.data.length).toEqual(0)
+
+    const result3A = await conn.db(db1)
+      .returnFirst(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
+
+    expect(result3A).toBeNull()
+
+    const result3B = await conn.db(db1)
+      .fetchOneByPropertyValue(CONST.userCollection, { name: 'strength', value: 'Trail Running' })
+
+    expect(result3B).toBeNull()
+
+    const result4A = await conn.db(db1)
+      .returnFirst(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`)
+
+    expect(result4A).toBeDefined()
+    expect(result4A.surname).toBeDefined()
+
+    const result4B = await conn.db(db1)
+      .fetchOneByPropertyValue(CONST.userCollection, { name: 'strength', value: 'Time Trial' })
+
+    expect(result4B).toBeDefined()
+    expect(result4B.surname).toBeDefined()
+
+    const result5A = await conn.db(db1)
+      .returnFirst(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
+
+    expect(result5A).toBeDefined()
+    expect(result5A.name).toEqual('Daryl')
+
+    const result5B = await conn.db(db1)
+      .fetchOneByPropertyValue(CONST.userCollection, { name: 'surname', value: 'Impey' })
+
+    expect(result5B).toBeDefined()
+    expect(result5B.name).toEqual('Daryl')
+    expect(result5B.surname).toEqual('Impey')
+    expect(result5B._secret).toEqual('Rusks')
+    expect(result5B._key).toBeDefined()
+
+    const result5C = await conn.db(db1)
+      .fetchOneByPropertyValue(
+        CONST.userCollection,
+        { name: 'surname', value: 'Impey' },
+        { trimPrivateProps: true }
+      )
+
+    expect(result5C).toBeDefined()
+    expect(result5C.name).toEqual('Daryl')
+    expect(result5C.surname).toEqual('Impey')
+    expect(result5C._secret).toBeUndefined()
+    expect(result5C._key).toBeDefined()
+
+    const result5D = await conn.db(db1)
+      .fetchOneByPropertyValue(
+        CONST.userCollection,
+        { name: 'surname', value: 'Impey' },
+        { trimPrivateProps: true }
+      )
+
+    expect(result5D).toBeDefined()
+    expect(result5D.name).toEqual('Daryl')
+    expect(result5D.surname).toEqual('Impey')
+    expect(result5B._secret).toEqual('Rusks')
+    expect(result5D._key).toBeDefined()
+
+    const result6A = (await conn.db(db1).fetchByAllPropertyValues(CONST.userCollection, [
+      { name: 'country', value: 'Belgium' },
+      { name: 'strength', value: 'Classics' }
+    ])) as QueryResult
+
+    expect(result6A.data.length).toEqual(2)
+    expect(result6A.data[0].name === 'Wout' || result6A.data[0].name === 'Tim').toBeTruthy()
+    expect(result6A.data[1].surname === 'van Aert' || result6A.data[1].surname === 'Wellens').toBeTruthy()
+
+    const result6B = (await conn.db(db1).fetchByAllPropertyValues(CONST.userCollection, [
+      { name: 'country', value: 'UK' },
+      { name: 'strength', value: 'Classics' }
+    ])) as QueryResult
+
+    expect(result6B.data.length).toEqual(0)
+
+    const result7A = await conn.db(db1).fetchOneByAllPropertyValues(CONST.userCollection, [
+      { name: 'country', value: 'Belgium' },
+      { name: 'strength', value: 'Classics' }
+    ])
+
+    expect(result7A.surname === 'van Aert' || result7A.surname === 'Wellens').toBeTruthy()
+
+    const result7B = await conn.db(db1).fetchOneByAllPropertyValues(CONST.userCollection, [
+      { name: 'name', value: 'Jan' },
+      { name: 'surname', value: 'Ullrich' }
+    ])
+
+    expect(result7B.surname).toEqual('Ullrich')
+
+    const result7C = await conn.db(db1).fetchOneByAllPropertyValues(CONST.userCollection, [
+      { name: 'name', value: 'Jan' },
+      { name: 'surname', value: 'Armstrong' }
+    ])
+
+    expect(result7C).toBeNull()
   })
 
   test('fetchByPropertyValue', async () => {
@@ -1004,187 +1181,50 @@ describe('Guacamole Integration Tests', () => {
     const result1H = (await conn.db(db1)
       .fetchByAllPropertyValues(CONST.userCollection, [
         { name: 'country', value: 'UK' },
-        { name: 'speciality', value: 'General Classification' }
+        { name: 'strength', value: 'General Classification' }
       ])) as QueryResult
 
     expect(result1H.data.length).toEqual(2)
   })
 
-  test('returnAll, returnFirst', async () => {
-    const result1A = await conn
-      .db(db1)
-      .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
+  test('fetchByPropertySearch', async () => {
+    const result1A = await conn.db(db1)
+      // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) ) RETURN d',
+      // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) || LIKE(d.surname, "%lance%", true) || LIKE(d.surname, "%chris%", true) ) RETURN d'
+      .fetchByPropertySearch(CONST.userCollection, { props: 'name', terms: ['lance', 'chris'] }) as QueryResult
 
-    expect(result1A.data.length).toEqual(3)
-    expect(result1A.data[0].surname).toBeDefined()
-
-    const result1ALiteral = await conn
-      .db(db1)
-      .returnAll(`FOR d IN ${CONST.userCollection} FILTER d.speciality LIKE "Time Trial" RETURN d`)
-
-    expect(result1ALiteral.data.length).toEqual(3)
-    expect(result1ALiteral.data[0].surname).toBeDefined()
-
-    const result1B = (await conn
-      .db(db1)
-      .fetchByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Time Trial' })) as QueryResult
-
-    expect(result1B.data.length).toEqual(3)
-    expect(result1B.data[0].name).toBeDefined()
-    expect(result1B.data[0].surname).toBeDefined()
-    expect(result1B.data[0]._key).toBeDefined()
-
-    const result1C = (await conn.db(db1).fetchByPropertyValue(
-      CONST.userCollection,
-      { name: 'speciality', value: 'Time Trial' },
-      {
-        trimPrivateProps: true
-      }
-    )) as QueryResult
-
-    expect(result1C.data.length).toEqual(3)
-    expect(result1C.data[0].name).toBeDefined()
-    expect(result1C.data[0].surname).toBeDefined()
-    expect(result1C.data[0]._key).toBeDefined()
-
-    const result1D = (await conn.db(db1).fetchByPropertyValue(
-      CONST.userCollection,
-      { name: 'speciality', value: 'Time Trial' },
-      {
-        trimPrivateProps: true
-      }
-    )) as QueryResult
-
-    expect(result1D.data.length).toEqual(3)
-    expect(result1D.data[0].name).toBeDefined()
-    expect(result1D.data[0].surname).toBeDefined()
-    expect(result1D.data[0]._key).toBeDefined()
-
-    const result1E = (await conn.db(db1).fetchByPropertyValue(
-      CONST.userCollection,
-      { name: 'speciality', value: 'Time Trial' },
-      { returnCursor: true }
-    )) as ArrayCursor
-
-    expect(result1E instanceof ArrayCursor).toBeTruthy()
-    const allDocs = await result1E.all()
-    expect(allDocs[0].surname).toBeDefined()
+    expect(result1A.data.length).toEqual(2)
+    expect(result1A.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Lance', surname: 'Armstrong' }),
+        expect.objectContaining({ name: 'Chris', surname: 'Froome' })
+      ])
+    )
 
     const result2A = await conn.db(db1)
-      .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
+      .fetchByPropertySearch(CONST.userCollection, { props: 'name', terms: ['mar'] }) as QueryResult
 
-    expect(result2A.data).toBeDefined()
-    expect(Array.isArray(result2A.data)).toBeTruthy()
-    expect(result2A.data.length).toEqual(0)
+    expect(result2A.data.length).toEqual(3)
+    expect(result2A.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Marco', surname: 'Pantani' }),
+        expect.objectContaining({ name: 'Mark', surname: 'Cavendish' }),
+        expect.objectContaining({ name: 'Marc', surname: 'Soler' })
+      ])
+    )
 
-    const result2B = (await conn.db(db1).fetchByPropertyValue(CONST.userCollection, {
-      name: 'speciality',
-      value: 'Trail Running'
-    })) as QueryResult
+    // we shouldn't have to prefix property names for searches, only filters
+    const result2B = await conn2.db(db1)
+      .fetchByPropertySearch(CONST.userCollection, { props: 'name', terms: ['mar'] }) as QueryResult
 
-    expect(result2B.data).toBeDefined()
-    expect(Array.isArray(result2B.data)).toBeTruthy()
-    expect(result2B.data.length).toEqual(0)
-
-    const result3A = await conn.db(db1)
-      .returnFirst(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Trail Running" RETURN d`)
-
-    expect(result3A).toBeNull()
-
-    const result3B = await conn.db(db1)
-      .fetchOneByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Trail Running' })
-
-    expect(result3B).toBeNull()
-
-    const result4A = await conn.db(db1)
-      .returnFirst(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.speciality LIKE "Time Trial" RETURN d`)
-
-    expect(result4A).toBeDefined()
-    expect(result4A.surname).toBeDefined()
-
-    const result4B = await conn.db(db1)
-      .fetchOneByPropertyValue(CONST.userCollection, { name: 'speciality', value: 'Time Trial' })
-
-    expect(result4B).toBeDefined()
-    expect(result4B.surname).toBeDefined()
-
-    const result5A = await conn.db(db1)
-      .returnFirst(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
-
-    expect(result5A).toBeDefined()
-    expect(result5A.name).toEqual('Daryl')
-
-    const result5B = await conn.db(db1)
-      .fetchOneByPropertyValue(CONST.userCollection, { name: 'surname', value: 'Impey' })
-
-    expect(result5B).toBeDefined()
-    expect(result5B.name).toEqual('Daryl')
-    expect(result5B.surname).toEqual('Impey')
-    expect(result5B._secret).toEqual('Rusks')
-    expect(result5B._key).toBeDefined()
-
-    const result5C = await conn.db(db1)
-      .fetchOneByPropertyValue(
-        CONST.userCollection,
-        { name: 'surname', value: 'Impey' },
-        { trimPrivateProps: true }
-      )
-
-    expect(result5C).toBeDefined()
-    expect(result5C.name).toEqual('Daryl')
-    expect(result5C.surname).toEqual('Impey')
-    expect(result5C._secret).toBeUndefined()
-    expect(result5C._key).toBeDefined()
-
-    const result5D = await conn.db(db1)
-      .fetchOneByPropertyValue(
-        CONST.userCollection,
-        { name: 'surname', value: 'Impey' },
-        { trimPrivateProps: true }
-      )
-
-    expect(result5D).toBeDefined()
-    expect(result5D.name).toEqual('Daryl')
-    expect(result5D.surname).toEqual('Impey')
-    expect(result5B._secret).toEqual('Rusks')
-    expect(result5D._key).toBeDefined()
-
-    const result6A = (await conn.db(db1).fetchByAllPropertyValues(CONST.userCollection, [
-      { name: 'country', value: 'Belgium' },
-      { name: 'speciality', value: 'Classics' }
-    ])) as QueryResult
-
-    expect(result6A.data.length).toEqual(2)
-    expect(result6A.data[0].name === 'Wout' || result6A.data[0].name === 'Tim').toBeTruthy()
-    expect(result6A.data[1].surname === 'van Aert' || result6A.data[1].surname === 'Wellens').toBeTruthy()
-
-    const result6B = (await conn.db(db1).fetchByAllPropertyValues(CONST.userCollection, [
-      { name: 'country', value: 'UK' },
-      { name: 'speciality', value: 'Classics' }
-    ])) as QueryResult
-
-    expect(result6B.data.length).toEqual(0)
-
-    const result7A = await conn.db(db1).fetchOneByAllPropertyValues(CONST.userCollection, [
-      { name: 'country', value: 'Belgium' },
-      { name: 'speciality', value: 'Classics' }
-    ])
-
-    expect(result7A.surname === 'van Aert' || result7A.surname === 'Wellens').toBeTruthy()
-
-    const result7B = await conn.db(db1).fetchOneByAllPropertyValues(CONST.userCollection, [
-      { name: 'name', value: 'Jan' },
-      { name: 'surname', value: 'Ullrich' }
-    ])
-
-    expect(result7B.surname).toEqual('Ullrich')
-
-    const result7C = await conn.db(db1).fetchOneByAllPropertyValues(CONST.userCollection, [
-      { name: 'name', value: 'Jan' },
-      { name: 'surname', value: 'Armstrong' }
-    ])
-
-    expect(result7C).toBeNull()
+    expect(result2B.data.length).toEqual(3)
+    expect(result2B.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Marco', surname: 'Pantani' }),
+        expect.objectContaining({ name: 'Mark', surname: 'Cavendish' }),
+        expect.objectContaining({ name: 'Marc', surname: 'Soler' })
+      ])
+    )
   })
 
   test('fetchByFilters', async () => {
@@ -1234,9 +1274,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN cyclists FILTER ( LIKE(d.name, "%mar%", true) && d.speciality == "Climbing" ) RETURN d
+    // FOR d IN cyclists FILTER ( LIKE(d.name, "%mar%", true) && d.strength == "Climbing" ) RETURN d
     const result2B = await conn.db(db1)
-      .fetchByFilters(CONST.userCollection, 'LIKE(name, "%mar%", true) && speciality == "Climbing"') as QueryResult
+      .fetchByFilters(CONST.userCollection, 'LIKE(name, "%mar%", true) && strength == "Climbing"') as QueryResult
 
     expect(result2B.data.length).toEqual(2)
     expect(result2B.data).toEqual(
@@ -1246,10 +1286,10 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN cyclists FILTER ( LIKE(d.name, "%mar%", true) && d.speciality == "Climbing" ) RETURN d
+    // FOR d IN cyclists FILTER ( LIKE(d.name, "%mar%", true) && d.strength == "Climbing" ) RETURN d
     const result2C = await conn.db(db1)
       .fetchByFilters(CONST.userCollection, {
-        filters: ['LIKE(name, "%mar%", true)', 'speciality == "Climbing"'],
+        filters: ['LIKE(name, "%mar%", true)', 'strength == "Climbing"'],
         match: MatchType.ALL
       }) as QueryResult
 
@@ -1263,7 +1303,7 @@ describe('Guacamole Integration Tests', () => {
 
     const result2D = await conn.db(db1)
       .fetchByFilters(CONST.userCollection, {
-        filters: ['LIKE(name, "%mar%", true)', 'speciality == "Climbing"'],
+        filters: ['LIKE(name, "%mar%", true)', 'strength == "Climbing"'],
         match: MatchType.ANY
       }) as QueryResult
 
@@ -1277,7 +1317,7 @@ describe('Guacamole Integration Tests', () => {
     )
 
     const result3A = await conn.db(db1)
-      .fetchByFilters(CONST.userCollection, 'country == "Italy" && speciality == "General Classification"') as QueryResult
+      .fetchByFilters(CONST.userCollection, 'country == "Italy" && strength == "General Classification"') as QueryResult
 
     expect(result3A.data.length).toEqual(2)
     expect(result3A.data).toEqual(
@@ -1289,7 +1329,7 @@ describe('Guacamole Integration Tests', () => {
 
     const result3B = await conn.db(db1)
       .fetchByFilters(CONST.userCollection, {
-        filters: ['d.country == "Italy"', 'd.speciality == "General Classification"'],
+        filters: ['d.country == "Italy"', 'd.strength == "General Classification"'],
         match: MatchType.ALL
       }, { autoPrefixPropNamesInFilters: false }) as QueryResult
 
@@ -1348,7 +1388,7 @@ describe('Guacamole Integration Tests', () => {
     )
 
     const result2B = await conn2.db(db1)
-      .fetchByFilters(CONST.userCollection, 'LIKE(d.name, "%mar%", true) && d.speciality == "Climbing"') as QueryResult
+      .fetchByFilters(CONST.userCollection, 'LIKE(d.name, "%mar%", true) && d.strength == "Climbing"') as QueryResult
 
     expect(result2B.data.length).toEqual(2)
     expect(result2B.data).toEqual(
@@ -1360,7 +1400,7 @@ describe('Guacamole Integration Tests', () => {
 
     const result2C = await conn2.db(db1)
       .fetchByFilters(CONST.userCollection, {
-        filters: ['LIKE(d.name, "%mar%", true)', 'd.speciality == "Climbing"'],
+        filters: ['LIKE(d.name, "%mar%", true)', 'd.strength == "Climbing"'],
         match: MatchType.ALL
       }) as QueryResult
 
@@ -1374,7 +1414,7 @@ describe('Guacamole Integration Tests', () => {
 
     const result2D = await conn2.db(db1)
       .fetchByFilters(CONST.userCollection, {
-        filters: ['LIKE(d.name, "%mar%", true)', 'd.speciality == "Climbing"'],
+        filters: ['LIKE(d.name, "%mar%", true)', 'd.strength == "Climbing"'],
         match: MatchType.ANY
       }) as QueryResult
 
@@ -1392,7 +1432,7 @@ describe('Guacamole Integration Tests', () => {
     // // .fetchByFilterCriteria(CONST.userCollection, 'name LIKE "lance"') as QueryResult // does return a result
 
     const result3A = await conn2.db(db1)
-      .fetchByFilters(CONST.userCollection, 'd.country == "Italy" && d.speciality == "General Classification"') as QueryResult
+      .fetchByFilters(CONST.userCollection, 'd.country == "Italy" && d.strength == "General Classification"') as QueryResult
 
     expect(result3A.data.length).toEqual(2)
     expect(result3A.data).toEqual(
@@ -1404,7 +1444,7 @@ describe('Guacamole Integration Tests', () => {
 
     const result3B = await conn2.db(db1)
       .fetchByFilters(CONST.userCollection, {
-        filters: ['country == "Italy"', 'speciality == "General Classification"'],
+        filters: ['country == "Italy"', 'strength == "General Classification"'],
         match: MatchType.ALL
       }, { autoPrefixPropNamesInFilters: true }) as QueryResult
 
@@ -1418,12 +1458,12 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('fetchByCriteria', async () => {
-    // FOR d IN cyclists FILTER ( ( d.speciality == "Climbing" ) || ( LIKE(d.name, "%mar%", true) ) ) RETURN d
+    // FOR d IN cyclists FILTER ( ( d.strength == "Climbing" ) || ( LIKE(d.name, "%mar%", true) ) ) RETURN d
     const result1A = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
         {
-          filter: 'speciality == "Climbing"',
+          filter: 'strength == "Climbing"',
           search: { props: 'name', terms: 'mar' }
         }
       ) as QueryResult
@@ -1441,7 +1481,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchByCriteria(
         CONST.userCollection,
         {
-          filter: 'speciality == "Climbing"',
+          filter: 'strength == "Climbing"',
           search: { props: 'name', terms: 'mar' },
           match: MatchType.ALL
         }
@@ -1459,19 +1499,19 @@ describe('Guacamole Integration Tests', () => {
       .fetchByCriteria(
         CONST.userCollection,
         {
-          filter: 'speciality != NULL',
+          filter: 'strength != NULL',
           search: { props: 'name', terms: 'mar' },
           match: MatchType.ANY
         }
       ) as QueryResult
 
-    expect(result1B.data.length).toEqual(24)
+    expect(result1B.data.length).toEqual(27)
 
     const result1BB = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
         {
-          filter: 'speciality != NULL',
+          filter: 'strength != NULL',
           search: { props: 'name', terms: 'mar' },
           match: MatchType.ALL
         }
@@ -1483,19 +1523,19 @@ describe('Guacamole Integration Tests', () => {
       .fetchByCriteria(
         CONST.userCollection,
         {
-          filter: 'speciality == "Zooming"',
+          filter: 'strength == "Zooming"',
           search: { props: 'name', terms: 'mar' }
         }
       ) as QueryResult
 
     expect(result2A.data.length).toEqual(3)
 
-    // FOR d IN cyclists FILTER ( ( d.speciality == "Zooming" ) && ( LIKE(d.name, "%mar%", true) ) ) RETURN d
+    // FOR d IN cyclists FILTER ( ( d.strength == "Zooming" ) && ( LIKE(d.name, "%mar%", true) ) ) RETURN d
     const result2AB = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
         {
-          filter: 'speciality == "Zooming"',
+          filter: 'strength == "Zooming"',
           search: { props: 'name', terms: 'mar' },
           match: MatchType.ALL
         }
@@ -1503,24 +1543,24 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2AB.data.length).toEqual(0)
 
-    // FOR d IN cyclists FILTER ( ( d.speciality != "Zooming" ) || ( LIKE(d.name, "%mar%", true) ) ) RETURN d
+    // FOR d IN cyclists FILTER ( ( d.strength != "Zooming" ) || ( LIKE(d.name, "%mar%", true) ) ) RETURN d
     const result2B = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
         {
-          filter: 'speciality != "Zooming"',
+          filter: 'strength != "Zooming"',
           search: { props: 'name', terms: 'mar' }
         }, { printQuery: true }
       ) as QueryResult
 
-    expect(result2B.data.length).toEqual(25)
+    expect(result2B.data.length).toEqual(28)
 
-    // FOR d IN cyclists FILTER ( ( d.speciality != "Zooming" ) && ( LIKE(d.name, "%mar%", true) ) ) RETURN d
+    // FOR d IN cyclists FILTER ( ( d.strength != "Zooming" ) && ( LIKE(d.name, "%mar%", true) ) ) RETURN d
     const result2BB = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
         {
-          filter: 'speciality != "Zooming"',
+          filter: 'strength != "Zooming"',
           search: { props: 'name', terms: 'mar' },
           match: MatchType.ALL
         }
@@ -1528,12 +1568,12 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2BB.data.length).toEqual(3)
 
-    // FOR d IN cyclists FILTER ( d.speciality == "Climbing" ) RETURN d
+    // FOR d IN cyclists FILTER ( d.strength == "Climbing" ) RETURN d
     const result3A = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
         {
-          filter: 'speciality == "Climbing"'
+          filter: 'strength == "Climbing"'
         }
       ) as QueryResult
 
@@ -1551,46 +1591,6 @@ describe('Guacamole Integration Tests', () => {
     expect(result4A.data.length).toEqual(3)
   })
 
-  test('fetchByPropertySearch', async () => {
-    const result1A = await conn.db(db1)
-      // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) ) RETURN d',
-      // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) || LIKE(d.surname, "%lance%", true) || LIKE(d.surname, "%chris%", true) ) RETURN d'
-      .fetchByPropertySearch(CONST.userCollection, { props: 'name', terms: ['lance', 'chris'] }) as QueryResult
-
-    expect(result1A.data.length).toEqual(2)
-    expect(result1A.data).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ name: 'Lance', surname: 'Armstrong' }),
-        expect.objectContaining({ name: 'Chris', surname: 'Froome' })
-      ])
-    )
-
-    const result2A = await conn.db(db1)
-      .fetchByPropertySearch(CONST.userCollection, { props: 'name', terms: ['mar'] }) as QueryResult
-
-    expect(result2A.data.length).toEqual(3)
-    expect(result2A.data).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ name: 'Marco', surname: 'Pantani' }),
-        expect.objectContaining({ name: 'Mark', surname: 'Cavendish' }),
-        expect.objectContaining({ name: 'Marc', surname: 'Soler' })
-      ])
-    )
-
-    // we shouldn't have to prefix property names for searches, only filters
-    const result2B = await conn2.db(db1)
-      .fetchByPropertySearch(CONST.userCollection, { props: 'name', terms: ['mar'] }) as QueryResult
-
-    expect(result2B.data.length).toEqual(3)
-    expect(result2B.data).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ name: 'Marco', surname: 'Pantani' }),
-        expect.objectContaining({ name: 'Mark', surname: 'Cavendish' }),
-        expect.objectContaining({ name: 'Marc', surname: 'Soler' })
-      ])
-    )
-  })
-
   test('fetchByPropertyValueAndCriteria', async () => {
     // FOR d IN cyclists FILTER (
     // ( d.@p == @v ) AND
@@ -1599,7 +1599,7 @@ describe('Guacamole Integration Tests', () => {
     const result1A = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Climbing' },
+        { name: 'strength', value: 'Climbing' },
         { search: { props: 'name', terms: 'mar' } }
       ) as QueryResult
 
@@ -1618,7 +1618,7 @@ describe('Guacamole Integration Tests', () => {
     const result1B = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Climbing' },
+        { name: 'strength', value: 'Climbing' },
         { filter: 'LIKE(name, "%mar%", true)' }
       ) as QueryResult
 
@@ -1637,7 +1637,7 @@ describe('Guacamole Integration Tests', () => {
     const result1C = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Climbing' },
+        { name: 'strength', value: 'Climbing' },
         { filter: { filters: ['LIKE(name, "%mar%", true)'] } }
       ) as QueryResult
 
@@ -1653,7 +1653,7 @@ describe('Guacamole Integration Tests', () => {
     const result1D = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Sprinter' }
+        { name: 'strength', value: 'Sprinter' }
       ) as QueryResult
 
     expect(result1D.data.length).toEqual(4)
@@ -1673,7 +1673,7 @@ describe('Guacamole Integration Tests', () => {
     const result1E = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Climbing' },
+        { name: 'strength', value: 'Climbing' },
         {
           search: { props: 'name', terms: 'mar' },
           filter: 'surname == "Pantani"'
@@ -1691,7 +1691,7 @@ describe('Guacamole Integration Tests', () => {
     const result1F = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Climbing' },
+        { name: 'strength', value: 'Climbing' },
         {
           search: { props: 'name', terms: 'mar' },
           filter: 'surname == "Pantani"',
@@ -1709,7 +1709,7 @@ describe('Guacamole Integration Tests', () => {
     const result1K = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Sprinter' },
+        { name: 'strength', value: 'Sprinter' },
         { search: { props: 'country', terms: 'ia' } }
       ) as QueryResult
 
@@ -1725,7 +1725,7 @@ describe('Guacamole Integration Tests', () => {
     const result1L = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Sprinter' },
+        { name: 'strength', value: 'Sprinter' },
         { filter: 'LIKE(surname, "%cav%", true)' }
       ) as QueryResult
 
@@ -1743,7 +1743,7 @@ describe('Guacamole Integration Tests', () => {
     const result1M = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Sprinter' },
+        { name: 'strength', value: 'Sprinter' },
         {
           search: { props: 'country', terms: 'ia' },
           filter: 'LIKE(surname, "%cav%", true)',
@@ -1767,7 +1767,7 @@ describe('Guacamole Integration Tests', () => {
     const result1N = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Sprinter' },
+        { name: 'strength', value: 'Sprinter' },
         {
           search: { props: 'country', terms: 'ia' },
           filter: 'LIKE(surname, "%cav%", true)',
@@ -1780,7 +1780,7 @@ describe('Guacamole Integration Tests', () => {
     const result1P = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Sprinter' },
+        { name: 'strength', value: 'Sprinter' },
         {
           search: { props: 'country', terms: 'ia' },
           filter: 'LIKE(surname, "%an%", true)',
@@ -1800,7 +1800,7 @@ describe('Guacamole Integration Tests', () => {
     const result1Z = await conn2.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Climbing' },
+        { name: 'strength', value: 'Climbing' },
         { search: { props: 'name', terms: 'mar' } }
       ) as QueryResult
 
@@ -1812,144 +1812,142 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const result2A = await conn.db(db1)
+    const result200A = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Zooming' },
+        { name: 'strength', value: 'Zooming' },
         { search: { props: 'name', terms: 'mar' } }
       ) as QueryResult
 
-    expect(result2A.data.length).toEqual(0)
+    expect(result200A.data.length).toEqual(0)
 
     const result3A = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
-        { name: 'speciality', value: 'Climbing' },
+        { name: 'strength', value: 'Climbing' },
         { search: { props: 'name', terms: 'wil' } }
       ) as QueryResult
 
     expect(result3A.data.length).toEqual(0)
-  })
 
-  test('fetchBy[Any/All]PropertyValuesAndCriteria', async () => {
     // FOR d IN cyclists FILTER (
     // ( d.@p1 == @v1 && d.@p2 == @v2 ) AND
-    // ( ( LIKE(d.speciality, "%time%", true) ) )
+    // ( ( LIKE(d.strength, "%time%", true) ) )
     // ) RETURN d
 
     // FOR d IN cyclists FILTER (
     // ( d.@p1 == @v1 && d.@p2 == @v2 ) AND
     // ( LIKE(d.name, "%aint%", true) )
     // ) RETURN d
-    const result1A = await conn.db(db1)
+    const result2A = await conn.db(db1)
       .fetchByAllPropertyValuesAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'UK' },
-          { name: 'speciality', value: 'General Classification' }
+          { name: 'strength', value: 'General Classification' }
         ],
         { search: { props: 'name', terms: 'aint' } }
       ) as QueryResult
 
-    expect(result1A.data.length).toEqual(1)
-    expect(result1A.data).toEqual(
+    expect(result2A.data.length).toEqual(1)
+    expect(result2A.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'Geraint', surname: 'Thomas' })
       ])
     )
 
-    const result1B = await conn.db(db1)
+    const result2B = await conn.db(db1)
       .fetchByAllPropertyValuesAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'UK' },
-          { name: 'speciality', value: 'Sprinter' }
+          { name: 'strength', value: 'Sprinter' }
         ],
         { search: { props: 'name', terms: 'aint' } }
       ) as QueryResult
 
-    expect(result1B.data.length).toEqual(0)
+    expect(result2B.data.length).toEqual(0)
 
-    const result1C = await conn.db(db1)
+    const result2C = await conn.db(db1)
       .fetchByAllPropertyValuesAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'UK' },
-          { name: 'speciality', value: 'General Classification' }
+          { name: 'strength', value: 'General Classification' }
         ],
         { search: { props: 'name', terms: 'wil' } }
       ) as QueryResult
 
-    expect(result1C.data.length).toEqual(0)
+    expect(result2C.data.length).toEqual(0)
 
     // FOR d IN cyclists FILTER (
     // ( d.@p1 == @v1 || d.@p2 == @v2 ) AND
-    // ( ( LIKE(d.speciality, "%time%", true) ) )
+    // ( ( LIKE(d.strength, "%time%", true) ) )
     // ) RETURN d
-    const result1D = await conn.db(db1)
+    const result2D = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'Germany' },
           { name: 'country', value: 'Switzerland' }
         ],
-        { search: { props: 'speciality', terms: 'time' } }
+        { search: { props: 'strength', terms: 'time' } }
       ) as QueryResult
 
-    expect(result1D.data.length).toEqual(2)
+    expect(result2D.data.length).toEqual(2)
 
-    const result1E = await conn.db(db1)
+    const result2E = await conn.db(db1)
       .fetchByAllPropertyValuesAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'Germany' },
           { name: 'country', value: 'Switzerland' }
         ],
-        { search: { props: 'speciality', terms: 'time' } }
+        { search: { props: 'strength', terms: 'time' } }
       ) as QueryResult
 
-    expect(result1E.data.length).toEqual(0)
+    expect(result2E.data.length).toEqual(0)
 
     // FOR d IN cyclists FILTER (
     // ( d.@p1 == @v1 || d.@p2 == @v2 ) AND
-    // ( LIKE(d.speciality, "%time%", true) )
+    // ( LIKE(d.strength, "%time%", true) )
     // ) RETURN d
-    const result1F = await conn.db(db1)
+    const result2F = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'Germany' },
           { name: 'country', value: 'Switzerland' }
         ],
-        { filter: 'LIKE(speciality, "%time%", true)' }
+        { filter: 'LIKE(strength, "%time%", true)' }
       ) as QueryResult
 
-    expect(result1F.data.length).toEqual(2)
+    expect(result2F.data.length).toEqual(2)
 
-    const result1G = await conn.db(db1)
+    const result2G = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'Germany' },
           { name: 'country', value: 'Switzerland' }
         ],
-        { filter: { filters: ['LIKE(speciality, "%time%", true)'] } }
+        { filter: { filters: ['LIKE(strength, "%time%", true)'] } }
       ) as QueryResult
 
-    expect(result1G.data.length).toEqual(2)
+    expect(result2G.data.length).toEqual(2)
 
     // FOR d IN cyclists FILTER ( d.@p1 == @v1 && d.@p2 == @v2 ) RETURN d
-    const result1H = await conn.db(db1)
+    const result2H = await conn.db(db1)
       .fetchByAllPropertyValuesAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'UK' },
-          { name: 'speciality', value: 'General Classification' }
+          { name: 'strength', value: 'General Classification' }
         ]
       ) as QueryResult
 
-    expect(result1H.data.length).toEqual(2)
-    expect(result1H.data).toEqual(
+    expect(result2H.data.length).toEqual(2)
+    expect(result2H.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'Geraint', surname: 'Thomas' }),
         expect.objectContaining({ name: 'Chris', surname: 'Froome' })
@@ -1960,26 +1958,26 @@ describe('Guacamole Integration Tests', () => {
     // ( d.@p1 == @v1 || d.@p2 == @v2 || d.@p3 == @v3 ) AND
     // ( LIKE(d.country, "%ia%", true) )
     // ) RETURN d
-    const result1J = await conn.db(db1)
+    const result2J = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
         [
-          { name: 'speciality', value: 'General Classification' },
-          { name: 'speciality', value: 'Time Trial' },
-          { name: 'speciality', value: 'Sprinter' }
+          { name: 'strength', value: 'General Classification' },
+          { name: 'strength', value: 'Time Trial' },
+          { name: 'strength', value: 'Sprinter' }
         ],
         {
           search: { props: 'country', terms: 'ia' }
         }
       ) as QueryResult
 
-    expect(result1J.data.length).toEqual(4)
-    expect(result1J.data).toEqual(
+    expect(result2J.data.length).toEqual(4)
+    expect(result2J.data).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ name: 'Tadej', surname: 'Pogačar', country: 'Slovenia', speciality: 'General Classification' }),
-        expect.objectContaining({ name: 'Peter', surname: 'Sagan', country: 'Slovakia', speciality: 'Sprinter' }),
-        expect.objectContaining({ name: 'Caleb', surname: 'Ewan', country: 'Australia', speciality: 'Sprinter' }),
-        expect.objectContaining({ name: 'Rohan', surname: 'Dennis', country: 'Australia', speciality: 'Time Trial' })
+        expect.objectContaining({ name: 'Tadej', surname: 'Pogačar', country: 'Slovenia', strength: 'General Classification' }),
+        expect.objectContaining({ name: 'Peter', surname: 'Sagan', country: 'Slovakia', strength: 'Sprinter' }),
+        expect.objectContaining({ name: 'Caleb', surname: 'Ewan', country: 'Australia', strength: 'Sprinter' }),
+        expect.objectContaining({ name: 'Rohan', surname: 'Dennis', country: 'Australia', strength: 'Time Trial' })
       ])
     )
 
@@ -1987,13 +1985,13 @@ describe('Guacamole Integration Tests', () => {
     // ( d.@p1 == @v1 || d.@p2 == @v2 || d.@p3 == @v3 ) AND
     // ( ( LIKE(d.surname, "%cav%", true) ) || ( LIKE(d.country, "%ia%", true) ) )
     // ) RETURN d
-    const result1K = await conn.db(db1)
+    const result2K = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
         [
-          { name: 'speciality', value: 'General Classification' },
-          { name: 'speciality', value: 'Time Trial' },
-          { name: 'speciality', value: 'Sprinter' }
+          { name: 'strength', value: 'General Classification' },
+          { name: 'strength', value: 'Time Trial' },
+          { name: 'strength', value: 'Sprinter' }
         ],
         {
           search: { props: 'country', terms: 'ia' },
@@ -2002,24 +2000,24 @@ describe('Guacamole Integration Tests', () => {
         }
       ) as QueryResult
 
-    expect(result1K.data.length).toEqual(5)
-    expect(result1K.data).toEqual(
+    expect(result2K.data.length).toEqual(5)
+    expect(result2K.data).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ name: 'Tadej', surname: 'Pogačar', country: 'Slovenia', speciality: 'General Classification' }),
-        expect.objectContaining({ name: 'Peter', surname: 'Sagan', country: 'Slovakia', speciality: 'Sprinter' }),
-        expect.objectContaining({ name: 'Caleb', surname: 'Ewan', country: 'Australia', speciality: 'Sprinter' }),
-        expect.objectContaining({ name: 'Rohan', surname: 'Dennis', country: 'Australia', speciality: 'Time Trial' }),
-        expect.objectContaining({ name: 'Mark', surname: 'Cavendish', country: 'UK', speciality: 'Sprinter' })
+        expect.objectContaining({ name: 'Tadej', surname: 'Pogačar', country: 'Slovenia', strength: 'General Classification' }),
+        expect.objectContaining({ name: 'Peter', surname: 'Sagan', country: 'Slovakia', strength: 'Sprinter' }),
+        expect.objectContaining({ name: 'Caleb', surname: 'Ewan', country: 'Australia', strength: 'Sprinter' }),
+        expect.objectContaining({ name: 'Rohan', surname: 'Dennis', country: 'Australia', strength: 'Time Trial' }),
+        expect.objectContaining({ name: 'Mark', surname: 'Cavendish', country: 'UK', strength: 'Sprinter' })
       ])
     )
 
-    const result1L = await conn.db(db1)
+    const result2L = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
         [
-          { name: 'speciality', value: 'General Classification' },
-          { name: 'speciality', value: 'Time Trial' },
-          { name: 'speciality', value: 'Sprinter' }
+          { name: 'strength', value: 'General Classification' },
+          { name: 'strength', value: 'Time Trial' },
+          { name: 'strength', value: 'Sprinter' }
         ],
         {
           search: { props: 'country', terms: 'ia' },
@@ -2028,73 +2026,73 @@ describe('Guacamole Integration Tests', () => {
         }
       ) as QueryResult
 
-    expect(result1L.data.length).toEqual(2)
-    expect(result1L.data).toEqual(
+    expect(result2L.data.length).toEqual(2)
+    expect(result2L.data).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ name: 'Peter', surname: 'Sagan', country: 'Slovakia', speciality: 'Sprinter' }),
-        expect.objectContaining({ name: 'Caleb', surname: 'Ewan', country: 'Australia', speciality: 'Sprinter' })
+        expect.objectContaining({ name: 'Peter', surname: 'Sagan', country: 'Slovakia', strength: 'Sprinter' }),
+        expect.objectContaining({ name: 'Caleb', surname: 'Ewan', country: 'Australia', strength: 'Sprinter' })
       ])
     )
 
-    const result1M = await conn.db(db1)
+    const result2M = await conn.db(db1)
       .fetchByAllPropertyValuesAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'Belgium' },
-          { name: 'speciality', value: 'Classics' }
+          { name: 'strength', value: 'Classics' }
         ],
         {
           search: { props: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
-    expect(result1M.data.length).toEqual(1)
+    expect(result2M.data.length).toEqual(1)
 
-    const result1N = await conn.db(db1)
+    const result2N = await conn.db(db1)
       .fetchByAllPropertyValuesAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'Slovenia' },
-          { name: 'speciality', value: 'Classics' }
+          { name: 'strength', value: 'Classics' }
         ],
         {
           search: { props: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
-    expect(result1N.data.length).toEqual(0)
+    expect(result2N.data.length).toEqual(0)
 
     // FOR d IN cyclists FILTER (
     // ( d.@p1 == @v1 || d.@p2 == @v2 ) AND
     // ( LIKE(d.fame, "%Train%", true) )
     // ) RETURN d
-    const result1P = await conn.db(db1)
+    const result2P = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'Slovenia' },
-          { name: 'speciality', value: 'Classics' }
+          { name: 'strength', value: 'Classics' }
         ],
         {
           search: { props: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
-    expect(result1P.data.length).toEqual(1)
+    expect(result2P.data.length).toEqual(1)
 
-    const result1Q = await conn.db(db1)
+    const result2Q = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
         [
           { name: 'country', value: 'Slovenia' },
-          { name: 'speciality', value: 'Sprinter' }
+          { name: 'strength', value: 'Sprinter' }
         ],
         {
           search: { props: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
-    expect(result1Q.data.length).toEqual(0)
+    expect(result2Q.data.length).toEqual(0)
   })
 
   // test('Delete database', async () => {
