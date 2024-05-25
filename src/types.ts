@@ -103,7 +103,6 @@ export interface FetchOptions extends DocumentTrimOptions {
   returnCursor?: boolean
   printQuery?: boolean
   debugFilters?: boolean
-  autoPrefixPropNamesInFilters?: boolean
 }
 
 export interface QueryResult<T = any> {

@@ -4,8 +4,7 @@ import {
   // fetchByCompositeValue,
   // findByFilterCriteria,
   // uniqueConstraintQuery,
-  _findAllIndicesOfSubString,
-  _prefixPropertyNames
+  _findAllIndicesOfSubString
 } from '../../src/queries'
 
 describe('Queries', () => {
@@ -44,40 +43,40 @@ describe('Queries', () => {
     expect(str.indexOf('==', 33)).toEqual(49)
   })
 
-  test('Prefix property name in filter string', () => {
-    const filter1 = 'name == "Thomas"'
-    const filter2 = 'name == "Thomas" && age == 42'
-    const filter3 = 'LIKE(name, "%thomas%", true)'
-    const filter4 = 'LIKE(name, "%thomas%", true) || age IN arr'
-    const filter5 = 'LIKE(name, "%thomas%", true) || age IN_PROP arr'
-    const filter6 = '(name == "Thomas" && age == 42) || name == "Lance"'
-    const filter7 = '(name == "Thomas" && age == 42) || (name == "Lance" && surname == "Armstrong")'
-    // const filter8 = '(name == "Thomas" AND age == 42) OR (name == "Lance" AND surname == "Armstrong")';
-    // const filter9 = '(name == "Thomas" and age == 42) or (name == "Lance" and surname == "Armstrong")';
-    const filter10 = 'name IN ["Thomas","Lance"] && (age > 42 || speciality != "timetrial")'
+  // test('Prefix property name in filter string', () => {
+  //   const filter1 = 'name == "Thomas"'
+  //   const filter2 = 'name == "Thomas" && age == 42'
+  //   const filter3 = 'LIKE(name, "%thomas%", true)'
+  //   const filter4 = 'LIKE(name, "%thomas%", true) || age IN arr'
+  //   const filter5 = 'LIKE(name, "%thomas%", true) || age IN_PROP arr'
+  //   const filter6 = '(name == "Thomas" && age == 42) || name == "Lance"'
+  //   const filter7 = '(name == "Thomas" && age == 42) || (name == "Lance" && surname == "Armstrong")'
+  //   // const filter8 = '(name == "Thomas" AND age == 42) OR (name == "Lance" AND surname == "Armstrong")';
+  //   // const filter9 = '(name == "Thomas" and age == 42) or (name == "Lance" and surname == "Armstrong")';
+  //   const filter10 = 'name IN ["Thomas","Lance"] && (age > 42 || speciality != "timetrial")'
 
-    const result1 = _prefixPropertyNames(filter1)
-    const result2 = _prefixPropertyNames(filter2)
-    const result3 = _prefixPropertyNames(filter3)
-    const result4 = _prefixPropertyNames(filter4)
-    const result5 = _prefixPropertyNames(filter5)
-    const result6 = _prefixPropertyNames(filter6)
-    const result7 = _prefixPropertyNames(filter7)
-    // const result8 = _prefixPropertyNames(filter8);
-    // const result9 = _prefixPropertyNames(filter9);
-    const result10 = _prefixPropertyNames(filter10)
+  //   const result1 = _prefixPropertyNames(filter1)
+  //   const result2 = _prefixPropertyNames(filter2)
+  //   const result3 = _prefixPropertyNames(filter3)
+  //   const result4 = _prefixPropertyNames(filter4)
+  //   const result5 = _prefixPropertyNames(filter5)
+  //   const result6 = _prefixPropertyNames(filter6)
+  //   const result7 = _prefixPropertyNames(filter7)
+  //   // const result8 = _prefixPropertyNames(filter8);
+  //   // const result9 = _prefixPropertyNames(filter9);
+  //   const result10 = _prefixPropertyNames(filter10)
 
-    expect(result1).toEqual('d.name == "Thomas"')
-    expect(result2).toEqual('d.name == "Thomas" && d.age == 42')
-    expect(result3).toEqual('LIKE(d.name, "%thomas%", true)')
-    expect(result4).toEqual('LIKE(d.name, "%thomas%", true) || d.age IN arr')
-    expect(result5).toEqual('LIKE(d.name, "%thomas%", true) || age IN d.arr')
-    expect(result6).toEqual('(d.name == "Thomas" && d.age == 42) || d.name == "Lance"')
-    expect(result7).toEqual('(d.name == "Thomas" && d.age == 42) || (d.name == "Lance" && d.surname == "Armstrong")')
-    // expect(result8).toEqual('(d.name == "Thomas" AND d.age == 42) OR (d.name == "Lance" AND d.surname == "Armstrong")');
-    // expect(result9).toEqual('(d.name == "Thomas" and d.age == 42) or (d.name == "Lance" and d.surname == "Armstrong")');
-    expect(result10).toEqual('d.name IN ["Thomas","Lance"] && (d.age > 42 || d.speciality != "timetrial")')
-  })
+  //   expect(result1).toEqual('d.name == "Thomas"')
+  //   expect(result2).toEqual('d.name == "Thomas" && d.age == 42')
+  //   expect(result3).toEqual('LIKE(d.name, "%thomas%", true)')
+  //   expect(result4).toEqual('LIKE(d.name, "%thomas%", true) || d.age IN arr')
+  //   expect(result5).toEqual('LIKE(d.name, "%thomas%", true) || age IN d.arr')
+  //   expect(result6).toEqual('(d.name == "Thomas" && d.age == 42) || d.name == "Lance"')
+  //   expect(result7).toEqual('(d.name == "Thomas" && d.age == 42) || (d.name == "Lance" && d.surname == "Armstrong")')
+  //   // expect(result8).toEqual('(d.name == "Thomas" AND d.age == 42) OR (d.name == "Lance" AND d.surname == "Armstrong")');
+  //   // expect(result9).toEqual('(d.name == "Thomas" and d.age == 42) or (d.name == "Lance" and d.surname == "Armstrong")');
+  //   expect(result10).toEqual('d.name IN ["Thomas","Lance"] && (d.age > 42 || d.speciality != "timetrial")')
+  // })
 
   // test('Find by filter criteria', async () => {
   //   const filter1 = '(name == "Thomas" && age == 42) || name == "Lance"'

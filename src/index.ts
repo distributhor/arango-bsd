@@ -221,11 +221,6 @@ export class ArangoDB {
    */
   constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
     this.go = options
-
-    if (this.go?.hasOwnProperty('autoPrefixPropNamesInFilters')) {
-      this.go.autoPrefixPropNamesInFilters = true
-    }
-
     this.q = new Queries(this.go)
     this.queries = this.q
 
