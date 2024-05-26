@@ -1201,6 +1201,12 @@ describe('Guacamole Integration Tests', () => {
         expect.objectContaining({ name: 'Marc', surname: 'Soler' })
       ])
     )
+
+    // FOR d IN cyclists FILTER ( LIKE(d.name, "%%", true) ) RETURN d
+    const result3A = await conn.db(db1)
+      .fetchByPropertySearch(CONST.userCollection, { props: 'name', terms: '' }) as QueryResult
+
+    expect(result3A.data.length).toEqual(30)
   })
 
   test('fetchByFilters', async () => {

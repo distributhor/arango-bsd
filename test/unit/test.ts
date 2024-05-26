@@ -1,48 +1,76 @@
 // import { ListOfFilters, MatchType, QueryType } from '../../src'
-import {
+
+// import {
 // fetchByPropertyValue,
 // fetchByCompositeValue,
 // findByFilterCriteria,
 // uniqueConstraintQuery,
 // _findAllIndicesOfSubString
+// } from '../../src/queries'
+
+import {
+  isSearch,
+  isFilter
 } from '../../src/queries'
 
 describe('Queries', () => {
-  test('Find all indices of substring in string', () => {
-    expect(1).toEqual(1)
-    // const str = ' LIKE("carrot", "ca%t") && name == "wk" || ( age == 42 && speciality != "timetrial"'
+  test('isSearch', () => {
+    expect(isSearch({ props: '123', terms: 'ABC' })).toBeTruthy()
+    expect(isSearch({ props: '123', termz: 'ABC' })).toBeFalsy()
+    expect(isSearch({ props: '123', terms: '' })).toBeTruthy()
+    expect(isSearch({ props: '123', terms: ' ' })).toBeTruthy()
+    expect(isSearch({ props: '123', terms: [] })).toBeTruthy()
 
-    // const result1 = _findAllIndicesOfSubString(['||', '&&', 'OR', 'LIKE', '!=', '=='], str)
-    // const result2 = _findAllIndicesOfSubString('||', str)
-    // const result3 = _findAllIndicesOfSubString('&&', str)
+    expect(isSearch({ propz: '123', terms: 'ABC' })).toBeFalsy()
+    expect(isSearch({ props: '', terms: 'ABC' })).toBeFalsy()
+    expect(isSearch({ props: ' ', terms: 'ABC' })).toBeTruthy()
+    expect(isSearch({ props: [], terms: 'ABC' })).toBeTruthy()
 
-    // expect(result1).toEqual(
-    //   expect.arrayContaining([
-    //     { index: 1, value: 'like' },
-    //     { index: 24, value: '&&' },
-    //     { index: 32, value: '==' },
-    //     { index: 40, value: '||' },
-    //     { index: 49, value: '==' },
-    //     { index: 55, value: '&&' },
-    //     { index: 69, value: '!=' }
-    //   ])
-    // )
-    // expect(result2).toEqual(expect.arrayContaining([{ index: 40, value: '||' }]))
-    // expect(result3).toEqual(
-    //   expect.arrayContaining([
-    //     { index: 24, value: '&&' },
-    //     { index: 55, value: '&&' }
-    //   ])
-    // )
-
-    // expect(str.indexOf('||')).toEqual(40)
-    // expect(str.indexOf('&&')).toEqual(24)
-    // expect(str.indexOf('&&', 25)).toEqual(55)
-    // expect(str.indexOf('LIKE')).toEqual(1)
-    // expect(str.indexOf('!=')).toEqual(69)
-    // expect(str.indexOf('==')).toEqual(32)
-    // expect(str.indexOf('==', 33)).toEqual(49)
+    expect(isSearch('ABC')).toBeFalsy()
   })
+
+  test('isFilter', () => {
+    expect(isFilter({ filters: [] })).toBeTruthy()
+    expect(isFilter({ filters: ['ABC'] })).toBeTruthy()
+    expect(isFilter({ filterz: ['ABC'] })).toBeFalsy()
+    expect(isFilter({ filters: 'ABC' })).toBeFalsy()
+    expect(isFilter('ABC')).toBeFalsy()
+  })
+
+  // test('Find all indices of substring in string', () => {
+  //   const str = ' LIKE("carrot", "ca%t") && name == "wk" || ( age == 42 && speciality != "timetrial"'
+
+  //   const result1 = _findAllIndicesOfSubString(['||', '&&', 'OR', 'LIKE', '!=', '=='], str)
+  //   const result2 = _findAllIndicesOfSubString('||', str)
+  //   const result3 = _findAllIndicesOfSubString('&&', str)
+
+  //   expect(result1).toEqual(
+  //     expect.arrayContaining([
+  //       { index: 1, value: 'like' },
+  //       { index: 24, value: '&&' },
+  //       { index: 32, value: '==' },
+  //       { index: 40, value: '||' },
+  //       { index: 49, value: '==' },
+  //       { index: 55, value: '&&' },
+  //       { index: 69, value: '!=' }
+  //     ])
+  //   )
+  //   expect(result2).toEqual(expect.arrayContaining([{ index: 40, value: '||' }]))
+  //   expect(result3).toEqual(
+  //     expect.arrayContaining([
+  //       { index: 24, value: '&&' },
+  //       { index: 55, value: '&&' }
+  //     ])
+  //   )
+
+  //   expect(str.indexOf('||')).toEqual(40)
+  //   expect(str.indexOf('&&')).toEqual(24)
+  //   expect(str.indexOf('&&', 25)).toEqual(55)
+  //   expect(str.indexOf('LIKE')).toEqual(1)
+  //   expect(str.indexOf('!=')).toEqual(69)
+  //   expect(str.indexOf('==')).toEqual(32)
+  //   expect(str.indexOf('==', 33)).toEqual(49)
+  // })
 
   // test('Prefix property name in filter string', () => {
   //   const filter1 = 'name == "Thomas"'

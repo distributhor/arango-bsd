@@ -26,12 +26,12 @@ import {
 
 /** @internal */
 export function isFilter(x: any): x is Filter {
-  return x.filters
+  return x.filters && Array.isArray(x.filters)
 }
 
 /** @internal */
 export function isSearch(x: any): x is Search {
-  return x.terms
+  return x.props && (x.terms || x.terms === '')
 }
 
 /** @internal */
@@ -127,12 +127,16 @@ export class Queries {
 
   /** @internal */
   private _toFilterString(filter: string | Filter | Search): string {
-    if (typeof filter === 'string' || (!isFilter(filter) && !isSearch(filter))) {
+    if (typeof filter === 'string') {
       return filter
     }
 
     if (isSearch(filter)) {
       return this._toFilterString(this._toSearchFilter(filter))
+    }
+
+    if (!isFilter(filter)) {
+      throw new Error('Invalid input received for conversion to filter string')
     }
 
     let filterString = ''
