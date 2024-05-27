@@ -6,7 +6,7 @@ import {
   isCompositeKey,
   isUniqueValue,
   KeyValue,
-  Search,
+  SearchTerms,
   Filter,
   Criteria,
   MatchTypeOperator,
@@ -16,61 +16,14 @@ import {
 } from './index'
 
 /** @internal */
-// function _debugFilters(options: FetchOptions, debugVal: string): string | undefined {
-//   if (options.debugFilters) {
-//     return debugVal
-//   }
-
-//   return undefined
-// }
-
-/** @internal */
 export function isFilter(x: any): x is Filter {
   return x.filters && Array.isArray(x.filters)
 }
 
 /** @internal */
-export function isSearch(x: any): x is Search {
+export function isSearch(x: any): x is SearchTerms {
   return x.props && (x.terms || x.terms === '')
 }
-
-/** @internal */
-// export function _findAllIndicesOfSubString(
-//   subString: string | string[],
-//   targetString: string,
-//   caseInSensitive = true
-// ): IndexedValue[] {
-//   if (Array.isArray(subString)) {
-//     let indices: IndexedValue[] = []
-
-//     for (const s of subString) {
-//       indices = indices.concat(_findAllIndicesOfSubString(s, targetString, caseInSensitive))
-//     }
-
-//     return indices.sort(function (a: any, b: any) {
-//       return a.index > b.index ? 1 : -1
-//     })
-//   }
-
-//   if (targetString.length === 0) {
-//     return []
-//   }
-
-//   if (caseInSensitive) {
-//     targetString = targetString.toLowerCase()
-//     subString = subString.toLowerCase()
-//   }
-
-//   const indices: IndexedValue[] = []
-
-//   let index = targetString.indexOf(subString)
-//   while (index !== -1) {
-//     indices.push({ index, value: subString })
-//     index = targetString.indexOf(subString, index + 1)
-//   }
-
-//   return indices
-// }
 
 export class Queries {
   private readonly go: GuacamoleOptions
@@ -93,40 +46,37 @@ export class Queries {
   }
 
   /** @internal */
-  private _toSearchFilter(search: Search): Filter {
-    const filter: Filter = {
-      match: MatchType.ANY,
-      filters: []
-    }
+  private _toSearchFilter(search: SearchTerms): Filter {
+    const filters: string[] = []
 
-    if (typeof search.props === 'string') {
-      search.props = search.props.split(',')
-    }
+    const props = typeof search.props === 'string'
+      ? search.props.split(',').map(p => `d.${p}`)
+      : search.props.map(p => `d.${p}`)
 
-    search.props = search.props.map(p => `d.${p}`)
+    const terms = typeof search.terms === 'string'
+      ? search.terms.split(',')
+      : search.terms
 
-    if (typeof search.terms === 'string') {
-      search.terms = search.terms.split(',')
-    }
-
-    for (let i = 0; i < search.props.length; i++) {
-      for (let j = 0; j < search.terms.length; j++) {
-        if (search.terms[j].trim().toLowerCase() === 'null') {
-          filter.filters.push(search.props[i].trim() + ' == null')
-        } else if (search.terms[j].trim().toLowerCase() === '!null') {
-          filter.filters.push(search.props[i].trim() + ' != null')
+    for (let i = 0; i < props.length; i++) {
+      for (let j = 0; j < terms.length; j++) {
+        if (terms[j].trim().toLowerCase() === 'null') {
+          filters.push(props[i].trim() + ' == null')
+        } else if (terms[j].trim().toLowerCase() === '!null') {
+          filters.push(props[i].trim() + ' != null')
         } else {
-        // filters.push(fields[i].trim() + ' LIKE "%' + search.trim() + '%"');
-          filter.filters.push('LIKE(' + search.props[i].trim() + ', "%' + search.terms[j].trim() + '%", true)')
+          filters.push('LIKE(' + props[i].trim() + ', "%' + terms[j].trim() + '%", true)')
         }
       }
     }
 
-    return filter
+    return {
+      filters,
+      match: MatchType.ANY
+    }
   }
 
   /** @internal */
-  private _toFilterString(filter: string | Filter | Search): string {
+  private _toFilterString(filter: string | Filter | SearchTerms): string {
     if (typeof filter === 'string') {
       return filter
     }
@@ -136,7 +86,7 @@ export class Queries {
     }
 
     if (!isFilter(filter)) {
-      throw new Error('Invalid input received for conversion to filter string')
+      throw new Error('Invalid input received for filter string conversion')
     }
 
     let filterString = ''

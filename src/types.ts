@@ -47,7 +47,7 @@ export enum MatchTypeOperator {
   ALL = '&&',
 }
 
-export interface Search {
+export interface SearchTerms {
   props: string | string[]
   terms: string | string[]
 }
@@ -58,7 +58,7 @@ export interface Filter {
 }
 
 export interface Criteria {
-  search?: Search
+  search?: SearchTerms
   filter?: string | Filter
   match?: MatchType
 }
