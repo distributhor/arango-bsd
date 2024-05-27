@@ -24,9 +24,11 @@ import {
   Identifier,
   MatchType,
   DocumentMeta,
-  DocumentUpdate
+  DocumentUpdate,
+  SearchTerms,
+  Filter
 } from './types'
-import { Queries } from './queries'
+import { Queries, isFilter, isSearch } from './queries'
 import { ArrayCursor } from 'arangojs/cursor'
 import { CollectionInsertOptions, CollectionReadOptions, CollectionRemoveOptions, CollectionUpdateOptions, DocumentCollection, EdgeCollection } from 'arangojs/collection'
 import { Document, DocumentData, ObjectWithKey } from 'arangojs/documents'
@@ -523,7 +525,7 @@ export class ArangoDB {
   public async fetchByPropertyValueAndCriteria<T = any>(
     collection: string,
     propValue: KeyValue,
-    criteria: string | Criteria,
+    criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -545,7 +547,7 @@ export class ArangoDB {
   public async fetchByAnyPropertyValueAndCriteria<T = any>(
     collection: string,
     propValue: KeyValue[],
-    criteria: string | Criteria,
+    criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -567,7 +569,7 @@ export class ArangoDB {
   public async fetchByAllPropertyValuesAndCriteria<T = any>(
     collection: string,
     propValues: KeyValue[],
-    criteria?: string | Criteria,
+    criteria?: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -588,7 +590,7 @@ export class ArangoDB {
 
   public async fetchByCriteria<T = any>(
     collection: string,
-    criteria: string | Criteria,
+    criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -603,11 +605,15 @@ export class ArangoDB {
       throw new Error('No criteria supplied')
     }
 
-    const filterCriteria = typeof criteria === 'string'
-      ? { filter: criteria }
-      : criteria
+    if (typeof criteria === 'string' || isFilter(criteria)) {
+      return await this._fetchByCriteria(collection, { filter: criteria }, options)
+    }
 
-    return await this._fetchByCriteria(collection, filterCriteria, options)
+    // if (isSearch(criteria)) {
+    //   return await this._fetchByCriteria(collection, { search: criteria }, options)
+    // }
+
+    return await this._fetchByCriteria(collection, criteria, options)
   }
 
   /** @internal */
@@ -615,9 +621,23 @@ export class ArangoDB {
     collection: string,
     propValues: KeyValue | KeyValue[],
     matchType: MatchType,
-    criteria?: Criteria,
+    criteria?: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
+    let filterCriteria: Criteria | undefined
+
+    if (criteria) {
+      if (typeof criteria === 'string' || isFilter(criteria)) {
+        filterCriteria = { filter: criteria }
+      }
+
+      // if (isSearch(criteria)) {
+      //   filterCriteria = { search: criteria }
+      // }
+
+      filterCriteria = criteria as Criteria
+    }
+
     let arangojsQueryOptions = options?.arangojs?.query
 
     if (options.limit) {
@@ -633,18 +653,18 @@ export class ArangoDB {
     if (Array.isArray(propValues)) {
       if (matchType === MatchType.ANY) {
         result = await this.driver.query(
-          this.q.fetchByMatchingAnyProperty(collection, propValues, options, criteria),
+          this.q.fetchByMatchingAnyProperty(collection, propValues, options, filterCriteria),
           arangojsQueryOptions
         )
       } else {
         result = await this.driver.query(
-          this.q.fetchByMatchingAllProperties(collection, propValues, options, criteria),
+          this.q.fetchByMatchingAllProperties(collection, propValues, options, filterCriteria),
           arangojsQueryOptions
         )
       }
     } else {
       result = await this.driver.query(
-        this.q.fetchByMatchingProperty(collection, propValues, options, criteria),
+        this.q.fetchByMatchingProperty(collection, propValues, options, filterCriteria),
         arangojsQueryOptions
       )
     }

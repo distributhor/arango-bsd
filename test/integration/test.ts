@@ -1490,7 +1490,9 @@ describe('Guacamole Integration Tests', () => {
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
         { name: 'strength', value: 'Climbing' },
-        { filter: 'LIKE(d.name, "%mar%", true)' }
+        // Should work with either a string filter or criteria
+        // { filter: 'LIKE(d.name, "%mar%", true)' }
+        'LIKE(d.name, "%mar%", true)'
       ) as QueryResult
 
     expect(result1B.data.length).toEqual(2)
