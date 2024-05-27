@@ -70,8 +70,8 @@ export class Queries {
     }
 
     return {
-      filters,
-      match: MatchType.ANY
+      match: search.match ? search.match : MatchType.ANY,
+      filters
     }
   }
 
@@ -172,6 +172,7 @@ export class Queries {
 
       if (criteria.filter && criteria.search) {
         query += ` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `
+        // query += ` ) ${criteria.match ? criteria.match : MatchType.ANY} ( `
       }
 
       if (criteria.search) {
@@ -286,6 +287,7 @@ export class Queries {
 
     if (criteria.filter && criteria.search) {
       query += ` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `
+      // query += ` ) ${criteria.match ? criteria.match : MatchType.ANY} ( `
     }
 
     if (criteria.search) {

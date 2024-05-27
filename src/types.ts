@@ -50,6 +50,7 @@ export enum MatchTypeOperator {
 export interface SearchTerms {
   props: string | string[]
   terms: string | string[]
+  match?: MatchType
 }
 
 export interface Filter {

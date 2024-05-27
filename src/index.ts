@@ -569,11 +569,33 @@ export class ArangoDB {
   public async fetchByAllPropertyValuesAndCriteria<T = any>(
     collection: string,
     propValues: KeyValue[],
-    criteria?: string | Filter | Criteria,
+    criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
       console.log(`fetchByAllPropertyValuesAndCriteria: ${collection}`)
+    }
+
+    if (this._debugParams()) {
+      console.log(propValues)
+      console.log(criteria)
+    }
+
+    const filterCriteria = typeof criteria === 'string'
+      ? { filter: criteria }
+      : criteria
+
+    return await this._fetchByPropValues(collection, propValues, MatchType.ALL, filterCriteria, options)
+  }
+
+  public async fetchByCriteriaAndAllPropertyValues<T = any>(
+    collection: string,
+    propValues: KeyValue[],
+    criteria: string | Filter | Criteria,
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    if (this._debugFunctions()) {
+      console.log(`fetchByCriteriaAndAllPropertyValues: ${collection}`)
     }
 
     if (this._debugParams()) {
