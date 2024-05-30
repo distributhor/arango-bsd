@@ -9,7 +9,7 @@
 
 While no one likes backseat driver, sometimes a little help or extra instructions can't be avoided. That is the philosophy behind Guacamole. Think of it more as a thin wrapper that exposes the native `ArangoJS` driver, while adding a few potentially useful functions for some common use cases. The primary aim is not to take over the main job of using the native driver, or to add any friction to it's use; but rather to get out of the way completely, and only make available the additional functionality as an optional extra. In fact, it's possible to use this package and only ever stick to the natively exposed `ArangoJS` driver, without choosing to leverage any other functionality. But, like a true backset driver, we feel the need to add a few additional instructions here and there, mostly because it makes our own lives easier. 
 
-On that note: this is primarily a project borne from having to address some common cases derived in *our own world*, and therefore very limited in what it attempts to be. The additional functionality relates mostly to simple CRUD operations and working with data in single collections, especially regarding the finding and retrieval of appropriate data via criteria. Not much exists, currently, in the way of special functionality for working with graphs, etc. As such, this is a simple tool, which may or not fit your use case.
+On that note: this is primarily a project borne from having to address some common cases derived in *our own world*, and therefore very limited in what it attempts to be. The additional functionality relates mostly to simple CRUD operations and working with data in single collections, especially w.r.t the finding and retrieval of data via criteria. Not much currently exists in the way of special functionality for working with graphs and traversals. As such, this is a simple tool, which may or not fit your use case.
 
 You can find the generated [Typescript API reference](https://distributhor.github.io/guacamole/) for this package here: 
 
@@ -18,7 +18,7 @@ You can find the generated [Typescript API reference](https://distributhor.githu
 
 ## Introduction
 
-The two main classes that you will typically work with, are:
+The two main classes that you will typically interface with, are:
 
 - [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html): A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance. It provides direct and easy access to the ArangoJS instance itself, but also adds a few convenience methods, for optional use.
 - [ArangoConnection](https://distributhor.github.io/guacamole/classes/index.ArangoConnection.html): A class that manages instances of [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html). An `ArangoDB` instance strictly deals with only one `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html). If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier. The current limitation, however, is that it only manages multiple database connections (or instances) for the same `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) credentials. In other words, you can easily (and only) work with multiple databases using the same shared configuration.
