@@ -9,13 +9,10 @@ While no one likes backseat driver, sometimes a little help or extra instruction
 
 On that note: this is primarily a project borne from having to address some common cases derived in *our own world*, and therefore very limited in what it attempts to be. The additional functionality relates mostly to simple CRUD operations and working with data in single collections, especially regarding the finding and retrieval of appropriate data via criteria. Not much exists, currently, in the way of special functionality for working with graphs, etc. As such, this is a simple tool, which may or not fit your use case.
 
-&nbsp;
-
 You can find the generated [Typescript API reference](https://distributhor.github.io/guacamole/) for this package here: 
 
 [https://distributhor.github.io/guacamole/](https://distributhor.github.io/guacamole/)
 
-&nbsp;
 
 ## Introduction
 
@@ -24,7 +21,6 @@ The two main classes that you will typically work with, are:
 - [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html): A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance. It provides direct and easy access to the ArangoJS instance itself, but also adds a few convenience methods, for optional use.
 - [ArangoConnection](https://distributhor.github.io/guacamole/classes/index.ArangoConnection.html): A class that manages instances of [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html). An `ArangoDB` instance strictly deals with only one `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html). If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier. The current limitation, however, is that it only manages multiple database connections (or instances) for the same `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) credentials. In other words, you can easily (and only) work with multiple databases using the same shared configuration.
 
-&nbsp;
 <!-- 
 ## Table Of Contents
 
