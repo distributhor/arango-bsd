@@ -33,12 +33,12 @@ import { ArangoDB } from '@distributhor/guacamole'
 import { aql } from 'arangojs/aql'
 
 const db = new ArangoDB({
-	databaseName: process.env.YOUR_DB_NAME,
-	url: process.env.YOUR_DB_URL,
-	auth: {
-		username: process.env.YOUR_DB_USER,
-		password: process.env.YOUR_DB_PASSWORD
-	}
+   databaseName: process.env.YOUR_DB_NAME,
+   url: process.env.YOUR_DB_URL,
+      auth: {
+         username: process.env.YOUR_DB_USER,
+         password: process.env.YOUR_DB_PASSWORD
+     }
 });
 ```
 
