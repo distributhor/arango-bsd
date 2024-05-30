@@ -2,8 +2,10 @@
 
 [![GitHub Release][ico-release]][link-github-release]
 [![License][ico-license]](LICENSE)
+<!--
 [![Total alerts][lgtm-alerts]][link-lgtm-alerts]
 [![Language grade: JavaScript][lgtm-code-quality]][link-lgtm-code-quality]
+-->
 
 While no one likes backseat driver, sometimes a little help or extra instructions can't be avoided. That is the philosophy behind Guacamole. Think of it more as a thin wrapper that exposes the native `ArangoJS` driver, while adding a few potentially useful functions for some common use cases. The primary aim is not to take over the main job of using the native driver, or to add any friction to it's use; but rather to get out of the way completely, and only make available the additional functionality as an optional extra. In fact, it's possible to use this package and only ever stick to the natively exposed `ArangoJS` driver, without choosing to leverage any other functionality. But, like a true backset driver, we feel the need to add a few additional instructions here and there, mostly because it makes our own lives easier. 
 
