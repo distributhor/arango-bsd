@@ -46,14 +46,14 @@ const db = new ArangoDB({
 The configuration object passed into the constructor is a standard ArangoJS [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) object. Alternatively, it also takes a [DatabaseConfig](https://distributhor.github.io/guacamole/interfaces/types.DatabaseConfig.html) object, which extends from the `ArangoJS` class, but provides some additional options for use with `Guacamole` functions. Lastly, the constructor will also accept an existing `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
 
 To perform an `aql` query:
-```
-const cursor = await db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+```javascript
+const cursor = await db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 ```
 
 This returns the standard `ArangoJS` cursor. If you simply want to return all results immediately, and not bother with the array cursor (equivalent to invoking `cursor.all()`, the usual warnings apply) ...
 
-```
-const results = await db.returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+```javascript
+const results = await db.returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 
 for (const r of result) {
 	console.log(r)
