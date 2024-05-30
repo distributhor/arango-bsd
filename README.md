@@ -7,9 +7,9 @@
 [![Language grade: JavaScript][lgtm-code-quality]][link-lgtm-code-quality]
 -->
 
-While no one likes backseat driver, sometimes a little help or extra instructions can't be avoided. That is the philosophy behind Guacamole. Think of it more as a thin wrapper that exposes the native `ArangoJS` driver, while adding a few potentially useful functions for some common use cases. The primary aim is not to take over the main job of using the native driver, or to add any friction to it's use; but rather to get out of the way completely, and only make available the additional functionality as an optional extra. In fact, it's possible to use this package and only ever stick to the natively exposed `ArangoJS` driver, without choosing to leverage any other functionality. But, like a true backset driver, we feel the need to add a few additional instructions here and there, mostly because it makes our own lives easier. 
+While no one likes backseat driver, sometimes a little help or extra instructions can't be avoided. That is the philosophy behind Guacamole. Think of it more as a thin wrapper that exposes the native `ArangoJS` driver, while adding a few potentially useful functions for some common use cases. The primary aim is not to take over the main job of using the native driver, or to add any friction to it's use; but rather to get out of the way completely, and only make available the additional functionality as an optional extra. In fact, it's possible to use this package and only ever stick to the natively exposed `ArangoJS` driver, without choosing to leverage any other functionality. But, like a true backset driver, we added a few additional instructions, mostly of the kind that are performed repetitively.
 
-On that note: this is primarily a project borne from having to address some common cases derived in *our own world*, and therefore very limited in what it attempts to be. The additional functionality relates mostly to simple CRUD operations and working with data in single collections, especially w.r.t the finding and retrieval of data via criteria. Not much currently exists in the way of special functionality for working with graphs and traversals. As such, this is a simple tool, which may or not fit your use case.
+On that note: this tool primarily started its existence to address some common cases derived from *our own world*, and is therefore very limited in what it attempts to be. The additional functionality relates mostly to simple CRUD operations, array manipulation operations, and the ability to easily query data in single collections (as opposed to operations intended for graphs and traversals). As such, this is a basic tool, which may or not fit your use case. But for the types of tasks that it does perform, it's probably useful enough to make available to a larger audience.
 
 You can find the generated [Typescript API reference](https://distributhor.github.io/guacamole/) for this package here: 
 
@@ -23,51 +23,51 @@ The two main classes that you will typically interface with, are:
 - [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html): A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance. It provides direct and easy access to the ArangoJS instance itself, but also adds a few convenience methods, for optional use.
 - [ArangoConnection](https://distributhor.github.io/guacamole/classes/index.ArangoConnection.html): A class that manages instances of [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html). An `ArangoDB` instance strictly deals with only one `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html). If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier. The current limitation, however, is that it only manages multiple database connections (or instances) for the same `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) credentials. In other words, you can easily (and only) work with multiple databases using the same shared configuration.
 
+## Quick Start
+
+A basic example ...
+
+```javascript
+// const { ArangoDB } = require('@distributhor/guacamole')
+import { ArangoDB } from '@distributhor/guacamole'
+import { aql } from 'arangojs/aql'
+
+const db = new ArangoDB({
+	databaseName: process.env.YOUR_DB_NAME,
+	url: process.env.YOUR_DB_URL,
+	auth: {
+		username: process.env.YOUR_DB_USER,
+		password: process.env.YOUR_DB_PASSWORD
+	}
+});
+```
+
+
+The configuration object passed into the constructor is a standard ArangoJS [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) object. Alternatively, it also takes a [DatabaseConfig](https://distributhor.github.io/guacamole/interfaces/types.DatabaseConfig.html) object, which extends from the `ArangoJS` class, but provides some additional options for use with `Guacamole` functions. Lastly, the constructor will also accept an existing `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
+
+To perform an `aql` query:
+```
+const cursor = await db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+```
+
+This returns the standard `ArangoJS` cursor. If you simply want to return all results immediately, and not bother with the array cursor (equivalent to invoking `cursor.all()`, the usual warnings apply) ...
+
+```
+const results = await db.returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+
+for (const r of result) {
+	console.log(r)
+}
+```
+
+[Back to top](#table-of-contents)
+
 <!-- 
 ## Table Of Contents
 
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
 - [Types](#types)
-
-## Quick Start
-
-For `Typescript` ...
-
-```typescript
-import { PayGateClient } from "paygate-sdk";
-```
-
-or alternatively, for `NodeJS/Javascript` ...
-
-```javascript
-const { PayGateClient } = require("paygate-sdk");
-```
-
-and then you can use the client ...
-
-```javascript
-const client = new PayGateClient({
-  payGateId: "id",
-  payGateSecret: "secret",
-  returnUrl: "http://app.ui/payment-status",
-  notifyUrl: "http://backend/api/handle-payment-notification",
-  autoTransactionDate: true,
-  autoPaymentReference: true,
-  fallbackToZA: true,
-});
-
-const paymentResponse = await client.requestPayment({
-  AMOUNT: 100.0,
-  EMAIL: "client@email.com",
-});
-
-console.log(paymentResponse.paymentRef);
-```
-
-More detail is covered in the sections below.
-
-[Back to top](#table-of-contents)
 
 ## Reference Implementation
 
