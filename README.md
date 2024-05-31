@@ -125,41 +125,41 @@ The documentation below does not replace the official [API Reference](https://di
 #### Native Driver, AQL & CRUD
 - [x] [The native ArangoJS Driver](#The-native-ArangoJS-Driver)
 - [x] [AQL Queries](#AQL-Queries)
-- [ ][CRUD](#CRUD) (TODO)
-- [ ][fetchProperty](#fetchProperty)
-- [ ][updateProperty](#updateProperty)
+- [ ] [CRUD](#CRUD) (TODO)
+- [ ] [fetchProperty](#fetchProperty)
+- [ ] [updateProperty](#updateProperty)
 
 #### Queries & Data Fetching
 
-- [ ][fetchByProperties](#fetchByProperties)
-- [ ][fetchByCriteria](#fetchByCriteria)
-- [ ][fetchByPropertiesAndCriteria](#fetchByPropertiesAndCriteria)
+- [ ] [fetchByProperties](#fetchByProperties)
+- [ ] [fetchByCriteria](#fetchByCriteria)
+- [ ] [fetchByPropertiesAndCriteria](#fetchByPropertiesAndCriteria)
 
 #### Arrays
-- [ ][addArrayValue](#addArrayValue)
-- [ ][removeArrayValue](#removeArrayValue)
-- [ ][addArrayObject](#addArrayObject)
-- [ ][removeArrayObject](#removeArrayObject)
-- [ ][updateArrayObject](#updateArrayObject)
-- [ ][replaceArrayObject](#replaceArrayObject)
-- [ ][replaceArray](#replaceArray)
+- [ ] [addArrayValue](#addArrayValue)
+- [ ] [removeArrayValue](#removeArrayValue)
+- [ ] [addArrayObject](#addArrayObject)
+- [ ] [removeArrayObject](#removeArrayObject)
+- [ ] [updateArrayObject](#updateArrayObject)
+- [ ] [replaceArrayObject](#replaceArrayObject)
+- [ ] [replaceArray](#replaceArray)
 
 #### Util
 
-- [ ][trimDocuments](#trimDocuments)
-- [ ][validateUniqueConstraint](#validateUniqueConstraint)
+- [ ] [trimDocuments](#trimDocuments)
+- [ ] [validateUniqueConstraint](#validateUniqueConstraint)
 
 #### With Sauce
 
-- [ ][fetchByPropertyValue](#fetchByPropertyValue)
-- [ ][fetchByAnyPropertyValue](#fetchByAnyPropertyValue)
-- [ ][fetchByAllPropertyValues](#fetchByAllPropertyValues)
-- [ ][fetchOneByPropertyValue](#fetchOneByPropertyValue)
-- [ ][fetchOneByAnyPropertyValue](#fetchOneByAnyPropertyValue)
-- [ ][fetchOneByAllPropertyValues](#fetchOneByAllPropertyValues)
-- [ ][fetchByPropertyValueAndCriteria](#fetchByPropertyValueAndCriteria)
-- [ ][fetchByAnyPropertyValueAndCriteria](#fetchByAnyPropertyValueAndCriteria)
-- [ ][fetchByAllPropertyValuesAndCriteria](#fetchByAllPropertyValuesAndCriteria)
+- [ ] [fetchByPropertyValue](#fetchByPropertyValue)
+- [ ] [fetchByAnyPropertyValue](#fetchByAnyPropertyValue)
+- [ ] [fetchByAllPropertyValues](#fetchByAllPropertyValues)
+- [ ] [fetchOneByPropertyValue](#fetchOneByPropertyValue)
+- [ ] [fetchOneByAnyPropertyValue](#fetchOneByAnyPropertyValue)
+- [ ] [fetchOneByAllPropertyValues](#fetchOneByAllPropertyValues)
+- [ ] [fetchByPropertyValueAndCriteria](#fetchByPropertyValueAndCriteria)
+- [ ] [fetchByAnyPropertyValueAndCriteria](#fetchByAnyPropertyValueAndCriteria)
+- [ ] [fetchByAllPropertyValuesAndCriteria](#fetchByAllPropertyValuesAndCriteria)
 
 ### The native ArangoJS Driver
 
