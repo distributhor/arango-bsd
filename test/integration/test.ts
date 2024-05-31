@@ -447,22 +447,22 @@ describe('Guacamole Integration Tests', () => {
     expect(result1F.resultsV3[2017].length).toEqual(1)
     expect(result1F.resultsV3[2018].length).toEqual(3)
 
-    const result1GA = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'resultsV3[2017]')
+    const result1GA = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'resultsV3[2017]')
     expect(Array.isArray(result1GA)).toBeTruthy()
     expect(result1GA.length).toEqual(1)
 
-    const result1GB = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'resultsV3[2018]')
+    const result1GB = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'resultsV3[2018]')
     expect(Array.isArray(result1GB)).toBeTruthy()
     expect(result1GB.length).toEqual(3)
 
-    const result1GC = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'country')
+    const result1GC = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'country')
     expect(result1GC).toEqual('South Africa')
 
-    const result1GD = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'favoriteRoads')
+    const result1GD = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'favoriteRoads')
     expect(result1GD).toBeDefined()
     expect(result1GD.SouthAfrica).toBeDefined()
 
-    const result1GE = await conn.db(db1).getField(CONST.userCollection, result1A[0]._key, 'blah')
+    const result1GE = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'blah')
     expect(result1GE).toBeNull()
 
     const result1HA = await conn.db(db1).addArrayValue(CONST.userCollection, result1A[0]._key, 'blah', 'one')
@@ -621,12 +621,12 @@ describe('Guacamole Integration Tests', () => {
 
     const result1TA = await conn.db(db1).updateArrayObject(CONST.userCollection, result1A[0]._key, 'foo', 'id', 'a', {
       val: 'XYZ'
-    }, { addIfMissing: true })
+    }, { addIfNotFound: true })
 
     const result1TB = await conn.db(db1).updateArrayObject(CONST.userCollection, result1A[0]._key, 'oblah', 'id', 'x', {
       id: 'x',
       val: 'ZZZ'
-    }, { addIfMissing: true })
+    }, { addIfNotFound: true })
 
     expect(result1TA).not.toBeNull()
     expect(result1TB).not.toBeNull()
@@ -858,7 +858,7 @@ describe('Guacamole Integration Tests', () => {
 
     // WFC finish this
     // const result4BAlt = (await conn.db(db1)
-    //   .fetchByPropertyValues(CONST.userCollection, {
+    //   .fetchByPropertyValueSelection(CONST.userCollection, {
     //     props: { name: 'strength', value: 'Time Trial' },
     //     match: MatchType.ANY
     //   })) as QueryResult
@@ -921,7 +921,7 @@ describe('Guacamole Integration Tests', () => {
     const rohanDennisv2 = result4D.data.find(i => i.surname === 'Dennis')
     expect(rohanDennisv2.rating.timetrial).toEqual(8)
 
-    const result4E = await conn.db(db1).updateField(CONST.userCollection, rohanDennisv2._key, 'rating.timetrial', 7)
+    const result4E = await conn.db(db1).updateProperty(CONST.userCollection, rohanDennisv2._key, 'rating.timetrial', 7)
 
     expect(result4E).toBeDefined()
     expect(Array.isArray(result4E)).toBeTruthy()

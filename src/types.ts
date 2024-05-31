@@ -45,6 +45,7 @@ export interface IndexValue {
 export interface PropertyValue {
   property: string
   value: any
+  options?: PropertyValueOptions
 }
 
 export interface PropertyValueSelector {
@@ -130,8 +131,13 @@ export interface ArangoJSOptions {
   query?: QueryOptions
 }
 
+export interface PropertyValueOptions {
+  ignoreCase?: boolean
+}
+
 export interface FetchOptions extends DocumentTrimOptions {
   arangojs?: ArangoJSOptions
+  // propertyValues?: PropertyValueOptions
   limit?: number
   offset?: number
   sortBy?: string

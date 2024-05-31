@@ -39,10 +39,58 @@ const db = new ArangoDB({
          password: process.env.YOUR_DB_PASSWORD
      }
 })
+
+const person = await fetchOneByPropertyValue(
+   'users', 
+   { 
+      property: 'email', 
+      value: 'someone@email.com' 
+   }
+)
+
+const peopleNamedJoeCaseSensitive = await fetchByPropertyValue(
+   'users', 
+   { 
+      property: 'firstName', 
+      value: 'Joe' 
+   }
+)
+
+const peopleNamedJoe = await fetchByPropertyValue(
+   'users', 
+   { 
+      property: 'firstName', 
+      value: 'Joe',
+      options: {
+        ignoreCase: true
+      } 
+   },
+   { 
+      limit: 10,
+      sortBy: 'lastName'
+   }
+)
 ```
 
 
 The configuration object passed into the constructor is a standard ArangoJS [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) object. Alternatively, it also takes a [DatabaseConfig](https://distributhor.github.io/guacamole/interfaces/types.DatabaseConfig.html) object, which extends from the `ArangoJS` class, but provides some additional options for use with `Guacamole` functions. Lastly, the constructor will also accept an existing `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
+
+[Back to top](#table-of-contents)
+
+## Table Of Contents
+
+- [Using the native ArangoJS driver](#Using-the-native-ArangoJS-driver)
+- [AQL Query](#AQL-Query)
+- 
+### Using the native ArangoJS driver
+
+```javascript
+const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
+```
+
+The native `ArangoJS` driver is exposed on the `.driver` property of the `ArangoDB` class. By using `db.driver` you always have the full native capability available.
+
+### AQL Query
 
 To perform an `aql` query:
 ```javascript
@@ -58,22 +106,6 @@ for (const r of result) {
 	console.log(r)
 }
 ```
-
-[Back to top](#table-of-contents)
-
-## Table Of Contents
-
-- [Using the native ArangoJS driver](#Using-the-native-ArangoJS-driver)
-- [Configuration](#configuration)
-- 
-### Using the native ArangoJS driver
-
-```javascript
-const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
-```
-
-The native `ArangoJS` driver is exposed on the `.driver` property of the `ArangoDB` class. By using `db.driver` you always have the full native capability available.
-
 
 <!-- 
 ## Table Of Contents

@@ -454,7 +454,7 @@ export class ArangoDB {
 
   public async fetchOneByPropertyValue<T = any>(
     collection: string,
-    propValue: PropertyValue,
+    propertyValue: PropertyValue,
     options: FetchOptions = {}
   ): Promise<T | T[] | null> {
     if (this._debugFunctions()) {
@@ -462,15 +462,15 @@ export class ArangoDB {
     }
 
     if (this._debugParams()) {
-      console.log(propValue)
+      console.log(propertyValue)
     }
 
-    return await this.returnFirst<T>(this.q.fetchByMatchingProperty(collection, propValue), options)
+    return await this.returnFirst<T>(this.q.fetchByMatchingProperty(collection, propertyValue, options), options)
   }
 
   public async fetchOneByAllPropertyValues<T = any>(
     collection: string,
-    propValues: PropertyValue[],
+    propertyValues: PropertyValue[],
     options: FetchOptions = {}
   ): Promise<T | T[] | null> {
     if (this._debugFunctions()) {
@@ -478,15 +478,15 @@ export class ArangoDB {
     }
 
     if (this._debugParams()) {
-      console.log(propValues)
+      console.log(propertyValues)
     }
 
-    return await this.returnFirst<T>(this.q.fetchByMatchingAllProperties(collection, propValues), options)
+    return await this.returnFirst<T>(this.q.fetchByMatchingAllProperties(collection, propertyValues, options), options)
   }
 
   public async fetchByPropertyValue<T = any>(
     collection: string,
-    propValue: PropertyValue,
+    propertyValue: PropertyValue,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -494,33 +494,32 @@ export class ArangoDB {
     }
 
     if (this._debugParams()) {
-      console.log(propValue)
+      console.log(propertyValue)
     }
 
-    return await this._fetchByPropValues(collection, propValue, MatchType.ANY, undefined, options)
+    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
   }
 
-  public async fetchByPropertyValues<T = any>(
-    collection: string,
-    // propValue: PropertyValues,
-    propValue: PropertyValue | PropertyValue[],
-    matchType: MatchType,
-    options: FetchOptions = {}
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debugFunctions()) {
-      console.log(`fetchByPropertyValues: ${collection}`)
-    }
+  // public async fetchByPropertyValueSelection<T = any>(
+  //   collection: string,
+  //   propValueSelector: PropertyValueSelector,
+  //   matchType: MatchType,
+  //   options: FetchOptions = {}
+  // ): Promise<ArrayCursor | QueryResult<T>> {
+  //   if (this._debugFunctions()) {
+  //     console.log(`fetchByPropertyValueSelection: ${collection}`)
+  //   }
 
-    if (this._debugParams()) {
-      console.log(propValue)
-    }
+  //   if (this._debugParams()) {
+  //     console.log(propValues)
+  //   }
 
-    return await this._fetchByPropValues(collection, propValue, matchType, undefined, options)
-  }
+  //   return await this._fetchByPropValues(collection, propValues, matchType, undefined, options)
+  // }
 
   public async fetchByAnyPropertyValue<T = any>(
     collection: string,
-    propValue: PropertyValue[],
+    propertyValue: PropertyValue[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -528,15 +527,15 @@ export class ArangoDB {
     }
 
     if (this._debugParams()) {
-      console.log(propValue)
+      console.log(propertyValue)
     }
 
-    return await this._fetchByPropValues(collection, propValue, MatchType.ANY, undefined, options)
+    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
   }
 
   public async fetchByAllPropertyValues<T = any>(
     collection: string,
-    propValues: PropertyValue[],
+    propertyValues: PropertyValue[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -544,15 +543,15 @@ export class ArangoDB {
     }
 
     if (this._debugParams()) {
-      console.log(propValues)
+      console.log(propertyValues)
     }
 
-    return await this._fetchByPropValues(collection, propValues, MatchType.ALL, undefined, options)
+    return await this._fetchByPropValues(collection, propertyValues, MatchType.ALL, undefined, options)
   }
 
   public async fetchByPropertyValueAndCriteria<T = any>(
     collection: string,
-    propValue: PropertyValue,
+    propertyValue: PropertyValue,
     criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
@@ -561,7 +560,7 @@ export class ArangoDB {
     }
 
     if (this._debugParams()) {
-      console.log(propValue)
+      console.log(propertyValue)
       console.log(criteria)
     }
 
@@ -569,12 +568,12 @@ export class ArangoDB {
       ? { filter: criteria }
       : criteria
 
-    return await this._fetchByPropValues(collection, propValue, MatchType.ANY, filterCriteria, options)
+    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, filterCriteria, options)
   }
 
   // public async fetchByPropertyValuesAndCriteria<T = any>(
   //   collection: string,
-  //   propValue: PropertyValues,
+  //   propertyValue: PropertyValues,
   //   criteria: string | Filter | Criteria,
   //   options: FetchOptions = {}
   // ): Promise<ArrayCursor | QueryResult<T>> {
@@ -583,22 +582,22 @@ export class ArangoDB {
   //   }
 
   //   if (this._debugParams()) {
-  //     console.log(propValue)
+  //     console.log(propertyValue)
   //     console.log(criteria)
   //   }
 
-  //   const matchType = propValue.match ?? MatchType.ANY
+  //   const matchType = propertyValue.match ?? MatchType.ANY
 
   //   const filterCriteria = typeof criteria === 'string'
   //     ? { filter: criteria }
   //     : criteria
 
-  //   return await this._fetchByPropValues(collection, propValue.props, MatchType.ANY, filterCriteria, options)
+  //   return await this._fetchByPropValues(collection, propertyValue.props, MatchType.ANY, filterCriteria, options)
   // }
 
   public async fetchByAnyPropertyValueAndCriteria<T = any>(
     collection: string,
-    propValue: PropertyValue[],
+    propertyValue: PropertyValue[],
     criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
@@ -607,7 +606,7 @@ export class ArangoDB {
     }
 
     if (this._debugParams()) {
-      console.log(propValue)
+      console.log(propertyValue)
       console.log(criteria)
     }
 
@@ -615,12 +614,12 @@ export class ArangoDB {
       ? { filter: criteria }
       : criteria
 
-    return await this._fetchByPropValues(collection, propValue, MatchType.ANY, filterCriteria, options)
+    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, filterCriteria, options)
   }
 
   public async fetchByAllPropertyValuesAndCriteria<T = any>(
     collection: string,
-    propValues: PropertyValue[],
+    propertyValues: PropertyValue[],
     criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
@@ -629,7 +628,7 @@ export class ArangoDB {
     }
 
     if (this._debugParams()) {
-      console.log(propValues)
+      console.log(propertyValues)
       console.log(criteria)
     }
 
@@ -637,12 +636,12 @@ export class ArangoDB {
       ? { filter: criteria }
       : criteria
 
-    return await this._fetchByPropValues(collection, propValues, MatchType.ALL, filterCriteria, options)
+    return await this._fetchByPropValues(collection, propertyValues, MatchType.ALL, filterCriteria, options)
   }
 
   public async fetchByCriteriaAndAllPropertyValues<T = any>(
     collection: string,
-    propValues: PropertyValue[],
+    propertyValues: PropertyValue[],
     criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
@@ -651,7 +650,7 @@ export class ArangoDB {
     }
 
     if (this._debugParams()) {
-      console.log(propValues)
+      console.log(propertyValues)
       console.log(criteria)
     }
 
@@ -659,7 +658,7 @@ export class ArangoDB {
       ? { filter: criteria }
       : criteria
 
-    return await this._fetchByPropValues(collection, propValues, MatchType.ALL, filterCriteria, options)
+    return await this._fetchByPropValues(collection, propertyValues, MatchType.ALL, filterCriteria, options)
   }
 
   public async fetchByCriteria<T = any>(
@@ -693,7 +692,7 @@ export class ArangoDB {
   /** @internal */
   private async _fetchByPropValues<T = any>(
     collection: string,
-    propValues: PropertyValue | PropertyValue[],
+    propertyValues: PropertyValue | PropertyValue[],
     matchType: MatchType,
     criteria?: string | Filter | Criteria,
     options: FetchOptions = {}
@@ -724,21 +723,21 @@ export class ArangoDB {
 
     let result: ArrayCursor<any> | QueryResult<T> | PromiseLike<ArrayCursor<any> | QueryResult<T>>
 
-    if (Array.isArray(propValues)) {
+    if (Array.isArray(propertyValues)) {
       if (matchType === MatchType.ANY) {
         result = await this.driver.query(
-          this.q.fetchByMatchingAnyProperty(collection, propValues, options, filterCriteria),
+          this.q.fetchByMatchingAnyProperty(collection, propertyValues, options, filterCriteria),
           arangojsQueryOptions
         )
       } else {
         result = await this.driver.query(
-          this.q.fetchByMatchingAllProperties(collection, propValues, options, filterCriteria),
+          this.q.fetchByMatchingAllProperties(collection, propertyValues, options, filterCriteria),
           arangojsQueryOptions
         )
       }
     } else {
       result = await this.driver.query(
-        this.q.fetchByMatchingProperty(collection, propValues, options, filterCriteria),
+        this.q.fetchByMatchingProperty(collection, propertyValues, options, filterCriteria),
         arangojsQueryOptions
       )
     }
@@ -811,11 +810,11 @@ export class ArangoDB {
     }
   }
 
-  public async getField<T = any>(collection: string, key: string, field: string): Promise<T | T[] | null> {
+  public async fetchProperty<T = any>(collection: string, key: string, field: string): Promise<T | T[] | null> {
     return await this.returnFirst(`LET d = DOCUMENT("${collection}/${key}") RETURN d.${field}`)
   }
 
-  public async updateField(
+  public async updateProperty(
     collection: string,
     key: string,
     field: string,
@@ -849,11 +848,11 @@ export class ArangoDB {
   public async addArrayValue(
     collection: string,
     key: string,
-    arrayField: string,
+    arrayProperty: string,
     arrayValue: any,
     options: any = {}
   ): Promise<DocumentMeta[]> {
-    const arr = await this.getField(collection, key, arrayField)
+    const arr = await this.fetchProperty(collection, key, arrayProperty)
 
     if (arr && !Array.isArray(arr)) {
       throw new Error('Cannot add array value to an existing field that is not already of type array')
@@ -885,17 +884,17 @@ export class ArangoDB {
 
     let query = `LET d = DOCUMENT("${collection}/${key}") `
 
-    if (arrayField.includes('.')) {
-      const nestedFields = arrayField.split('.')
+    if (arrayProperty.includes('.')) {
+      const nestedFields = arrayProperty.split('.')
 
       query += 'UPDATE d WITH '
 
       for (const field of nestedFields) { query += '{ ' + field + ': ' }
 
       if (Array.isArray(arrayValue)) {
-        query += `APPEND(d.${arrayField}, ${JSON.stringify(arrayValue)}, ${unique})`
+        query += `APPEND(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${unique})`
       } else {
-        query += `PUSH(d.${arrayField}, ${JSON.stringify(arrayValue)}, ${unique})`
+        query += `PUSH(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${unique})`
       }
 
       for (const _f of nestedFields) { query += ' }' }
@@ -908,7 +907,7 @@ export class ArangoDB {
       for (const field of nestedFields) {
         countA++
         if (countA === nestedFields.length) {
-          query += `"${field}": updated.${arrayField}`
+          query += `"${field}": updated.${arrayProperty}`
         } else {
           query += `"${field}": { `
         }
@@ -922,11 +921,11 @@ export class ArangoDB {
       query += ' }'
     } else {
       if (Array.isArray(arrayValue)) {
-        query += `UPDATE d WITH { ${arrayField}: APPEND(d.${arrayField}, ${JSON.stringify(arrayValue)}, ${unique}) } `
-        query += `IN ${collection} LET updated = NEW RETURN { "_key": updated._key, "${arrayField}": updated.${arrayField} }`
+        query += `UPDATE d WITH { ${arrayProperty}: APPEND(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${unique}) } `
+        query += `IN ${collection} LET updated = NEW RETURN { "_key": updated._key, "${arrayProperty}": updated.${arrayProperty} }`
       } else {
-        query += `UPDATE d WITH { ${arrayField}: PUSH(d.${arrayField}, ${JSON.stringify(arrayValue)}, ${unique}) } `
-        query += `IN ${collection} LET updated = NEW RETURN { "_key": updated._key, "${arrayField}": updated.${arrayField} }`
+        query += `UPDATE d WITH { ${arrayProperty}: PUSH(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${unique}) } `
+        query += `IN ${collection} LET updated = NEW RETURN { "_key": updated._key, "${arrayProperty}": updated.${arrayProperty} }`
       }
     }
 
@@ -938,10 +937,10 @@ export class ArangoDB {
   public async removeArrayValue(
     collection: string,
     key: string,
-    arrayField: string,
+    arrayProperty: string,
     arrayValue: any
   ): Promise<DocumentMeta[] | null> {
-    const arr = await this.getField(collection, key, arrayField)
+    const arr = await this.fetchProperty(collection, key, arrayProperty)
 
     if (arr && !Array.isArray(arr)) {
       throw new Error('Cannot remove array value from an existing field that is not already of type array')
@@ -953,14 +952,14 @@ export class ArangoDB {
 
     let query = `LET d = DOCUMENT("${collection}/${key}") `
 
-    if (arrayField.includes('.')) {
-      const nestedFields = arrayField.split('.')
+    if (arrayProperty.includes('.')) {
+      const nestedFields = arrayProperty.split('.')
 
       query += 'UPDATE d WITH '
 
       for (const field of nestedFields) { query += `{ ${field}: ` }
 
-      query += `REMOVE_VALUE(d.${arrayField}, ${JSON.stringify(arrayValue)})`
+      query += `REMOVE_VALUE(d.${arrayProperty}, ${JSON.stringify(arrayValue)})`
 
       for (const _f of nestedFields) { query += ' }' }
 
@@ -972,7 +971,7 @@ export class ArangoDB {
       for (const field of nestedFields) {
         countA++
         if (countA === nestedFields.length) {
-          query += `"${field}": updated.${arrayField}`
+          query += `"${field}": updated.${arrayProperty}`
         } else {
           query += `"${field}": { `
         }
@@ -985,8 +984,8 @@ export class ArangoDB {
 
       query += ' }'
     } else {
-      query += `UPDATE d WITH { ${arrayField}: REMOVE_VALUE(d.${arrayField}, ${JSON.stringify(arrayValue)}) } `
-      query += `IN ${collection} LET updated = NEW RETURN { "_key": updated._key, "${arrayField}": updated.${arrayField} }`
+      query += `UPDATE d WITH { ${arrayProperty}: REMOVE_VALUE(d.${arrayProperty}, ${JSON.stringify(arrayValue)}) } `
+      query += `IN ${collection} LET updated = NEW RETURN { "_key": updated._key, "${arrayProperty}": updated.${arrayProperty} }`
     }
 
     const results = await this.query(query)
@@ -997,7 +996,7 @@ export class ArangoDB {
   public async addArrayObject(
     collection: string,
     key: string,
-    arrayField: string,
+    arrayProperty: string,
     arrayObject: any,
     uniqueObjectField?: string,
     options: any = {}
@@ -1012,17 +1011,17 @@ export class ArangoDB {
       options.allowDuplicates = true
     }
 
-    return await this.addArrayValue(collection, key, arrayField, arrayObject, options)
+    return await this.addArrayValue(collection, key, arrayProperty, arrayObject, options)
   }
 
   public async removeArrayObject(
     collection: string,
     key: string,
-    arrayField: string,
+    arrayProperty: string,
     objectIdField: string,
     objectIdValue: any
   ): Promise<DocumentMeta[] | null> {
-    const arr = await this.getField(collection, key, arrayField)
+    const arr = await this.fetchProperty(collection, key, arrayProperty)
 
     if (arr && !Array.isArray(arr)) {
       throw new Error('Cannot remove array value from an existing field that is not already of type array')
@@ -1044,7 +1043,7 @@ export class ArangoDB {
     })
 
     if (arrayUpdated) {
-      return await this.updateField(collection, key, arrayField, alteredArray)
+      return await this.updateProperty(collection, key, arrayProperty, alteredArray)
     }
 
     return null
@@ -1053,7 +1052,7 @@ export class ArangoDB {
   public async updateArrayObject(
     collection: string,
     key: string,
-    arrayField: string,
+    arrayProperty: string,
     objectIdField: string,
     objectIdValue: any,
     updatedObject: any,
@@ -1070,12 +1069,12 @@ export class ArangoDB {
 
     // var query = 'LET d = DOCUMENT("' + collection + '/' + id + '") ';
     // query += 'LET alteredArray = (';
-    // query += '  FOR element IN d.' + arrayField + ' LET newElement = element RETURN newElement';
+    // query += '  FOR element IN d.' + arrayProperty + ' LET newElement = element RETURN newElement';
     // query += ') RETURN alteredArray';
-    // query += ') UPDATE document WITH { arrayField:  alteredArray } IN collection'
+    // query += ') UPDATE document WITH { arrayProperty:  alteredArray } IN collection'
     // console.log('UPDATE ARRAY QUERY: ' + query);
 
-    const arr = await this.getField(collection, key, arrayField)
+    const arr = await this.fetchProperty(collection, key, arrayProperty)
 
     if (arr && !Array.isArray(arr)) {
       throw new Error('Cannot update array value from an existing field that is not already of type array')
@@ -1086,16 +1085,16 @@ export class ArangoDB {
     }
 
     if (!arr || arr.length === 0) {
-      if (options.hasOwnProperty('addIfMissing') && options.addIfMissing === true) {
+      if (options.hasOwnProperty('addIfNotFound') && options.addIfNotFound === true) {
         if (updatedObject[objectIdField] && updatedObject[objectIdField] !== objectIdValue) {
           throw new Error('Specified ID does not match the one provided in the object instance')
         }
 
         if (options.hasOwnProperty('allowDuplicates') && options.allowDuplicates === true) {
-          return await this.addArrayObject(collection, key, arrayField, updatedObject)
+          return await this.addArrayObject(collection, key, arrayProperty, updatedObject)
         }
 
-        return await this.addArrayObject(collection, key, arrayField, updatedObject, objectIdField)
+        return await this.addArrayObject(collection, key, arrayProperty, updatedObject, objectIdField)
       }
 
       return null
@@ -1119,19 +1118,19 @@ export class ArangoDB {
     })
 
     if (arrayUpdated) {
-      return await this.updateField(collection, key, arrayField, alteredArray)
+      return await this.updateProperty(collection, key, arrayProperty, alteredArray)
     }
 
-    if (options.hasOwnProperty('addIfMissing') && options.addIfMissing === true) {
+    if (options.hasOwnProperty('addIfNotFound') && options.addIfNotFound === true) {
       if (updatedObject[objectIdField] && updatedObject[objectIdField] !== objectIdValue) {
         throw new Error('Specified ID does not match the one provided in the object instance')
       }
 
       if (options.hasOwnProperty('allowDuplicates') && options.allowDuplicates === true) {
-        return await this.addArrayObject(collection, key, arrayField, updatedObject)
+        return await this.addArrayObject(collection, key, arrayProperty, updatedObject)
       }
 
-      return await this.addArrayObject(collection, key, arrayField, updatedObject, objectIdField)
+      return await this.addArrayObject(collection, key, arrayProperty, updatedObject, objectIdField)
     }
 
     return null
@@ -1140,7 +1139,7 @@ export class ArangoDB {
   public async replaceArrayObject(
     collection: string,
     key: string,
-    arrayField: string,
+    arrayProperty: string,
     objectIdField: string,
     objectIdValue: any,
     updatedObject: any,
@@ -1150,7 +1149,7 @@ export class ArangoDB {
     return await this.updateArrayObject(
       collection,
       key,
-      arrayField,
+      arrayProperty,
       objectIdField,
       objectIdValue,
       updatedObject,
@@ -1161,10 +1160,10 @@ export class ArangoDB {
   public async replaceArray(
     collection: string,
     key: string,
-    arrayField: string,
+    arrayProperty: string,
     updatedArray: any[]
   ): Promise<DocumentMeta[] | null> {
-    return await this.updateField(collection, key, arrayField, updatedArray)
+    return await this.updateProperty(collection, key, arrayProperty, updatedArray)
   }
 
   public static trimDocument(document: any, options: DocumentTrimOptions = {}): any {

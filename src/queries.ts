@@ -136,9 +136,14 @@ export class Queries {
         } else {
           params[keyParam] = kv.property
         }
-        params[valueParam] = kv.value
 
-        query += ` d.@${keyParam} == @${valueParam}`
+        if (kv.options?.ignoreCase) {
+          params[valueParam] = kv.value.toLowerCase()
+          query += ` LOWER(d.@${keyParam}) == @${valueParam}`
+        } else {
+          params[valueParam] = kv.value
+          query += ` d.@${keyParam} == @${valueParam}`
+        }
       }
     } else {
       if (identifier.property.indexOf('.') > 0) {
@@ -147,8 +152,13 @@ export class Queries {
         params.p = identifier.property
       }
 
-      params.v = identifier.value
-      query += ' d.@p == @v'
+      if (identifier.options?.ignoreCase) {
+        params.v = identifier.value.toLowerCase()
+        query += ' LOWER(d.@p) == @v'
+      } else {
+        params.v = identifier.value
+        query += ' d.@p == @v'
+      }
     }
 
     if (criteria?.filter && criteria.search) {
