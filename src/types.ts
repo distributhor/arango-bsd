@@ -132,7 +132,7 @@ export interface ArangoJSOptions {
 }
 
 export interface PropertyValueOptions {
-  ignoreCase?: boolean
+  caseSensitive?: boolean
 }
 
 export interface FetchOptions extends DocumentTrimOptions {

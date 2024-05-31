@@ -24,7 +24,7 @@ The two main classes that you will typically interface with, are:
 - [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html): A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance. It provides direct and easy access to the ArangoJS instance itself, but also adds a few convenience methods, for optional use.
 - [ArangoConnection](https://distributhor.github.io/guacamole/classes/index.ArangoConnection.html): A class that manages instances of [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html). An `ArangoDB` instance strictly deals with only one `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html). If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier. The current limitation, however, is that it only manages multiple database connections (or instances) for the same `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) credentials. In other words, you can easily (and only) work with multiple databases using the same shared configuration.
 
-A basic example ...
+A basic example (which will also give you a succinct idea of the types of things this tool aims to help with) ...
 
 ```javascript
 // const { ArangoDB } = require('@distributhor/guacamole')
@@ -43,9 +43,12 @@ const db = new ArangoDB({
 
 The configuration object passed into the constructor is a standard `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) object. Alternatively, it also takes a [DatabaseConfig](https://distributhor.github.io/guacamole/interfaces/types.DatabaseConfig.html) object, which extends from the `ArangoJS` class, but provides some additional options for use with `Guacamole` functions. Lastly, the constructor will also accept an existing `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
 
-Perform some operations ...
+Then perform some operations ...
 
 ```javascript
+// Fetch one result only, it will return the first match
+// By default the the value is considered case insensitive
+// Other than case, it will match on the exact value
 const person = await fetchOneByPropertyValue(
    'users', 
    { 
@@ -54,21 +57,27 @@ const person = await fetchOneByPropertyValue(
    }
 )
 
+// Fetch all results that matches the property value
+// By default the the value is considered case insensitive
+// Other than case, it will match on the exact value
 const peopleNamedJoe = await fetchByPropertyValue(
    'users', 
    { 
       property: 'firstName', 
-      value: 'Joe' 
+      value: 'joe' 
    }
 )
 
+// Fetch all results that matches the exact property value
+// Stipulate that the match should be case sensitive
+// Limit the result to 10 and sort by lastName property
 const peopleNamedJoeV2 = await fetchByPropertyValue(
    'users', 
    { 
       property: 'firstName', 
       value: 'Joe',
       options: {
-        ignoreCase: true
+        caseSensitive: true
       } 
    },
    { 
@@ -76,26 +85,79 @@ const peopleNamedJoeV2 = await fetchByPropertyValue(
       sortBy: 'lastName'
    }
 )
-```
 
-[Back to top](#table-of-contents)
+// Fetch all results that matches the search criteria
+// The terms are considered case insentitive and not exact,
+// so will match values such as "Joey" and "William"
+const peopleNamedJoeV3 = await fetchByCriteria(
+   'users', 
+   search: {
+      props: 'name', terms: ['joe', 'wil']
+   }
+)
+
+// Fetch all results where gender == 'M'
+// AND the name matches anything containing "joe"
+// Return the ArangoJS ArrayCursor instead of .all()
+const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
+   'users', 
+   { 
+      property: 'gender', 
+      value: 'M' 
+   }
+   search: {
+      props: 'name', terms: 'joe'
+   },
+   { 
+      returnCursor: true
+   }
+)
+```
 
 ## Table Of Contents
 
-- [Using the native ArangoJS driver](#Using-the-native-ArangoJS-driver)
-- [AQL Query](#AQL-Query)
-- 
-### Using the native ArangoJS driver
+- [Using the ArangoJS Driver](#Using-the-ArangoJS-Driver)
+- [AQL, query, queryAll, queryOne](#AQL-Queries)
+- [CRUD](#CRUD)
+- [fetchOneByPropertyValue](#fetchOneByPropertyValue)
+- [fetchOneByAllPropertyValues](#fetchOneByAllPropertyValues)
+- [fetchByPropertyValue](#fetchByPropertyValue)
+- [fetchByAnyPropertyValue](#fetchByAnyPropertyValue)
+- [fetchByAllPropertyValues](#fetchByAllPropertyValues)
+- [fetchByPropertyValueAndCriteria](#fetchByPropertyValueAndCriteria)
+- [fetchByAnyPropertyValueAndCriteria](#fetchByAnyPropertyValueAndCriteria)
+- [fetchByAllPropertyValuesAndCriteria](#fetchByAllPropertyValuesAndCriteria)
+- [fetchByCriteria](#fetchByCriteria)
+- [fetchProperty](#fetchProperty)
+- [updateProperty](#updateProperty)
+- [addArrayValue](#addArrayValue)
+- [removeArrayValue](#removeArrayValue)
+- [addArrayObject](#addArrayObject)
+- [removeArrayObject](#removeArrayObject)
+- [updateArrayObject](#updateArrayObject)
+- [replaceArrayObject](#replaceArrayObject)
+- [replaceArray](#replaceArray)
+- [trimDocuments](#trimDocuments)
+- [uniqueConstraintValidation](#uniqueConstraintValidation)
+
+### Using the ArangoJS Driver
 
 ```javascript
 const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 ```
 
-The native `ArangoJS` driver is exposed on the `.driver` property of the `ArangoDB` class. By using `db.driver` you always have the full native capability available.
+The native `ArangoJS` driver is exposed on the `.driver` property of the `ArangoDB` class. By using `db.driver` you always have the full native capability available. Use as usual.
 
-### AQL Query
+### AQL Queries
 
-To perform an `aql` query:
+To perform an AQL query you can, of course, just run them using the native driver.
+
+```javascript
+const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
+```
+
+But since it is used soo often, there is a shorthand for convenience.
+
 ```javascript
 const cursor = await db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 ```
@@ -109,6 +171,8 @@ for (const r of result) {
 	console.log(r)
 }
 ```
+
+[Back to top](#table-of-contents)
 
 <!-- 
 ## Table Of Contents

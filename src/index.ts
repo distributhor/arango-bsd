@@ -214,7 +214,7 @@ export class ArangoConnection {
  *
  * // the backseat driver method, which immediately calls cursor.all()
  * // on the results, returning all the documents, and not the cursor
- * db.returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ * db.queryAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
  * ```
  */
 export class ArangoDB {
@@ -281,7 +281,7 @@ export class ArangoDB {
     return await this.driver.query<T>(query, options)
   }
 
-  public async returnAll<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<QueryResult<T>> {
+  public async queryAll<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<QueryResult<T>> {
     const response = await this.query<T>(query, options?.arangojs?.query)
     const documents = await response.all()
     return {
@@ -299,7 +299,7 @@ export class ArangoDB {
    * @param options  Driver options that may be passed in along with the query
    * @returns an object
    */
-  public async returnFirst<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | T[] | null> {
+  public async queryOne<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | T[] | null> {
     const response = await this.query<T>(query, options?.arangojs?.query)
     const documents = await response.all()
 
@@ -465,7 +465,7 @@ export class ArangoDB {
       console.log(propertyValue)
     }
 
-    return await this.returnFirst<T>(this.q.fetchByMatchingProperty(collection, propertyValue, options), options)
+    return await this.queryOne<T>(this.q.fetchByMatchingProperty(collection, propertyValue, options), options)
   }
 
   public async fetchOneByAllPropertyValues<T = any>(
@@ -481,7 +481,7 @@ export class ArangoDB {
       console.log(propertyValues)
     }
 
-    return await this.returnFirst<T>(this.q.fetchByMatchingAllProperties(collection, propertyValues, options), options)
+    return await this.queryOne<T>(this.q.fetchByMatchingAllProperties(collection, propertyValues, options), options)
   }
 
   public async fetchByPropertyValue<T = any>(
@@ -811,7 +811,7 @@ export class ArangoDB {
   }
 
   public async fetchProperty<T = any>(collection: string, key: string, field: string): Promise<T | T[] | null> {
-    return await this.returnFirst(`LET d = DOCUMENT("${collection}/${key}") RETURN d.${field}`)
+    return await this.queryOne(`LET d = DOCUMENT("${collection}/${key}") RETURN d.${field}`)
   }
 
   public async updateProperty(
