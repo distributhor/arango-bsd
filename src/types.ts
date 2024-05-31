@@ -113,7 +113,7 @@ export interface Criteria {
 export interface DatabaseConfig extends Config {}
 
 export interface GuacamoleOptions {
-  autoPrefixPropNamesInFilters?: boolean
+  // withSauce?: boolean
   debugFunctions?: boolean
   debugParams?: boolean
   printQueries?: boolean

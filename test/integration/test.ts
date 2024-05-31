@@ -58,13 +58,13 @@ const conn = new ArangoConnection({
   databaseName: db1,
   url: process.env.GUACAMOLE_TEST_DB_URI,
   auth: { username: dbAdminUser, password: dbAdminPassword }
-})
+}, { printQueries: false })
 
 const db = new ArangoDBWithSauce({
   databaseName: db1,
   url: process.env.GUACAMOLE_TEST_DB_URI,
   auth: { username: dbAdminUser, password: dbAdminPassword }
-})
+}, { debugFunctions: false })
 
 describe('Guacamole Integration Tests', () => {
   test('Connection and instance management', async () => {

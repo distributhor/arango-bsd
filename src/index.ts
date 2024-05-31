@@ -109,7 +109,7 @@ function stripProps(obj: any, props: string[]): void {
 
 /** @internal */
 interface InstancePool {
-  [key: string]: ArangoDB
+  [key: string]: ArangoDBWithSauce
 }
 
 /**
@@ -148,15 +148,15 @@ interface InstancePool {
  */
 export class ArangoConnection {
   private readonly pool: InstancePool = {}
-  private readonly arangodb: ArangoDB
+  private readonly arangodb: ArangoDBWithSauce
   private readonly arangojs: Database
-  private readonly go: GuacamoleOptions
+  private readonly options: GuacamoleOptions
   public readonly system: Database
 
   constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
-    this.go = options
+    this.options = options
     this.arangojs = db instanceof Database ? db : new Database(db)
-    this.arangodb = new ArangoDB(this.arangojs, options)
+    this.arangodb = new ArangoDBWithSauce(this.arangojs, options)
     if (this.arangojs.name === '_system') {
       this.system = this.arangojs
     } else {
@@ -169,7 +169,7 @@ export class ArangoConnection {
     return this.getInstance(db).driver
   }
 
-  public db(db: string): ArangoDB {
+  public db(db: string): ArangoDBWithSauce {
     return this.getInstance(db)
   }
 
@@ -185,13 +185,13 @@ export class ArangoConnection {
   }
 
   /** @internal */
-  private getInstance(db: string): ArangoDB {
+  private getInstance(db: string): ArangoDBWithSauce {
     if (this.pool[db]) {
       return this.pool[db]
     }
 
     debugInfo(`Adding '${db}' to pool`)
-    this.pool[db] = new ArangoDB(this.arangojs.database(db), this.go)
+    this.pool[db] = new ArangoDBWithSauce(this.arangojs.database(db), this.options)
 
     return this.pool[db]
   }
@@ -225,10 +225,8 @@ export class ArangoDB {
    */
   public driver: Database
   public system: Database
-  public queries: Queries
 
-  readonly q: Queries
-  readonly go: GuacamoleOptions
+  readonly options: GuacamoleOptions
 
   /**
    * The constructor accepts an existing
@@ -236,9 +234,7 @@ export class ArangoDB {
    * **or** an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) configuration.
    */
   constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
-    this.go = options
-    this.q = new Queries(this.go)
-    this.queries = this.q
+    this.options = options
 
     if (db instanceof Database) {
       this.driver = db
@@ -247,24 +243,24 @@ export class ArangoDB {
     }
 
     this.system = this.driver.database('_system')
+
+    Queries.setOptions(options)
+
+    // console.log(Queries.getOptions())
   }
 
   /** @internal */
   _debugFunctions(): boolean {
-    return !!(this.go?.debugFunctions)
+    return !!(this.options?.debugFunctions)
   }
 
   /** @internal */
   _debugParams(): boolean {
-    return !!(this.go?.debugParams)
+    return !!(this.options?.debugParams)
   }
 
   public get name(): string {
     return this.driver.name
-  }
-
-  public col<T extends Record<string, any> = any>(collection: string): DocumentCollection<T> | EdgeCollection<T> {
-    return this.driver.collection(collection)
   }
 
   /**
@@ -376,7 +372,7 @@ export class ArangoDB {
     }
 
     if (document.prop) {
-      const query = this.q.updateDocumentsByKeyValue(
+      const query = Queries.updateDocumentsByKeyValue(
         this.driver.collection(collection),
         { property: document.prop, value: document.value },
         document.data
@@ -403,7 +399,7 @@ export class ArangoDB {
 
     if (isIdentifier(identifier)) {
       if (identifier.prop) {
-        const query = this.q.deleteDocumentsByKeyValue(
+        const query = Queries.deleteDocumentsByKeyValue(
           this.driver.collection(collection),
           { property: identifier.prop, value: identifier.value }
         )
@@ -436,7 +432,7 @@ export class ArangoDB {
     }
 
     const result = await this.driver.query(
-      this.q.fetchAll(collection, options),
+      Queries.fetchAll(collection, options),
       arangojsQueryOptions
     )
 
@@ -497,11 +493,15 @@ export class ArangoDB {
     }
 
     if (!Array.isArray(values.properties)) {
-      return await this.queryOne<T>(this.q.fetchByMatchingProperty(collection, values.properties, options), options)
+      return await this.queryOne<T>(Queries.fetchByMatchingProperty(
+        collection,
+        values.properties,
+        options),
+      options)
     }
 
     if (values.match && values.match === MatchType.ALL) {
-      return await this.queryOne<T>(this.q.fetchByMatchingAllProperties(
+      return await this.queryOne<T>(Queries.fetchByMatchingAllProperties(
         collection,
         values.properties,
         options),
@@ -509,7 +509,7 @@ export class ArangoDB {
       )
     }
 
-    return await this.queryOne<T>(this.q.fetchByMatchingAnyProperties(
+    return await this.queryOne<T>(Queries.fetchByMatchingAnyProperty(
       collection,
       values.properties,
       options),
@@ -610,18 +610,18 @@ export class ArangoDB {
     if (Array.isArray(propertyValues)) {
       if (matchType === MatchType.ANY) {
         result = await this.driver.query(
-          this.q.fetchByMatchingAnyProperty(collection, propertyValues, options, filterCriteria),
+          Queries.fetchByMatchingAnyProperty(collection, propertyValues, options, filterCriteria),
           arangojsQueryOptions
         )
       } else {
         result = await this.driver.query(
-          this.q.fetchByMatchingAllProperties(collection, propertyValues, options, filterCriteria),
+          Queries.fetchByMatchingAllProperties(collection, propertyValues, options, filterCriteria),
           arangojsQueryOptions
         )
       }
     } else {
       result = await this.driver.query(
-        this.q.fetchByMatchingProperty(collection, propertyValues, options, filterCriteria),
+        Queries.fetchByMatchingProperty(collection, propertyValues, options, filterCriteria),
         arangojsQueryOptions
       )
     }
@@ -659,7 +659,7 @@ export class ArangoDB {
     }
 
     const result = await this.driver.query(
-      this.q.fetchByCriteria(collection, criteria, options),
+      Queries.fetchByCriteria(collection, criteria, options),
       arangojsQueryOptions
     )
 
@@ -1081,13 +1081,203 @@ export class ArangoDB {
     }
 
     // const query = uniqueConstraintQuery(constraints, QueryType.STRING) as string;
-    const query = this.q.uniqueConstraintQuery(constraints)
+    const query = Queries.uniqueConstraintQuery(constraints)
     const documents = await (await this.query(query)).all()
 
     return {
       violatesUniqueConstraint: documents.length > 0,
       documents
     }
+  }
+}
+
+export class ArangoDBWithSauce extends ArangoDB {
+  constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
+    super(db, options)
+  }
+
+  public col<T extends Record<string, any> = any>(collection: string): DocumentCollection<T> | EdgeCollection<T> {
+    return this.driver.collection(collection)
+  }
+
+  public async fetchByPropertyValue<T = any>(
+    collection: string,
+    propertyValue: PropertyValue,
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    if (this._debugFunctions()) {
+      console.log(`fetchByPropertyValue: ${collection}`)
+    }
+
+    if (this._debugParams()) {
+      console.log(propertyValue)
+    }
+
+    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
+  }
+
+  public async fetchByAnyPropertyValue<T = any>(
+    collection: string,
+    propertyValue: PropertyValue[],
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    if (this._debugFunctions()) {
+      console.log(`fetchByAnyPropertyValue: ${collection}`)
+    }
+
+    if (this._debugParams()) {
+      console.log(propertyValue)
+    }
+
+    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
+  }
+
+  public async fetchByAllPropertyValues<T = any>(
+    collection: string,
+    propertyValues: PropertyValue[],
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    if (this._debugFunctions()) {
+      console.log(`fetchByAllPropertyValues: ${collection}`)
+    }
+
+    if (this._debugParams()) {
+      console.log(propertyValues)
+    }
+
+    return await this._fetchByPropValues(collection, propertyValues, MatchType.ALL, undefined, options)
+  }
+
+  public async fetchOneByPropertyValue<T = any>(
+    collection: string,
+    propertyValue: PropertyValue,
+    options: FetchOptions = {}
+  ): Promise<T | T[] | null> {
+    if (this._debugFunctions()) {
+      console.log(`fetchOneByPropertyValue: ${collection}`)
+    }
+
+    if (this._debugParams()) {
+      console.log(propertyValue)
+    }
+
+    return await this.queryOne<T>(Queries.fetchByMatchingProperty(collection, propertyValue, options), options)
+  }
+
+  public async fetchOneByAnyPropertyValue<T = any>(
+    collection: string,
+    propertyValues: PropertyValue[],
+    options: FetchOptions = {}
+  ): Promise<T | T[] | null> {
+    if (this._debugFunctions()) {
+      console.log(`fetchOneByAnyPropertyValues: ${collection}`)
+    }
+
+    if (this._debugParams()) {
+      console.log(propertyValues)
+    }
+
+    return await this.queryOne<T>(Queries.fetchByMatchingAnyProperty(
+      collection,
+      propertyValues,
+      options),
+    options)
+  }
+
+  public async fetchOneByAllPropertyValues<T = any>(
+    collection: string,
+    propertyValues: PropertyValue[],
+    options: FetchOptions = {}
+  ): Promise<T | T[] | null> {
+    if (this._debugFunctions()) {
+      console.log(`fetchOneByAllPropertyValues: ${collection}`)
+    }
+
+    if (this._debugParams()) {
+      console.log(propertyValues)
+    }
+
+    return await this.queryOne<T>(Queries.fetchByMatchingAllProperties(
+      collection,
+      propertyValues,
+      options),
+    options
+    )
+  }
+
+  public async fetchByPropertyValueAndCriteria<T = any>(
+    collection: string,
+    propertyValue: PropertyValue,
+    criteria: string | Filter | Criteria,
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    if (this._debugFunctions()) {
+      console.log(`fetchByPropertyValueAndCriteria: ${collection}`)
+    }
+
+    if (this._debugParams()) {
+      console.log(propertyValue)
+      console.log(criteria)
+    }
+
+    const filterCriteria = typeof criteria === 'string'
+      ? { filter: criteria }
+      : criteria
+
+    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, filterCriteria, options)
+  }
+
+  public async fetchByAnyPropertyValueAndCriteria<T = any>(
+    collection: string,
+    propertyValue: PropertyValue[],
+    criteria: string | Filter | Criteria,
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    if (this._debugFunctions()) {
+      console.log(`fetchByAnyPropertyValueAndCriteria: ${collection}`)
+    }
+
+    if (this._debugParams()) {
+      console.log(propertyValue)
+      console.log(criteria)
+    }
+
+    const filterCriteria = typeof criteria === 'string'
+      ? { filter: criteria }
+      : criteria
+
+    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, filterCriteria, options)
+  }
+
+  public async fetchByAllPropertyValuesAndCriteria<T = any>(
+    collection: string,
+    propertyValues: PropertyValue[],
+    criteria: string | Filter | Criteria,
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    if (this._debugFunctions()) {
+      console.log(`fetchByAllPropertyValuesAndCriteria: ${collection}`)
+    }
+
+    if (this._debugParams()) {
+      console.log(propertyValues)
+      console.log(criteria)
+    }
+
+    const filterCriteria = typeof criteria === 'string'
+      ? { filter: criteria }
+      : criteria
+
+    return await this._fetchByPropValues(collection, propertyValues, MatchType.ALL, filterCriteria, options)
+  }
+
+  public async dbExists(): Promise<boolean> {
+    // if (db) {
+    //   driver.listDatabases() will throw an error (database not found) if the db in question doesn't actually exist yet
+    //   return (await this.driver.listDatabases()).includes(db)
+    // }
+
+    return await this.driver.exists()
   }
 
   public async clearDB(method: DBClearanceMethod = DBClearanceMethod.DELETE_DATA): Promise<void> {
@@ -1111,15 +1301,6 @@ export class ArangoDB {
 
     (await this.driver.collections()).map(async (collection) => await collection.truncate())
     debugInfo(`DB ${this.driver.name} cleaned`)
-  }
-
-  public async dbExists(): Promise<boolean> {
-    // if (db) {
-    //   driver.listDatabases() will throw an error (database not found) if the db in question doesn't actually exist yet
-    //   return (await this.driver.listDatabases()).includes(db)
-    // }
-
-    return await this.driver.exists()
   }
 
   public async createDBStructure(
@@ -1323,173 +1504,5 @@ export class ArangoDB {
     }
 
     return response
-  }
-}
-
-export class ArangoDBWithSauce extends ArangoDB {
-  constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
-    super(db, options)
-  }
-
-  public async fetchByPropertyValue<T = any>(
-    collection: string,
-    propertyValue: PropertyValue,
-    options: FetchOptions = {}
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debugFunctions()) {
-      console.log(`fetchByPropertyValue: ${collection}`)
-    }
-
-    if (this._debugParams()) {
-      console.log(propertyValue)
-    }
-
-    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
-  }
-
-  public async fetchByAnyPropertyValue<T = any>(
-    collection: string,
-    propertyValue: PropertyValue[],
-    options: FetchOptions = {}
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debugFunctions()) {
-      console.log(`fetchByAnyPropertyValue: ${collection}`)
-    }
-
-    if (this._debugParams()) {
-      console.log(propertyValue)
-    }
-
-    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
-  }
-
-  public async fetchByAllPropertyValues<T = any>(
-    collection: string,
-    propertyValues: PropertyValue[],
-    options: FetchOptions = {}
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debugFunctions()) {
-      console.log(`fetchByAllPropertyValues: ${collection}`)
-    }
-
-    if (this._debugParams()) {
-      console.log(propertyValues)
-    }
-
-    return await this._fetchByPropValues(collection, propertyValues, MatchType.ALL, undefined, options)
-  }
-
-  public async fetchOneByPropertyValue<T = any>(
-    collection: string,
-    propertyValue: PropertyValue,
-    options: FetchOptions = {}
-  ): Promise<T | T[] | null> {
-    if (this._debugFunctions()) {
-      console.log(`fetchOneByPropertyValue: ${collection}`)
-    }
-
-    if (this._debugParams()) {
-      console.log(propertyValue)
-    }
-
-    return await this.queryOne<T>(this.q.fetchByMatchingProperty(collection, propertyValue, options), options)
-  }
-
-  public async fetchOneByAnyPropertyValue<T = any>(
-    collection: string,
-    propertyValues: PropertyValue[],
-    options: FetchOptions = {}
-  ): Promise<T | T[] | null> {
-    if (this._debugFunctions()) {
-      console.log(`fetchOneByAnyPropertyValues: ${collection}`)
-    }
-
-    if (this._debugParams()) {
-      console.log(propertyValues)
-    }
-
-    return await this.queryOne<T>(this.q.fetchByMatchingAnyProperties(collection, propertyValues, options), options)
-  }
-
-  public async fetchOneByAllPropertyValues<T = any>(
-    collection: string,
-    propertyValues: PropertyValue[],
-    options: FetchOptions = {}
-  ): Promise<T | T[] | null> {
-    if (this._debugFunctions()) {
-      console.log(`fetchOneByAllPropertyValues: ${collection}`)
-    }
-
-    if (this._debugParams()) {
-      console.log(propertyValues)
-    }
-
-    return await this.queryOne<T>(this.q.fetchByMatchingAllProperties(collection, propertyValues, options), options)
-  }
-
-  public async fetchByPropertyValueAndCriteria<T = any>(
-    collection: string,
-    propertyValue: PropertyValue,
-    criteria: string | Filter | Criteria,
-    options: FetchOptions = {}
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debugFunctions()) {
-      console.log(`fetchByPropertyValueAndCriteria: ${collection}`)
-    }
-
-    if (this._debugParams()) {
-      console.log(propertyValue)
-      console.log(criteria)
-    }
-
-    const filterCriteria = typeof criteria === 'string'
-      ? { filter: criteria }
-      : criteria
-
-    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, filterCriteria, options)
-  }
-
-  public async fetchByAnyPropertyValueAndCriteria<T = any>(
-    collection: string,
-    propertyValue: PropertyValue[],
-    criteria: string | Filter | Criteria,
-    options: FetchOptions = {}
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debugFunctions()) {
-      console.log(`fetchByAnyPropertyValueAndCriteria: ${collection}`)
-    }
-
-    if (this._debugParams()) {
-      console.log(propertyValue)
-      console.log(criteria)
-    }
-
-    const filterCriteria = typeof criteria === 'string'
-      ? { filter: criteria }
-      : criteria
-
-    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, filterCriteria, options)
-  }
-
-  public async fetchByAllPropertyValuesAndCriteria<T = any>(
-    collection: string,
-    propertyValues: PropertyValue[],
-    criteria: string | Filter | Criteria,
-    options: FetchOptions = {}
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    if (this._debugFunctions()) {
-      console.log(`fetchByAllPropertyValuesAndCriteria: ${collection}`)
-    }
-
-    if (this._debugParams()) {
-      console.log(propertyValues)
-      console.log(criteria)
-    }
-
-    const filterCriteria = typeof criteria === 'string'
-      ? { filter: criteria }
-      : criteria
-
-    return await this._fetchByPropValues(collection, propertyValues, MatchType.ALL, filterCriteria, options)
   }
 }
