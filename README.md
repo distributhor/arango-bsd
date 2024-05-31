@@ -121,15 +121,9 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 - [Using the native ArangoJS Driver](#Using-the-native-ArangoJS-Driver)
 - [AQL, query, queryAll, queryOne](#AQL-Queries)
 - [CRUD](#CRUD)
-- [fetchOneByPropertyValue](#fetchOneByPropertyValue)
-- [fetchOneByAllPropertyValues](#fetchOneByAllPropertyValues)
-- [fetchByPropertyValue](#fetchByPropertyValue)
-- [fetchByAnyPropertyValue](#fetchByAnyPropertyValue)
-- [fetchByAllPropertyValues](#fetchByAllPropertyValues)
+- [fetchByProperties](#fetchByProperties)
 - [fetchByCriteria](#fetchByCriteria)
-- [fetchByPropertyValueAndCriteria](#fetchByPropertyValueAndCriteria)
-- [fetchByAnyPropertyValueAndCriteria](#fetchByAnyPropertyValueAndCriteria)
-- [fetchByAllPropertyValuesAndCriteria](#fetchByAllPropertyValuesAndCriteria)
+- [fetchByPropertiesAndCriteria](#fetchByPropertiesAndCriteria)
 - [fetchProperty](#fetchProperty)
 - [updateProperty](#updateProperty)
 - [addArrayValue](#addArrayValue)
@@ -140,7 +134,19 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 - [replaceArrayObject](#replaceArrayObject)
 - [replaceArray](#replaceArray)
 - [trimDocuments](#trimDocuments)
-- [uniqueConstraintValidation](#uniqueConstraintValidation)
+- [validateUniqueConstraint](#validateUniqueConstraint)
+
+## With Sauce
+
+- [fetchByPropertyValue](#fetchByPropertyValue)
+- [fetchByAnyPropertyValue](#fetchByAnyPropertyValue)
+- [fetchByAllPropertyValues](#fetchByAllPropertyValues)
+- [fetchOneByPropertyValue](#fetchOneByPropertyValue)
+- [fetchOneByAnyPropertyValue](#fetchOneByAnyPropertyValue)
+- [fetchOneByAllPropertyValues](#fetchOneByAllPropertyValues)
+- [fetchByPropertyValueAndCriteria](#fetchByPropertyValueAndCriteria)
+- [fetchByAnyPropertyValueAndCriteria](#fetchByAnyPropertyValueAndCriteria)
+- [fetchByAllPropertyValuesAndCriteria](#fetchByAllPropertyValuesAndCriteria)
 
 ### Using the native ArangoJS Driver
 

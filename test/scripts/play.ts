@@ -35,28 +35,28 @@ void (async function () {
 
     // console.log(query);
 
-    const result1 = await db.uniqueConstraintValidation({
+    const result1 = await db.validateUniqueConstraint({
       collection: 'users',
       constraints: [{ unique: { name: 'username', value: 'chiefdoper' } }]
     })
 
     console.log(result1)
 
-    const result2 = await db.uniqueConstraintValidation({
+    const result2 = await db.validateUniqueConstraint({
       collection: 'users',
       constraints: [{ unique: { name: 'username', value: 'thetrain' } }]
     })
 
     console.log(result2)
 
-    // const result3 = await db.uniqueConstraintValidation({
+    // const result3 = await db.validateUniqueConstraint({
     //   collection: "users",
     //   constraints: [{ unique: { key: "username", value: "thetrain" } }, { unique: { key: "name", value: "Lance" } }],
     // });
 
     // console.log(result3);
 
-    // const result4 = await db.uniqueConstraintValidation({
+    // const result4 = await db.validateUniqueConstraint({
     //   collection: "users",
     //   constraints: [{ unique: { key: "username", value: "thetrain" } }, { unique: { key: "name", value: "Thomas" } }],
     // });

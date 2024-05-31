@@ -48,8 +48,8 @@ export interface PropertyValue {
   options?: PropertyValueOptions
 }
 
-export interface PropertyValueSelector {
-  propValues: PropertyValue
+export interface PropertyValues {
+  properties: PropertyValue | PropertyValue[]
   match?: MatchType
 }
 
@@ -97,6 +97,11 @@ export interface SearchTerms {
 export interface Filter {
   filters: string[]
   match?: MatchType
+  options?: FilterOptions
+}
+
+export interface FilterOptions {
+  autoPrefixPropNames?: boolean
 }
 
 export interface Criteria {

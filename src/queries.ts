@@ -250,6 +250,19 @@ export class Queries {
     return this._fetchByKeyValue(collection, identifier, MatchType.ANY, criteria, options)
   }
 
+  public fetchByMatchingAnyProperties(
+    collection: string,
+    identifier: PropertyValue[],
+    options: FetchOptions = {},
+    criteria?: Criteria
+  ): AqlQuery {
+    if (this._debugFunctions()) {
+      console.log(`fetchByMatchingAnyProperties: ${collection}`)
+    }
+
+    return this._fetchByKeyValue(collection, identifier, MatchType.ANY, criteria, options)
+  }
+
   public fetchByMatchingAllProperties(
     collection: string,
     identifier: PropertyValue[],
