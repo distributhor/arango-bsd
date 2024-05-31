@@ -39,7 +39,13 @@ const db = new ArangoDB({
          password: process.env.YOUR_DB_PASSWORD
      }
 })
+```
 
+The configuration object passed into the constructor is a standard `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) object. Alternatively, it also takes a [DatabaseConfig](https://distributhor.github.io/guacamole/interfaces/types.DatabaseConfig.html) object, which extends from the `ArangoJS` class, but provides some additional options for use with `Guacamole` functions. Lastly, the constructor will also accept an existing `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
+
+Perform some operations ...
+
+```javascript
 const person = await fetchOneByPropertyValue(
    'users', 
    { 
@@ -71,9 +77,6 @@ const peopleNamedJoeV2 = await fetchByPropertyValue(
    }
 )
 ```
-
-
-The configuration object passed into the constructor is a standard ArangoJS [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) object. Alternatively, it also takes a [DatabaseConfig](https://distributhor.github.io/guacamole/interfaces/types.DatabaseConfig.html) object, which extends from the `ArangoJS` class, but provides some additional options for use with `Guacamole` functions. Lastly, the constructor will also accept an existing `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
 
 [Back to top](#table-of-contents)
 
