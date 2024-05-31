@@ -126,6 +126,10 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 - [fetchByPropertiesAndCriteria](#fetchByPropertiesAndCriteria)
 - [fetchProperty](#fetchProperty)
 - [updateProperty](#updateProperty)
+- [trimDocuments](#trimDocuments)
+- [validateUniqueConstraint](#validateUniqueConstraint)
+
+### Array Functions
 - [addArrayValue](#addArrayValue)
 - [removeArrayValue](#removeArrayValue)
 - [addArrayObject](#addArrayObject)
@@ -133,10 +137,8 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 - [updateArrayObject](#updateArrayObject)
 - [replaceArrayObject](#replaceArrayObject)
 - [replaceArray](#replaceArray)
-- [trimDocuments](#trimDocuments)
-- [validateUniqueConstraint](#validateUniqueConstraint)
 
-## With Sauce
+### With Sauce
 
 - [fetchByPropertyValue](#fetchByPropertyValue)
 - [fetchByAnyPropertyValue](#fetchByAnyPropertyValue)
