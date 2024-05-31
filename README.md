@@ -118,18 +118,20 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 
 ## Table Of Contents
 
-- [Using the native ArangoJS Driver](#Using-the-native-ArangoJS-Driver)
-- [AQL, query, queryAll, queryOne](#AQL-Queries)
+#### Native Driver, AQL & CRUD
+- [The native ArangoJS Driver](#The-native-ArangoJS-Driver)
+- [AQL](#AQL-Queries)
 - [CRUD](#CRUD)
+- [fetchProperty](#fetchProperty)
+- [updateProperty](#updateProperty)
+
+#### Queries & Data Fetching
+
 - [fetchByProperties](#fetchByProperties)
 - [fetchByCriteria](#fetchByCriteria)
 - [fetchByPropertiesAndCriteria](#fetchByPropertiesAndCriteria)
-- [fetchProperty](#fetchProperty)
-- [updateProperty](#updateProperty)
-- [trimDocuments](#trimDocuments)
-- [validateUniqueConstraint](#validateUniqueConstraint)
 
-### Array Functions
+#### Arrays
 - [addArrayValue](#addArrayValue)
 - [removeArrayValue](#removeArrayValue)
 - [addArrayObject](#addArrayObject)
@@ -138,7 +140,12 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 - [replaceArrayObject](#replaceArrayObject)
 - [replaceArray](#replaceArray)
 
-### With Sauce
+#### Util
+
+- [trimDocuments](#trimDocuments)
+- [validateUniqueConstraint](#validateUniqueConstraint)
+
+#### With Sauce
 
 - [fetchByPropertyValue](#fetchByPropertyValue)
 - [fetchByAnyPropertyValue](#fetchByAnyPropertyValue)
@@ -150,7 +157,7 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 - [fetchByAnyPropertyValueAndCriteria](#fetchByAnyPropertyValueAndCriteria)
 - [fetchByAllPropertyValuesAndCriteria](#fetchByAllPropertyValuesAndCriteria)
 
-### Using the native ArangoJS Driver
+### The native ArangoJS Driver
 
 ```javascript
 const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
