@@ -119,9 +119,9 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 ## Table Of Contents
 
 #### Native Driver, AQL & CRUD
-- [The native ArangoJS Driver](#The-native-ArangoJS-Driver)
-- [AQL](#AQL-Queries)
-- [CRUD](#CRUD)
+- [x] [The native ArangoJS Driver](#The-native-ArangoJS-Driver)
+- [] [AQL Queries](#AQL-Queries)
+- [CRUD](#CRUD) (TODO)
 - [fetchProperty](#fetchProperty)
 - [updateProperty](#updateProperty)
 
