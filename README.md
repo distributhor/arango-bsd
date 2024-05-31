@@ -48,7 +48,7 @@ const person = await fetchOneByPropertyValue(
    }
 )
 
-const peopleNamedJoeCaseSensitive = await fetchByPropertyValue(
+const peopleNamedJoe = await fetchByPropertyValue(
    'users', 
    { 
       property: 'firstName', 
@@ -56,7 +56,7 @@ const peopleNamedJoeCaseSensitive = await fetchByPropertyValue(
    }
 )
 
-const peopleNamedJoe = await fetchByPropertyValue(
+const peopleNamedJoeV2 = await fetchByPropertyValue(
    'users', 
    { 
       property: 'firstName', 
