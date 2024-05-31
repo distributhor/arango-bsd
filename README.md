@@ -27,6 +27,7 @@ The two main classes that you will typically interface with, are:
 - [ArangoConnection](https://distributhor.github.io/guacamole/classes/index.ArangoConnection.html): A class that manages instances of [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html). An `ArangoDB` instance strictly deals with only one `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html). If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier. The current limitation, however, is that it only manages multiple database connections (or instances) for the same `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) credentials. In other words, you can easily (and only) work with multiple databases using the same shared configuration.
 
 Construct your instance ...
+
 ```javascript
 // const { ArangoDB } = require('@distributhor/guacamole')
 import { ArangoDB } from '@distributhor/guacamole'
@@ -117,7 +118,7 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 
 ## Table Of Contents
 
-- [Using the ArangoJS Driver](#Using-the-ArangoJS-Driver)
+- [Using the native ArangoJS Driver](#Using-the-native-ArangoJS-Driver)
 - [AQL, query, queryAll, queryOne](#AQL-Queries)
 - [CRUD](#CRUD)
 - [fetchOneByPropertyValue](#fetchOneByPropertyValue)
@@ -125,10 +126,10 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 - [fetchByPropertyValue](#fetchByPropertyValue)
 - [fetchByAnyPropertyValue](#fetchByAnyPropertyValue)
 - [fetchByAllPropertyValues](#fetchByAllPropertyValues)
+- [fetchByCriteria](#fetchByCriteria)
 - [fetchByPropertyValueAndCriteria](#fetchByPropertyValueAndCriteria)
 - [fetchByAnyPropertyValueAndCriteria](#fetchByAnyPropertyValueAndCriteria)
 - [fetchByAllPropertyValuesAndCriteria](#fetchByAllPropertyValuesAndCriteria)
-- [fetchByCriteria](#fetchByCriteria)
 - [fetchProperty](#fetchProperty)
 - [updateProperty](#updateProperty)
 - [addArrayValue](#addArrayValue)
@@ -141,7 +142,7 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 - [trimDocuments](#trimDocuments)
 - [uniqueConstraintValidation](#uniqueConstraintValidation)
 
-### Using the ArangoJS Driver
+### Using the native ArangoJS Driver
 
 ```javascript
 const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
@@ -166,7 +167,7 @@ const cursor = await db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETUR
 This returns the standard `ArangoJS` cursor. If you simply want to return all results immediately, and not bother with the array cursor (equivalent to invoking `cursor.all()`, the usual warnings apply) ...
 
 ```javascript
-const results = await db.returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
+const results = await db. queryAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 
 for (const r of result) {
 	console.log(r)
