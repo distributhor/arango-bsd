@@ -1,28 +1,30 @@
-//
-// Run with: node test/scripts/play.js
-//
+// eslint-disable-next-line func-call-spacing
 const { aql } = require('arangojs/aql')
-const { ArangoDB } = require('../../../lib/index')
+const { ArangoDB, MatchType } = require('../../dist/index')
 
-const fetchUserByName = (name) => {
-  return aql`
-    FOR d IN user FILTER d.name LIKE ${name} RETURN d 
-  `
-};
-
-(async function () {
+async function play() {
   try {
     const db = new ArangoDB({
-      databaseName: 'arango-driver-test',
-      url: 'http://root:lol@db.localhost:8530'
+      databaseName: 'guacamole-test1',
+      url: 'http://root:letmein@localhost:8529'
     })
 
-    const johnByQuery = await db.queryOne(fetchUserByName('John'))
-    const johnByKey = await db.driver.collection('user').document(johnByQuery._key)
+    const result = await db.fetchByCriteria('cyclists', {
+      filter: {
+        filters: ['d.name == "Lance"', 'd.name == "Chris"'],
+        match: MatchType.ANY
+      }
+    })
 
-    console.log(johnByQuery)
-    console.log(johnByKey)
+    console.log(result)
+
+    const cursor = await db.driver.query(aql`FOR d IN cyclists FILTER d.name == "Lance" RETURN d`)
+    const result2 = await cursor.all()
+
+    console.log(result2)
   } catch (err) {
     console.log(err)
   }
-})()
+}
+
+play()

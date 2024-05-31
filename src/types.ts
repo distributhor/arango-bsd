@@ -1,28 +1,68 @@
 import { Config } from 'arangojs/connection'
 import { CursorStats } from 'arangojs/cursor'
 import { QueryOptions } from 'arangojs/database'
-import { DocumentData, DocumentMetadata, DocumentSelector, Patch } from 'arangojs/documents'
+import { DocumentData, DocumentMetadata, Patch } from 'arangojs/documents'
+
+/** @internal */
+export function isFilter(x: any): x is Filter {
+  return x.filters && Array.isArray(x.filters)
+}
+
+/** @internal */
+export function isSearch(x: any): x is SearchTerms {
+  return x.props && (x.terms || x.terms === '')
+}
+
+/** @internal */
+export function isIdentifier(x: any): x is Identifier {
+  return x.value
+}
+
+/** @internal */
+export function isUniqueValue(x: any): x is UniqueValue {
+  return x.unique
+}
+
+/** @internal */
+export function isCompositeKey(x: any): x is CompositeKey {
+  return x.composite
+}
 
 export interface UntypedObject {
   [key: string]: any
 }
 
 export interface KeyValue {
-  name: string
+  key: string
   value: any
 }
 
-export interface IndexedValue {
+export interface IndexValue {
   index: number
   value: string
 }
 
+export interface PropertyValue {
+  property: string
+  value: any
+}
+
+export interface PropertyValueSelector {
+  propValues: PropertyValue
+  match?: MatchType
+}
+
 export interface UniqueValue {
-  unique: KeyValue
+  unique: PropertyValue
+}
+
+export interface Identifier {
+  value: string | Number
+  prop?: string
 }
 
 export interface CompositeKey {
-  composite: KeyValue[]
+  composite: PropertyValue[]
 }
 
 export interface UniqueConstraint {
@@ -71,11 +111,6 @@ export interface GuacamoleOptions {
   debugFunctions?: boolean
   debugParams?: boolean
   printQueries?: boolean
-}
-
-export interface Identifier {
-  identifier?: string
-  id: DocumentSelector
 }
 
 export interface DocumentUpdate<T extends Record<string, any> = any> extends Identifier {
@@ -169,16 +204,6 @@ export function isGraphDefinition(x: any): x is GraphDefinition {
 /** @internal */
 export function isGraphDefinitionArray(x: any[]): x is GraphDefinition[] {
   return x.length > 0 && isGraphDefinition(x[0])
-}
-
-/** @internal */
-export function isUniqueValue(x: any): x is UniqueValue {
-  return x.unique
-}
-
-/** @internal */
-export function isCompositeKey(x: any): x is CompositeKey {
-  return x.composite
 }
 
 /*

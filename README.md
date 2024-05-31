@@ -11,19 +11,18 @@ While no one likes backseat driver, sometimes a little help or extra instruction
 
 On that note: this tool primarily started its existence to address some common cases derived from *our own world*, and is therefore very limited in what it attempts to be. The additional functionality relates mostly to simple CRUD operations, array manipulation operations, and the ability to easily query data in single collections (as opposed to operations intended for graphs and traversals). As such, this is a basic tool, which may or not fit your use case. But for the types of tasks that it does perform, it's probably useful enough to make available to a larger audience.
 
-You can find the generated [Typescript API reference](https://distributhor.github.io/guacamole/) for this package here: 
+You can find the generated [API reference](https://distributhor.github.io/guacamole/) for this package here: 
 
 [https://distributhor.github.io/guacamole/](https://distributhor.github.io/guacamole/)
 
+Introductory documentation follows below, by way of examples, which does not cover any details. It's best used in conjunction with the [API Reference](https://distributhor.github.io/guacamole/) where the details of the specifications can be found.
 
-## Introduction
+## Quick Start
 
 The two main classes that you will typically interface with, are:
 
 - [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html): A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance. It provides direct and easy access to the ArangoJS instance itself, but also adds a few convenience methods, for optional use.
 - [ArangoConnection](https://distributhor.github.io/guacamole/classes/index.ArangoConnection.html): A class that manages instances of [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html). An `ArangoDB` instance strictly deals with only one `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html). If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier. The current limitation, however, is that it only manages multiple database connections (or instances) for the same `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) credentials. In other words, you can easily (and only) work with multiple databases using the same shared configuration.
-
-## Quick Start
 
 A basic example ...
 
@@ -39,7 +38,7 @@ const db = new ArangoDB({
          username: process.env.YOUR_DB_USER,
          password: process.env.YOUR_DB_PASSWORD
      }
-});
+})
 ```
 
 
@@ -61,6 +60,20 @@ for (const r of result) {
 ```
 
 [Back to top](#table-of-contents)
+
+## Table Of Contents
+
+- [Using the native ArangoJS driver](#Using-the-native-ArangoJS-driver)
+- [Configuration](#configuration)
+- 
+### Using the native ArangoJS driver
+
+```javascript
+const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
+```
+
+The native `ArangoJS` driver is exposed on the `.driver` property of the `ArangoDB` class. By using `db.driver` you always have the full native capability available.
+
 
 <!-- 
 ## Table Of Contents

@@ -5,25 +5,17 @@ import {
   UniqueConstraint,
   isCompositeKey,
   isUniqueValue,
-  KeyValue,
+  PropertyValue,
   SearchTerms,
   Filter,
   Criteria,
   MatchTypeOperator,
   MatchType,
   FetchOptions,
-  GuacamoleOptions
+  GuacamoleOptions,
+  isSearch,
+  isFilter
 } from './index'
-
-/** @internal */
-export function isFilter(x: any): x is Filter {
-  return x.filters && Array.isArray(x.filters)
-}
-
-/** @internal */
-export function isSearch(x: any): x is SearchTerms {
-  return x.props && (x.terms || x.terms === '')
-}
 
 export class Queries {
   private readonly go: GuacamoleOptions
@@ -105,7 +97,7 @@ export class Queries {
   /** @internal */
   private _fetchByKeyValue(
     collection: string,
-    identifier: KeyValue | KeyValue[],
+    identifier: PropertyValue | PropertyValue[],
     keyValueMatchType: MatchType,
     criteria?: Criteria,
     options: FetchOptions = {}
@@ -139,20 +131,20 @@ export class Queries {
         const keyParam = `p${keyCount}`
         const valueParam = `v${keyCount}`
 
-        if (kv.name.indexOf('.') > 0) {
-          params[keyParam] = kv.name.split('.')
+        if (kv.property.indexOf('.') > 0) {
+          params[keyParam] = kv.property.split('.')
         } else {
-          params[keyParam] = kv.name
+          params[keyParam] = kv.property
         }
         params[valueParam] = kv.value
 
         query += ` d.@${keyParam} == @${valueParam}`
       }
     } else {
-      if (identifier.name.indexOf('.') > 0) {
-        params.p = identifier.name.split('.')
+      if (identifier.property.indexOf('.') > 0) {
+        params.p = identifier.property.split('.')
       } else {
-        params.p = identifier.name
+        params.p = identifier.property
       }
 
       params.v = identifier.value
@@ -224,7 +216,7 @@ export class Queries {
 
   public fetchByMatchingProperty(
     collection: string,
-    identifier: KeyValue,
+    identifier: PropertyValue,
     options: FetchOptions = {},
     criteria?: Criteria
   ): AqlQuery {
@@ -237,7 +229,7 @@ export class Queries {
 
   public fetchByMatchingAnyProperty(
     collection: string,
-    identifier: KeyValue[],
+    identifier: PropertyValue[],
     options: FetchOptions = {},
     criteria?: Criteria
   ): AqlQuery {
@@ -250,7 +242,7 @@ export class Queries {
 
   public fetchByMatchingAllProperties(
     collection: string,
-    identifier: KeyValue[],
+    identifier: PropertyValue[],
     options: FetchOptions = {},
     criteria?: Criteria
   ): AqlQuery {
@@ -389,7 +381,7 @@ export class Queries {
     }
   }
 
-  public updateDocumentsByKeyValue(collection: DocumentCollection, identifier: KeyValue, data: any): AqlQuery {
+  public updateDocumentsByKeyValue(collection: DocumentCollection, identifier: PropertyValue, data: any): AqlQuery {
     // return literal(
     //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
     //     data
@@ -398,7 +390,7 @@ export class Queries {
 
     return aql`
       FOR d IN ${collection}
-      FILTER d.${identifier.name} == ${identifier.value}
+      FILTER d.${identifier.property} == ${identifier.value}
       UPDATE d WITH ${data} IN ${collection}
       RETURN { _key: NEW._key }`
 
@@ -429,14 +421,14 @@ export class Queries {
     // `)
   }
 
-  public deleteDocumentsByKeyValue(collection: DocumentCollection, identifier: KeyValue): AqlQuery {
+  public deleteDocumentsByKeyValue(collection: DocumentCollection, identifier: PropertyValue): AqlQuery {
     // return literal(
     //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
     // )
 
     return aql`
       FOR d IN ${collection}
-      FILTER d.${identifier.name} == ${identifier.value}
+      FILTER d.${identifier.property} == ${identifier.value}
       REMOVE d IN ${collection}
       RETURN { _key: d._key }`
   }
@@ -476,19 +468,24 @@ export class Queries {
           }
 
           if (constraints.caseInsensitive) {
-            const keyParam = `${kv.name}_key_${keyCount}`
-            const valueParam = `${kv.name}_val_${keyCount}`
+            const keyParam = `${kv.property}_key_${keyCount}`
+            const valueParam = `${kv.property}_val_${keyCount}`
 
-            params[keyParam] = kv.name
+            params[keyParam] = kv.property
             params[valueParam] = kv.value
 
             query += ` d.@${keyParam} == @${valueParam}`
           } else {
-            const keyParam = `${kv.name}_key_${keyCount}`
-            const valueParam = `${kv.name}_val_${keyCount}`
+            const keyParam = `${kv.property}_key_${keyCount}`
+            const valueParam = `${kv.property}_val_${keyCount}`
 
-            params[keyParam] = kv.name
-            params[valueParam] = kv.value.toLowerCase()
+            params[keyParam] = kv.property
+
+            if (typeof kv.value === 'string') {
+              params[valueParam] = kv.value.toLowerCase()
+            } else {
+              params[valueParam] = kv.value
+            }
 
             query += ` LOWER(d.@${keyParam}) == @${valueParam}`
           }
@@ -498,17 +495,22 @@ export class Queries {
       }
 
       if (isUniqueValue(constraint)) {
-        const keyParam = `${constraint.unique.name}_key`
-        const valueParam = `${constraint.unique.name}_val`
+        const keyParam = `${constraint.unique.property}_key`
+        const valueParam = `${constraint.unique.property}_val`
 
         if (constraints.caseInsensitive) {
-          params[keyParam] = constraint.unique.name
+          params[keyParam] = constraint.unique.property
           params[valueParam] = constraint.unique.value
 
           query += ` d.@${keyParam} == @${valueParam}`
         } else {
-          params[keyParam] = constraint.unique.name
-          params[valueParam] = constraint.unique.value.toLowerCase()
+          params[keyParam] = constraint.unique.property
+
+          if (typeof constraint.unique.value === 'string') {
+            params[valueParam] = constraint.unique.value.toLowerCase()
+          } else {
+            params[valueParam] = constraint.unique.value
+          }
 
           query += ` LOWER(d.@${keyParam}) == @${valueParam}`
         }

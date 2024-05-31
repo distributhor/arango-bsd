@@ -10,8 +10,9 @@
 
 import {
   isSearch,
-  isFilter
-} from '../../src/queries'
+  isFilter,
+  isIdentifier
+} from '../../src/types'
 
 describe('Queries', () => {
   test('isSearch', () => {
@@ -35,6 +36,13 @@ describe('Queries', () => {
     expect(isFilter({ filterz: ['ABC'] })).toBeFalsy()
     expect(isFilter({ filters: 'ABC' })).toBeFalsy()
     expect(isFilter('ABC')).toBeFalsy()
+  })
+
+  test('isIdentifier', () => {
+    expect(isIdentifier({ value: 'ABC' })).toBeTruthy()
+    expect(isIdentifier({ value: 123 })).toBeTruthy()
+    expect(isIdentifier({ identifier: 'ABC' })).toBeFalsy()
+    expect(isIdentifier('ABC')).toBeFalsy()
   })
 
   // test('Find all indices of substring in string', () => {

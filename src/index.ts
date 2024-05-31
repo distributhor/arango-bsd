@@ -1,9 +1,6 @@
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Debug from 'debug'
-import { Database } from 'arangojs'
-import { AqlQuery, literal } from 'arangojs/aql'
-import { QueryOptions } from 'arangojs/database'
 import {
   GuacamoleOptions,
   DatabaseConfig,
@@ -19,19 +16,35 @@ import {
   FetchOptions,
   DocumentTrimOptions,
   QueryResult,
-  KeyValue,
+  PropertyValue,
+  Filter,
   Criteria,
   Identifier,
   MatchType,
   DocumentMeta,
   DocumentUpdate,
-  SearchTerms,
-  Filter
+  isIdentifier,
+  isFilter
 } from './types'
-import { Queries, isFilter, isSearch } from './queries'
+import { Queries } from './queries'
+import {
+  CollectionInsertOptions,
+  CollectionReadOptions,
+  CollectionRemoveOptions,
+  CollectionUpdateOptions,
+  DocumentCollection,
+  EdgeCollection
+} from 'arangojs/collection'
+import {
+  Document,
+  DocumentData,
+  DocumentSelector,
+  ObjectWithKey
+} from 'arangojs/documents'
+import { Database } from 'arangojs'
+import { AqlQuery, literal } from 'arangojs/aql'
+import { QueryOptions } from 'arangojs/database'
 import { ArrayCursor } from 'arangojs/cursor'
-import { CollectionInsertOptions, CollectionReadOptions, CollectionRemoveOptions, CollectionUpdateOptions, DocumentCollection, EdgeCollection } from 'arangojs/collection'
-import { Document, DocumentData, ObjectWithKey } from 'arangojs/documents'
 
 export * from './types'
 
@@ -307,21 +320,25 @@ export class ArangoDB {
 
   public async read<T extends Record<string, any> = any>(
     collection: string,
-    document: Identifier,
+    identifier: Identifier | DocumentSelector,
     trim: DocumentTrimOptions = {},
     options: CollectionReadOptions = {}
   ): Promise<Document<T> | null> {
     let d
 
-    if (document.identifier) {
-      // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
-      d = await this.fetchOneByPropertyValue<T>(collection, { name: document.identifier, value: document.id })
-    } else {
-      if (options.graceful !== false) {
-        options.graceful = true
-      }
+    if (options.graceful !== false) {
+      options.graceful = true
+    }
 
-      d = await this.driver.collection<T>(collection).document(document.id, options)
+    if (isIdentifier(identifier)) {
+      if (identifier.prop) {
+        d = await this.fetchOneByPropertyValue<T>(collection, { property: identifier.prop, value: identifier.value })
+      } else {
+        d = await this.driver.collection<T>(collection).document(`${identifier.value}`, options)
+      }
+    } else {
+      // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
+      d = await this.driver.collection<T>(collection).document(identifier, options)
     }
 
     if (!d) {
@@ -354,59 +371,50 @@ export class ArangoDB {
       return await this.driver.collection(collection).updateAll(document, options)
     }
 
-    if (document.identifier) {
+    if (document.prop) {
       const query = this.q.updateDocumentsByKeyValue(
         this.driver.collection(collection),
-        { name: document.identifier, value: document.id },
+        { property: document.prop, value: document.value },
         document.data
       )
 
       const result = await this.driver.query(query)
 
-      // [
-      //   {
-      //     _key: '270228543'
-      //   }
-      // ]
       return await result.all()
     }
 
-    const result = await this.driver.collection(collection).update(document.id, document.data, options)
+    const result = await this.driver.collection(collection).update(`${document.value}`, document.data, options)
 
-    // [
-    //   {
-    //     _id: 'cyclists/270226544',
-    //     _key: '270226544',
-    //     _rev: '_fgqsdT----',
-    //     _oldRev: '_fgqsdS2---'
-    //   }
-    // ]
     return [result]
   }
 
   public async delete<T extends Record<string, any> = any>(
     collection: string,
-    document: Identifier | Array<string | ObjectWithKey>,
+    identifier: DocumentSelector | Identifier | Array<string | ObjectWithKey>,
     options: CollectionRemoveOptions = {}
   ): Promise<Array<DocumentMeta & { old?: Document<T> }>> {
-    if (Array.isArray(document)) {
-      return await this.driver.collection(collection).removeAll(document, options)
+    if (Array.isArray(identifier)) {
+      return await this.driver.collection(collection).removeAll(identifier, options)
     }
 
-    if (document.identifier) {
-      const query = this.q.deleteDocumentsByKeyValue(
-        this.driver.collection(collection),
-        { name: document.identifier, value: document.id }
-      )
+    if (isIdentifier(identifier)) {
+      if (identifier.prop) {
+        const query = this.q.deleteDocumentsByKeyValue(
+          this.driver.collection(collection),
+          { property: identifier.prop, value: identifier.value }
+        )
 
-      const result = await this.driver.query(query)
+        const result = await this.driver.query(query)
 
-      return await result.all()
+        return await result.all()
+      } else {
+        const response = await this.driver.collection(collection).remove(`${identifier.value}`, options)
+        return [response]
+      }
+    } else {
+      const response = await this.driver.collection(collection).remove(identifier, options)
+      return [response]
     }
-
-    const response = await this.driver.collection(collection).remove(document.id, options)
-
-    return [response]
   }
 
   public async fetchAll<T = any>(
@@ -446,7 +454,7 @@ export class ArangoDB {
 
   public async fetchOneByPropertyValue<T = any>(
     collection: string,
-    propValue: KeyValue,
+    propValue: PropertyValue,
     options: FetchOptions = {}
   ): Promise<T | T[] | null> {
     if (this._debugFunctions()) {
@@ -462,7 +470,7 @@ export class ArangoDB {
 
   public async fetchOneByAllPropertyValues<T = any>(
     collection: string,
-    propValues: KeyValue[],
+    propValues: PropertyValue[],
     options: FetchOptions = {}
   ): Promise<T | T[] | null> {
     if (this._debugFunctions()) {
@@ -478,7 +486,7 @@ export class ArangoDB {
 
   public async fetchByPropertyValue<T = any>(
     collection: string,
-    propValue: KeyValue,
+    propValue: PropertyValue,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -492,9 +500,27 @@ export class ArangoDB {
     return await this._fetchByPropValues(collection, propValue, MatchType.ANY, undefined, options)
   }
 
+  public async fetchByPropertyValues<T = any>(
+    collection: string,
+    // propValue: PropertyValues,
+    propValue: PropertyValue | PropertyValue[],
+    matchType: MatchType,
+    options: FetchOptions = {}
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    if (this._debugFunctions()) {
+      console.log(`fetchByPropertyValues: ${collection}`)
+    }
+
+    if (this._debugParams()) {
+      console.log(propValue)
+    }
+
+    return await this._fetchByPropValues(collection, propValue, matchType, undefined, options)
+  }
+
   public async fetchByAnyPropertyValue<T = any>(
     collection: string,
-    propValue: KeyValue[],
+    propValue: PropertyValue[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -510,7 +536,7 @@ export class ArangoDB {
 
   public async fetchByAllPropertyValues<T = any>(
     collection: string,
-    propValues: KeyValue[],
+    propValues: PropertyValue[],
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -526,7 +552,7 @@ export class ArangoDB {
 
   public async fetchByPropertyValueAndCriteria<T = any>(
     collection: string,
-    propValue: KeyValue,
+    propValue: PropertyValue,
     criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
@@ -546,9 +572,33 @@ export class ArangoDB {
     return await this._fetchByPropValues(collection, propValue, MatchType.ANY, filterCriteria, options)
   }
 
+  // public async fetchByPropertyValuesAndCriteria<T = any>(
+  //   collection: string,
+  //   propValue: PropertyValues,
+  //   criteria: string | Filter | Criteria,
+  //   options: FetchOptions = {}
+  // ): Promise<ArrayCursor | QueryResult<T>> {
+  //   if (this._debugFunctions()) {
+  //     console.log(`fetchByPropertyValueAndCriteria: ${collection}`)
+  //   }
+
+  //   if (this._debugParams()) {
+  //     console.log(propValue)
+  //     console.log(criteria)
+  //   }
+
+  //   const matchType = propValue.match ?? MatchType.ANY
+
+  //   const filterCriteria = typeof criteria === 'string'
+  //     ? { filter: criteria }
+  //     : criteria
+
+  //   return await this._fetchByPropValues(collection, propValue.props, MatchType.ANY, filterCriteria, options)
+  // }
+
   public async fetchByAnyPropertyValueAndCriteria<T = any>(
     collection: string,
-    propValue: KeyValue[],
+    propValue: PropertyValue[],
     criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
@@ -570,7 +620,7 @@ export class ArangoDB {
 
   public async fetchByAllPropertyValuesAndCriteria<T = any>(
     collection: string,
-    propValues: KeyValue[],
+    propValues: PropertyValue[],
     criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
@@ -592,7 +642,7 @@ export class ArangoDB {
 
   public async fetchByCriteriaAndAllPropertyValues<T = any>(
     collection: string,
-    propValues: KeyValue[],
+    propValues: PropertyValue[],
     criteria: string | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
@@ -643,7 +693,7 @@ export class ArangoDB {
   /** @internal */
   private async _fetchByPropValues<T = any>(
     collection: string,
-    propValues: KeyValue | KeyValue[],
+    propValues: PropertyValue | PropertyValue[],
     matchType: MatchType,
     criteria?: string | Filter | Criteria,
     options: FetchOptions = {}

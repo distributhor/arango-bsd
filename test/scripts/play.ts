@@ -37,14 +37,14 @@ void (async function () {
 
     const result1 = await db.uniqueConstraintValidation({
       collection: 'users',
-      constraints: [{ unique: { property: 'username', value: 'chiefdoper' } }]
+      constraints: [{ unique: { name: 'username', value: 'chiefdoper' } }]
     })
 
     console.log(result1)
 
     const result2 = await db.uniqueConstraintValidation({
       collection: 'users',
-      constraints: [{ unique: { property: 'username', value: 'thetrain' } }]
+      constraints: [{ unique: { name: 'username', value: 'thetrain' } }]
     })
 
     console.log(result2)
