@@ -183,7 +183,7 @@ const cursor = await db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETUR
 This returns the standard `ArangoJS` cursor. If you simply want to return all results immediately, and not bother with the array cursor (equivalent to invoking `cursor.all()`, the usual warnings apply) ...
 
 ```javascript
-const results = await db. queryAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
+const results = await db. returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 
 for (const r of result) {
 	console.log(r)

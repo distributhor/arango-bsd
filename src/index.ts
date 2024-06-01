@@ -271,7 +271,7 @@ export class ArangoDBWithoutSauce {
     return await this.driver.query<T>(query, options)
   }
 
-  public async queryAll<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<QueryResult<T>> {
+  public async returnAll<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<QueryResult<T>> {
     const response = await this.query<T>(query, options?.query)
     const documents = await response.all()
     return {
@@ -289,7 +289,7 @@ export class ArangoDBWithoutSauce {
    * @param options  Driver options that may be passed in along with the query
    * @returns an object
    */
-  public async queryOne<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | T[] | null> {
+  public async returnOne<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | T[] | null> {
     const response = await this.query<T>(query, options?.query)
     const documents = await response.all()
 
@@ -412,7 +412,7 @@ export class ArangoDBWithoutSauce {
     property: string
   ): Promise<T | T[] | null> {
     // in the query below, properties such as prop.nested should be converted into prop[nested] for the query to work
-    // return await this.queryOne(`LET d = DOCUMENT("${collection}/${key}") RETURN d.${property}`)
+    // return await this.returnOne(`LET d = DOCUMENT("${collection}/${key}") RETURN d.${property}`)
     const d = await this.read(collection, identifier, undefined)
 
     if (!d) {
@@ -539,7 +539,7 @@ export class ArangoDBWithoutSauce {
     const fetchOptions = this._fetchOptions(options)
 
     if (!Array.isArray(values.properties)) {
-      return await this.queryOne<T>(Queries.fetchByMatchingProperty(
+      return await this.returnOne<T>(Queries.fetchByMatchingProperty(
         collection,
         values.properties,
         fetchOptions),
@@ -547,7 +547,7 @@ export class ArangoDBWithoutSauce {
     }
 
     if (values.match && values.match === MatchType.ALL) {
-      return await this.queryOne<T>(Queries.fetchByMatchingAllProperties(
+      return await this.returnOne<T>(Queries.fetchByMatchingAllProperties(
         collection,
         values.properties,
         fetchOptions),
@@ -555,7 +555,7 @@ export class ArangoDBWithoutSauce {
       )
     }
 
-    return await this.queryOne<T>(Queries.fetchByMatchingAnyProperty(
+    return await this.returnOne<T>(Queries.fetchByMatchingAnyProperty(
       collection,
       values.properties,
       fetchOptions),
@@ -796,7 +796,7 @@ export class ArangoDBWithoutSauce {
  *
  * // the backseat driver method, which immediately calls cursor.all()
  * // on the results, returning all the documents, and not the cursor
- * db.queryAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ * db.returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
  * ```
  */
 export class ArangoDB extends ArangoDBWithoutSauce {
@@ -857,7 +857,7 @@ export class ArangoDB extends ArangoDBWithoutSauce {
 
     const fetchOptions = this._fetchOptions(options)
 
-    return await this.queryOne<T>(Queries.fetchByMatchingProperty(
+    return await this.returnOne<T>(Queries.fetchByMatchingProperty(
       collection,
       propertyValue,
       fetchOptions),
@@ -875,7 +875,7 @@ export class ArangoDB extends ArangoDBWithoutSauce {
 
     const fetchOptions = this._fetchOptions(options)
 
-    return await this.queryOne<T>(Queries.fetchByMatchingAnyProperty(
+    return await this.returnOne<T>(Queries.fetchByMatchingAnyProperty(
       collection,
       propertyValues,
       fetchOptions),
@@ -893,7 +893,7 @@ export class ArangoDB extends ArangoDBWithoutSauce {
 
     const fetchOptions = this._fetchOptions(options)
 
-    return await this.queryOne<T>(Queries.fetchByMatchingAllProperties(
+    return await this.returnOne<T>(Queries.fetchByMatchingAllProperties(
       collection,
       propertyValues,
       fetchOptions),

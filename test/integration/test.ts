@@ -965,17 +965,17 @@ describe('Guacamole Integration Tests', () => {
     expect(result5B.data.length).toEqual(0)
   })
 
-  test('queryAll, queryOne', async () => {
+  test('returnAll, returnOne', async () => {
     const result1A = await conn
       .db(db1)
-      .queryAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`)
+      .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`)
 
     expect(result1A.data.length).toEqual(3)
     expect(result1A.data[0].surname).toBeDefined()
 
     const result1ALiteral = await conn
       .db(db1)
-      .queryAll(`FOR d IN ${CONST.userCollection} FILTER d.strength LIKE "Time Trial" RETURN d`)
+      .returnAll(`FOR d IN ${CONST.userCollection} FILTER d.strength LIKE "Time Trial" RETURN d`)
 
     expect(result1ALiteral.data.length).toEqual(3)
     expect(result1ALiteral.data[0].surname).toBeDefined()
@@ -1026,7 +1026,7 @@ describe('Guacamole Integration Tests', () => {
     expect(allDocs[0].surname).toBeDefined()
 
     const result2A = await conn.db(db1)
-      .queryAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
+      .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
 
     expect(result2A.data).toBeDefined()
     expect(Array.isArray(result2A.data)).toBeTruthy()
@@ -1041,7 +1041,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2B.data.length).toEqual(0)
 
     const result3A = await conn.db(db1)
-      .queryOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
+      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
 
     expect(result3A).toBeNull()
 
@@ -1052,7 +1052,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result3B).toBeNull()
 
     const result4A = await conn.db(db1)
-      .queryOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`)
+      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`)
 
     expect(result4A).toBeDefined()
     expect(result4A.surname).toBeDefined()
@@ -1065,7 +1065,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result4B.surname).toBeDefined()
 
     const result5A = await conn.db(db1)
-      .queryOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
+      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
 
     expect(result5A).toBeDefined()
     expect(result5A.name).toEqual('Daryl')
