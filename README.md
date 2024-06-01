@@ -7,15 +7,19 @@
 [![Language grade: JavaScript][lgtm-code-quality]][link-lgtm-code-quality]
 -->
 
-While no one likes backseat driver, sometimes a little help or extra instructions can't be avoided. That is the philosophy behind Guacamole. Think of it more as a thin wrapper that exposes the native `ArangoJS` driver, while adding a few potentially useful functions for some common use cases. The primary aim is not to take over the main job of using the native driver, or to add any friction to it's use; but rather to get out of the way completely, and only make available the additional functionality as an optional extra. In fact, it's possible to use this package and only ever stick to the natively exposed `ArangoJS` driver, without choosing to leverage any other functionality. But, like a true backset driver, we added a few additional instructions, mostly of the kind that are performed repetitively.
+While no one likes backseat driver, sometimes a few extra instructions can't be avoided. That is the philosophy behind Guacamole. Think of it more as a thin wrapper that exposes the native `ArangoJS` driver (so you can keep on using it without friction), while adding a few potentially useful functions. 
 
-On that note: this tool primarily started its existence to address some common cases derived from *our own world*, and is therefore very limited in what it attempts to be. The additional functionality relates mostly to simple CRUD operations, array manipulation operations, and the ability to easily query data in single collections (as opposed to operations intended for graphs and traversals). As such, this is a basic tool, which may or not fit your use case. But for the types of tasks that it does perform, it's probably useful enough to make available to a larger audience.
+The primary aim is not to take over the main job of using the native driver, but rather to get out of the way, while allowing you to use the additional functionality if it's helpful. In fact, it's possible to use this package and only ever stick to the natively exposed `ArangoJS` driver and it's native functions. But, like a true backset driver, we had to throw in a few additional instructions.
 
-You can find the generated [API reference](https://distributhor.github.io/guacamole/) for this package here: 
+On that note: this tool primarily came into existence to address a number of common use cases from within *our own world*, and is therefore very limited in what it attempts to be. The additional functionality relates mostly to a few CRUD operations, array manipulation, and the ability to perform simple queries easily, across data in single collections (as opposed to operations intended for graphs and traversals). 
+
+As such, this is a basic tool, which may or not fit your use case. But for the types of tasks that it does perform, it's probably useful enough to make available to a larger audience.
+
+Introductory documentation follows below. It's best used in conjunction with the [API Reference](https://distributhor.github.io/guacamole/) which contains some more details.
+
+The link to the API reference: 
 
 [https://distributhor.github.io/guacamole/](https://distributhor.github.io/guacamole/)
-
-Introductory documentation follows below, by way of examples, which does not cover any details. It's best used in conjunction with the [API Reference](https://distributhor.github.io/guacamole/) where the details of the specifications can be found.
 
 ## Quick Start
 
@@ -26,9 +30,9 @@ The two main classes that you will typically interface with, are:
 - [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html): A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance. It provides direct and easy access to the ArangoJS instance itself, but also adds a few convenience methods, for optional use.
 - [ArangoConnection](https://distributhor.github.io/guacamole/classes/index.ArangoConnection.html): A class that manages instances of [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html). An `ArangoDB` instance strictly deals with only one `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html). If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier. The current limitation, however, is that it only manages multiple database connections (or instances) for the same `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) credentials. In other words, you can easily (and only) work with multiple databases using the same shared configuration.
 
-Actually, there is one more class that should be mentioned, namely [ArangoDBWithSauce](https://distributhor.github.io/guacamole/classes/index.ArangoDBWithSauce.html), which provides a little extra. But more about that further down.
+Actually, there is one more class that should be mentioned, namely [ArangoDBWithoutSauce](https://distributhor.github.io/guacamole/classes/index. ArangoDBWithoutSauce.html). But more about that further down.
 
-Construct your instance ...
+Construct an instance.
 
 ```javascript
 // const { ArangoDB } = require('@distributhor/guacamole')
@@ -120,7 +124,7 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 
 ## Table Of Contents
 
-The documentation below does not replace the official [API Reference](https://distributhor.github.io/guacamole/) (which contains more detail), but it does provide a simple introduction and usage example for each function. The snippets without a checkmark still needs to be completed.
+The documentation below does not replace the official [API Reference](https://distributhor.github.io/guacamole/) (which contain more details), but it does provide simple introductions and usage examples for each function. The snippets without checkmarks imply that the documentation is not yet done for that section, but gives an overview of what is to come.
 
 #### Native Driver, AQL & CRUD
 - [x] [The native ArangoJS Driver](#The-native-ArangoJS-Driver)
