@@ -87,16 +87,17 @@ function _toFilterString(filter: string | Filter | SearchTerms): string {
 }
 
 /** @internal */
-function _fetchByKeyValue(
+function _fetchByPropertyValues(
   collection: string,
-  identifier: PropertyValue | PropertyValue[],
-  keyValueMatchType: MatchType,
+  properties: PropertyValue | PropertyValue[],
+  match: MatchType,
   criteria?: Criteria,
   options: FetchOptions = {}
 ): AqlQuery {
   if (_printQuery(options) || _debugFunctions(options)) {
-    console.log(`_fetchByKeyValue: ${collection}`)
-    console.log(identifier)
+    console.log(`_fetchByPropertyValues: ${collection}`)
+    console.log(properties)
+    console.log(match)
     if (criteria) {
       console.dir(criteria)
     }
@@ -110,45 +111,45 @@ function _fetchByKeyValue(
     query += ' ('
   }
 
-  if (Array.isArray(identifier)) {
-    let keyCount = 0
+  if (Array.isArray(properties)) {
+    let propCount = 0
 
-    for (const kv of identifier) {
-      keyCount++
+    for (const kv of properties) {
+      propCount++
 
-      if (keyCount > 1) {
-        query += ` ${MatchTypeOperator[keyValueMatchType]}`
+      if (propCount > 1) {
+        query += ` ${MatchTypeOperator[match]}`
       }
 
-      const keyParam = `p${keyCount}`
-      const valueParam = `v${keyCount}`
+      const bindProp = `p${propCount}`
+      const bindValue = `v${propCount}`
 
       if (kv.property.indexOf('.') > 0) {
-        params[keyParam] = kv.property.split('.')
+        params[bindProp] = kv.property.split('.')
       } else {
-        params[keyParam] = kv.property
+        params[bindProp] = kv.property
       }
 
-      if (kv.options?.caseSensitive) {
-        params[valueParam] = kv.value
-        query += ` d.@${keyParam} == @${valueParam}`
+      if (kv.options?.caseSensitive ?? typeof kv.value !== 'string') {
+        params[bindValue] = kv.value
+        query += ` d.@${bindProp} == @${bindValue}`
       } else {
-        params[valueParam] = kv.value.toLowerCase()
-        query += ` LOWER(d.@${keyParam}) == @${valueParam}`
+        params[bindValue] = kv.value.toLowerCase()
+        query += ` LOWER(d.@${bindProp}) == @${bindValue}`
       }
     }
   } else {
-    if (identifier.property.indexOf('.') > 0) {
-      params.p = identifier.property.split('.')
+    if (properties.property.indexOf('.') > 0) {
+      params.p = properties.property.split('.')
     } else {
-      params.p = identifier.property
+      params.p = properties.property
     }
 
-    if (identifier.options?.caseSensitive) {
-      params.v = identifier.value
+    if (properties.options?.caseSensitive ?? typeof properties.value !== 'string') {
+      params.v = properties.value
       query += ' d.@p == @v'
     } else {
-      params.v = identifier.value.toLowerCase()
+      params.v = properties.value.toLowerCase()
       query += ' LOWER(d.@p) == @v'
     }
   }
@@ -226,7 +227,7 @@ export function fetchByMatchingProperty(
     console.log(`fetchByMatchingProperty: ${collection}`)
   }
 
-  return _fetchByKeyValue(collection, identifier, MatchType.ANY, criteria, options)
+  return _fetchByPropertyValues(collection, identifier, MatchType.ANY, criteria, options)
 }
 
 export function fetchByMatchingAnyProperty(
@@ -239,7 +240,7 @@ export function fetchByMatchingAnyProperty(
     console.log(`fetchByMatchingAnyProperty: ${collection}`)
   }
 
-  return _fetchByKeyValue(collection, identifier, MatchType.ANY, criteria, options)
+  return _fetchByPropertyValues(collection, identifier, MatchType.ANY, criteria, options)
 }
 
 export function fetchByMatchingAllProperties(
@@ -252,7 +253,7 @@ export function fetchByMatchingAllProperties(
     console.log(`fetchByMatchingAllProperties: ${collection}`)
   }
 
-  return _fetchByKeyValue(collection, identifier, MatchType.ALL, criteria, options)
+  return _fetchByPropertyValues(collection, identifier, MatchType.ALL, criteria, options)
 }
 
 export function fetchByCriteria(
@@ -462,38 +463,38 @@ export function uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
     }
 
     if (isCompositeKey(constraint)) {
-      let keyCount = 0
+      let propCount = 0
 
       query += ' ('
 
       for (const kv of constraint.composite) {
-        keyCount++
+        propCount++
 
-        if (keyCount > 1) {
+        if (propCount > 1) {
           query += ' &&'
         }
 
         if (constraints.caseInsensitive) {
-          const keyParam = `${kv.property}_key_${keyCount}`
-          const valueParam = `${kv.property}_val_${keyCount}`
+          const bindProp = `${kv.property}_key_${propCount}`
+          const bindValue = `${kv.property}_val_${propCount}`
 
-          params[keyParam] = kv.property
-          params[valueParam] = kv.value
+          params[bindProp] = kv.property
+          params[bindValue] = kv.value
 
-          query += ` d.@${keyParam} == @${valueParam}`
+          query += ` d.@${bindProp} == @${bindValue}`
         } else {
-          const keyParam = `${kv.property}_key_${keyCount}`
-          const valueParam = `${kv.property}_val_${keyCount}`
+          const bindProp = `${kv.property}_key_${propCount}`
+          const bindValue = `${kv.property}_val_${propCount}`
 
-          params[keyParam] = kv.property
+          params[bindProp] = kv.property
 
           if (typeof kv.value === 'string') {
-            params[valueParam] = kv.value.toLowerCase()
+            params[bindValue] = kv.value.toLowerCase()
+            query += ` LOWER(d.@${bindProp}) == @${bindValue}`
           } else {
-            params[valueParam] = kv.value
+            params[bindValue] = kv.value
+            query += ` d.@${bindProp} == @${bindValue}`
           }
-
-          query += ` LOWER(d.@${keyParam}) == @${valueParam}`
         }
       }
 
@@ -501,24 +502,24 @@ export function uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
     }
 
     if (isUniqueValue(constraint)) {
-      const keyParam = `${constraint.unique.property}_key`
-      const valueParam = `${constraint.unique.property}_val`
+      const bindProp = `${constraint.unique.property}_key`
+      const bindValue = `${constraint.unique.property}_val`
 
       if (constraints.caseInsensitive) {
-        params[keyParam] = constraint.unique.property
-        params[valueParam] = constraint.unique.value
+        params[bindProp] = constraint.unique.property
+        params[bindValue] = constraint.unique.value
 
-        query += ` d.@${keyParam} == @${valueParam}`
+        query += ` d.@${bindProp} == @${bindValue}`
       } else {
-        params[keyParam] = constraint.unique.property
+        params[bindProp] = constraint.unique.property
 
         if (typeof constraint.unique.value === 'string') {
-          params[valueParam] = constraint.unique.value.toLowerCase()
+          params[bindValue] = constraint.unique.value.toLowerCase()
+          query += ` LOWER(d.@${bindProp}) == @${bindValue}`
         } else {
-          params[valueParam] = constraint.unique.value
+          params[bindValue] = constraint.unique.value
+          query += ` d.@${bindProp} == @${bindValue}`
         }
-
-        query += ` LOWER(d.@${keyParam}) == @${valueParam}`
       }
     }
   }

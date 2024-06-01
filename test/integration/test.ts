@@ -1160,13 +1160,15 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('fetchByPropertyValue', async () => {
-    const result1A = (await db
-      .fetchByProperties(CONST.userCollection, { properties: { property: 'name', value: 'Daryl' } })) as QueryResult
+    const result1A = (await db.fetchByProperties(CONST.userCollection, {
+      properties: { property: 'name', value: 'Daryl' }
+    })) as QueryResult
 
     expect(result1A.data.length).toEqual(1)
 
-    const result1B = (await db
-      .fetchByProperties(CONST.userCollection, { properties: { property: 'favoriteRoads.Portugal.Lisbon', value: 'Sintra' } })) as QueryResult
+    const result1B = (await db.fetchByProperties(CONST.userCollection, {
+      properties: { property: 'favoriteRoads.Portugal.Lisbon', value: 'Sintra' }
+    })) as QueryResult
 
     expect(result1B.data.length).toEqual(1)
 
@@ -1217,6 +1219,36 @@ describe('Guacamole Integration Tests', () => {
       ])) as QueryResult
 
     expect(result1H.data.length).toEqual(2)
+
+    const result1J = (await conn.db(db1).fetchByPropertyValue(CONST.userCollection, {
+      property: 'favoriteRoads.Portugal.Lisbon', value: 'Sintra'
+    })) as QueryResult
+
+    expect(result1J.data.length).toEqual(1)
+
+    const result1K = (await conn.db(db1).fetchByPropertyValue(CONST.userCollection, {
+      property: 'favoriteRoads.Portugal.Lisbon', value: 'sintra'
+    })) as QueryResult
+
+    expect(result1K.data.length).toEqual(1)
+
+    const result1L = (await conn.db(db1).fetchByPropertyValue(CONST.userCollection, {
+      property: 'favoriteRoads.Portugal.Lisbon', value: 'sintra', options: { caseSensitive: true }
+    })) as QueryResult
+
+    expect(result1L.data.length).toEqual(0)
+
+    const result1M = (await conn.db(db1)
+      .fetchByPropertyValue(CONST.userCollection, { property: 'stats.grandTours', value: 21 }
+      )) as QueryResult
+
+    expect(result1M.data.length).toEqual(4)
+
+    const result1N = (await conn.db(db1)
+      .fetchByPropertyValue(CONST.userCollection, { property: 'stats.grandTours', value: 21, options: { caseSensitive: true } }
+      )) as QueryResult
+
+    expect(result1N.data.length).toEqual(4)
   })
 
   test('fetchByPropertySearch', async () => {
