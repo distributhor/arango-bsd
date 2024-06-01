@@ -110,7 +110,7 @@ function stripProps(obj: any, props: string[]): void {
 
 /** @internal */
 interface InstancePool {
-  [key: string]: ArangoDBWithSauce
+  [key: string]: ArangoDB
 }
 
 /**
@@ -149,7 +149,7 @@ interface InstancePool {
  */
 export class ArangoConnection {
   private readonly pool: InstancePool = {}
-  private readonly arangodb: ArangoDBWithSauce
+  private readonly arangodb: ArangoDB
   private readonly arangojs: Database
   private readonly guacamole: GuacamoleOptions
   public readonly system: Database
@@ -157,7 +157,7 @@ export class ArangoConnection {
   constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
     this.guacamole = options
     this.arangojs = db instanceof Database ? db : new Database(db)
-    this.arangodb = new ArangoDBWithSauce(this.arangojs, options)
+    this.arangodb = new ArangoDB(this.arangojs, options)
     if (this.arangojs.name === '_system') {
       this.system = this.arangojs
     } else {
@@ -170,7 +170,7 @@ export class ArangoConnection {
     return this.getInstance(db).driver
   }
 
-  public db(db: string): ArangoDBWithSauce {
+  public db(db: string): ArangoDB {
     return this.getInstance(db)
   }
 
@@ -186,40 +186,19 @@ export class ArangoConnection {
   }
 
   /** @internal */
-  private getInstance(db: string): ArangoDBWithSauce {
+  private getInstance(db: string): ArangoDB {
     if (this.pool[db]) {
       return this.pool[db]
     }
 
     debugInfo(`Adding '${db}' to pool`)
-    this.pool[db] = new ArangoDBWithSauce(this.arangojs.database(db), this.guacamole)
+    this.pool[db] = new ArangoDB(this.arangojs.database(db), this.guacamole)
 
     return this.pool[db]
   }
 }
 
-/**
- * A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html)
- * instance. It provides direct and easy access to the ArangoJS instance itself, but also adds a few convenience methods,
- * for optional use.
- *
- * The constructor accepts an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html)
- *
- * ```typescript
- * import { aql } from "arangojs/aql";
- * import { ArangoDB } from "@distributhor/guacamole";
- *
- * const db = new ArangoDB({ databaseName: "name", url: "http://127.0.0.1:8529", auth: { username: "admin", password: "letmein" } });
- *
- * // the native ArangoJS driver instance is exposed on the `db.driver` property
- * db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
- *
- * // the backseat driver method, which immediately calls cursor.all()
- * // on the results, returning all the documents, and not the cursor
- * db.queryAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
- * ```
- */
-export class ArangoDB {
+export class ArangoDBCore {
   /**
    * A property that exposes the native `ArangoJS`
    * [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
@@ -227,6 +206,7 @@ export class ArangoDB {
   public driver: Database
   public system: Database
 
+  /** @internal */
   readonly guacamole: GuacamoleOptions | undefined
 
   /**
@@ -251,6 +231,7 @@ export class ArangoDB {
     return !!(this.guacamole?.debugFunctions)
   }
 
+  /** @internal */
   _fetchOptions(fetchOptions: FetchOptions = {}): FetchOptions {
     fetchOptions.guacamole = this.guacamole
 
@@ -791,7 +772,28 @@ export class ArangoDB {
   }
 }
 
-export class ArangoDBWithSauce extends ArangoDB {
+/**
+ * A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html)
+ * instance. It provides direct and easy access to the ArangoJS instance itself, but also adds a few convenience methods,
+ * for optional use.
+ *
+ * The constructor accepts an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html)
+ *
+ * ```typescript
+ * import { aql } from "arangojs/aql";
+ * import { ArangoDB } from "@distributhor/guacamole";
+ *
+ * const db = new ArangoDB({ databaseName: "name", url: "http://127.0.0.1:8529", auth: { username: "admin", password: "letmein" } });
+ *
+ * // the native ArangoJS driver instance is exposed on the `db.driver` property
+ * db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ *
+ * // the backseat driver method, which immediately calls cursor.all()
+ * // on the results, returning all the documents, and not the cursor
+ * db.queryAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ * ```
+ */
+export class ArangoDB extends ArangoDBCore {
   constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
     super(db, options)
   }
