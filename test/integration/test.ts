@@ -64,7 +64,7 @@ const db = new ArangoDBWithSauce({
   databaseName: db1,
   url: process.env.GUACAMOLE_TEST_DB_URI,
   auth: { username: dbAdminUser, password: dbAdminPassword }
-}, { debugFunctions: false })
+}, { printQueries: false })
 
 describe('Guacamole Integration Tests', () => {
   test('Connection and instance management', async () => {
@@ -422,7 +422,9 @@ describe('Guacamole Integration Tests', () => {
     // }
     // const result1C = await conn.db(db1).read<Person>(
 
-    const result1C = await conn.db(db1).read(CONST.userCollection, result1A[0]._key, { trimPrivateProps: true })
+    const result1C = await conn.db(db1).read(CONST.userCollection, result1A[0]._key, {
+      trimPrivateProps: true
+    })
 
     expect(result1C.name).toEqual('Daryl')
     expect(result1C.surname).toEqual('Impey')
@@ -438,7 +440,9 @@ describe('Guacamole Integration Tests', () => {
     expect(result1D.resultsV3[2018].length).toEqual(3)
     expect(result1D.rating.timetrial).toEqual(8)
 
-    const result1E = await conn.db(db1).read(CONST.userCollection, { value: 'Impey', prop: 'surname' }, { trimPrivateProps: true })
+    const result1E = await conn.db(db1).read(CONST.userCollection, { value: 'Impey', prop: 'surname' }, {
+      trimPrivateProps: true
+    })
 
     expect(result1E.name).toEqual('Daryl')
     expect(result1E.surname).toEqual('Impey')
@@ -453,11 +457,12 @@ describe('Guacamole Integration Tests', () => {
     expect(result1F.resultsV3[2017].length).toEqual(1)
     expect(result1F.resultsV3[2018].length).toEqual(3)
 
-    const result1GA = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'resultsV3[2017]')
+    const result1GA = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'resultsV3.2017')
+    console.log(result1GA)
     expect(Array.isArray(result1GA)).toBeTruthy()
     expect(result1GA.length).toEqual(1)
 
-    const result1GB = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'resultsV3[2018]')
+    const result1GB = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'resultsV3.2018')
     expect(Array.isArray(result1GB)).toBeTruthy()
     expect(result1GB.length).toEqual(3)
 
@@ -469,7 +474,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1GD.SouthAfrica).toBeDefined()
 
     const result1GE = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'blah')
-    expect(result1GE).toBeNull()
+    expect(result1GE).toBeUndefined()
 
     const result1HA = await conn.db(db1).addArrayValue(CONST.userCollection, result1A[0]._key, 'blah', 'one')
     const result1HB = await conn.db(db1).addArrayValue(CONST.userCollection, result1A[0]._key, 'blah', 2)
@@ -985,7 +990,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       { property: 'strength', value: 'Time Trial' },
       {
-        trimPrivateProps: true
+        trim: { trimPrivateProps: true }
       }
     )) as QueryResult
 
@@ -998,7 +1003,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       { property: 'strength', value: 'Time Trial' },
       {
-        trimPrivateProps: true
+        trim: { trimPrivateProps: true }
       }
     )) as QueryResult
 
@@ -1076,7 +1081,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchOneByProperties(
         CONST.userCollection,
         { properties: { property: 'surname', value: 'Impey' } },
-        { trimPrivateProps: true }
+        { trim: { trimPrivateProps: true } }
       )
 
     expect(result5C).toBeDefined()
@@ -1089,7 +1094,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchOneByPropertyValue(
         CONST.userCollection,
         { property: 'surname', value: 'Impey' },
-        { trimPrivateProps: true }
+        { trim: { trimPrivateProps: true } }
       )
 
     expect(result5D).toBeDefined()

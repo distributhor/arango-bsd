@@ -2,26 +2,23 @@
 import { aql, AqlQuery } from 'arangojs/aql'
 import { DocumentCollection } from 'arangojs/collection'
 import {
+  MatchTypeOperator,
   UniqueConstraint,
   isCompositeKey,
   isUniqueValue,
+  FetchOptions,
   PropertyValue,
   SearchTerms,
   Filter,
   Criteria,
-  MatchTypeOperator,
   MatchType,
-  FetchOptions,
-  GuacamoleOptions,
   isSearch,
   isFilter
 } from './index'
 
-let guacamole
-
 /** @internal */
-function _debugFunctions(): boolean {
-  return !!(guacamole?.debugFunctions)
+function _debugFunctions(options?: FetchOptions): boolean {
+  return !!(options?.guacamole?.debugFunctions)
 }
 
 function _printQuery(options?: FetchOptions): boolean {
@@ -29,7 +26,7 @@ function _printQuery(options?: FetchOptions): boolean {
     return true
   }
 
-  return !!(guacamole?.printQueries)
+  return !!(options?.guacamole?.printQueries)
 }
 
 /** @internal */
@@ -97,7 +94,7 @@ function _fetchByKeyValue(
   criteria?: Criteria,
   options: FetchOptions = {}
 ): AqlQuery {
-  if (_printQuery(options) || _debugFunctions()) {
+  if (_printQuery(options) || _debugFunctions(options)) {
     console.log(`_fetchByKeyValue: ${collection}`)
     console.log(identifier)
     if (criteria) {
@@ -225,7 +222,7 @@ export function fetchByMatchingProperty(
   options: FetchOptions = {},
   criteria?: Criteria
 ): AqlQuery {
-  if (_debugFunctions()) {
+  if (_debugFunctions(options)) {
     console.log(`fetchByMatchingProperty: ${collection}`)
   }
 
@@ -238,7 +235,7 @@ export function fetchByMatchingAnyProperty(
   options: FetchOptions = {},
   criteria?: Criteria
 ): AqlQuery {
-  if (_debugFunctions()) {
+  if (_debugFunctions(options)) {
     console.log(`fetchByMatchingAnyProperty: ${collection}`)
   }
 
@@ -251,7 +248,7 @@ export function fetchByMatchingAllProperties(
   options: FetchOptions = {},
   criteria?: Criteria
 ): AqlQuery {
-  if (_debugFunctions()) {
+  if (_debugFunctions(options)) {
     console.log(`fetchByMatchingAllProperties: ${collection}`)
   }
 
@@ -263,7 +260,7 @@ export function fetchByCriteria(
   criteria: Criteria,
   options: FetchOptions = {}
 ): AqlQuery {
-  if (_printQuery(options) || _debugFunctions()) {
+  if (_printQuery(options) || _debugFunctions(options)) {
     console.log(`fetchByCriteria: ${collection}`)
     if (criteria) {
       console.dir(criteria)
@@ -534,17 +531,7 @@ export function uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
   }
 }
 
-export const setOptions = function (options?: GuacamoleOptions): any {
-  guacamole = options
-}
-
-export const getOptions = function (): GuacamoleOptions {
-  return guacamole
-}
-
 export const Queries = {
-  setOptions,
-  getOptions,
   fetchAll,
   fetchByCriteria,
   fetchByMatchingProperty,

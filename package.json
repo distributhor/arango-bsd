@@ -46,6 +46,12 @@
   },
   "dependencies": {
     "arangojs": "^8.1.0",
+    "lodash.clonedeep": "^4.5.0",
+    "lodash.get": "^4.4.2",
+    "lodash.has": "^4.5.2",
+    "lodash.isequal": "^4.5.0",
+    "lodash.omit": "^4.5.0",
+    "lodash.pick": "^4.4.0",
     "debug": "^4.2.0"
   },
   "devDependencies": {

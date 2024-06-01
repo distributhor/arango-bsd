@@ -53,6 +53,10 @@ export interface PropertyValues {
   match?: MatchType
 }
 
+export interface PropertyValueOptions {
+  caseSensitive?: boolean
+}
+
 export interface UniqueValue {
   unique: PropertyValue
 }
@@ -112,13 +116,6 @@ export interface Criteria {
 
 export interface DatabaseConfig extends Config {}
 
-export interface GuacamoleOptions {
-  // withSauce?: boolean
-  debugFunctions?: boolean
-  debugParams?: boolean
-  printQueries?: boolean
-}
-
 export interface DocumentUpdate<T extends Record<string, any> = any> extends Identifier {
   data: Patch<DocumentData<T>>
 }
@@ -127,22 +124,21 @@ export interface DocumentMeta extends DocumentMetadata {
   [key: string]: any
 }
 
+export interface GuacamoleOptions {
+  debugFunctions?: boolean
+  printQueries?: boolean
+}
+
 export interface DocumentTrimOptions {
   trimPrivateProps?: boolean
   trimProps?: string[]
+  keepProps?: string[]
 }
 
-export interface ArangoJSOptions {
+export interface FetchOptions {
+  guacamole?: GuacamoleOptions
+  trim?: DocumentTrimOptions
   query?: QueryOptions
-}
-
-export interface PropertyValueOptions {
-  caseSensitive?: boolean
-}
-
-export interface FetchOptions extends DocumentTrimOptions {
-  arangojs?: ArangoJSOptions
-  // propertyValues?: PropertyValueOptions
   limit?: number
   offset?: number
   sortBy?: string
