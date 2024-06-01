@@ -16,16 +16,16 @@ import {
 
 describe('Queries', () => {
   test('isSearch', () => {
-    expect(isSearch({ props: '123', terms: 'ABC' })).toBeTruthy()
-    expect(isSearch({ props: '123', termz: 'ABC' })).toBeFalsy()
-    expect(isSearch({ props: '123', terms: '' })).toBeTruthy()
-    expect(isSearch({ props: '123', terms: ' ' })).toBeTruthy()
-    expect(isSearch({ props: '123', terms: [] })).toBeTruthy()
+    expect(isSearch({ properties: '123', terms: 'ABC' })).toBeTruthy()
+    expect(isSearch({ properties: '123', termz: 'ABC' })).toBeFalsy()
+    expect(isSearch({ properties: '123', terms: '' })).toBeTruthy()
+    expect(isSearch({ properties: '123', terms: ' ' })).toBeTruthy()
+    expect(isSearch({ properties: '123', terms: [] })).toBeTruthy()
 
-    expect(isSearch({ propz: '123', terms: 'ABC' })).toBeFalsy()
-    expect(isSearch({ props: '', terms: 'ABC' })).toBeFalsy()
-    expect(isSearch({ props: ' ', terms: 'ABC' })).toBeTruthy()
-    expect(isSearch({ props: [], terms: 'ABC' })).toBeTruthy()
+    expect(isSearch({ props: '123', terms: 'ABC' })).toBeFalsy()
+    expect(isSearch({ properties: '', terms: 'ABC' })).toBeFalsy()
+    expect(isSearch({ properties: ' ', terms: 'ABC' })).toBeTruthy()
+    expect(isSearch({ properties: [], terms: 'ABC' })).toBeTruthy()
 
     expect(isSearch('ABC')).toBeFalsy()
   })

@@ -10,7 +10,7 @@ export function isFilter(x: any): x is Filter {
 
 /** @internal */
 export function isSearch(x: any): x is SearchTerms {
-  return x.props && (x.terms || x.terms === '')
+  return x.properties && (x.terms || x.terms === '')
 }
 
 /** @internal */
@@ -63,7 +63,7 @@ export interface UniqueValue {
 
 export interface Identifier {
   value: string | Number
-  prop?: string
+  property?: string
 }
 
 export interface CompositeKey {
@@ -93,7 +93,7 @@ export enum MatchTypeOperator {
 }
 
 export interface SearchTerms {
-  props: string | string[]
+  properties: string | string[]
   terms: string | string[]
   match?: MatchType
 }

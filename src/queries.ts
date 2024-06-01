@@ -33,9 +33,9 @@ function _printQuery(options?: FetchOptions): boolean {
 function _toSearchFilter(search: SearchTerms): Filter {
   const filters: string[] = []
 
-  const props = typeof search.props === 'string'
-    ? search.props.split(',').map(p => `d.${p}`)
-    : search.props.map(p => `d.${p}`)
+  const props = typeof search.properties === 'string'
+    ? search.properties.split(',').map(p => `d.${p}`)
+    : search.properties.map(p => `d.${p}`)
 
   const terms = typeof search.terms === 'string'
     ? search.terms.split(',')

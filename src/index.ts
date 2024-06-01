@@ -317,10 +317,10 @@ export class ArangoDBWithoutSauce {
     }
 
     if (isIdentifier(identifier)) {
-      if (identifier.prop) {
-        // d = await this.fetchOneByPropertyValue<T>(collection, { property: identifier.prop, value: identifier.value })
+      if (identifier.property) {
+        // d = await this.fetchOneByPropertyValue<T>(collection, { property: identifier.property, value: identifier.value })
         d = await this.fetchOneByProperties<T>(collection, {
-          properties: { property: identifier.prop, value: identifier.value }
+          properties: { property: identifier.property, value: identifier.value }
         })
       } else {
         d = await this.driver.collection<T>(collection).document(`${identifier.value}`, options)
@@ -360,10 +360,10 @@ export class ArangoDBWithoutSauce {
       return await this.driver.collection(collection).updateAll(document, options)
     }
 
-    if (document.prop) {
+    if (document.property) {
       const query = Queries.updateDocumentsByKeyValue(
         this.driver.collection(collection),
-        { property: document.prop, value: document.value },
+        { property: document.property, value: document.value },
         document.data
       )
 
@@ -387,10 +387,10 @@ export class ArangoDBWithoutSauce {
     }
 
     if (isIdentifier(identifier)) {
-      if (identifier.prop) {
+      if (identifier.property) {
         const query = Queries.deleteDocumentsByKeyValue(
           this.driver.collection(collection),
-          { property: identifier.prop, value: identifier.value }
+          { property: identifier.property, value: identifier.value }
         )
 
         const result = await this.driver.query(query)

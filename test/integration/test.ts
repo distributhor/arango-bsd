@@ -432,7 +432,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1C.resultsV3[2018].length).toEqual(3)
     expect(result1C.rating.timetrial).toEqual(8)
 
-    const result1D = await conn.db(db1).read(CONST.userCollection, { value: 'Impey', prop: 'surname' })
+    const result1D = await conn.db(db1).read(CONST.userCollection, { value: 'Impey', property: 'surname' })
 
     expect(result1D.name).toEqual('Daryl')
     expect(result1D.surname).toEqual('Impey')
@@ -440,7 +440,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1D.resultsV3[2018].length).toEqual(3)
     expect(result1D.rating.timetrial).toEqual(8)
 
-    const result1E = await conn.db(db1).read(CONST.userCollection, { value: 'Impey', prop: 'surname' }, {
+    const result1E = await conn.db(db1).read(CONST.userCollection, { value: 'Impey', property: 'surname' }, {
       trimPrivateProps: true
     })
 
@@ -771,7 +771,7 @@ describe('Guacamole Integration Tests', () => {
     )
 
     const result2E = await conn.db(db1).update(CONST.userCollection, {
-      prop: 'surname',
+      property: 'surname',
       value: 'Evans',
       data: {
         fame: 'Too Nice',
@@ -806,7 +806,7 @@ describe('Guacamole Integration Tests', () => {
       })
     )
 
-    const result2G = await conn.db(db1).read(CONST.userCollection, { value: 'Evans', prop: 'surname' })
+    const result2G = await conn.db(db1).read(CONST.userCollection, { value: 'Evans', property: 'surname' })
 
     expect(result2G.name).toEqual('Cadel')
     expect(result2G.surname).toEqual('Evans')
@@ -819,7 +819,7 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2I).toBeNull()
 
-    const result2J = await conn.db(db1).read(CONST.userCollection, { value: 'Evans', prop: 'surname' })
+    const result2J = await conn.db(db1).read(CONST.userCollection, { value: 'Evans', property: 'surname' })
 
     expect(result2J).toBeNull()
 
@@ -837,7 +837,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result3B.name).toEqual('Thomas')
     expect(result3B.surname).toEqual('Voeckler')
 
-    const result3C = await conn.db(db1).delete(CONST.userCollection, { value: 'Voeckler', prop: 'surname' })
+    const result3C = await conn.db(db1).delete(CONST.userCollection, { value: 'Voeckler', property: 'surname' })
 
     expect(result3C).toBeDefined()
     expect(Array.isArray(result3C)).toBeTruthy()
@@ -849,7 +849,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result3D).toBeNull()
 
     const result4A = await conn.db(db1).update(CONST.userCollection, {
-      prop: 'strength',
+      property: 'strength',
       value: 'Time Trial',
       data: {
         rating: { timetrial: 9 }
@@ -912,7 +912,7 @@ describe('Guacamole Integration Tests', () => {
     )
 
     const result4C = await conn.db(db1).update(CONST.userCollection, {
-      prop: 'surname',
+      property: 'surname',
       value: 'Dennis',
       data: {
         rating: { timetrial: 8 }
@@ -952,7 +952,7 @@ describe('Guacamole Integration Tests', () => {
     const rohanDennisv3 = result4F.data.find(i => i.surname === 'Dennis')
     expect(rohanDennisv3.rating.timetrial).toEqual(7)
 
-    const result5A = await conn.db(db1).delete(CONST.userCollection, { prop: 'strength', value: 'Break Aways' })
+    const result5A = await conn.db(db1).delete(CONST.userCollection, { property: 'strength', value: 'Break Aways' })
 
     expect(result5A).toBeDefined()
     expect(Array.isArray(result5A)).toBeTruthy()
@@ -1225,7 +1225,7 @@ describe('Guacamole Integration Tests', () => {
       // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) || LIKE(d.surname, "%lance%", true) || LIKE(d.surname, "%chris%", true) ) RETURN d'
       .fetchByCriteria(CONST.userCollection, {
         search: {
-          props: 'name', terms: ['lance', 'chris']
+          properties: 'name', terms: ['lance', 'chris']
         }
       }) as QueryResult
 
@@ -1240,7 +1240,7 @@ describe('Guacamole Integration Tests', () => {
     const result2A = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection, {
         search: {
-          props: 'name', terms: ['mar']
+          properties: 'name', terms: ['mar']
         }
       }) as QueryResult
 
@@ -1257,7 +1257,7 @@ describe('Guacamole Integration Tests', () => {
     const result3A = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection, {
         search: {
-          props: 'name', terms: ''
+          properties: 'name', terms: ''
         }
       }) as QueryResult
 
@@ -1378,7 +1378,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         {
           filter: 'd.strength == "Climbing"',
-          search: { props: 'name', terms: 'mar' }
+          search: { properties: 'name', terms: 'mar' }
         }
       ) as QueryResult
 
@@ -1396,7 +1396,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         {
           filter: 'd.strength == "Climbing"',
-          search: { props: 'name', terms: 'mar' },
+          search: { properties: 'name', terms: 'mar' },
           match: MatchType.ALL
         }
       ) as QueryResult
@@ -1414,7 +1414,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         {
           filter: 'd.strength != NULL',
-          search: { props: 'name', terms: 'mar' },
+          search: { properties: 'name', terms: 'mar' },
           match: MatchType.ANY
         }
       ) as QueryResult
@@ -1426,7 +1426,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         {
           filter: 'd.strength != NULL',
-          search: { props: 'name', terms: 'mar' },
+          search: { properties: 'name', terms: 'mar' },
           match: MatchType.ALL
         }
       ) as QueryResult
@@ -1438,7 +1438,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         {
           filter: 'd.strength == "Zooming"',
-          search: { props: 'name', terms: 'mar' }
+          search: { properties: 'name', terms: 'mar' }
         }
       ) as QueryResult
 
@@ -1450,7 +1450,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         {
           filter: 'd.strength == "Zooming"',
-          search: { props: 'name', terms: 'mar' },
+          search: { properties: 'name', terms: 'mar' },
           match: MatchType.ALL
         }
       ) as QueryResult
@@ -1463,7 +1463,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         {
           filter: 'd.strength != "Zooming"',
-          search: { props: 'name', terms: 'mar' }
+          search: { properties: 'name', terms: 'mar' }
         }
       ) as QueryResult
 
@@ -1475,7 +1475,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         {
           filter: 'd.strength != "Zooming"',
-          search: { props: 'name', terms: 'mar' },
+          search: { properties: 'name', terms: 'mar' },
           match: MatchType.ALL
         }
       ) as QueryResult
@@ -1498,7 +1498,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchByCriteria(
         CONST.userCollection,
         {
-          search: { props: 'name', terms: 'mar' }
+          search: { properties: 'name', terms: 'mar' }
         }
       ) as QueryResult
 
@@ -1514,7 +1514,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchByPropertiesAndCriteria(
         CONST.userCollection,
         { properties: { property: 'strength', value: 'Climbing' } },
-        { search: { props: 'name', terms: 'mar' } }
+        { search: { properties: 'name', terms: 'mar' } }
       ) as QueryResult
 
     expect(result1A.data.length).toEqual(2)
@@ -1581,7 +1581,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         { properties: { property: 'strength', value: 'Climbing' } },
         {
-          search: { props: 'name', terms: 'mar' },
+          search: { properties: 'name', terms: 'mar' },
           filter: 'd.surname == "Pantani"'
         }
       ) as QueryResult
@@ -1599,7 +1599,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         { properties: { property: 'strength', value: 'Climbing' } },
         {
-          search: { props: 'name', terms: 'mar' },
+          search: { properties: 'name', terms: 'mar' },
           filter: 'd.surname == "Pantani"',
           match: MatchType.ALL
         }
@@ -1616,14 +1616,14 @@ describe('Guacamole Integration Tests', () => {
     //   .fetchByPropertyValueAndCriteria(
     //     CONST.userCollection,
     //     { property: 'strength', value: 'Sprinter' },
-    //     { search: { props: 'country', terms: 'ia' } }
+    //     { search: { properties: 'country', terms: 'ia' } }
     //   ) as QueryResult
 
     const result1K = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
         { property: 'strength', value: 'Sprinter' },
-        { search: { props: 'country', terms: 'ia' } }
+        { search: { properties: 'country', terms: 'ia' } }
       ) as QueryResult
 
     expect(result1K.data.length).toEqual(2)
@@ -1658,7 +1658,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         { properties: { property: 'strength', value: 'Sprinter' } },
         {
-          search: { props: 'country', terms: 'ia' },
+          search: { properties: 'country', terms: 'ia' },
           filter: 'LIKE(d.surname, "%cav%", true)',
           match: MatchType.ANY
         }
@@ -1682,7 +1682,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         { property: 'strength', value: 'Sprinter' },
         {
-          search: { props: 'country', terms: 'ia' },
+          search: { properties: 'country', terms: 'ia' },
           filter: 'LIKE(d.surname, "%cav%", true)',
           match: MatchType.ALL
         }
@@ -1695,7 +1695,7 @@ describe('Guacamole Integration Tests', () => {
         CONST.userCollection,
         { property: 'strength', value: 'Sprinter' },
         {
-          search: { props: 'country', terms: 'ia' },
+          search: { properties: 'country', terms: 'ia' },
           filter: 'LIKE(d.surname, "%an%", true)',
           match: MatchType.ALL
         }
@@ -1714,7 +1714,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
         { property: 'strength', value: 'Zooming' },
-        { search: { props: 'name', terms: 'mar' } }
+        { search: { properties: 'name', terms: 'mar' } }
       ) as QueryResult
 
     expect(result200A.data.length).toEqual(0)
@@ -1723,7 +1723,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
         { property: 'strength', value: 'Climbing' },
-        { search: { props: 'name', terms: 'wil' } }
+        { search: { properties: 'name', terms: 'wil' } }
       ) as QueryResult
 
     expect(result3A.data.length).toEqual(0)
@@ -1743,20 +1743,20 @@ describe('Guacamole Integration Tests', () => {
         { property: 'country', value: 'UK' },
         { property: 'strength', value: 'General Classification' }
       ],
-      { search: { props: 'name', terms: 'aint' } }
+      { search: { properties: 'name', terms: 'aint' } }
     ) as QueryResult
 
     // const Z = await conn.db(db1)
     //   .fetchByAllPropertyValuesAndCriteria(
     //     CONST.userCollection,
     //     {
-    //       props: [
+    //       properties: [
     //         { name: 'country', value: 'UK' },
     //         { name: 'strength', value: 'General Classification' }
     //       ],
     //       match: MatchType.ALL
     //     },
-    //     { search: { props: 'name', terms: 'aint' } }
+    //     { search: { properties: 'name', terms: 'aint' } }
     //   ) as QueryResult
 
     expect(result2A.data.length).toEqual(1)
@@ -1774,7 +1774,7 @@ describe('Guacamole Integration Tests', () => {
         ],
         match: MatchType.ALL
       },
-      { search: { props: 'name', terms: 'aint' } }
+      { search: { properties: 'name', terms: 'aint' } }
     ) as QueryResult
 
     expect(result2B.data.length).toEqual(0)
@@ -1787,7 +1787,7 @@ describe('Guacamole Integration Tests', () => {
         ],
         match: MatchType.ALL
       },
-      { search: { props: 'name', terms: 'wil' } }
+      { search: { properties: 'name', terms: 'wil' } }
     ) as QueryResult
 
     expect(result2C.data.length).toEqual(0)
@@ -1804,7 +1804,7 @@ describe('Guacamole Integration Tests', () => {
         ],
         match: MatchType.ANY
       },
-      { search: { props: 'strength', terms: 'time' } }
+      { search: { properties: 'strength', terms: 'time' } }
     ) as QueryResult
 
     expect(result2D.data.length).toEqual(2)
@@ -1813,13 +1813,13 @@ describe('Guacamole Integration Tests', () => {
     //   .fetchByPropertyValuesAndCriteria(
     //     CONST.userCollection,
     //     {
-    //       props: [
+    //       properties: [
     //         { name: 'country', value: 'Germany' },
     //         { name: 'country', value: 'Switzerland' }
     //       ],
     //       match: MatchType.ANY
     //     },
-    //     { search: { props: 'strength', terms: 'time' } }
+    //     { search: { properties: 'strength', terms: 'time' } }
     //   ) as QueryResult
 
     // expect(result3D.data.length).toEqual(2)
@@ -1831,7 +1831,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'country', value: 'Germany' },
           { property: 'country', value: 'Switzerland' }
         ],
-        { search: { props: 'strength', terms: 'time' } }
+        { search: { properties: 'strength', terms: 'time' } }
       ) as QueryResult
 
     expect(result2E.data.length).toEqual(0)
@@ -1887,7 +1887,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'strength', value: 'Sprinter' }
         ],
         {
-          search: { props: 'country', terms: 'ia' }
+          search: { properties: 'country', terms: 'ia' }
         }
       ) as QueryResult
 
@@ -1914,7 +1914,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'strength', value: 'Sprinter' }
         ],
         {
-          search: { props: 'country', terms: 'ia' },
+          search: { properties: 'country', terms: 'ia' },
           filter: 'LIKE(d.surname, "%cav%", true)',
           match: MatchType.ANY
         }
@@ -1941,7 +1941,7 @@ describe('Guacamole Integration Tests', () => {
           ]
         },
         {
-          search: { props: 'country', terms: 'ia' },
+          search: { properties: 'country', terms: 'ia' },
           filter: 'LIKE(d.surname, "%an%", true)',
           match: MatchType.ALL
         }
@@ -1963,7 +1963,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'strength', value: 'Classics' }
         ],
         {
-          search: { props: 'fame', terms: 'do it all' }
+          search: { properties: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
@@ -1977,7 +1977,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'strength', value: 'Classics' }
         ],
         {
-          search: { props: 'fame', terms: 'do it all' }
+          search: { properties: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
@@ -1995,7 +1995,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'strength', value: 'Classics' }
         ],
         {
-          search: { props: 'fame', terms: 'do it all' }
+          search: { properties: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
@@ -2009,7 +2009,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'strength', value: 'Sprinter' }
         ],
         {
-          search: { props: 'fame', terms: 'do it all' }
+          search: { properties: 'fame', terms: 'do it all' }
         }
       ) as QueryResult
 
