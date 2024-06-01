@@ -125,32 +125,20 @@ The documentation below does not replace the official [API Reference](https://di
 #### Native Driver, AQL & CRUD
 - [x] [The native ArangoJS Driver](#The-native-ArangoJS-Driver)
 - [x] [AQL Queries](#AQL-Queries)
-- [ ] [CRUD](#CRUD) (TODO)
-- [ ] [fetchProperty](#fetchProperty)
-- [ ] [updateProperty](#updateProperty)
+- [ ] [CRUD Operations](#CRUD-Operations)
 
-#### Queries & Data Fetching
-
-- [ ] [fetchByProperties](#fetchByProperties)
-- [ ] [fetchByCriteria](#fetchByCriteria)
-- [ ] [fetchByPropertiesAndCriteria](#fetchByPropertiesAndCriteria)
-
-#### Arrays
-- [ ] [addArrayValue](#addArrayValue)
-- [ ] [removeArrayValue](#removeArrayValue)
-- [ ] [addArrayObject](#addArrayObject)
-- [ ] [removeArrayObject](#removeArrayObject)
-- [ ] [updateArrayObject](#updateArrayObject)
-- [ ] [replaceArrayObject](#replaceArrayObject)
-- [ ] [replaceArray](#replaceArray)
-
-#### Util
-
-- [ ] [trimDocuments](#trimDocuments)
+#### Validation
 - [ ] [validateUniqueConstraint](#validateUniqueConstraint)
 
-#### With Sauce
+#### Queries & Data Fetching
+- [ ] [fetchAll](#fetchAll)
+- [ ] [fetchByProperties](#fetchByProperties)
+- [ ] [fetchOneByProperties](#fetchByProperties)
+- [ ] [fetchByCriteria](#fetchByCriteria)
+- [ ] [fetchByPropertiesAndCriteria](#fetchByPropertiesAndCriteria)
+- [ ] [trimDocuments](#trimDocuments)
 
+#### With Sauce
 - [ ] [fetchByPropertyValue](#fetchByPropertyValue)
 - [ ] [fetchByAnyPropertyValue](#fetchByAnyPropertyValue)
 - [ ] [fetchByAllPropertyValues](#fetchByAllPropertyValues)
@@ -160,6 +148,15 @@ The documentation below does not replace the official [API Reference](https://di
 - [ ] [fetchByPropertyValueAndCriteria](#fetchByPropertyValueAndCriteria)
 - [ ] [fetchByAnyPropertyValueAndCriteria](#fetchByAnyPropertyValueAndCriteria)
 - [ ] [fetchByAllPropertyValuesAndCriteria](#fetchByAllPropertyValuesAndCriteria)
+
+#### Array Helpers (WIP)
+- [ ] [addArrayValue](#addArrayValue)
+- [ ] [removeArrayValue](#removeArrayValue)
+- [ ] [addArrayObject](#addArrayObject)
+- [ ] [removeArrayObject](#removeArrayObject)
+- [ ] [updateArrayObject](#updateArrayObject)
+- [ ] [replaceArrayObject](#replaceArrayObject)
+- [ ] [replaceArray](#replaceArray)
 
 ### The native ArangoJS Driver
 

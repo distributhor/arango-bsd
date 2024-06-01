@@ -198,7 +198,7 @@ export class ArangoConnection {
   }
 }
 
-export class ArangoDBCore {
+export class ArangoDBWithoutSauce {
   /**
    * A property that exposes the native `ArangoJS`
    * [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
@@ -246,6 +246,10 @@ export class ArangoDBCore {
 
   public get name(): string {
     return this.driver.name
+  }
+
+  public col<T extends Record<string, any> = any>(collection: string): DocumentCollection<T> | EdgeCollection<T> {
+    return this.driver.collection(collection)
   }
 
   /**
@@ -418,11 +422,11 @@ export class ArangoDBCore {
     return _get(d, property)
   }
 
-  public async updateProperty(
+  public async updateProperty<T = any>(
     collection: string,
     identifier: Identifier | DocumentSelector,
     property: string,
-    value: any
+    value: T
   ): Promise<DocumentMeta[]> {
     const d = await this.read(collection, identifier, undefined)
 
@@ -610,6 +614,63 @@ export class ArangoDBCore {
     return await this._fetchByPropValues(collection, values.properties, match, filterCriteria, fetchOptions)
   }
 
+  public static trimDocument(document: any, options: DocumentTrimOptions = {}): any {
+    if (!document || !isObject(document)) {
+      return document
+    }
+
+    if (options.trimPrivateProps) {
+      stripUnderscoreProps(document, ['_key', '_id', '_rev'])
+    }
+
+    if (options.trimProps) {
+      stripProps(document, options.trimProps)
+    }
+
+    return document
+  }
+
+  public static trimDocuments(documents: any[], options: DocumentTrimOptions = {}): any[] {
+    if (!documents) {
+      return documents
+    }
+
+    documents.map((document) => {
+      if (!isObject(document)) {
+        return document
+      }
+
+      if (options.trimPrivateProps) {
+        stripUnderscoreProps(document, ['_key', '_id', '_rev'])
+      }
+
+      if (options.trimProps) {
+        stripProps(document, options.trimProps)
+      }
+
+      return document
+    })
+
+    return documents
+  }
+
+  public async validateUniqueConstraint(
+    constraints: UniqueConstraint
+  ): Promise<UniqueConstraintResult> {
+    if (!constraints || constraints.constraints.length === 0) {
+      throw new Error('No constraints specified')
+    }
+
+    // const query = uniqueConstraintQuery(constraints, QueryType.STRING) as string;
+    const query = Queries.uniqueConstraintQuery(constraints)
+    const documents = await (await this.query(query)).all()
+
+    return {
+      violatesUniqueConstraint: documents.length > 0,
+      documents
+    }
+  }
+
   /** @internal */
   async _fetchByPropValues<T = any>(
     collection: string,
@@ -715,61 +776,6 @@ export class ArangoDBCore {
 
     return response
   }
-
-  public static trimDocument(document: any, options: DocumentTrimOptions = {}): any {
-    if (!document || !isObject(document)) {
-      return document
-    }
-
-    if (options.trimPrivateProps) {
-      stripUnderscoreProps(document, ['_key', '_id', '_rev'])
-    }
-
-    if (options.trimProps) {
-      stripProps(document, options.trimProps)
-    }
-
-    return document
-  }
-
-  public static trimDocuments(documents: any[], options: DocumentTrimOptions = {}): any[] {
-    if (!documents) {
-      return documents
-    }
-
-    documents.map((document) => {
-      if (!isObject(document)) {
-        return document
-      }
-
-      if (options.trimPrivateProps) {
-        stripUnderscoreProps(document, ['_key', '_id', '_rev'])
-      }
-
-      if (options.trimProps) {
-        stripProps(document, options.trimProps)
-      }
-
-      return document
-    })
-
-    return documents
-  }
-
-  public async validateUniqueConstraint(constraints: UniqueConstraint): Promise<UniqueConstraintResult> {
-    if (!constraints || constraints.constraints.length === 0) {
-      throw new Error('No constraints specified')
-    }
-
-    // const query = uniqueConstraintQuery(constraints, QueryType.STRING) as string;
-    const query = Queries.uniqueConstraintQuery(constraints)
-    const documents = await (await this.query(query)).all()
-
-    return {
-      violatesUniqueConstraint: documents.length > 0,
-      documents
-    }
-  }
 }
 
 /**
@@ -793,13 +799,9 @@ export class ArangoDBCore {
  * db.queryAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
  * ```
  */
-export class ArangoDB extends ArangoDBCore {
+export class ArangoDB extends ArangoDBWithoutSauce {
   constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
     super(db, options)
-  }
-
-  public col<T extends Record<string, any> = any>(collection: string): DocumentCollection<T> | EdgeCollection<T> {
-    return this.driver.collection(collection)
   }
 
   public async fetchByPropertyValue<T = any>(
