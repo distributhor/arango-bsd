@@ -458,7 +458,6 @@ describe('Guacamole Integration Tests', () => {
     expect(result1F.resultsV3[2018].length).toEqual(3)
 
     const result1GA = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'resultsV3.2017')
-    console.log(result1GA)
     expect(Array.isArray(result1GA)).toBeTruthy()
     expect(result1GA.length).toEqual(1)
 

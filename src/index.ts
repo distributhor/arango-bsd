@@ -151,11 +151,11 @@ export class ArangoConnection {
   private readonly pool: InstancePool = {}
   private readonly arangodb: ArangoDBWithSauce
   private readonly arangojs: Database
-  private readonly options: GuacamoleOptions
+  private readonly guacamole: GuacamoleOptions
   public readonly system: Database
 
   constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
-    this.options = options
+    this.guacamole = options
     this.arangojs = db instanceof Database ? db : new Database(db)
     this.arangodb = new ArangoDBWithSauce(this.arangojs, options)
     if (this.arangojs.name === '_system') {
@@ -192,7 +192,7 @@ export class ArangoConnection {
     }
 
     debugInfo(`Adding '${db}' to pool`)
-    this.pool[db] = new ArangoDBWithSauce(this.arangojs.database(db), this.options)
+    this.pool[db] = new ArangoDBWithSauce(this.arangojs.database(db), this.guacamole)
 
     return this.pool[db]
   }
@@ -227,7 +227,7 @@ export class ArangoDB {
   public driver: Database
   public system: Database
 
-  readonly options: GuacamoleOptions | undefined
+  readonly guacamole: GuacamoleOptions | undefined
 
   /**
    * The constructor accepts an existing
@@ -235,7 +235,7 @@ export class ArangoDB {
    * **or** an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) configuration.
    */
   constructor(db: Database | DatabaseConfig, options?: GuacamoleOptions) {
-    this.options = options
+    this.guacamole = options
 
     if (db instanceof Database) {
       this.driver = db
@@ -248,19 +248,19 @@ export class ArangoDB {
 
   /** @internal */
   _debugFunctions(): boolean {
-    return !!(this.options?.debugFunctions)
+    return !!(this.guacamole?.debugFunctions)
   }
 
   _fetchOptions(fetchOptions: FetchOptions = {}): FetchOptions {
-    fetchOptions.guacamole = this.options
+    fetchOptions.guacamole = this.guacamole
 
     return fetchOptions
 
-    // if (!this.options) {
+    // if (!this.guacamole) {
     //   return options
     // }
 
-    // return Object.assign(fetchOptions, this.options)
+    // return Object.assign(fetchOptions, this.guacamole)
   }
 
   public get name(): string {
