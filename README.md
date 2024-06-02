@@ -31,19 +31,18 @@ Construct an instance.
 ```javascript
 // const { ArangoDB } = require('@distributhor/guacamole')
 import { ArangoDB } from '@distributhor/guacamole'
-import { aql } from 'arangojs/aql'
 
 const db = new ArangoDB({
-   databaseName: process.env.YOUR_DB_NAME,
-   url: process.env.YOUR_DB_URL,
-      auth: {
-         username: process.env.YOUR_DB_USER,
-         password: process.env.YOUR_DB_PASSWORD
-     }
+   databaseName: process.env.DB_NAME,
+   url: process.env.DB_URL,
+   auth: {
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD
+   }
 })
 ```
 
-The configuration object passed into the constructor is a standard `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) object. Alternatively, it also takes a [DatabaseConfig](https://distributhor.github.io/guacamole/interfaces/types.DatabaseConfig.html) object, which extends from the `ArangoJS` class, but provides some additional options for use with `Guacamole` functions. Lastly, the constructor will also accept an existing `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
+The configuration object passed into the constructor is a standard `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) object. It will also accept an existing `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
 
 Then perform some operations ...
 
@@ -51,33 +50,39 @@ Then perform some operations ...
 // Fetch one result only, it will return the first match
 // By default the the value is considered case insensitive
 // Other than case, it will match on the exact value
+// Will match "nicosmith@email.com" and "NicoSmith@Email.com"
+// Won't match "nico@email.com"
 const person = await fetchOneByPropertyValue(
    'users', 
    { 
       property: 'email', 
-      value: 'someone@email.com' 
+      value: 'nicosmith@email.com' 
    }
 )
 
 // Fetch all results that matches the property value
 // By default the the value is considered case insensitive
 // Other than case, it will match on the exact value
-const peopleNamedJoe = await fetchByPropertyValue(
+// Will match "nico" and "Nico"
+// Won't match "nic" or "nicolas"
+const peopleNamedNico = await fetchByPropertyValue(
    'users', 
    { 
       property: 'firstName', 
-      value: 'joe' 
+      value: 'nico' 
    }
 )
 
 // Fetch all results that matches the exact property value
 // Stipulate that the match should be case sensitive
 // Limit the result to 10 and sort by lastName property
-const peopleNamedJoeV2 = await fetchByPropertyValue(
+// Will match only "Nico"
+// Won't match "nico"
+const peopleNamedNicoV2 = await fetchByPropertyValue(
    'users', 
    { 
       property: 'firstName', 
-      value: 'Joe',
+      value: 'Nico',
       options: {
         caseSensitive: true
       } 
@@ -89,26 +94,27 @@ const peopleNamedJoeV2 = await fetchByPropertyValue(
 )
 
 // Fetch all results that matches the search criteria
-// The terms are considered case insentitive and not exact,
-// so will match values such as "Joey" and "William"
-const peopleNamedJoeV3 = await fetchByCriteria(
+// The terms are considered case insentitive and not exact
+// Will match values such as "Nicolas" and "William"
+// Will, of course, also match "nic" and "Wil"
+const peopleNamedNicoV3 = await fetchByCriteria(
    'users', 
    search: {
-      props: 'name', terms: ['joe', 'wil']
+      props: 'name', terms: ['nic', 'wil']
    }
 )
 
 // Fetch all results where gender == 'M'
 // AND the name matches anything containing "joe"
 // Return the ArangoJS ArrayCursor instead of .all()
-const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
+const peopleNamedNicoV4 = await fetchByPropertyValueAndCriteria(
    'users', 
    { 
       property: 'gender', 
       value: 'M' 
    }
    search: {
-      props: 'name', terms: 'joe'
+      props: 'name', terms: 'nic'
    },
    { 
       returnCursor: true
@@ -118,11 +124,11 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 
 ## Table Of Contents
 
-The documentation below does not replace the official [API Reference](https://distributhor.github.io/guacamole/) (which contain more details), but it does provide simple introductions and usage examples for each function. The snippets without checkmarks imply that the documentation is not yet done for that section, but gives an interim overview of what is to come.
+The documentation below does not replace the official [API Reference](https://distributhor.github.io/guacamole/) (which contain additional details), but it does provide simple introductions and usage examples for each function. The snippets without checkmarks imply that the documentation is not yet done for that section, but gives an interim overview of what is to come.
 
 #### Constructors & Connection Management
-- [ ] [ArangoDB](#ArangoDB)
-- [ ] [ArangoConnection](#ArangoConnection)
+- [x] [ArangoDB](#ArangoDB)
+- [x] [ArangoConnection](#ArangoConnection)
 
 #### Native Driver, AQL & CRUD
 - [x] [ArangoJS Driver](#The-ArangoJS-Driver)
@@ -163,19 +169,90 @@ The documentation below does not replace the official [API Reference](https://di
 
 ## Constructors & Connection Management
 ### ArangoDB
-*TODO*
+[ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html): This is the main class and interface. It provides direct and easy access to the ArangoJS instance/driver itself, but adds methods which can be used optionally.
+
+The configuration object passed into the constructor is a standard `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) object. It will also accept an existing `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
+
+Optionally, a second parameter accepts a [GuacamoleOptions](https://distributhor.github.io/guacamole/interfaces/types.GuacamoleOptions.html) object, which provides additional configuration options.
+
+```javascript
+const db = new ArangoDB({
+   databaseName: process.env.DB_NAME,
+   url: process.env.DB_URL,
+   auth: {
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD
+   }
+})
+```
+
+```javascript
+import { Database } from "arangojs"
+
+const ajsdb = new Database({
+   databaseName: process.env.DB_NAME,
+   url: process.env.DB_URL,
+   auth: {
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD
+   }
+})
+
+const db = new ArangoDB(ajsdb)
+```
 
 ### ArangoConnection
-*TODO*
+[ArangoConnection](https://distributhor.github.io/guacamole/classes/index.ArangoConnection.html): A class that manages instances of `ArangoDB`. An `ArangoDB` instance deals with only one `ArangoJS Database`. If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier.
+
+It is not without limitations though, and it's important to understand how it behaves. *TODO: finish describing how it behaves.*
+
+```javascript
+const con = new ArangoConnection({
+   databaseName: 'dbName1',
+   url: process.env.DB_URL,
+   auth: {
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD
+   }
+})
+
+// or alternatively, if the other database(s) require 
+// different credentials, pass an array of config
+
+const con = new ArangoConnection([{
+   databaseName: 'dbName1',
+   url: process.env.DB_URL,
+   auth: {
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD
+   }
+}, {
+   databaseName: 'dbName2',
+   url: process.env.DB_URL_2,
+   auth: {
+      username: process.env.DB_USER_2,
+      password: process.env.DB_PASSWORD_2
+   }
+}])
+
+con.db('dbName1').query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
+
+con.db('dbName2').fetchByCriteria('user', {
+   search: { 
+      properties: 'name', 
+      terms: ${name} 
+   },
+})
+```
 
 ## Native Driver, AQL & CRUD
 ### The ArangoJS Driver
 
+The native `ArangoJS` driver is exposed on a public `.driver` property of the `ArangoDB` class. By using `db.driver` you always have the full native capability available.
+
 ```javascript
 const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 ```
-
-The native `ArangoJS` driver is exposed on the `.driver` property of the `ArangoDB` class. By using `db.driver` you always have the full native capability available. Use as usual.
 
 ### AQL Queries
 
@@ -185,13 +262,13 @@ To perform an AQL query you can, of course, just run them using the native drive
 const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 ```
 
-But since it is used soo often, there is a shorthand for convenience.
+In the case of the `	query` method (because it is used so much), there is a version available without having to use `.driver` first.
 
 ```javascript
 const cursor = await db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 ```
 
-This returns the standard `ArangoJS` cursor. If you simply want to return all results immediately, and not bother with the array cursor (equivalent to invoking `cursor.all()`, the usual warnings apply) ...
+This returns the standard `ArangoJS` cursor. If you simply want to return all results immediately, and not bother with the array cursor (equivalent to invoking `cursor.all()` - the usual warnings apply) ...
 
 ```javascript
 const results = await db. returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)

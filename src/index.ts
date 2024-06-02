@@ -3,7 +3,6 @@
 import Debug from 'debug'
 import {
   GuacamoleOptions,
-  DatabaseConfig,
   EntityAvailability,
   GraphDefinition,
   DBStructure,
@@ -46,6 +45,8 @@ import { Database } from 'arangojs'
 import { AqlQuery, literal } from 'arangojs/aql'
 import { QueryOptions } from 'arangojs/database'
 import { ArrayCursor } from 'arangojs/cursor'
+import { Config } from 'arangojs/connection'
+
 import _get from 'lodash.get'
 
 export * from './types'
@@ -154,7 +155,7 @@ export class ArangoConnection {
 
   public readonly system: Database
 
-  constructor(dbs: Database | DatabaseConfig | Database[] | DatabaseConfig[], options: GuacamoleOptions = {}) {
+  constructor(dbs: Config | Database | Config[] | Database[], options: GuacamoleOptions = {}) {
     this.guacamole = options
 
     const listOfDb = Array.isArray(dbs) ? dbs : [dbs]
@@ -217,7 +218,7 @@ export class ArangoDBWithoutSauce {
    * `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance,
    * **or** an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) configuration.
    */
-  constructor(db: Database | DatabaseConfig, options?: GuacamoleOptions) {
+  constructor(db: Config | Database, options?: GuacamoleOptions) {
     this.driver = db instanceof Database ? db : new Database(db)
     this.system = this.driver.database('_system')
     this.guacamole = options
@@ -797,7 +798,7 @@ export class ArangoDBWithoutSauce {
  * ```
  */
 export class ArangoDB extends ArangoDBWithoutSauce {
-  constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
+  constructor(db: Config | Database, options: GuacamoleOptions = {}) {
     super(db, options)
   }
 
@@ -1278,7 +1279,7 @@ export class ArangoDB extends ArangoDBWithoutSauce {
 }
 
 export class ArangoDBWithSpice extends ArangoDB {
-  constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
+  constructor(db: Config | Database, options: GuacamoleOptions = {}) {
     super(db, options)
   }
 

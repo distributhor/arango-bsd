@@ -1,4 +1,3 @@
-import { Config } from 'arangojs/connection'
 import { CursorStats } from 'arangojs/cursor'
 import { QueryOptions } from 'arangojs/database'
 import { DocumentData, DocumentMetadata, Patch } from 'arangojs/documents'
@@ -114,7 +113,9 @@ export interface Criteria {
   match?: MatchType
 }
 
-export interface DatabaseConfig extends Config {}
+// export interface DatabaseConfig extends Config {
+//   guacamole?: GuacamoleOptions
+// }
 
 export interface DocumentUpdate<T extends Record<string, any> = any> extends Identifier {
   data: Patch<DocumentData<T>>
