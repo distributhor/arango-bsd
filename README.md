@@ -235,8 +235,14 @@ const con = new ArangoConnection([{
    }
 }])
 
+// db1 = ArangoDB instance for dbName1
+const db1 = con.db('dbName1')
+db1.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
+
+// or simply ...
 con.db('dbName1').query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 
+// and working with ArangoDB instance for dbName2
 con.db('dbName2').fetchByCriteria('user', {
    search: { 
       properties: 'name', 
