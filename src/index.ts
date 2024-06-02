@@ -110,7 +110,7 @@ function stripProps(obj: any, props: string[]): void {
 
 /** @internal */
 interface InstancePool {
-  [key: string]: ArangoDB
+  [key: string]: ArangoDBWithSpice
 }
 
 /**
@@ -149,7 +149,7 @@ interface InstancePool {
  */
 export class ArangoConnection {
   private readonly pool: InstancePool = {}
-  private readonly arangodb: ArangoDB
+  private readonly arangodb: ArangoDBWithSpice
   private readonly arangojs: Database
   private readonly guacamole: GuacamoleOptions
   public readonly system: Database
@@ -157,7 +157,7 @@ export class ArangoConnection {
   constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
     this.guacamole = options
     this.arangojs = db instanceof Database ? db : new Database(db)
-    this.arangodb = new ArangoDB(this.arangojs, options)
+    this.arangodb = new ArangoDBWithSpice(this.arangojs, options)
     if (this.arangojs.name === '_system') {
       this.system = this.arangojs
     } else {
@@ -170,7 +170,7 @@ export class ArangoConnection {
     return this.getInstance(db).driver
   }
 
-  public db(db: string): ArangoDB {
+  public db(db: string): ArangoDBWithSpice {
     return this.getInstance(db)
   }
 
@@ -186,13 +186,13 @@ export class ArangoConnection {
   }
 
   /** @internal */
-  private getInstance(db: string): ArangoDB {
+  private getInstance(db: string): ArangoDBWithSpice {
     if (this.pool[db]) {
       return this.pool[db]
     }
 
     debugInfo(`Adding '${db}' to pool`)
-    this.pool[db] = new ArangoDB(this.arangojs.database(db), this.guacamole)
+    this.pool[db] = new ArangoDBWithSpice(this.arangojs.database(db), this.guacamole)
 
     return this.pool[db]
   }
@@ -1277,6 +1277,12 @@ export class ArangoDB extends ArangoDBWithoutSauce {
     updatedArray: any[]
   ): Promise<DocumentMeta[] | null> {
     return await this.updateProperty(collection, identifier, arrayProperty, updatedArray)
+  }
+}
+
+export class ArangoDBWithSpice extends ArangoDB {
+  constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
+    super(db, options)
   }
 
   public async dbExists(): Promise<boolean> {
