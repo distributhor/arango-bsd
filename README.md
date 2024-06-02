@@ -130,12 +130,12 @@ The documentation below does not replace the official [API Reference](https://di
 - [x] [ArangoDB](#ArangoDB)
 - [x] [ArangoConnection](#ArangoConnection)
 
-#### Native Driver, AQL & CRUD
+#### Native Driver, AQL Queries & CRUD
 - [x] [ArangoJS Driver](#The-ArangoJS-Driver)
 - [x] [AQL Queries](#AQL-Queries)
 - [ ] [CRUD Operations](#CRUD-Operations)
 
-#### Queries & Data Fetching
+#### Criteria Queries & Property-Based Data Fetching
 - [ ] [fetchAll](#fetchAll)
 - [ ] [fetchByProperties](#fetchByProperties)
 - [ ] [fetchOneByProperties](#fetchByProperties)
@@ -204,7 +204,9 @@ const db = new ArangoDB(ajsdb)
 ### ArangoConnection
 [ArangoConnection](https://distributhor.github.io/guacamole/classes/index.ArangoConnection.html): A class that manages instances of `ArangoDB`. An `ArangoDB` instance deals with only one `ArangoJS Database`. If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier.
 
-It is not without limitations though, and it's important to understand how it behaves. *TODO: finish describing how it behaves.*
+It is not without limitations though, and it's important to understand how it behaves. 
+
+*TODO: finish describing how it behaves.*
 
 ```javascript
 const con = new ArangoConnection({
@@ -251,7 +253,7 @@ con.db('dbName2').fetchByCriteria('user', {
 })
 ```
 
-## Native Driver, AQL & CRUD
+## Native Driver, AQL Queries & CRUD
 ### The ArangoJS Driver
 
 The native `ArangoJS` driver is exposed on a public `.driver` property of the `ArangoDB` class. By using `db.driver` you always have the full native capability available.
@@ -259,18 +261,18 @@ The native `ArangoJS` driver is exposed on a public `.driver` property of the `A
 ```javascript
 const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 
-const document = await db.driver.collection.document('abc123)
+const document = await db.driver.collection.document('abc123')
 ```
 
 ### AQL Queries
 
-To perform an AQL query you can, of course, just use the native driver. But in the case of the `query` method (since it's used so much), there is a direct version available without having to use `.driver` first.
+To perform an AQL query you can, of course, just use the native driver. However, in the case of the `query` method (since it's used so much) there's a direct version available without having to use `.driver` first.
 
 ```javascript
 const cursor = await db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 ```
 
-This returns the standard `ArangoJS` cursor as per normal. If you don't want use the `ArrayCursor` and prefer to simply return all results immediately (equivalent to invoking `cursor.all()` - the usual warnings apply) ...
+This returns the standard `ArangoJS ArrayCursor ` as per normal. If you don't want use the `ArrayCursor` and prefer to simply return all results immediately (equivalent to invoking `cursor.all()` - the usual warnings apply) ...
 
 ```javascript
 const results = await db. returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
@@ -284,7 +286,14 @@ for (const r of result) {
 
 ### CRUD Operations
 
-&nbsp;
+*TODO: finish documentation for this section*
+
+[Back to top](#table-of-contents)
+
+
+## Criteria Queries & Property-Based Data Fetching
+
+[fetchAll](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html#fetchAll): here now
 
 [Back to top](#table-of-contents)
 
