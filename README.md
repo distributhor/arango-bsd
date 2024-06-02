@@ -11,7 +11,7 @@ While no one likes backseat driver, sometimes a few extra instructions can't be 
 
 The primary aim is not to take over the main job of using the native driver, but rather to get out of the way, while allowing you to use the additional functionality if it's helpful. In fact, it's possible to use this package and only ever stick to the natively exposed `ArangoJS` driver and it's native functions. But, like a true backset driver, we had to throw in a few additional instructions.
 
-On that note: this tool primarily came into existence to address a number of common use cases from within `our own world`, and is therefore very limited in what it attempts to be. The additional functionality relates mostly to a few CRUD operations, array manipulation, and the ability to perform simple queries easily, across data in single collections (as opposed to operations intended for graphs and traversals). 
+On that note: this tool primarily came into existence to address a number of common use cases from `within our own world`, and is therefore very limited in what it attempts to be. The additional functionality relates mostly to a few CRUD operations, array manipulation, and the ability to perform simple queries easily, across data in single collections (as opposed to operations intended for graphs and traversals). 
 
 As such, this is a basic tool, which may or not cover your use cases.
 
@@ -162,14 +162,14 @@ The documentation below does not replace the official [API Reference](https://di
 
 
 ## Constructors & Connection Management
-#### ArangoDB
-TODO
+### ArangoDB
+*TODO*
 
-#### ArangoConnection
-TODO
+### ArangoConnection
+*TODO*
 
 ## Native Driver, AQL & CRUD
-#### The ArangoJS Driver
+### The ArangoJS Driver
 
 ```javascript
 const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
@@ -177,7 +177,7 @@ const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name
 
 The native `ArangoJS` driver is exposed on the `.driver` property of the `ArangoDB` class. By using `db.driver` you always have the full native capability available. Use as usual.
 
-#### AQL Queries
+### AQL Queries
 
 To perform an AQL query you can, of course, just run them using the native driver.
 
@@ -203,7 +203,13 @@ for (const r of result) {
 
 [Back to top](#table-of-contents)
 
- ## License
+### CRUD Operations
+
+&nbsp;
+
+[Back to top](#table-of-contents)
+
+## License
 
 The MIT License (MIT). Please see [License File](LICENSE) for more information.
 
