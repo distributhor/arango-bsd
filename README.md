@@ -258,23 +258,19 @@ The native `ArangoJS` driver is exposed on a public `.driver` property of the `A
 
 ```javascript
 const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
+
+const document = await db.driver.collection.document('abc123)
 ```
 
 ### AQL Queries
 
-To perform an AQL query you can, of course, just run them using the native driver.
-
-```javascript
-const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
-```
-
-In the case of the `	query` method (because it is used so much), there is a version available without having to use `.driver` first.
+To perform an AQL query you can, of course, just use the native driver. But in the case of the `query` method (since it's used so much), there is a direct version available without having to use `.driver` first.
 
 ```javascript
 const cursor = await db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
 ```
 
-This returns the standard `ArangoJS` cursor. If you simply want to return all results immediately, and not bother with the array cursor (equivalent to invoking `cursor.all()` - the usual warnings apply) ...
+This returns the standard `ArangoJS` cursor as per normal. If you don't want use the `ArrayCursor` and prefer to simply return all results immediately (equivalent to invoking `cursor.all()` - the usual warnings apply) ...
 
 ```javascript
 const results = await db. returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
