@@ -116,12 +116,12 @@ interface InstancePool {
 /**
  * A class that manages instances of {@link ArangoDB} classes.
  *
- * An `ArangoDB` instance strictly deals with only one `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html).
+ * An `ArangoDB` instance deals with only one `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html).
  * If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to
  * use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier.
  * The current limitation, however, is that it only manages multiple database connections (or instances) for the same `ArangoJS`
  * [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) credentials.
- * In other words, you can easily (and only) work with multiple databases using the same shared configuration.
+ * In other words, you can easily (and only) work with multiple databases that use the same connection credentials.
  *
  * The constructor accepts an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html)
  *
@@ -148,22 +148,25 @@ interface InstancePool {
  * ```
  */
 export class ArangoConnection {
-  private readonly pool: InstancePool = {}
-  private readonly arangodb: ArangoDBWithSpice
-  private readonly arangojs: Database
   private readonly guacamole: GuacamoleOptions
+  private readonly arangojs: Database
+  private readonly pool: InstancePool = {}
+
   public readonly system: Database
 
-  constructor(db: Database | DatabaseConfig, options: GuacamoleOptions = {}) {
+  constructor(dbs: Database | DatabaseConfig | Database[] | DatabaseConfig[], options: GuacamoleOptions = {}) {
     this.guacamole = options
-    this.arangojs = db instanceof Database ? db : new Database(db)
-    this.arangodb = new ArangoDBWithSpice(this.arangojs, options)
-    if (this.arangojs.name === '_system') {
-      this.system = this.arangojs
-    } else {
-      this.pool[this.arangojs.name] = this.arangodb
-      this.system = this.arangojs.database('_system')
+
+    const listOfDb = Array.isArray(dbs) ? dbs : [dbs]
+    for (const db of listOfDb) {
+      if (!this.arangojs) {
+        this.arangojs = db instanceof Database ? db : new Database(db)
+      }
+
+      this.pool[this.arangojs.name] = new ArangoDBWithSpice(db, options)
     }
+
+    this.system = this.arangojs.database('_system')
   }
 
   public driver(db: string): Database {
@@ -215,15 +218,9 @@ export class ArangoDBWithoutSauce {
    * **or** an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) configuration.
    */
   constructor(db: Database | DatabaseConfig, options?: GuacamoleOptions) {
-    this.guacamole = options
-
-    if (db instanceof Database) {
-      this.driver = db
-    } else {
-      this.driver = new Database(db)
-    }
-
+    this.driver = db instanceof Database ? db : new Database(db)
     this.system = this.driver.database('_system')
+    this.guacamole = options
   }
 
   /** @internal */

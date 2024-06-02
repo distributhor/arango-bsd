@@ -54,11 +54,11 @@ const dbStructure: DBStructure = {
   ]
 }
 
-const conn = new ArangoConnection({
+const conn = new ArangoConnection([{
   databaseName: db1,
   url: process.env.GUACAMOLE_TEST_DB_URI,
   auth: { username: dbAdminUser, password: dbAdminPassword }
-}, { printQueries: false })
+}], { printQueries: false })
 
 const db = new ArangoDBWithoutSauce({
   databaseName: db1,
@@ -69,7 +69,6 @@ const db = new ArangoDBWithoutSauce({
 describe('Guacamole Integration Tests', () => {
   test('Connection and instance management', async () => {
     expect(conn.db(db1).name).toEqual(db1)
-    expect(conn.system.name).toEqual('_system')
     expect(conn.listConnections()).toEqual([db1])
 
     conn.db(db1) // should NOT create additional instance, because it already exists

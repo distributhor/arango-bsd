@@ -15,7 +15,7 @@ On that note: this tool primarily came into existence to address a number of com
 
 As such, this is a basic tool, which may or not cover your use cases.
 
-Introductory documentation follows below. It's best used in conjunction with the [API Reference](https://distributhor.github.io/guacamole/) which contain more details.
+Introductory documentation follows below. It's best to read in conjunction with the [API Reference](https://distributhor.github.io/guacamole/) for additional details.
 
 API reference: [https://distributhor.github.io/guacamole/](https://distributhor.github.io/guacamole/)
 
@@ -26,7 +26,7 @@ The following is a basic example, which will also give you a succinct idea of th
 The two main classes that you will typically interface with, are:
 
 - [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html): A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance. It provides direct and easy access to the ArangoJS instance itself, but also adds a few convenience methods, for optional use.
-- [ArangoConnection](https://distributhor.github.io/guacamole/classes/index.ArangoConnection.html): A class that manages instances of [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html). An `ArangoDB` instance strictly deals with only one `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html). If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier. The current limitation, however, is that it only manages multiple database connections (or instances) for the same `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html) credentials. In other words, you can easily (and only) work with multiple databases using the same shared configuration.
+- [ArangoConnection](https://distributhor.github.io/guacamole/classes/index.ArangoConnection.html): A class that manages instances of [ArangoDB](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html). An `ArangoDB` instance deals with only one `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html). If you only need to work with one database, then simply use the `ArangoDB` class directly, but if you want to use different databases interchangeably in the same code, then `ArangoConnection` could potentially make that easier. It's not without limitation - read the documentation further below to understand it's usage and limits.
 
 Construct an instance.
 
@@ -120,15 +120,16 @@ const peopleNamedJoeV4 = await fetchByPropertyValueAndCriteria(
 
 ## Table Of Contents
 
-The documentation below does not replace the official [API Reference](https://distributhor.github.io/guacamole/) (which contain more details), but it does provide simple introductions and usage examples for each function. The snippets without checkmarks imply that the documentation is not yet done for that section, but gives an overview of what is to come.
+The documentation below does not replace the official [API Reference](https://distributhor.github.io/guacamole/) (which contain more details), but it does provide simple introductions and usage examples for each function. The snippets without checkmarks imply that the documentation is not yet done for that section, but gives an interim overview of what is to come.
+
+#### Constructors & Connection Management
+- [ ] [ArangoDB](#ArangoDB)
+- [ ] [ArangoConnection](#ArangoConnection)
 
 #### Native Driver, AQL & CRUD
-- [x] [The native ArangoJS Driver](#The-native-ArangoJS-Driver)
+- [x] [ArangoJS Driver](#The-ArangoJS-Driver)
 - [x] [AQL Queries](#AQL-Queries)
 - [ ] [CRUD Operations](#CRUD-Operations)
-
-#### Validation
-- [ ] [validateUniqueConstraint](#validateUniqueConstraint)
 
 #### Queries & Data Fetching
 - [ ] [fetchAll](#fetchAll)
@@ -150,6 +151,7 @@ The documentation below does not replace the official [API Reference](https://di
 
 #### Utility
 - [ ] [trimDocuments](#trimDocuments)
+- [ ] [validateUniqueConstraint](#validateUniqueConstraint)
 
 #### Array Helpers (WIP)
 - [ ] [addArrayValue](#addArrayValue)
@@ -160,7 +162,16 @@ The documentation below does not replace the official [API Reference](https://di
 - [ ] [replaceArrayObject](#replaceArrayObject)
 - [ ] [replaceArray](#replaceArray)
 
-### The native ArangoJS Driver
+
+### Constructors & Connection Management
+#### ArangoDB
+TODO
+
+#### ArangoConnection
+TODO
+
+### Native Driver, AQL & CRUD
+#### The ArangoJS Driver
 
 ```javascript
 const cursor = await db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`)
