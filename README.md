@@ -293,6 +293,11 @@ for (const r of result) {
 
 ## Criteria Queries & Property-Based Data Fetching
 
+### Introduction
+
+Here now
+
+### Methods
 [fetchAll](https://distributhor.github.io/guacamole/classes/index.ArangoDB.html#fetchAll): here now
 
 [Back to top](#table-of-contents)

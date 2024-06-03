@@ -538,7 +538,7 @@ export class ArangoDBWithoutSauce {
 
     if (!Array.isArray(values.properties)) {
       return await this.returnOne<T>(Queries.fetchByMatchingProperty(
-        collection,
+        this.col(collection),
         values.properties,
         fetchOptions),
       fetchOptions)
@@ -546,7 +546,7 @@ export class ArangoDBWithoutSauce {
 
     if (values.match && values.match === MatchType.ALL) {
       return await this.returnOne<T>(Queries.fetchByMatchingAllProperties(
-        collection,
+        this.col(collection),
         values.properties,
         fetchOptions),
       fetchOptions
@@ -554,7 +554,7 @@ export class ArangoDBWithoutSauce {
     }
 
     return await this.returnOne<T>(Queries.fetchByMatchingAnyProperty(
-      collection,
+      this.col(collection),
       values.properties,
       fetchOptions),
     fetchOptions
@@ -674,7 +674,7 @@ export class ArangoDBWithoutSauce {
     collection: string,
     propertyValues: PropertyValue | PropertyValue[],
     matchType: MatchType,
-    criteria?: string | Filter | Criteria,
+    criteria?: string | AqlQuery | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     let filterCriteria: Criteria | undefined
@@ -706,18 +706,18 @@ export class ArangoDBWithoutSauce {
     if (Array.isArray(propertyValues)) {
       if (matchType === MatchType.ANY) {
         result = await this.driver.query(
-          Queries.fetchByMatchingAnyProperty(collection, propertyValues, options, filterCriteria),
+          Queries.fetchByMatchingAnyProperty(this.col(collection), propertyValues, options, filterCriteria),
           arangojsQueryOptions
         )
       } else {
         result = await this.driver.query(
-          Queries.fetchByMatchingAllProperties(collection, propertyValues, options, filterCriteria),
+          Queries.fetchByMatchingAllProperties(this.col(collection), propertyValues, options, filterCriteria),
           arangojsQueryOptions
         )
       }
     } else {
       result = await this.driver.query(
-        Queries.fetchByMatchingProperty(collection, propertyValues, options, filterCriteria),
+        Queries.fetchByMatchingProperty(this.col(collection), propertyValues, options, filterCriteria),
         arangojsQueryOptions
       )
     }
@@ -755,7 +755,7 @@ export class ArangoDBWithoutSauce {
     }
 
     const result = await this.driver.query(
-      Queries.fetchByCriteria(collection, criteria, options),
+      Queries.fetchByCriteria(this.col(collection), criteria, options),
       arangojsQueryOptions
     )
 
@@ -856,7 +856,7 @@ export class ArangoDB extends ArangoDBWithoutSauce {
     const fetchOptions = this._fetchOptions(options)
 
     return await this.returnOne<T>(Queries.fetchByMatchingProperty(
-      collection,
+      this.col(collection),
       propertyValue,
       fetchOptions),
     fetchOptions)
@@ -874,7 +874,7 @@ export class ArangoDB extends ArangoDBWithoutSauce {
     const fetchOptions = this._fetchOptions(options)
 
     return await this.returnOne<T>(Queries.fetchByMatchingAnyProperty(
-      collection,
+      this.col(collection),
       propertyValues,
       fetchOptions),
     fetchOptions)
@@ -892,7 +892,7 @@ export class ArangoDB extends ArangoDBWithoutSauce {
     const fetchOptions = this._fetchOptions(options)
 
     return await this.returnOne<T>(Queries.fetchByMatchingAllProperties(
-      collection,
+      this.col(collection),
       propertyValues,
       fetchOptions),
     fetchOptions
@@ -902,7 +902,7 @@ export class ArangoDB extends ArangoDBWithoutSauce {
   public async fetchByPropertyValueAndCriteria<T = any>(
     collection: string,
     propertyValue: PropertyValue,
-    criteria: string | Filter | Criteria,
+    criteria: string | AqlQuery | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor | QueryResult<T>> {
     if (this._debugFunctions()) {

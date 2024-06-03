@@ -1342,8 +1342,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const result2B = await conn.db(db1)
-      .fetchByCriteria(CONST.userCollection, 'LIKE(d.name, "%mar%", true) && d.strength == "Climbing"') as QueryResult
+    const result2B = await conn.db(db1).fetchByCriteria(CONST.userCollection,
+      'LIKE(d.name, "%mar%", true) && d.strength == "Climbing"'
+    ) as QueryResult
 
     expect(result2B.data.length).toEqual(2)
     expect(result2B.data).toEqual(
@@ -1545,7 +1546,8 @@ describe('Guacamole Integration Tests', () => {
       .fetchByPropertiesAndCriteria(
         CONST.userCollection,
         { properties: { property: 'strength', value: 'Climbing' } },
-        { search: { properties: 'name', terms: 'mar' } }
+        { search: { properties: 'name', terms: 'mar' } },
+        { debugFilters: true }
       ) as QueryResult
 
     expect(result1A.data.length).toEqual(2)
@@ -1564,9 +1566,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
         { property: 'strength', value: 'Climbing' },
-        // Should work with either a string filter or criteria
-        // { filter: 'LIKE(d.name, "%mar%", true)' }
-        'LIKE(d.name, "%mar%", true)'
+        { filter: 'LIKE(d.name, "%mar%", true)' }
       ) as QueryResult
 
     expect(result1B.data.length).toEqual(2)

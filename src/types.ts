@@ -1,3 +1,4 @@
+import { AqlQuery } from 'arangojs/aql'
 import { CursorStats } from 'arangojs/cursor'
 import { QueryOptions } from 'arangojs/database'
 import { DocumentData, DocumentMetadata, Patch } from 'arangojs/documents'
@@ -98,7 +99,7 @@ export interface SearchTerms {
 }
 
 export interface Filter {
-  filters: string[]
+  filters: string[] | AqlQuery[]
   match?: MatchType
   options?: FilterOptions
 }

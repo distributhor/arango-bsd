@@ -8,6 +8,7 @@
 // _findAllIndicesOfSubString
 // } from '../../src/queries'
 
+import { aql, isAqlQuery } from 'arangojs/aql'
 import {
   isSearch,
   isFilter,
@@ -43,6 +44,18 @@ describe('Queries', () => {
     expect(isIdentifier({ value: 123 })).toBeTruthy()
     expect(isIdentifier({ identifier: 'ABC' })).toBeFalsy()
     expect(isIdentifier('ABC')).toBeFalsy()
+  })
+
+  test('isAqlQuery', () => {
+    expect(isAqlQuery('FILTER d.name != NULL')).toBeFalsy()
+    expect(isAqlQuery(aql`FILTER d.name != NULL`)).toBeTruthy()
+    expect(isAqlQuery({
+      query: 'ABC',
+      bindVars: {
+        p: 'strength',
+        v: 'climbing'
+      }
+    })).toBeTruthy()
   })
 
   // test('Find all indices of substring in string', () => {

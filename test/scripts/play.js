@@ -9,9 +9,21 @@ async function play() {
       url: 'http://root:letmein@localhost:8529'
     })
 
+    // const result1 = await db.fetchByPropertiesAndCriteria(
+    //   'cyclists',
+    //   { properties: { property: 'strength', value: 'Climbing' } },
+    //   { search: { properties: 'name', terms: 'mar' } },
+    //   { printQuery: true }
+    // )
+
+    const result1 = await db.fetchByCriteria('cyclists', 'd.name == "Lance" || d.name == "Chris"', {
+      printQuery: true
+    })
+
+    console.log(result1)
+
     // const cursor = await db.driver.query(aql`FOR d IN cyclists FILTER d.name == "Lance" RETURN d`)
     // const result2 = await cursor.all()
-
     // console.log(result2)
 
     // const result3 = await db.fetchOneByPropertyValue('cyclists', {
@@ -28,15 +40,15 @@ async function play() {
 
     // console.log(result4)
 
-    const result5 = await db.fetchOneByPropertyValue('cyclists', {
-      property: 'name',
-      value: 'lance',
-      options: {
-        caseSensitive: true
-      }
-    })
+    // const result5 = await db.fetchOneByPropertyValue('cyclists', {
+    //   property: 'name',
+    //   value: 'lance',
+    //   options: {
+    //     caseSensitive: true
+    //   }
+    // })
 
-    console.log(result5)
+    // console.log(result5)
 
     // const result6 = await db.fetchByCriteria('cyclists', {
     //   filter: {
@@ -47,19 +59,19 @@ async function play() {
 
     // console.log(result6)
 
-    const result7 = await db.fetchByCriteria(
-      'cyclists',
-      {
-        search: {
-          props: 'name', terms: ['lance', 'chris']
-        }
-      },
-      {
-        limit: 10
-      }
-    )
+    // const result7 = await db.fetchByCriteria(
+    //   'cyclists',
+    //   {
+    //     search: {
+    //       props: 'name', terms: ['lance', 'chris']
+    //     }
+    //   },
+    //   {
+    //     limit: 10
+    //   }
+    // )
 
-    console.log(result7)
+    // console.log(result7)
   } catch (err) {
     console.log(err)
   }
