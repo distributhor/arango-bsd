@@ -30,7 +30,7 @@ function _printQuery(options?: FetchOptions): boolean {
 }
 
 /** @internal */
-function _toSearchFilter(search: SearchTerms): Filter {
+function _toAqlSearchFilter(search: SearchTerms): Filter {
   const filters: AqlQuery[] = []
 
   const props = typeof search.properties === 'string'
@@ -60,7 +60,7 @@ function _toSearchFilter(search: SearchTerms): Filter {
 }
 
 /** @internal */
-function _toFilterString(filter: string | AqlValue | Filter | SearchTerms): AqlValue[] {
+function _toAqlFilters(filter: string | AqlValue | Filter | SearchTerms): AqlValue[] {
   if (typeof filter === 'string') {
     return [literal(filter)]
   }
@@ -70,7 +70,7 @@ function _toFilterString(filter: string | AqlValue | Filter | SearchTerms): AqlV
   }
 
   if (isSearch(filter)) {
-    return _toFilterString(_toSearchFilter(filter))
+    return _toAqlFilters(_toAqlSearchFilter(filter))
   }
 
   if (!isFilter(filter)) {
@@ -98,253 +98,7 @@ function _toFilterString(filter: string | AqlValue | Filter | SearchTerms): AqlV
 }
 
 /** @internal */
-// function _fetchByPropertyValues(
-//   collection: string,
-//   properties: PropertyValue | PropertyValue[],
-//   match: MatchType,
-//   criteria?: Criteria,
-//   options: FetchOptions = {}
-// ): AqlQuery {
-//   if (_printQuery(options) || _debugFunctions(options)) {
-//     console.log(`_fetchByPropertyValues: ${collection}`)
-//     console.log(properties)
-//     console.log(match)
-//     if (criteria) {
-//       console.dir(criteria)
-//     }
-//   }
-
-//   const params: any = {
-//     '@collection': collection
-//   }
-
-//   let query = 'FOR d IN @@collection FILTER ('
-
-//   if (criteria && (criteria.filter ?? criteria.search)) {
-//     query += ' ('
-//   }
-
-//   if (Array.isArray(properties)) {
-//     let propCount = 0
-
-//     for (const kv of properties) {
-//       propCount++
-
-//       if (propCount > 1) {
-//         query += ` ${MatchTypeOperator[match]}`
-//       }
-
-//       const bindProp = `p${propCount}`
-//       const bindValue = `v${propCount}`
-
-//       if (kv.property.indexOf('.') > 0) {
-//         params[bindProp] = kv.property.split('.')
-//       } else {
-//         params[bindProp] = kv.property
-//       }
-
-//       if (kv.options?.caseSensitive ?? typeof kv.value !== 'string') {
-//         params[bindValue] = kv.value
-//         query += ` d.@${bindProp} == @${bindValue}`
-//       } else {
-//         params[bindValue] = kv.value.toLowerCase()
-//         query += ` LOWER(d.@${bindProp}) == @${bindValue}`
-//       }
-//     }
-//   } else {
-//     if (properties.property.indexOf('.') > 0) {
-//       params.p = properties.property.split('.')
-//     } else {
-//       params.p = properties.property
-//     }
-
-//     if (properties.options?.caseSensitive ?? typeof properties.value !== 'string') {
-//       params.v = properties.value
-//       query += ' d.@p == @v'
-//     } else {
-//       params.v = properties.value.toLowerCase()
-//       query += ' LOWER(d.@p) == @v'
-//     }
-//   }
-
-//   if (criteria?.filter && criteria.search) {
-//     query += ' ) AND ( ( '
-//   } else if (criteria && (criteria.filter ?? criteria.search)) {
-//     query += ' ) AND ( '
-//   }
-
-//   if (criteria) {
-//     if (criteria.filter) {
-//       query += _toFilterString(criteria.filter)
-//     }
-
-//     if (criteria.filter && criteria.search) {
-//       query += ` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `
-//       // query += ` ) ${criteria.match ? criteria.match : MatchType.ANY} ( `
-//     }
-
-//     if (criteria.search) {
-//       query += _toFilterString(criteria.search)
-//     }
-//   }
-
-//   if (criteria?.filter && criteria.search) {
-//     query += ' ) )'
-//   } else if (criteria && (criteria.filter ?? criteria.search)) {
-//     query += ' )'
-//   }
-
-//   query += ' )'
-
-//   if (options.hasOwnProperty('sortBy')) {
-//     query += ` SORT d.${options.sortBy}`
-
-//     if (options.hasOwnProperty('sortOrder')) {
-//       if (options.sortOrder === 'ascending') {
-//         query += ' ASC'
-//       } else if (options.sortOrder === 'descending') {
-//         query += ' DESC'
-//       }
-//     }
-//   }
-
-//   if (options.limit && options.limit > 0) {
-//     if (options.offset) {
-//       query += ` LIMIT ${options.offset}, ${options.limit}`
-//     } else {
-//       query += ` LIMIT ${options.limit}`
-//     }
-//   }
-
-//   query += ' RETURN d'
-
-//   if (_printQuery(options)) {
-//     console.log(query)
-//     console.log(params)
-//     console.log('')
-//   }
-
-//   return {
-//     query,
-//     bindVars: params
-//   }
-// }
-
-function _fetchByPropertyValues(
-  collection: DocumentCollection | EdgeCollection,
-  properties: PropertyValue | PropertyValue[],
-  match: MatchType,
-  criteria?: Criteria,
-  options: FetchOptions = {}
-): AqlQuery {
-  if (_printQuery(options) || _debugFunctions(options)) {
-    console.log(`_fetchByPropertyValues: ${collection.name}`)
-    console.log(properties)
-    console.log(match)
-    if (criteria) {
-      console.dir(criteria)
-    }
-  }
-
-  const f: AqlValue[] = []
-
-  if (criteria && (criteria.filter ?? criteria.search)) {
-    f.push(literal(' ('))
-  }
-
-  if (Array.isArray(properties)) {
-    let propCount = 0
-
-    for (const kv of properties) {
-      propCount++
-
-      if (propCount > 1) {
-        f.push(literal(` ${MatchTypeOperator[match]}`))
-      }
-
-      if (kv.property.indexOf('.') > 0) {
-        if (kv.options?.caseSensitive ?? typeof kv.value !== 'string') {
-          f.push(literal(' d'))
-        } else {
-          f.push(literal(' LOWER(d'))
-        }
-
-        const props = kv.property.split('.')
-        for (let i = 0; i < props.length; i++) {
-          f.push(aql`.${props[i]}`)
-        }
-
-        if (kv.options?.caseSensitive ?? typeof kv.value !== 'string') {
-          f.push(aql` == ${kv.value}`)
-        } else {
-          f.push(aql`) == ${kv.value.toLowerCase()}`)
-        }
-      } else {
-        if (kv.options?.caseSensitive ?? typeof kv.value !== 'string') {
-          f.push(aql` d.${kv.property} == ${kv.value}`)
-        } else {
-          f.push(aql` LOWER(d.${kv.property}) == ${kv.value.toLowerCase()}`)
-        }
-      }
-    }
-  } else {
-    if (properties.property.indexOf('.') > 0) {
-      if (properties.options?.caseSensitive ?? typeof properties.value !== 'string') {
-        f.push(literal(' d'))
-      } else {
-        f.push(literal(' LOWER(d'))
-      }
-
-      const props = properties.property.split('.')
-      for (let i = 0; i < props.length; i++) {
-        f.push(aql`.${props[i]}`)
-      }
-
-      if (properties.options?.caseSensitive ?? typeof properties.value !== 'string') {
-        f.push(aql` == ${properties.value}`)
-      } else {
-        f.push(aql`) == ${properties.value.toLowerCase()}`)
-      }
-    } else {
-      if (properties.options?.caseSensitive ?? typeof properties.value !== 'string') {
-        f.push(aql` d.${properties.property} == ${properties.value}`)
-      } else {
-        f.push(aql` LOWER(d.${properties.property}) == ${properties.value.toLowerCase()}`)
-      }
-    }
-  }
-
-  if (criteria?.filter && criteria.search) {
-    f.push(literal(' ) AND ( ( '))
-  } else if (criteria && (criteria.filter ?? criteria.search)) {
-    f.push(literal(' ) AND ( '))
-  }
-
-  if (criteria) {
-    if (criteria.filter) {
-      for (const q of _toFilterString(criteria.filter)) {
-        f.push(q)
-      }
-    }
-
-    if (criteria.filter && criteria.search) {
-      f.push(literal(` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `))
-      // query += ` ) ${criteria.match ? criteria.match : MatchType.ANY} ( `
-    }
-
-    if (criteria.search) {
-      for (const q of _toFilterString(criteria.search)) {
-        f.push(q)
-      }
-    }
-  }
-
-  if (criteria?.filter && criteria.search) {
-    f.push(literal(' ) )'))
-  } else if (criteria && (criteria.filter ?? criteria.search)) {
-    f.push(literal(' )'))
-  }
-
+function _toQueryOpts(options: FetchOptions = {}): AqlValue[] {
   const o: AqlValue[] = []
 
   if (options.hasOwnProperty('sortBy')) {
@@ -368,7 +122,129 @@ function _fetchByPropertyValues(
     }
   }
 
-  const query = aql`FOR d IN ${collection} FILTER (${join(f)}) ${join(o)} RETURN d`
+  return o
+}
+
+// export interface PropertyValue {
+//   property: string
+//   value: any
+//   options?: PropertyValueOptions
+// }
+
+/** @internal */
+function _toPropertyFilter(prop: PropertyValue): AqlValue[] {
+  const filters: AqlValue[] = []
+
+  if (prop.property.indexOf('.') > 0) {
+    if (prop.options?.caseSensitive ?? typeof prop.value !== 'string') {
+      filters.push(literal(' d'))
+    } else {
+      filters.push(literal(' LOWER(d'))
+    }
+
+    const props = prop.property.split('.')
+
+    for (let i = 0; i < props.length; i++) {
+      filters.push(aql`.${props[i]}`)
+    }
+
+    if (prop.options?.caseSensitive ?? typeof prop.value !== 'string') {
+      filters.push(aql` == ${prop.value}`)
+    } else {
+      filters.push(aql`) == ${prop.value.toLowerCase()}`)
+    }
+  } else {
+    if (prop.options?.caseSensitive ?? typeof prop.value !== 'string') {
+      filters.push(aql` d.${prop.property} == ${prop.value}`)
+    } else {
+      filters.push(aql` LOWER(d.${prop.property}) == ${prop.value.toLowerCase()}`)
+    }
+  }
+
+  return filters
+}
+
+function _fetchByPropertyValues(
+  collection: DocumentCollection | EdgeCollection,
+  properties: PropertyValue | PropertyValue[],
+  match: MatchType,
+  criteria?: Criteria,
+  options: FetchOptions = {}
+): AqlQuery {
+  if (_printQuery(options) || _debugFunctions(options)) {
+    console.log(`_fetchByPropertyValues: ${collection.name}`)
+    console.log(properties)
+    console.log(match)
+    if (criteria) {
+      console.dir(criteria)
+    }
+  }
+
+  const filters: AqlValue[] = []
+
+  if (criteria && (criteria.filter ?? criteria.search)) {
+    filters.push(literal(' ('))
+  }
+
+  if (Array.isArray(properties)) {
+    let propCount = 0
+
+    for (const prop of properties) {
+      propCount++
+
+      if (propCount > 1) {
+        filters.push(literal(` ${MatchTypeOperator[match]}`))
+      }
+
+      for (const f of _toPropertyFilter(prop)) {
+        filters.push(f)
+      }
+    }
+  } else {
+    for (const f of _toPropertyFilter(properties)) {
+      filters.push(f)
+    }
+  }
+
+  if (criteria?.filter && criteria.search) {
+    filters.push(literal(' ) AND ( ( '))
+  } else if (criteria && (criteria.filter ?? criteria.search)) {
+    filters.push(literal(' ) AND ( '))
+  }
+
+  if (criteria) {
+    if (criteria.filter) {
+      for (const f of _toAqlFilters(criteria.filter)) {
+        filters.push(f)
+      }
+    }
+
+    if (criteria.filter && criteria.search) {
+      filters.push(literal(` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `))
+    }
+
+    if (criteria.search) {
+      for (const f of _toAqlFilters(criteria.search)) {
+        filters.push(f)
+      }
+    }
+  }
+
+  if (criteria?.filter && criteria.search) {
+    filters.push(literal(' ) )'))
+  } else if (criteria && (criteria.filter ?? criteria.search)) {
+    filters.push(literal(' )'))
+  }
+
+  if (filters.length === 0) {
+    throw new Error('Unexpected input received for query construction')
+  }
+
+  const opts = _toQueryOpts(options)
+
+  const query = opts.length > 0
+    ? aql`FOR d IN ${collection} FILTER (${join(filters)}) ${join(opts)} RETURN d`
+    : aql`FOR d IN ${collection} FILTER (${join(filters)}) RETURN d`
 
   if (_printQuery(options)) {
     console.log(query)
@@ -429,62 +305,47 @@ export function fetchByCriteria(
     }
   }
 
-  const f: AqlValue[] = []
+  const filters: AqlValue[] = []
 
   if (criteria.filter && criteria.search) {
-    f.push(literal('( '))
+    filters.push(literal('( '))
   }
 
   if (criteria.filter) {
-    for (const q of _toFilterString(criteria.filter)) {
-      f.push(q)
+    for (const f of _toAqlFilters(criteria.filter)) {
+      filters.push(f)
     }
   }
 
   if (criteria.filter && criteria.search) {
-    f.push(literal(` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `))
-    // query += ` ) ${criteria.match ? criteria.match : MatchType.ANY} ( `
+    filters.push(literal(` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `))
   }
 
   if (criteria.search) {
-    for (const q of _toFilterString(criteria.search)) {
-      f.push(q)
+    for (const f of _toAqlFilters(criteria.search)) {
+      filters.push(f)
     }
   }
 
   if (criteria.filter && criteria.search) {
-    f.push(literal(' )'))
+    filters.push(literal(' )'))
   }
 
-  const o: AqlValue[] = []
-
-  if (options.hasOwnProperty('sortBy')) {
-    o.push(aql` SORT d.${options.sortBy}`)
-
-    if (options.hasOwnProperty('sortOrder')) {
-      if (options.sortOrder === 'ascending') {
-        o.push(literal(' ASC'))
-      } else if (options.sortOrder === 'descending') {
-        o.push(literal(' DESC'))
-      }
-    }
+  if (filters.length === 0) {
+    throw new Error('Unexpected input received for query construction')
   }
 
-  if (options.limit && options.limit > 0) {
-    if (options.offset) {
-      o.push(literal(` LIMIT ${options.offset}, ${options.limit}`))
-    } else {
-      o.push(literal(` LIMIT ${options.limit}`))
-    }
-  }
+  const opts = _toQueryOpts(options)
+
+  const query = opts.length > 0
+    ? aql`FOR d IN ${collection} FILTER (${join(filters)}) ${join(opts)} RETURN d`
+    : aql`FOR d IN ${collection} FILTER (${join(filters)}) RETURN d`
 
   // if (_hasOmitOption(options)) {
   //   query += " RETURN UNSET_RECURSIVE( d, [" + _getOmitInstruction(options) + "])";
   // } else {
   //   query += " RETURN d";
   // }
-
-  const query = aql`FOR d IN ${collection} FILTER (${join(f)}) ${join(o)} RETURN d`
 
   if (_printQuery(options)) {
     console.log(query)
@@ -494,85 +355,7 @@ export function fetchByCriteria(
   return query
 }
 
-// export function fetchByCriteria(
-//   collection: string,
-//   criteria: Criteria,
-//   options: FetchOptions = {}
-// ): AqlQuery {
-//   if (_printQuery(options) || _debugFunctions(options)) {
-//     console.log(`fetchByCriteria: ${collection}`)
-//     if (criteria) {
-//       console.dir(criteria)
-//     }
-//   }
-
-//   const params: any = {}
-
-//   let query = `FOR d IN ${collection} FILTER ( `
-
-//   if (criteria.filter && criteria.search) {
-//     query += '( '
-//   }
-
-//   if (criteria.filter) {
-//     query += _toFilterString(criteria.filter)
-//   }
-
-//   if (criteria.filter && criteria.search) {
-//     query += ` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `
-//     // query += ` ) ${criteria.match ? criteria.match : MatchType.ANY} ( `
-//   }
-
-//   if (criteria.search) {
-//     query += _toFilterString(criteria.search)
-//   }
-
-//   if (criteria.filter && criteria.search) {
-//     query += ' )'
-//   }
-
-//   query += ' )'
-
-//   if (options?.hasOwnProperty('sortBy')) {
-//     query += ` SORT d.${options.sortBy}`
-
-//     if (options.hasOwnProperty('sortOrder')) {
-//       if (options.sortOrder === 'ascending') {
-//         query += ' ASC'
-//       } else if (options.sortOrder === 'descending') {
-//         query += ' DESC'
-//       }
-//     }
-//   }
-
-//   if (options.limit && options.limit > 0) {
-//     if (options.offset) {
-//       query += ` LIMIT ${options.offset}, ${options.limit}`
-//     } else {
-//       query += ` LIMIT ${options.limit}`
-//     }
-//   }
-
-//   // if (_hasOmitOption(options)) {
-//   //   query += " RETURN UNSET_RECURSIVE( d, [" + _getOmitInstruction(options) + "])";
-//   // } else {
-//   //   query += " RETURN d";
-//   // }
-
-//   query += ' RETURN d'
-
-//   if (_printQuery(options)) {
-//     console.log(query)
-//     console.log(params)
-//     console.log('')
-//   }
-
-//   return {
-//     query,
-//     bindVars: params
-//   }
-// }
-
+// TODO: turn this into safe AQL
 export function fetchAll(
   collection: string,
   options: FetchOptions = {}
@@ -678,6 +461,7 @@ export function deleteDocumentsByKeyValue(collection: DocumentCollection, identi
       RETURN { _key: d._key }`
 }
 
+// TODO: turn this into safe AQL
 export function uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
   if (!constraints || constraints.constraints.length === 0) {
     throw new Error('No constraints specified')
@@ -780,3 +564,214 @@ export const Queries = {
   updateDocumentsByKeyValue,
   deleteDocumentsByKeyValue
 }
+
+// function _fetchByPropertyValuesOriginal(
+//   collection: string,
+//   properties: PropertyValue | PropertyValue[],
+//   match: MatchType,
+//   criteria?: Criteria,
+//   options: FetchOptions = {}
+// ): AqlQuery {
+//   if (_printQuery(options) || _debugFunctions(options)) {
+//     console.log(`_fetchByPropertyValues: ${collection}`)
+//     console.log(properties)
+//     console.log(match)
+//     if (criteria) {
+//       console.dir(criteria)
+//     }
+//   }
+
+//   const params: any = {
+//     '@collection': collection
+//   }
+
+//   let query = 'FOR d IN @@collection FILTER ('
+
+//   if (criteria && (criteria.filter ?? criteria.search)) {
+//     query += ' ('
+//   }
+
+//   if (Array.isArray(properties)) {
+//     let propCount = 0
+
+//     for (const kv of properties) {
+//       propCount++
+
+//       if (propCount > 1) {
+//         query += ` ${MatchTypeOperator[match]}`
+//       }
+
+//       const bindProp = `p${propCount}`
+//       const bindValue = `v${propCount}`
+
+//       if (kv.property.indexOf('.') > 0) {
+//         params[bindProp] = kv.property.split('.')
+//       } else {
+//         params[bindProp] = kv.property
+//       }
+
+//       if (kv.options?.caseSensitive ?? typeof kv.value !== 'string') {
+//         params[bindValue] = kv.value
+//         query += ` d.@${bindProp} == @${bindValue}`
+//       } else {
+//         params[bindValue] = kv.value.toLowerCase()
+//         query += ` LOWER(d.@${bindProp}) == @${bindValue}`
+//       }
+//     }
+//   } else {
+//     if (properties.property.indexOf('.') > 0) {
+//       params.p = properties.property.split('.')
+//     } else {
+//       params.p = properties.property
+//     }
+
+//     if (properties.options?.caseSensitive ?? typeof properties.value !== 'string') {
+//       params.v = properties.value
+//       query += ' d.@p == @v'
+//     } else {
+//       params.v = properties.value.toLowerCase()
+//       query += ' LOWER(d.@p) == @v'
+//     }
+//   }
+
+//   if (criteria?.filter && criteria.search) {
+//     query += ' ) AND ( ( '
+//   } else if (criteria && (criteria.filter ?? criteria.search)) {
+//     query += ' ) AND ( '
+//   }
+
+//   if (criteria) {
+//     if (criteria.filter) {
+//       query += _toAqlFilters(criteria.filter)
+//     }
+
+//     if (criteria.filter && criteria.search) {
+//       query += ` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `
+//       // query += ` ) ${criteria.match ? criteria.match : MatchType.ANY} ( `
+//     }
+
+//     if (criteria.search) {
+//       query += _toAqlFilters(criteria.search)
+//     }
+//   }
+
+//   if (criteria?.filter && criteria.search) {
+//     query += ' ) )'
+//   } else if (criteria && (criteria.filter ?? criteria.search)) {
+//     query += ' )'
+//   }
+
+//   query += ' )'
+
+//   if (options.hasOwnProperty('sortBy')) {
+//     query += ` SORT d.${options.sortBy}`
+
+//     if (options.hasOwnProperty('sortOrder')) {
+//       if (options.sortOrder === 'ascending') {
+//         query += ' ASC'
+//       } else if (options.sortOrder === 'descending') {
+//         query += ' DESC'
+//       }
+//     }
+//   }
+
+//   if (options.limit && options.limit > 0) {
+//     if (options.offset) {
+//       query += ` LIMIT ${options.offset}, ${options.limit}`
+//     } else {
+//       query += ` LIMIT ${options.limit}`
+//     }
+//   }
+
+//   query += ' RETURN d'
+
+//   if (_printQuery(options)) {
+//     console.log(query)
+//     console.log(params)
+//     console.log('')
+//   }
+
+//   return {
+//     query,
+//     bindVars: params
+//   }
+// }
+
+// export function fetchByCriteriaOriginal(
+//   collection: string,
+//   criteria: Criteria,
+//   options: FetchOptions = {}
+// ): AqlQuery {
+//   if (_printQuery(options) || _debugFunctions(options)) {
+//     console.log(`fetchByCriteria: ${collection}`)
+//     if (criteria) {
+//       console.dir(criteria)
+//     }
+//   }
+
+//   const params: any = {}
+
+//   let query = `FOR d IN ${collection} FILTER ( `
+
+//   if (criteria.filter && criteria.search) {
+//     query += '( '
+//   }
+
+//   if (criteria.filter) {
+//     query += _toAqlFilters(criteria.filter)
+//   }
+
+//   if (criteria.filter && criteria.search) {
+//     query += ` ) ${MatchTypeOperator[criteria.match ? criteria.match : MatchType.ANY]} ( `
+//     // query += ` ) ${criteria.match ? criteria.match : MatchType.ANY} ( `
+//   }
+
+//   if (criteria.search) {
+//     query += _toAqlFilters(criteria.search)
+//   }
+
+//   if (criteria.filter && criteria.search) {
+//     query += ' )'
+//   }
+
+//   query += ' )'
+
+//   if (options?.hasOwnProperty('sortBy')) {
+//     query += ` SORT d.${options.sortBy}`
+
+//     if (options.hasOwnProperty('sortOrder')) {
+//       if (options.sortOrder === 'ascending') {
+//         query += ' ASC'
+//       } else if (options.sortOrder === 'descending') {
+//         query += ' DESC'
+//       }
+//     }
+//   }
+
+//   if (options.limit && options.limit > 0) {
+//     if (options.offset) {
+//       query += ` LIMIT ${options.offset}, ${options.limit}`
+//     } else {
+//       query += ` LIMIT ${options.limit}`
+//     }
+//   }
+
+//   // if (_hasOmitOption(options)) {
+//   //   query += " RETURN UNSET_RECURSIVE( d, [" + _getOmitInstruction(options) + "])";
+//   // } else {
+//   //   query += " RETURN d";
+//   // }
+
+//   query += ' RETURN d'
+
+//   if (_printQuery(options)) {
+//     console.log(query)
+//     console.log(params)
+//     console.log('')
+//   }
+
+//   return {
+//     query,
+//     bindVars: params
+//   }
+// }
