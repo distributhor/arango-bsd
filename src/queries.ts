@@ -30,7 +30,7 @@ function _printQuery(options?: FetchOptions): boolean {
 }
 
 /** @internal */
-function _toAqlSearchFilter(search: SearchTerms): Filter {
+function _toSearchFilter(search: SearchTerms): Filter {
   const filters: AqlQuery[] = []
 
   const props = typeof search.properties === 'string'
@@ -42,16 +42,57 @@ function _toAqlSearchFilter(search: SearchTerms): Filter {
     : search.terms.map(t => t.trim())
 
   for (let i = 0; i < props.length; i++) {
-    for (let j = 0; j < terms.length; j++) {
-      if (terms[j] === 'null' || terms[j] === 'NULL') {
-        filters.push(aql`d.${props[i]}  == null`)
-      } else if (terms[j] === '!null' || terms[j] === '!NULL') {
-        filters.push(aql`d.${props[i]} != null`)
-      } else {
-        filters.push(aql`LIKE(d.${props[i]}, ${'%' + terms[j].trim() + '%'}, true)`)
+    if (props[i].indexOf('.') > 0) {
+      const nestedPropPath: AqlValue[] = []
+
+      nestedPropPath.push(literal(' d'))
+
+      const nestedProps = props[i].split('.')
+      for (let i = 0; i < nestedProps.length; i++) {
+        nestedPropPath.push(aql`.${nestedProps[i]}`)
+      }
+
+      for (let j = 0; j < terms.length; j++) {
+        const filterBuffer: AqlValue[] = []
+        if (terms[j] === 'null' || terms[j] === 'NULL') {
+          filterBuffer.push(join(nestedPropPath, ''))
+          filterBuffer.push(literal(' == null'))
+        } else if (terms[j] === '!null' || terms[j] === '!NULL') {
+          filterBuffer.push(join(nestedPropPath, ''))
+          filterBuffer.push(literal(' != null'))
+        } else {
+          filterBuffer.push(literal('LIKE('))
+          filterBuffer.push(join(nestedPropPath, ''))
+          filterBuffer.push(aql`, ${'%' + terms[j].trim() + '%'}, true)`)
+          // filterBuffer.push(aql`LIKE(d.${props[i]}, ${'%' + terms[j].trim() + '%'}, true)`)
+        }
+
+        filters.push(join(filterBuffer, ''))
+      }
+    } else {
+      for (let j = 0; j < terms.length; j++) {
+        if (terms[j] === 'null' || terms[j] === 'NULL') {
+          filters.push(aql`d.${props[i]} == null`)
+        } else if (terms[j] === '!null' || terms[j] === '!NULL') {
+          filters.push(aql`d.${props[i]} != null`)
+        } else {
+          filters.push(aql`LIKE(d.${props[i]}, ${'%' + terms[j].trim() + '%'}, true)`)
+        }
       }
     }
   }
+
+  // for (let i = 0; i < props.length; i++) {
+  //   for (let j = 0; j < terms.length; j++) {
+  //     if (terms[j] === 'null' || terms[j] === 'NULL') {
+  //       filters.push(aql`d.${props[i]}  == null`)
+  //     } else if (terms[j] === '!null' || terms[j] === '!NULL') {
+  //       filters.push(aql`d.${props[i]} != null`)
+  //     } else {
+  //       filters.push(aql`LIKE(d.${props[i]}, ${'%' + terms[j].trim() + '%'}, true)`)
+  //     }
+  //   }
+  // }
 
   return {
     match: search.match ? search.match : MatchType.ANY,
@@ -60,17 +101,17 @@ function _toAqlSearchFilter(search: SearchTerms): Filter {
 }
 
 /** @internal */
-function _toAqlFilters(filter: string | AqlValue | Filter | SearchTerms): AqlValue[] {
+function _toAqlFilters(filter: string | AqlValue | Filter | SearchTerms): AqlValue {
   if (typeof filter === 'string') {
-    return [literal(filter)]
+    return literal(filter)
   }
 
   if (isAqlQuery(filter)) {
-    return [filter]
+    return filter
   }
 
   if (isSearch(filter)) {
-    return _toAqlFilters(_toAqlSearchFilter(filter))
+    return _toAqlFilters(_toSearchFilter(filter))
   }
 
   if (!isFilter(filter)) {
@@ -82,19 +123,17 @@ function _toAqlFilters(filter: string | AqlValue | Filter | SearchTerms): AqlVal
   const matchType: MatchType = filter.match ? filter.match : MatchType.ANY
   for (let i = 0; i < filter.filters.length; i++) {
     if (i > 0) {
-      filters.push(literal(` ${MatchTypeOperator[matchType]}`))
+      filters.push(literal(` ${MatchTypeOperator[matchType]} `))
     }
 
-    const f = filter.filters[i]
-
-    if (isAqlQuery(f)) {
-      filters.push(f)
+    if (isAqlQuery(filter.filters[i])) {
+      filters.push(filter.filters[i])
     } else { // if (typeof filter.filters[i] === 'string')
-      filters.push(literal(f))
+      filters.push(literal(filter.filters[i] as string))
     }
   }
 
-  return filters
+  return join(filters, '')
 }
 
 /** @internal */
@@ -132,36 +171,37 @@ function _toQueryOpts(options: FetchOptions = {}): AqlValue[] {
 // }
 
 /** @internal */
-function _toPropertyFilter(prop: PropertyValue): AqlValue[] {
-  const filters: AqlValue[] = []
+function _toPropertyFilter(prop: PropertyValue): AqlQuery {
+  const f: AqlValue[] = []
 
   if (prop.property.indexOf('.') > 0) {
     if (prop.options?.caseSensitive ?? typeof prop.value !== 'string') {
-      filters.push(literal(' d'))
+      // WFC can we remove the space in front?
+      f.push(literal(' d'))
     } else {
-      filters.push(literal(' LOWER(d'))
+      f.push(literal(' LOWER(d'))
     }
 
-    const props = prop.property.split('.')
+    const nestedProps = prop.property.split('.')
 
-    for (let i = 0; i < props.length; i++) {
-      filters.push(aql`.${props[i]}`)
+    for (let i = 0; i < nestedProps.length; i++) {
+      f.push(aql`.${nestedProps[i]}`)
     }
 
     if (prop.options?.caseSensitive ?? typeof prop.value !== 'string') {
-      filters.push(aql` == ${prop.value}`)
+      f.push(aql` == ${prop.value}`)
     } else {
-      filters.push(aql`) == ${prop.value.toLowerCase()}`)
+      f.push(aql`) == ${prop.value.toLowerCase()}`)
     }
   } else {
     if (prop.options?.caseSensitive ?? typeof prop.value !== 'string') {
-      filters.push(aql` d.${prop.property} == ${prop.value}`)
+      f.push(aql` d.${prop.property} == ${prop.value}`)
     } else {
-      filters.push(aql` LOWER(d.${prop.property}) == ${prop.value.toLowerCase()}`)
+      f.push(aql` LOWER(d.${prop.property}) == ${prop.value.toLowerCase()}`)
     }
   }
 
-  return filters
+  return join(f) // WFC join with '' ?
 }
 
 function _fetchByPropertyValues(
@@ -191,19 +231,14 @@ function _fetchByPropertyValues(
 
     for (const prop of properties) {
       propCount++
-
       if (propCount > 1) {
         filters.push(literal(` ${MatchTypeOperator[match]}`))
       }
 
-      for (const f of _toPropertyFilter(prop)) {
-        filters.push(f)
-      }
+      filters.push(_toPropertyFilter(prop))
     }
   } else {
-    for (const f of _toPropertyFilter(properties)) {
-      filters.push(f)
-    }
+    filters.push(_toPropertyFilter(properties))
   }
 
   if (criteria?.filter && criteria.search) {
@@ -214,9 +249,10 @@ function _fetchByPropertyValues(
 
   if (criteria) {
     if (criteria.filter) {
-      for (const f of _toAqlFilters(criteria.filter)) {
-        filters.push(f)
-      }
+      filters.push(_toAqlFilters(criteria.filter))
+      // for (const f of _toAqlFilters(criteria.filter)) {
+      //   filters.push(f)
+      // }
     }
 
     if (criteria.filter && criteria.search) {
@@ -224,9 +260,10 @@ function _fetchByPropertyValues(
     }
 
     if (criteria.search) {
-      for (const f of _toAqlFilters(criteria.search)) {
-        filters.push(f)
-      }
+      filters.push(_toAqlFilters(criteria.search))
+      // for (const f of _toAqlFilters(criteria.search)) {
+      //   filters.push(f)
+      // }
     }
   }
 
@@ -243,8 +280,8 @@ function _fetchByPropertyValues(
   const opts = _toQueryOpts(options)
 
   const query = opts.length > 0
-    ? aql`FOR d IN ${collection} FILTER (${join(filters)}) ${join(opts)} RETURN d`
-    : aql`FOR d IN ${collection} FILTER (${join(filters)}) RETURN d`
+    ? aql`FOR d IN ${collection} FILTER (${join(filters, '')}) ${join(opts, '')} RETURN d`
+    : aql`FOR d IN ${collection} FILTER (${join(filters, '')}) RETURN d`
 
   if (_printQuery(options)) {
     console.log(query)
@@ -312,9 +349,10 @@ export function fetchByCriteria(
   }
 
   if (criteria.filter) {
-    for (const f of _toAqlFilters(criteria.filter)) {
-      filters.push(f)
-    }
+    filters.push(_toAqlFilters(criteria.filter))
+    // for (const f of _toAqlFilters(criteria.filter)) {
+    //   filters.push(f)
+    // }
   }
 
   if (criteria.filter && criteria.search) {
@@ -322,9 +360,10 @@ export function fetchByCriteria(
   }
 
   if (criteria.search) {
-    for (const f of _toAqlFilters(criteria.search)) {
-      filters.push(f)
-    }
+    filters.push(_toAqlFilters(criteria.search))
+    // for (const f of _toAqlFilters(criteria.search)) {
+    //   filters.push(f)
+    // }
   }
 
   if (criteria.filter && criteria.search) {
@@ -338,8 +377,8 @@ export function fetchByCriteria(
   const opts = _toQueryOpts(options)
 
   const query = opts.length > 0
-    ? aql`FOR d IN ${collection} FILTER (${join(filters)}) ${join(opts)} RETURN d`
-    : aql`FOR d IN ${collection} FILTER (${join(filters)}) RETURN d`
+    ? aql`FOR d IN ${collection} FILTER (${join(filters, '')}) ${join(opts, '')} RETURN d`
+    : aql`FOR d IN ${collection} FILTER (${join(filters, '')}) RETURN d`
 
   // if (_hasOmitOption(options)) {
   //   query += " RETURN UNSET_RECURSIVE( d, [" + _getOmitInstruction(options) + "])";
@@ -564,6 +603,47 @@ export const Queries = {
   updateDocumentsByKeyValue,
   deleteDocumentsByKeyValue
 }
+
+// function _toAqlFiltersOriginal(filter: string | AqlValue | Filter | SearchTerms): AqlValue[] {
+//   if (typeof filter === 'string') {
+//     return [literal(filter)]
+//   }
+
+//   if (isAqlQuery(filter)) {
+//     return [filter]
+//   }
+
+//   if (isSearch(filter)) {
+//     return _toAqlFilters(_toSearchFilter(filter))
+//   }
+
+//   if (!isFilter(filter)) {
+//     throw new Error('Invalid input received for filter string conversion')
+//   }
+
+//   console.log('OK')
+//   console.log(filter.filters)
+//   const filters: AqlValue[] = []
+
+//   const matchType: MatchType = filter.match ? filter.match : MatchType.ANY
+//   for (let i = 0; i < filter.filters.length; i++) {
+//     if (i > 0) {
+//       console.log('SUP YO')
+//       filters.push(literal(` ${MatchTypeOperator[matchType]}`))
+//     }
+
+//     const f = filter.filters[i]
+
+//     if (isAqlQuery(f)) {
+//       filters.push(f)
+//     } else { // if (typeof filter.filters[i] === 'string')
+//       filters.push(literal(f))
+//     }
+//   }
+//   console.log(filters)
+
+//   return filters
+// }
 
 // function _fetchByPropertyValuesOriginal(
 //   collection: string,

@@ -13,6 +13,17 @@ import teams from './teams.json'
 for (const c of cyclists) {
   if (c.results) {
     c['resultsV2'] = c.results.map(r => `${r.year}, ${r.race}, ${r.position}`)
+
+    c['resultsV3'] = {}
+
+    for (const r of c.results) {
+      if (!c['resultsV3'][r.year]) {
+        c['resultsV3'][r.year] = []
+      }
+
+      c['resultsV3'][r.year].push(`${r.position}, ${r.race}`)
+    }
+
     if (c['resultsV2']) {
       c['palmares'] = c['resultsV2'].join('; ')
     }
@@ -1251,9 +1262,16 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('fetchByPropertySearch', async () => {
+    // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) ) RETURN d',
+    // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) || LIKE(d.surname, "%lance%", true) || LIKE(d.surname, "%chris%", true) ) RETURN d'
+    // FOR d IN @@value0 FILTER (LIKE(d.@value1, @value2, true) || LIKE(d.@value1, @value3, true)) RETURN d'
+    // bindVars: {
+    //   '@value0': 'cyclists',
+    //   value1: 'name',
+    //   value2: '%lance%',
+    //   value3: '%chris%'
+    // }
     const result1A = await conn.db(db1)
-      // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) ) RETURN d',
-      // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) || LIKE(d.surname, "%lance%", true) || LIKE(d.surname, "%chris%", true) ) RETURN d'
       .fetchByCriteria(CONST.userCollection, {
         search: {
           properties: 'name', terms: ['lance', 'chris']
@@ -1284,7 +1302,8 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN cyclists FILTER ( LIKE(d.name, "%%", true) ) RETURN d
+    // FOR d IN @@value0 FILTER (LIKE(d.@value1, @value2, true)) RETURN d
+    // bindVars: { '@value0': 'cyclists', value1: 'name', value2: '%%' }
     const result3A = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection, {
         search: {
@@ -1410,7 +1429,6 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('fetchByCriteria', async () => {
-    // FOR d IN cyclists FILTER ( ( d.strength == "Climbing" ) || ( LIKE(d.name, "%mar%", true) ) ) RETURN d
     const result1A = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
@@ -1485,7 +1503,13 @@ describe('Guacamole Integration Tests', () => {
     expect(result2A.data.length).toEqual(3)
 
     const zoom = 'Zooming'
-    // FOR d IN cyclists FILTER ( ( d.strength == "Zooming" ) && ( LIKE(d.name, "%mar%", true) ) ) RETURN d
+
+    // FOR d IN @@value0 FILTER (( d.strength == @value1 ) && ( LIKE(d.@value2, @value3, true) )) RETURN d
+    // bindVars: {
+    //   value1: 'Zooming',
+    //   value2: 'name',
+    //   value3: '%mar%'
+    // }
     const result2AB = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
@@ -1498,7 +1522,6 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2AB.data.length).toEqual(0)
 
-    // FOR d IN cyclists FILTER ( ( d.strength != "Zooming" ) || ( LIKE(d.name, "%mar%", true) ) ) RETURN d
     const result2B = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
@@ -1547,16 +1570,18 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('fetchByPropertyValueAndCriteria', async () => {
-    // FOR d IN cyclists FILTER (
-    // ( d.@p == @v ) AND
-    // ( LIKE(d.name, "%mar%", true) )
-    // ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( LIKE(d.@value3, @value4, true) )) RETURN d
+    // bindVars: {
+    //   value1: 'strength',
+    //   value2: 'climbing',
+    //   value3: 'name',
+    //   value4: '%mar%'
+    // }
     const result1A = await db
       .fetchByPropertiesAndCriteria(
         CONST.userCollection,
         { properties: { property: 'strength', value: 'Climbing' } },
-        { search: { properties: 'name', terms: 'mar' } },
-        { debugFilters: true }
+        { search: { properties: 'name', terms: 'mar' } }
       ) as QueryResult
 
     expect(result1A.data.length).toEqual(2)
@@ -1570,10 +1595,13 @@ describe('Guacamole Integration Tests', () => {
     const name = 'name'
     const likeMar = '%mar%'
 
-    // FOR d IN cyclists FILTER (
-    // ( d.@p == @v ) AND
-    // ( LIKE(d.name, "%mar%", true) )
-    // ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( LIKE(d.@value3, @value4, true) )) RETURN d
+    // bindVars: {
+    //   value1: 'strength',
+    //   value2: 'climbing',
+    //   value3: 'name',
+    //   value4: '%mar%'
+    // }
     const result1B = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
@@ -1589,10 +1617,8 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN cyclists FILTER (
-    // ( d.@p == @v ) AND
-    // ( LIKE(d.name, "%mar%", true) )
-    // ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( LIKE(d.name, "%mar%", true) )) RETURN d
+    // bindVars: { '@value0': 'cyclists', value1: 'strength', value2: 'climbing' }
     const result1C = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
@@ -1615,10 +1641,13 @@ describe('Guacamole Integration Tests', () => {
     //     { name: 'strength', value: 'Sprinter' }
     //   ) as QueryResult
 
-    // FOR d IN cyclists FILTER (
-    // ( d.@p == @v ) AND
-    // ( ( d.surname == "Pantani" ) || ( LIKE(d.name, "%mar%", true) ) )
-    // ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( ( d.surname == "Pantani" ) || ( LIKE(d.@value3, @value4, true) ) )) RETURN d
+    // bindVars: {
+    //   value1: 'strength',
+    //   value2: 'climbing',
+    //   value3: 'name',
+    //   value4: '%mar%'
+    // }
     const result1E = await db
       .fetchByPropertiesAndCriteria(
         CONST.userCollection,
@@ -1677,7 +1706,8 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN cyclists FILTER ( ( d.@p == @v ) AND ( ( LIKE(d.surname, "%cav%", true) ) ) ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( LIKE(d.surname, "%cav%", true) )) RETURN d
+    // bindVars: { '@value0': 'cyclists', value1: 'strength', value2: 'sprinter' }
     const result1L = await db
       .fetchByPropertiesAndCriteria(
         CONST.userCollection,
@@ -1692,10 +1722,13 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN cyclists FILTER (
-    // ( d.@p == @v ) AND
-    // ( ( LIKE(d.surname, "%cav%", true) ) || ( LIKE(d.country, "%ia%", true) ) )
-    // ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( ( LIKE(d.surname, "%cav%", true) ) || ( LIKE(d.@value3, @value4, true) ) )) RETURN d
+    // bindVars: {
+    //   value1: 'strength',
+    //   value2: 'sprinter',
+    //   value3: 'country',
+    //   value4: '%ia%'
+    // }
     const result1M = await db
       .fetchByPropertiesAndCriteria(
         CONST.userCollection,
@@ -1716,10 +1749,14 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN cyclists FILTER (
-    // ( d.@p == @v ) AND
-    // ( ( LIKE(d.surname, "%cav%", true) ) || ( LIKE(d.country, "%ia%", true) ) )
-    // ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( ( LIKE(d.surname, "%cav%", true) ) && ( LIKE(d.@value3, @value4, true) ) )) RETURN d
+    // bindVars: {
+    //   '@value0': 'cyclists',
+    //   value1: 'strength',
+    //   value2: 'sprinter',
+    //   value3: 'country',
+    //   value4: '%ia%'
+    // }
     const result1N = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
@@ -1771,15 +1808,15 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result3A.data.length).toEqual(0)
 
-    // FOR d IN cyclists FILTER (
-    // ( d.@p1 == @v1 && d.@p2 == @v2 ) AND
-    // ( ( LIKE(d.strength, "%time%", true) ) )
-    // ) RETURN d
-
-    // FOR d IN cyclists FILTER (
-    // ( d.@p1 == @v1 && d.@p2 == @v2 ) AND
-    // ( LIKE(d.name, "%aint%", true) )
-    // ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 || LOWER(d.@value3) == @value4 ) AND ( LIKE(d.@value5, @value6, true) )) RETURN d
+    // bindVars: {
+    //   value1: 'country',
+    //   value2: 'uk',
+    //   value3: 'strength',
+    //   value4: 'general classification',
+    //   value5: 'name',
+    //   value6: '%aint%'
+    // }
     const result2A = await conn.db(db1).fetchByAnyPropertyValueAndCriteria(
       CONST.userCollection,
       [
@@ -1835,10 +1872,14 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2C.data.length).toEqual(0)
 
-    // FOR d IN cyclists FILTER (
-    // ( d.@p1 == @v1 || d.@p2 == @v2 ) AND
-    // ( ( LIKE(d.strength, "%time%", true) ) )
-    // ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 || LOWER(d.@value1) == @value3 ) AND ( LIKE(d.@value4, @value5, true) )) RETURN d
+    // bindVars: {
+    //   value1: 'country',
+    //   value2: 'germany',
+    //   value3: 'switzerland',
+    //   value4: 'strength',
+    //   value5: '%time%'
+    // }
     const result2D = await db.fetchByPropertiesAndCriteria(
       CONST.userCollection, {
         properties: [
@@ -1880,10 +1921,14 @@ describe('Guacamole Integration Tests', () => {
     expect(result2E.data.length).toEqual(0)
 
     const likeTime = '%time%'
-    // FOR d IN cyclists FILTER (
-    // ( d.@p1 == @v1 || d.@p2 == @v2 ) AND
-    // ( LIKE(d.strength, "%time%", true) )
-    // ) RETURN d
+
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 || LOWER(d.@value1) == @value3 ) AND ( LIKE(d.strength, @value4, true) )) RETURN d
+    // bindVars: {
+    //   value1: 'country',
+    //   value2: 'germany',
+    //   value3: 'switzerland',
+    //   value4: '%time%'
+    // }
     const result2F = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
@@ -1918,10 +1963,15 @@ describe('Guacamole Integration Tests', () => {
     //     ]
     //   ) as QueryResult
 
-    // FOR d IN cyclists FILTER (
-    // ( d.@p1 == @v1 || d.@p2 == @v2 || d.@p3 == @v3 ) AND
-    // ( LIKE(d.country, "%ia%", true) )
-    // ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 || LOWER(d.@value1) == @value3 || LOWER(d.@value1) == @value4 ) AND ( LIKE(d.@value5, @value6, true) )) RETURN d
+    // bindVars: {
+    //   value1: 'strength',
+    //   value2: 'general classification',
+    //   value3: 'time trial',
+    //   value4: 'sprinter',
+    //   value5: 'country',
+    //   value6: '%ia%'
+    // }
     const result2J = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
@@ -1945,10 +1995,15 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN cyclists FILTER (
-    // ( d.@p1 == @v1 || d.@p2 == @v2 || d.@p3 == @v3 ) AND
-    // ( ( LIKE(d.surname, "%cav%", true) ) || ( LIKE(d.country, "%ia%", true) ) )
-    // ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 || LOWER(d.@value1) == @value3 || LOWER(d.@value1) == @value4 ) AND ( ( LIKE(d.surname, "%cav%", true) ) || ( LIKE(d.@value5, @value6, true) ) )) RETURN d
+    //  bindVars: {
+    //   value1: 'strength',
+    //   value2: 'general classification',
+    //   value3: 'time trial',
+    //   value4: 'sprinter',
+    //   value5: 'country',
+    //   value6: '%ia%'
+    // }
     const result2K = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
@@ -2027,10 +2082,15 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2N.data.length).toEqual(0)
 
-    // FOR d IN cyclists FILTER (
-    // ( d.@p1 == @v1 || d.@p2 == @v2 ) AND
-    // ( LIKE(d.fame, "%Train%", true) )
-    // ) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 || LOWER(d.@value3) == @value4 ) AND ( LIKE(d.@value5, @value6, true) )) RETURN d
+    // bindVars: {
+    //   value1: 'country',
+    //   value2: 'slovenia',
+    //   value3: 'strength',
+    //   value4: 'classics',
+    //   value5: 'fame',
+    //   value6: '%do it all%'
+    // }
     const result2P = await conn.db(db1)
       .fetchByAnyPropertyValueAndCriteria(
         CONST.userCollection,
@@ -2076,7 +2136,8 @@ describe('Guacamole Integration Tests', () => {
     // FOR d IN cyclists FILTER ( LIKE(TO_STRING(d.resultsV2), "%Gravel%", true) ) RETURN d
     const result2A = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        'LIKE(TO_STRING(d.resultsV2), "%Gravel%", true)'
+        // 'LIKE(TO_STRING(d.resultsV2), "%Gravel%", true)' // why was there a TOSTRING HERE?
+        'LIKE(d.resultsV2, "%Gravel%", true)'
       ) as QueryResult
 
     expect(result2A.data.length).toEqual(4)
@@ -2086,6 +2147,202 @@ describe('Guacamole Integration Tests', () => {
         expect.objectContaining({ name: 'Mathieu', surname: 'van der Poel' }),
         expect.objectContaining({ name: 'Peter', surname: 'Sagan' }),
         expect.objectContaining({ name: 'Matt', surname: 'Beers' })
+      ])
+    )
+
+    const resultsV2 = 'resultsV2'
+    const containsGravel = '%Gravel%'
+
+    const result2B = await conn.db(db1)
+      .fetchByCriteria(CONST.userCollection,
+        // aql`LIKE(TO_STRING(d.${resultsV2}), ${containsGravel}, true)`
+        aql`LIKE(d.${resultsV2}, ${containsGravel}, true)`
+      ) as QueryResult
+
+    expect(result2B.data.length).toEqual(4)
+    expect(result2B.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Alejandro', surname: 'Valverde' }),
+        expect.objectContaining({ name: 'Mathieu', surname: 'van der Poel' }),
+        expect.objectContaining({ name: 'Peter', surname: 'Sagan' }),
+        expect.objectContaining({ name: 'Matt', surname: 'Beers' })
+      ])
+    )
+
+    const resultsV3 = 'resultsV3'
+    const results2015 = '2015'
+    const resultsV32015 = 'resultsV3.2015'
+    const containsTirreno = '%Tirreno%'
+    const containsFrance = '%france%'
+
+    // returns correct results and the bind operation results in correct AQL
+    // FOR d IN @@value0 FILTER (LIKE(d.@value1.@value2, @value3, true)) RETURN d
+    // bindVars: {
+    //   value1: 'resultsV3',
+    //   value2: '2015',
+    //   value3: '%Tirreno%'
+    // }
+    const result2C = await conn.db(db1)
+      .fetchByCriteria(CONST.userCollection,
+        aql`LIKE(d.${resultsV3}.${results2015}, ${containsTirreno}, true)`
+      ) as QueryResult
+
+    expect(result2C.data.length).toEqual(2)
+    expect(result2C.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Ivan', surname: 'Basso' }),
+        expect.objectContaining({ name: 'Alberto', surname: 'Contador' })
+      ])
+    )
+
+    const result2D = await conn.db(db1)
+      .fetchByCriteria(CONST.userCollection,
+        aql`LIKE(d.${resultsV3}.${results2015}, ${containsFrance}, true)`
+      ) as QueryResult
+
+    expect(result2D.data.length).toEqual(7)
+    expect(result2D.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Ivan', surname: 'Basso' }),
+        expect.objectContaining({ name: 'Alberto', surname: 'Contador' }),
+        expect.objectContaining({ name: 'Alejandro', surname: 'Valverde' }),
+        expect.objectContaining({ name: 'Vincenzo', surname: 'Nibali' }),
+        expect.objectContaining({ name: 'Thibaut', surname: 'Pinot' }),
+        expect.objectContaining({ name: 'Chris', surname: 'Froome' })
+      ])
+    )
+
+    // returns no results because of the way resultsV32015 is bound, eg
+    // FOR d IN @@value0 FILTER (LIKE(d.@value1, @value2, true)) RETURN d
+    // bindVars: {
+    //   value1: 'resultsV3.2015',
+    //   value2: '%Tirreno%'
+    // }
+    const result2E = await conn.db(db1)
+      .fetchByCriteria(CONST.userCollection,
+        aql`LIKE(d.${resultsV32015}, ${containsTirreno}, true)`
+      ) as QueryResult
+
+    expect(result2E.data.length).toEqual(0)
+
+    // FOR d IN @@value0 FILTER (LIKE( d.@value1.@value2, @value3, true)) RETURN d
+    // bindVars: {
+    //   value1: 'resultsV3',
+    //   value2: '2015',
+    //   value3: '%Tirreno%'
+    // }
+    const result2F = await conn.db(db1)
+      .fetchByCriteria(CONST.userCollection,
+        { search: { properties: resultsV32015, terms: 'Tirreno' } }
+      ) as QueryResult
+
+    // console.log(result2F)
+    expect(result2F.data.length).toEqual(2)
+    expect(result2F.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Ivan', surname: 'Basso' }),
+        expect.objectContaining({ name: 'Alberto', surname: 'Contador' })
+      ])
+    )
+
+    // Liège UCI Roubaix Sanremo
+    const containsSanremo = '%Sanremo%'
+
+    const result2G = await conn.db(db1)
+      .fetchByCriteria(CONST.userCollection,
+        aql`LIKE(d.${resultsV3}.${results2015}, ${containsTirreno}, true) || LIKE(d.${resultsV3}.${results2015}, ${containsSanremo}, true)`
+      ) as QueryResult
+
+    expect(result2G.data.length).toEqual(4)
+    expect(result2G.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Ivan', surname: 'Basso' }),
+        expect.objectContaining({ name: 'Alberto', surname: 'Contador' }),
+        expect.objectContaining({ name: 'Mark', surname: 'Cavendish' }),
+        expect.objectContaining({ name: 'Fabian', surname: 'Cancellara' })
+      ])
+    )
+
+    // FOR d IN @@value0 FILTER (LIKE( d.@value1.@value2, @value3, true) || LIKE( d.@value1.@value2, @value4, true)) RETURN d
+    // bindVars: {
+    //   value1: 'resultsV3',
+    //   value2: '2015',
+    //   value3: '%Tirreno%',
+    //   value4: '%Sanremo%'
+    // }
+    const result2H = await conn.db(db1)
+      .fetchByCriteria(CONST.userCollection,
+        { search: { properties: resultsV32015, terms: ['Tirreno', 'Sanremo'] } }
+      ) as QueryResult
+
+    expect(result2H.data.length).toEqual(4)
+    expect(result2H.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Ivan', surname: 'Basso' }),
+        expect.objectContaining({ name: 'Alberto', surname: 'Contador' }),
+        expect.objectContaining({ name: 'Mark', surname: 'Cavendish' }),
+        expect.objectContaining({ name: 'Fabian', surname: 'Cancellara' })
+      ])
+    )
+
+    const palmares = 'palmares'
+
+    // FOR d IN @@value0 FILTER (LIKE(d.@value1, @value2, true)  || LIKE(d.@value1, @value3, true)) RETURN d
+    // bindVars: {
+    //   value1: 'palmares',
+    //   value2: '%Waffle%',
+    //   value3: '%12th%'
+    // }
+    const result2J = await conn.db(db1)
+      .fetchByCriteria(CONST.userCollection,
+        { search: { properties: palmares, terms: ['Waffle', '12th'] } }
+      ) as QueryResult
+
+    expect(result2J.data.length).toEqual(3)
+    expect(result2J.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Alejandro', surname: 'Valverde' }),
+        expect.objectContaining({ name: 'Vincenzo', surname: 'Nibali' }),
+        expect.objectContaining({ name: 'Matt', surname: 'Beers' })
+      ])
+    )
+
+    const sprinter = 'Sprinter'
+    const containsRoubaix = '%Roubaix%'
+
+    const result2K = await conn.db(db1)
+      .fetchByCriteria(CONST.userCollection,
+        aql`d.strength == ${sprinter} && (LIKE(d.${resultsV3}.${results2015}, ${containsRoubaix}, true) || LIKE(d.${resultsV3}.${results2015}, ${containsSanremo}, true))`
+      ) as QueryResult
+
+    expect(result2K.data.length).toEqual(2)
+    expect(result2K.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Peter', surname: 'Sagan' }),
+        expect.objectContaining({ name: 'Mark', surname: 'Cavendish' })
+      ])
+    )
+
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( LIKE( d.@value3.@value4, @value5, true) || LIKE( d.@value3.@value4, @value6, true) )) RETURN d
+    // bindVars: {
+    //   value1: 'strength',
+    //   value2: 'sprinter',
+    //   value3: 'resultsV3',
+    //   value4: '2015',
+    //   value5: '%Roubaix%',
+    //   value6: '%Sanremo%'
+    // }
+    const result2L = await conn.db(db1)
+      .fetchByPropertyValueAndCriteria(CONST.userCollection,
+        { property: 'strength', value: sprinter },
+        { search: { properties: resultsV32015, terms: ['Roubaix', 'Sanremo'] } }
+      ) as QueryResult
+
+    expect(result2L.data.length).toEqual(2)
+    expect(result2L.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Peter', surname: 'Sagan' }),
+        expect.objectContaining({ name: 'Mark', surname: 'Cavendish' })
       ])
     )
   })
