@@ -955,6 +955,12 @@ export class ArangoDB extends ArangoDBWithoutSauce {
 
     return await this._fetchByPropValues(collection, propertyValues, MatchType.ALL, filterCriteria, fetchOptions)
   }
+}
+
+export class ArangoDBWithSpice extends ArangoDB {
+  constructor(db: Config | Database, options: GuacamoleOptions = {}) {
+    super(db, options)
+  }
 
   public async addArrayValue(
     collection: string,
@@ -1275,12 +1281,6 @@ export class ArangoDB extends ArangoDBWithoutSauce {
     updatedArray: any[]
   ): Promise<DocumentMeta[] | null> {
     return await this.updateProperty(collection, identifier, arrayProperty, updatedArray)
-  }
-}
-
-export class ArangoDBWithSpice extends ArangoDB {
-  constructor(db: Config | Database, options: GuacamoleOptions = {}) {
-    super(db, options)
   }
 
   public async dbExists(): Promise<boolean> {
