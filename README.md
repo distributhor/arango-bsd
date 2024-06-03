@@ -126,23 +126,33 @@ const peopleNamedNicoV4 = await fetchByPropertyValueAndCriteria(
 
 The documentation below does not replace the official [API Reference](https://distributhor.github.io/guacamole/) (which contain additional details), but it does provide simple introductions and usage examples for each function. The snippets without checkmarks imply that the documentation is not yet done for that section, but gives an interim overview of what is to come.
 
-#### Constructors & Connection Management
+#### About The Naming Convention
+
+*TODO ...*
+
+### Without Sauce
+#### - Constructors & Connection Management
 - [x] [ArangoDB](#ArangoDB)
 - [x] [ArangoConnection](#ArangoConnection)
 
-#### Native Driver, AQL Queries & CRUD
+#### - Native Driver, AQL Queries & CRUD
 - [x] [ArangoJS Driver](#The-ArangoJS-Driver)
 - [x] [AQL Queries](#AQL-Queries)
 - [ ] [CRUD Operations](#CRUD-Operations)
 
-#### Criteria Queries & Property-Based Data Fetching
+#### - Utility
+- [ ] [trimDocuments](#trimDocuments)
+- [ ] [validateUniqueConstraint](#validateUniqueConstraint)
+
+#### - Criteria Queries & Property-Based Data Fetching
 - [ ] [fetchAll](#fetchAll)
 - [ ] [fetchByProperties](#fetchByProperties)
 - [ ] [fetchOneByProperties](#fetchByProperties)
 - [ ] [fetchByCriteria](#fetchByCriteria)
 - [ ] [fetchByPropertiesAndCriteria](#fetchByPropertiesAndCriteria)
 
-#### With Sauce
+### With Sauce
+#### - Human Readable & Refactorable Criteria Queries
 - [ ] [fetchByPropertyValue](#fetchByPropertyValue)
 - [ ] [fetchByAnyPropertyValue](#fetchByAnyPropertyValue)
 - [ ] [fetchByAllPropertyValues](#fetchByAllPropertyValues)
@@ -153,11 +163,8 @@ The documentation below does not replace the official [API Reference](https://di
 - [ ] [fetchByAnyPropertyValueAndCriteria](#fetchByAnyPropertyValueAndCriteria)
 - [ ] [fetchByAllPropertyValuesAndCriteria](#fetchByAllPropertyValuesAndCriteria)
 
-#### Utility
-- [ ] [trimDocuments](#trimDocuments)
-- [ ] [validateUniqueConstraint](#validateUniqueConstraint)
-
-#### Array Helpers (WIP)
+### With Spice
+#### - Array Helpers (WIP)
 - [ ] [addArrayValue](#addArrayValue)
 - [ ] [removeArrayValue](#removeArrayValue)
 - [ ] [addArrayObject](#addArrayObject)

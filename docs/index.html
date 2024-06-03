@@ -51,16 +51,25 @@
 </a>
 <p>The documentation below does not replace the official <a href="https://distributhor.github.io/guacamole/">API Reference</a> (which contain additional details), but it does provide simple introductions and usage examples for each function. The snippets without checkmarks imply that the documentation is not yet done for that section, but gives an interim overview of what is to come.</p>
 
-<a href="#constructors-amp-connection-management" id="constructors-amp-connection-management" style="color: inherit; text-decoration: none;">
-  <h4>Constructors &amp; Connection Management</h4>
+<a href="#about-the-naming-convention" id="about-the-naming-convention" style="color: inherit; text-decoration: none;">
+  <h4>About The Naming Convention</h4>
+</a>
+<p><em>TODO ...</em></p>
+
+<a href="#without-sauce" id="without-sauce" style="color: inherit; text-decoration: none;">
+  <h3>Without Sauce</h3>
+</a>
+
+<a href="#--constructors-amp-connection-management" id="--constructors-amp-connection-management" style="color: inherit; text-decoration: none;">
+  <h4>- Constructors &amp; Connection Management</h4>
 </a>
 <ul>
 <li><input checked="" disabled="" type="checkbox"> <a href="#ArangoDB">ArangoDB</a></li>
 <li><input checked="" disabled="" type="checkbox"> <a href="#ArangoConnection">ArangoConnection</a></li>
 </ul>
 
-<a href="#native-driver-aql-queries-amp-crud" id="native-driver-aql-queries-amp-crud" style="color: inherit; text-decoration: none;">
-  <h4>Native Driver, AQL Queries &amp; CRUD</h4>
+<a href="#--native-driver-aql-queries-amp-crud" id="--native-driver-aql-queries-amp-crud" style="color: inherit; text-decoration: none;">
+  <h4>- Native Driver, AQL Queries &amp; CRUD</h4>
 </a>
 <ul>
 <li><input checked="" disabled="" type="checkbox"> <a href="#The-ArangoJS-Driver">ArangoJS Driver</a></li>
@@ -68,8 +77,16 @@
 <li><input disabled="" type="checkbox"> <a href="#CRUD-Operations">CRUD Operations</a></li>
 </ul>
 
-<a href="#criteria-queries-amp-property-based-data-fetching" id="criteria-queries-amp-property-based-data-fetching" style="color: inherit; text-decoration: none;">
-  <h4>Criteria Queries &amp; Property-Based Data Fetching</h4>
+<a href="#--utility" id="--utility" style="color: inherit; text-decoration: none;">
+  <h4>- Utility</h4>
+</a>
+<ul>
+<li><input disabled="" type="checkbox"> <a href="#trimDocuments">trimDocuments</a></li>
+<li><input disabled="" type="checkbox"> <a href="#validateUniqueConstraint">validateUniqueConstraint</a></li>
+</ul>
+
+<a href="#--criteria-queries-amp-property-based-data-fetching" id="--criteria-queries-amp-property-based-data-fetching" style="color: inherit; text-decoration: none;">
+  <h4>- Criteria Queries &amp; Property-Based Data Fetching</h4>
 </a>
 <ul>
 <li><input disabled="" type="checkbox"> <a href="#fetchAll">fetchAll</a></li>
@@ -80,7 +97,11 @@
 </ul>
 
 <a href="#with-sauce" id="with-sauce" style="color: inherit; text-decoration: none;">
-  <h4>With Sauce</h4>
+  <h3>With Sauce</h3>
+</a>
+
+<a href="#--human-readable-amp-refactorable-criteria-queries" id="--human-readable-amp-refactorable-criteria-queries" style="color: inherit; text-decoration: none;">
+  <h4>- Human Readable &amp; Refactorable Criteria Queries</h4>
 </a>
 <ul>
 <li><input disabled="" type="checkbox"> <a href="#fetchByPropertyValue">fetchByPropertyValue</a></li>
@@ -94,16 +115,12 @@
 <li><input disabled="" type="checkbox"> <a href="#fetchByAllPropertyValuesAndCriteria">fetchByAllPropertyValuesAndCriteria</a></li>
 </ul>
 
-<a href="#utility" id="utility" style="color: inherit; text-decoration: none;">
-  <h4>Utility</h4>
+<a href="#with-spice" id="with-spice" style="color: inherit; text-decoration: none;">
+  <h3>With Spice</h3>
 </a>
-<ul>
-<li><input disabled="" type="checkbox"> <a href="#trimDocuments">trimDocuments</a></li>
-<li><input disabled="" type="checkbox"> <a href="#validateUniqueConstraint">validateUniqueConstraint</a></li>
-</ul>
 
-<a href="#array-helpers-wip" id="array-helpers-wip" style="color: inherit; text-decoration: none;">
-  <h4>Array Helpers (WIP)</h4>
+<a href="#--array-helpers-wip" id="--array-helpers-wip" style="color: inherit; text-decoration: none;">
+  <h4>- Array Helpers (WIP)</h4>
 </a>
 <ul>
 <li><input disabled="" type="checkbox"> <a href="#addArrayValue">addArrayValue</a></li>
@@ -115,7 +132,7 @@
 <li><input disabled="" type="checkbox"> <a href="#replaceArray">replaceArray</a></li>
 </ul>
 
-<a href="#constructors-amp-connection-management-1" id="constructors-amp-connection-management-1" style="color: inherit; text-decoration: none;">
+<a href="#constructors-amp-connection-management" id="constructors-amp-connection-management" style="color: inherit; text-decoration: none;">
   <h2>Constructors &amp; Connection Management</h2>
 </a>
 
@@ -139,7 +156,7 @@
 <pre><code class="language-javascript"><span class="hl-5">const</span><span class="hl-2"> </span><span class="hl-6">con</span><span class="hl-2"> = </span><span class="hl-5">new</span><span class="hl-2"> </span><span class="hl-7">ArangoConnection</span><span class="hl-2">({</span><br/><span class="hl-2">   </span><span class="hl-3">databaseName:</span><span class="hl-2"> </span><span class="hl-4">&#39;dbName1&#39;</span><span class="hl-2">,</span><br/><span class="hl-2">   </span><span class="hl-3">url:</span><span class="hl-2"> </span><span class="hl-3">process</span><span class="hl-2">.</span><span class="hl-3">env</span><span class="hl-2">.</span><span class="hl-6">DB_URL</span><span class="hl-2">,</span><br/><span class="hl-2">   </span><span class="hl-3">auth:</span><span class="hl-2"> {</span><br/><span class="hl-2">      </span><span class="hl-3">username:</span><span class="hl-2"> </span><span class="hl-3">process</span><span class="hl-2">.</span><span class="hl-3">env</span><span class="hl-2">.</span><span class="hl-6">DB_USER</span><span class="hl-2">,</span><br/><span class="hl-2">      </span><span class="hl-3">password:</span><span class="hl-2"> </span><span class="hl-3">process</span><span class="hl-2">.</span><span class="hl-3">env</span><span class="hl-2">.</span><span class="hl-6">DB_PASSWORD</span><br/><span class="hl-2">   }</span><br/><span class="hl-2">})</span><br/><br/><span class="hl-0">// or alternatively, if the other database(s) require </span><br/><span class="hl-0">// different credentials, pass an array of config</span><br/><br/><span class="hl-5">const</span><span class="hl-2"> </span><span class="hl-6">con</span><span class="hl-2"> = </span><span class="hl-5">new</span><span class="hl-2"> </span><span class="hl-7">ArangoConnection</span><span class="hl-2">([{</span><br/><span class="hl-2">   </span><span class="hl-3">databaseName:</span><span class="hl-2"> </span><span class="hl-4">&#39;dbName1&#39;</span><span class="hl-2">,</span><br/><span class="hl-2">   </span><span class="hl-3">url:</span><span class="hl-2"> </span><span class="hl-3">process</span><span class="hl-2">.</span><span class="hl-3">env</span><span class="hl-2">.</span><span class="hl-6">DB_URL</span><span class="hl-2">,</span><br/><span class="hl-2">   </span><span class="hl-3">auth:</span><span class="hl-2"> {</span><br/><span class="hl-2">      </span><span class="hl-3">username:</span><span class="hl-2"> </span><span class="hl-3">process</span><span class="hl-2">.</span><span class="hl-3">env</span><span class="hl-2">.</span><span class="hl-6">DB_USER</span><span class="hl-2">,</span><br/><span class="hl-2">      </span><span class="hl-3">password:</span><span class="hl-2"> </span><span class="hl-3">process</span><span class="hl-2">.</span><span class="hl-3">env</span><span class="hl-2">.</span><span class="hl-6">DB_PASSWORD</span><br/><span class="hl-2">   }</span><br/><span class="hl-2">}, {</span><br/><span class="hl-2">   </span><span class="hl-3">databaseName:</span><span class="hl-2"> </span><span class="hl-4">&#39;dbName2&#39;</span><span class="hl-2">,</span><br/><span class="hl-2">   </span><span class="hl-3">url:</span><span class="hl-2"> </span><span class="hl-3">process</span><span class="hl-2">.</span><span class="hl-3">env</span><span class="hl-2">.</span><span class="hl-6">DB_URL_2</span><span class="hl-2">,</span><br/><span class="hl-2">   </span><span class="hl-3">auth:</span><span class="hl-2"> {</span><br/><span class="hl-2">      </span><span class="hl-3">username:</span><span class="hl-2"> </span><span class="hl-3">process</span><span class="hl-2">.</span><span class="hl-3">env</span><span class="hl-2">.</span><span class="hl-6">DB_USER_2</span><span class="hl-2">,</span><br/><span class="hl-2">      </span><span class="hl-3">password:</span><span class="hl-2"> </span><span class="hl-3">process</span><span class="hl-2">.</span><span class="hl-3">env</span><span class="hl-2">.</span><span class="hl-6">DB_PASSWORD_2</span><br/><span class="hl-2">   }</span><br/><span class="hl-2">}])</span><br/><br/><span class="hl-0">// db1 = ArangoDB instance for dbName1</span><br/><span class="hl-5">const</span><span class="hl-2"> </span><span class="hl-6">db1</span><span class="hl-2"> = </span><span class="hl-3">con</span><span class="hl-2">.</span><span class="hl-7">db</span><span class="hl-2">(</span><span class="hl-4">&#39;dbName1&#39;</span><span class="hl-2">)</span><br/><span class="hl-3">db1</span><span class="hl-2">.</span><span class="hl-7">query</span><span class="hl-2">(</span><span class="hl-7">aql</span><span class="hl-4">`FOR d IN user FILTER d.name LIKE </span><span class="hl-5">${</span><span class="hl-3">name</span><span class="hl-5">}</span><span class="hl-4"> RETURN d`</span><span class="hl-2">)</span><br/><br/><span class="hl-0">// or simply ...</span><br/><span class="hl-3">con</span><span class="hl-2">.</span><span class="hl-7">db</span><span class="hl-2">(</span><span class="hl-4">&#39;dbName1&#39;</span><span class="hl-2">).</span><span class="hl-7">query</span><span class="hl-2">(</span><span class="hl-7">aql</span><span class="hl-4">`FOR d IN user FILTER d.name LIKE </span><span class="hl-5">${</span><span class="hl-3">name</span><span class="hl-5">}</span><span class="hl-4"> RETURN d`</span><span class="hl-2">)</span><br/><br/><span class="hl-0">// and working with ArangoDB instance for dbName2</span><br/><span class="hl-3">con</span><span class="hl-2">.</span><span class="hl-7">db</span><span class="hl-2">(</span><span class="hl-4">&#39;dbName2&#39;</span><span class="hl-2">).</span><span class="hl-7">fetchByCriteria</span><span class="hl-2">(</span><span class="hl-4">&#39;user&#39;</span><span class="hl-2">, {</span><br/><span class="hl-2">   </span><span class="hl-3">search:</span><span class="hl-2"> { </span><br/><span class="hl-2">      </span><span class="hl-3">properties:</span><span class="hl-2"> </span><span class="hl-4">&#39;name&#39;</span><span class="hl-2">, </span><br/><span class="hl-2">      </span><span class="hl-3">terms:</span><span class="hl-2"> </span><span class="hl-3">$</span><span class="hl-2">{</span><span class="hl-3">name</span><span class="hl-2">} </span><br/><span class="hl-2">   },</span><br/><span class="hl-2">})</span>
 </code></pre>
 
-<a href="#native-driver-aql-queries-amp-crud-1" id="native-driver-aql-queries-amp-crud-1" style="color: inherit; text-decoration: none;">
+<a href="#native-driver-aql-queries-amp-crud" id="native-driver-aql-queries-amp-crud" style="color: inherit; text-decoration: none;">
   <h2>Native Driver, AQL Queries &amp; CRUD</h2>
 </a>
 
@@ -167,7 +184,7 @@
 <p><em>TODO: finish documentation for this section</em></p>
 <p><a href="#table-of-contents">Back to top</a></p>
 
-<a href="#criteria-queries-amp-property-based-data-fetching-1" id="criteria-queries-amp-property-based-data-fetching-1" style="color: inherit; text-decoration: none;">
+<a href="#criteria-queries-amp-property-based-data-fetching" id="criteria-queries-amp-property-based-data-fetching" style="color: inherit; text-decoration: none;">
   <h2>Criteria Queries &amp; Property-Based Data Fetching</h2>
 </a>
 
