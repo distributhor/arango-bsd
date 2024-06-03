@@ -60,9 +60,13 @@ function _toSearchFilter(search: SearchTerms): Filter {
 }
 
 /** @internal */
-function _toFilterString(filter: string | Filter | SearchTerms): AqlValue[] {
+function _toFilterString(filter: string | AqlValue | Filter | SearchTerms): AqlValue[] {
   if (typeof filter === 'string') {
     return [literal(filter)]
+  }
+
+  if (isAqlQuery(filter)) {
+    return [filter]
   }
 
   if (isSearch(filter)) {

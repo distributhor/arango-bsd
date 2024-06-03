@@ -1323,8 +1323,11 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
+    const lance = 'Lance'
+    const chris = 'Chris'
+
     const result1C = await conn.db(db1)
-      .fetchByCriteria(CONST.userCollection, 'd.name == "Lance" || d.name == "Chris"', {
+      .fetchByCriteria(CONST.userCollection, aql`d.name == ${lance} || d.name == ${chris}`, {
         returnCursor: true
       }) as ArrayCursor
 
@@ -1342,8 +1345,11 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
+    const likeMar = '%mar%'
+    const climbing = 'Climbing'
+
     const result2B = await conn.db(db1).fetchByCriteria(CONST.userCollection,
-      'LIKE(d.name, "%mar%", true) && d.strength == "Climbing"'
+      aql`LIKE(d.name, ${likeMar}, true) && d.strength == ${climbing}`
     ) as QueryResult
 
     expect(result2B.data.length).toEqual(2)
@@ -1453,11 +1459,13 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result1B.data.length).toEqual(29)
 
+    const none = 'NULL'
+
     const result1BB = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
         {
-          filter: 'd.strength != NULL',
+          filter: aql`d.strength != ${none}`,
           search: { properties: 'name', terms: 'mar' },
           match: MatchType.ALL
         }
@@ -1476,12 +1484,13 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2A.data.length).toEqual(3)
 
+    const zoom = 'Zooming'
     // FOR d IN cyclists FILTER ( ( d.strength == "Zooming" ) && ( LIKE(d.name, "%mar%", true) ) ) RETURN d
     const result2AB = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
         {
-          filter: 'd.strength == "Zooming"',
+          filter: aql`d.strength == ${zoom}`,
           search: { properties: 'name', terms: 'mar' },
           match: MatchType.ALL
         }
@@ -1558,6 +1567,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
+    const name = 'name'
+    const likeMar = '%mar%'
+
     // FOR d IN cyclists FILTER (
     // ( d.@p == @v ) AND
     // ( LIKE(d.name, "%mar%", true) )
@@ -1566,7 +1578,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchByPropertyValueAndCriteria(
         CONST.userCollection,
         { property: 'strength', value: 'Climbing' },
-        { filter: 'LIKE(d.name, "%mar%", true)' }
+        { filter: aql`LIKE(d.${name}, ${likeMar}, true)` }
       ) as QueryResult
 
     expect(result1B.data.length).toEqual(2)
@@ -1867,6 +1879,7 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2E.data.length).toEqual(0)
 
+    const likeTime = '%time%'
     // FOR d IN cyclists FILTER (
     // ( d.@p1 == @v1 || d.@p2 == @v2 ) AND
     // ( LIKE(d.strength, "%time%", true) )
@@ -1878,7 +1891,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'country', value: 'Germany' },
           { property: 'country', value: 'Switzerland' }
         ],
-        { filter: 'LIKE(d.strength, "%time%", true)' }
+        { filter: aql`LIKE(d.strength, ${likeTime}, true)` }
       ) as QueryResult
 
     expect(result2F.data.length).toEqual(2)

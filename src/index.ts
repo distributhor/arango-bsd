@@ -42,7 +42,7 @@ import {
   ObjectWithKey
 } from 'arangojs/documents'
 import { Database } from 'arangojs'
-import { AqlQuery, literal } from 'arangojs/aql'
+import { AqlQuery, isAqlQuery, literal } from 'arangojs/aql'
 import { QueryOptions } from 'arangojs/database'
 import { ArrayCursor } from 'arangojs/cursor'
 import { Config } from 'arangojs/connection'
@@ -563,7 +563,7 @@ export class ArangoDBWithoutSauce {
 
   public async fetchByCriteria<T = any>(
     collection: string,
-    criteria: string | Filter | Criteria,
+    criteria: string | AqlQuery | Filter | Criteria,
     options: FetchOptions = {}
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
     if (this._debugFunctions()) {
@@ -576,7 +576,7 @@ export class ArangoDBWithoutSauce {
 
     const fetchOptions = this._fetchOptions(options)
 
-    if (typeof criteria === 'string' || isFilter(criteria)) {
+    if (typeof criteria === 'string' || isFilter(criteria) || isAqlQuery(criteria)) {
       return await this._fetchByCriteria(collection, { filter: criteria }, fetchOptions)
     }
 

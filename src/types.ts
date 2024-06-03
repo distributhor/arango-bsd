@@ -110,7 +110,7 @@ export interface FilterOptions {
 
 export interface Criteria {
   search?: SearchTerms
-  filter?: string | Filter
+  filter?: string | AqlQuery | Filter
   match?: MatchType
 }
 
