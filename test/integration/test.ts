@@ -4,7 +4,7 @@ import * as path from 'path'
 import * as dotenv from 'dotenv'
 import { aql } from 'arangojs/aql'
 import { ArrayCursor } from 'arangojs/cursor'
-import { ArangoConnection, ArangoDBWithoutSauce } from '../../src/index'
+import { ArangoConnection, ArangoDBWithoutGarnish } from '../../src/index'
 import { DBStructure, MatchType, QueryResult } from '../../src/types'
 
 import cyclists from './cyclists.json'
@@ -71,7 +71,7 @@ const conn = new ArangoConnection([{
   auth: { username: dbAdminUser, password: dbAdminPassword }
 }], { printQueries: false })
 
-const db = new ArangoDBWithoutSauce({
+const db = new ArangoDBWithoutGarnish({
   databaseName: db1,
   url: process.env.GUACAMOLE_TEST_DB_URI,
   auth: { username: dbAdminUser, password: dbAdminPassword }

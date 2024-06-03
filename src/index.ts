@@ -202,7 +202,7 @@ export class ArangoConnection {
   }
 }
 
-export class ArangoDBWithoutSauce {
+export class ArangoDBWithoutGarnish {
   /**
    * A property that exposes the native `ArangoJS`
    * [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
@@ -797,7 +797,7 @@ export class ArangoDBWithoutSauce {
  * db.returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
  * ```
  */
-export class ArangoDB extends ArangoDBWithoutSauce {
+export class ArangoDB extends ArangoDBWithoutGarnish {
   constructor(db: Config | Database, options: GuacamoleOptions = {}) {
     super(db, options)
   }
