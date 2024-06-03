@@ -877,15 +877,6 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result4B.data.length).toEqual(3)
 
-    // WFC finish this
-    // const result4BAlt = (await conn.db(db1)
-    //   .fetchByPropertyValues(CONST.userCollection, {
-    //     properties: { property: 'strength', value: 'Time Trial' },
-    //     match: MatchType.ANY
-    //   })) as QueryResult
-
-    // console.log(result4BAlt)
-
     const rohanDennisv1 = result4B.data.find(i => i.surname === 'Dennis')
     expect(rohanDennisv1.rating.timetrial).toEqual(9)
 
@@ -896,6 +887,7 @@ describe('Guacamole Integration Tests', () => {
         { limit: 2, sortBy: 'name', sortOrder: 'descending' }
       )) as QueryResult
 
+    // FOR d IN @@value0 FILTER ( LOWER(d.@value1) == @value2 ) SORT d.@value3 DESC LIMIT 1, 2 RETURN d
     const result4BWithLimit2 = (await db
       .fetchByProperties(
         CONST.userCollection,
@@ -1262,9 +1254,7 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('fetchByPropertySearch', async () => {
-    // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) ) RETURN d',
-    // 'FOR d IN cyclists FILTER ( LIKE(d.name, "%lance%", true) || LIKE(d.name, "%chris%", true) || LIKE(d.surname, "%lance%", true) || LIKE(d.surname, "%chris%", true) ) RETURN d'
-    // FOR d IN @@value0 FILTER (LIKE(d.@value1, @value2, true) || LIKE(d.@value1, @value3, true)) RETURN d'
+    // FOR d IN @@value0 FILTER ( LIKE(d.@value1, @value2, true) || LIKE(d.@value1, @value3, true) ) RETURN d
     // bindVars: {
     //   '@value0': 'cyclists',
     //   value1: 'name',
@@ -1302,7 +1292,7 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN @@value0 FILTER (LIKE(d.@value1, @value2, true)) RETURN d
+    // FOR d IN @@value0 FILTER (LIKE(d.@value1, @value2, true) ) RETURN d
     // bindVars: { '@value0': 'cyclists', value1: 'name', value2: '%%' }
     const result3A = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection, {
@@ -1504,7 +1494,7 @@ describe('Guacamole Integration Tests', () => {
 
     const zoom = 'Zooming'
 
-    // FOR d IN @@value0 FILTER (( d.strength == @value1 ) && ( LIKE(d.@value2, @value3, true) )) RETURN d
+    // FOR d IN @@value0 FILTER ( ( d.strength == @value1 ) && ( LIKE(d.@value2, @value3, true) ) ) RETURN d
     // bindVars: {
     //   value1: 'Zooming',
     //   value2: 'name',
@@ -1546,7 +1536,7 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2BB.data.length).toEqual(3)
 
-    // FOR d IN cyclists FILTER ( d.strength == "Climbing" ) RETURN d
+    // FOR d IN @@value0 FILTER ( d.strength == "Climbing" ) RETURN d
     const result3A = await conn.db(db1)
       .fetchByCriteria(
         CONST.userCollection,
@@ -2030,6 +2020,15 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 || LOWER(d.@value1) == @value3 || LOWER(d.@value1) == @value4 ) AND ( ( LIKE(d.surname, "%an%", true) ) && (  LIKE(d.@value5, @value6, true) ) ) ) RETURN d
+    // bindVars: {
+    //   value1: 'strength',
+    //   value2: 'general classification',
+    //   value3: 'time trial',
+    //   value4: 'sprinter',
+    //   value5: 'country',
+    //   value6: '%ia%'
+    // }
     const result2L = await db
       .fetchByPropertiesAndCriteria(
         CONST.userCollection, {
@@ -2082,7 +2081,7 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2N.data.length).toEqual(0)
 
-    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 || LOWER(d.@value3) == @value4 ) AND ( LIKE(d.@value5, @value6, true) )) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 || LOWER(d.@value3) == @value4 ) AND ( LIKE(d.@value5, @value6, true) ) ) RETURN d
     // bindVars: {
     //   value1: 'country',
     //   value2: 'slovenia',
@@ -2133,11 +2132,10 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN cyclists FILTER ( LIKE(TO_STRING(d.resultsV2), "%Gravel%", true) ) RETURN d
+    // FOR d IN @@value0 FILTER ( LIKE(TO_STRING(d.resultsV2), "%Gravel%", true) ) RETURN d
     const result2A = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        // 'LIKE(TO_STRING(d.resultsV2), "%Gravel%", true)' // why was there a TOSTRING HERE?
-        'LIKE(d.resultsV2, "%Gravel%", true)'
+        'LIKE(TO_STRING(d.resultsV2), "%Gravel%", true)'
       ) as QueryResult
 
     expect(result2A.data.length).toEqual(4)
@@ -2176,7 +2174,7 @@ describe('Guacamole Integration Tests', () => {
     const containsFrance = '%france%'
 
     // returns correct results and the bind operation results in correct AQL
-    // FOR d IN @@value0 FILTER (LIKE(d.@value1.@value2, @value3, true)) RETURN d
+    // FOR d IN @@value0 FILTER ( LIKE(d.@value1.@value2, @value3, true) ) RETURN d
     // bindVars: {
     //   value1: 'resultsV3',
     //   value2: '2015',
@@ -2213,7 +2211,7 @@ describe('Guacamole Integration Tests', () => {
     )
 
     // returns no results because of the way resultsV32015 is bound, eg
-    // FOR d IN @@value0 FILTER (LIKE(d.@value1, @value2, true)) RETURN d
+    // FOR d IN @@value0 FILTER ( LIKE(d.@value1, @value2, true) ) RETURN d
     // bindVars: {
     //   value1: 'resultsV3.2015',
     //   value2: '%Tirreno%'
@@ -2225,7 +2223,7 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2E.data.length).toEqual(0)
 
-    // FOR d IN @@value0 FILTER (LIKE( d.@value1.@value2, @value3, true)) RETURN d
+    // FOR d IN @@value0 FILTER ( LIKE(d.@value1.@value2, @value3, true) ) RETURN d
     // bindVars: {
     //   value1: 'resultsV3',
     //   value2: '2015',
@@ -2263,7 +2261,7 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN @@value0 FILTER (LIKE( d.@value1.@value2, @value3, true) || LIKE( d.@value1.@value2, @value4, true)) RETURN d
+    // FOR d IN @@value0 FILTER ( LIKE(d.@value1.@value2, @value3, true) || LIKE(d.@value1.@value2, @value4, true) ) RETURN d
     // bindVars: {
     //   value1: 'resultsV3',
     //   value2: '2015',
@@ -2287,7 +2285,7 @@ describe('Guacamole Integration Tests', () => {
 
     const palmares = 'palmares'
 
-    // FOR d IN @@value0 FILTER (LIKE(d.@value1, @value2, true)  || LIKE(d.@value1, @value3, true)) RETURN d
+    // FOR d IN @@value0 FILTER ( LIKE(d.@value1, @value2, true) || LIKE(d.@value1, @value3, true) ) RETURN d
     // bindVars: {
     //   value1: 'palmares',
     //   value2: '%Waffle%',
@@ -2323,7 +2321,7 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( LIKE( d.@value3.@value4, @value5, true) || LIKE( d.@value3.@value4, @value6, true) )) RETURN d
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( LIKE(d.@value3.@value4, @value5, true) || LIKE(d.@value3.@value4, @value6, true) ) ) RETURN d
     // bindVars: {
     //   value1: 'strength',
     //   value2: 'sprinter',
