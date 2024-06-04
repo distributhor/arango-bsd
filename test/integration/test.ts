@@ -282,134 +282,281 @@ describe('Guacamole Integration Tests', () => {
 
   test('Unique constraint validation', async () => {
     // should be case insensitive PT1
-    const result1 = await conn.db(db1).validateUniqueConstraint({
-      collection: CONST.userCollection,
-      constraints: [{ unique: { property: 'fame', value: 'Chief Doper' } }]
-    })
+    // FOR d IN @@value0 FILTER ( LOWER(d.@value1) == @value2 ) RETURN d._key
+    // bindVars: { '@value0': 'cyclists', value1: 'fame', value2: 'chief doper' }
+    const result1 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: {
+          property: 'fame', value: 'Chief Doper'
+        }
+      })
 
     expect(result1.violatesUniqueConstraint).toBeTruthy()
 
     // should be case insensitive PT2
-    const result1DifferentCase1 = await conn.db(db1).validateUniqueConstraint({
-      collection: CONST.userCollection,
-      constraints: [{ unique: { property: 'fame', value: 'Chief DOPER' } }]
-    })
+    const result1DifferentCase1 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: {
+          property: 'fame', value: 'Chief DOPER'
+        }
+      })
 
     expect(result1DifferentCase1.violatesUniqueConstraint).toBeTruthy()
 
     // should be case sensitive
-    const result1DifferentCase2 = await conn.db(db1).validateUniqueConstraint({
-      caseInsensitive: true,
-      collection: CONST.userCollection,
-      constraints: [{ unique: { property: 'fame', value: 'Chief DOPER' } }]
-    })
+    const result1DifferentCase2 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: {
+          property: 'fame', value: 'Chief DOPER', caseSensitive: true
+        }
+      })
 
     expect(result1DifferentCase2.violatesUniqueConstraint).toBeFalsy()
 
-    const result2 = await conn.db(db1).validateUniqueConstraint({
-      collection: CONST.userCollection,
-      constraints: [{ unique: { property: 'fame', value: 'Tornado' } }]
-    })
+    const result2 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: {
+          property: 'fame', value: 'Tornado'
+        }
+      })
 
     expect(result2.violatesUniqueConstraint).toBeFalsy()
 
-    const result3 = await conn.db(db1).validateUniqueConstraint({
-      collection: CONST.userCollection,
-      constraints: [
-        { unique: { property: 'fame', value: 'Tornado' } },
-        { unique: { property: 'surname', value: 'Armstrong' } }
-      ]
-    })
+    // FOR d IN @@value0 FILTER ( LOWER(d.@value1) == @value2 || LOWER(d.@value3) == @value4 ) RETURN d._key
+    // bindVars: {
+    //     value1: 'fame',
+    //     value2: 'tornado',
+    //     value3: 'surname',
+    //     value4: 'armstrong'
+    // }
+    const result3 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: [
+          { property: 'fame', value: 'Tornado' },
+          { property: 'surname', value: 'Armstrong' }
+        ]
+      })
 
     expect(result3.violatesUniqueConstraint).toBeTruthy()
 
-    const result3DifferentCase1 = await conn.db(db1).validateUniqueConstraint({
-      collection: CONST.userCollection,
-      constraints: [
-        { unique: { property: 'fame', value: 'TORNADO' } },
-        { unique: { property: 'surname', value: 'ArmSTRONG' } }
-      ]
-    })
+    const result3DifferentCase1 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: [
+          { property: 'fame', value: 'Tornado' },
+          { property: 'surname', value: 'ArmSTRONG' }
+        ]
+      })
 
     expect(result3DifferentCase1.violatesUniqueConstraint).toBeTruthy()
 
-    const result3DifferentCase2 = await conn.db(db1).validateUniqueConstraint({
-      caseInsensitive: true,
-      collection: CONST.userCollection,
-      constraints: [
-        { unique: { property: 'fame', value: 'TORNADO' } },
-        { unique: { property: 'surname', value: 'ArmSTRONG' } }
-      ]
-    })
+    const result3DifferentCase2 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: [
+          { property: 'fame', value: 'TORNADO', caseSensitive: true },
+          { property: 'surname', value: 'ArmSTRONG', caseSensitive: true }
+        ]
+      })
 
     expect(result3DifferentCase2.violatesUniqueConstraint).toBeFalsy()
 
-    const result4 = await conn.db(db1).validateUniqueConstraint({
-      collection: CONST.userCollection,
-      constraints: [
-        { unique: { property: 'fame', value: 'Tornado' } },
-        { unique: { property: 'surname', value: 'Voeckler' } }
-      ]
-    })
+    const result4 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: [
+          { property: 'fame', value: 'Tornado' },
+          { property: 'surname', value: 'Voeckler' }
+        ]
+      })
 
     expect(result4.violatesUniqueConstraint).toBeFalsy()
 
-    const result5 = await conn.db(db1).validateUniqueConstraint({
-      collection: CONST.userCollection,
-      constraints: [
-        {
-          composite: [
-            { property: 'name', value: 'Thomas' },
-            { property: 'surname', value: 'de Gendt' }
-          ]
-        }
-      ]
-    })
+    // FOR d IN @@value0 FILTER ( LOWER(d.@value1) == @value2 && LOWER(d.@value3) == @value4 ) RETURN d._key
+    // bindVars: {
+    //     value1: 'fame',
+    //     value2: 'tornado',
+    //     value3: 'surname',
+    //     value4: 'voeckler'
+    // }
+    const result5 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        composite: [
+          { property: 'fame', value: 'Tornado' },
+          { property: 'surname', value: 'Voeckler' }
+        ]
+      })
 
-    expect(result5.violatesUniqueConstraint).toBeTruthy()
+    expect(result5.violatesUniqueConstraint).toBeFalsy()
 
-    const result5DifferentCase1 = await conn.db(db1).validateUniqueConstraint({
-      collection: CONST.userCollection,
-      constraints: [
-        {
-          composite: [
-            { property: 'name', value: 'THOMAS' },
-            { property: 'surname', value: 'DE Gendt' }
-          ]
-        }
-      ]
-    })
+    const result5DifferentCase1 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        composite: [
+          { property: 'name', value: 'THOMAS' },
+          { property: 'surname', value: 'DE Gendt' }
+        ]
+      })
 
     expect(result5DifferentCase1.violatesUniqueConstraint).toBeTruthy()
 
-    const result5DifferentCase2 = await conn.db(db1).validateUniqueConstraint({
-      collection: CONST.userCollection,
-      caseInsensitive: true,
-      constraints: [
-        {
-          composite: [
-            { property: 'name', value: 'THOMAS' },
-            { property: 'surname', value: 'DE Gendt' }
-          ]
-        }
-      ]
-    })
+    const result5DifferentCase2 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        composite: [
+          { property: 'name', value: 'THOMAS', caseSensitive: true },
+          { property: 'surname', value: 'DE Gendt', caseSensitive: true }
+        ]
+      })
 
     expect(result5DifferentCase2.violatesUniqueConstraint).toBeFalsy()
 
-    const result6 = await conn.db(db1).validateUniqueConstraint({
-      collection: CONST.userCollection,
-      constraints: [
-        {
-          composite: [
-            { property: 'name', value: 'Thomas' },
-            { property: 'surname', value: 'Voeckler' }
-          ]
-        }
-      ]
-    })
+    const result6 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        composite: [
+          { property: 'name', value: 'Thomas' },
+          { property: 'surname', value: 'Voeckler' }
+        ]
+      })
 
     expect(result6.violatesUniqueConstraint).toBeFalsy()
+
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 && LOWER(d.@value3) == @value4 ) || LOWER(d.@value5) == @value6 ) RETURN d._key
+    // bindVars: {
+    //     value1: 'name',
+    //     value2: 'thomas',
+    //     value3: 'surname',
+    //     value4: 'de gendt',
+    //     value5: 'fame',
+    //     value6: 'tornado'
+    // }
+    const result7 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: {
+          property: 'fame', value: 'Tornado'
+        },
+        composite: [
+          { property: 'name', value: 'THOMAS' },
+          { property: 'surname', value: 'DE Gendt' }
+        ]
+      })
+
+    expect(result7.violatesUniqueConstraint).toBeTruthy()
+
+    const result8 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: {
+          property: 'fame', value: 'Tornado'
+        },
+        composite: [
+          { property: 'name', value: 'THOMAS' },
+          { property: 'surname', value: 'Voeckler' }
+        ]
+      })
+
+    expect(result8.violatesUniqueConstraint).toBeFalsy()
+
+    const result9 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: {
+          property: 'fame', value: 'Wish I Was 3kg Lighter'
+        },
+        composite: [
+          { property: 'name', value: 'THOMAS' },
+          { property: 'surname', value: 'Voeckler' }
+        ]
+      })
+
+    expect(result9.violatesUniqueConstraint).toBeTruthy()
+
+    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 && LOWER(d.@value3) == @value4 ) || LOWER(d.@value5) == @value6 || LOWER(d.@value5) == @value7 ) RETURN d._key
+    // bindVars: {
+    //     value1: 'name',
+    //     value2: 'thomas',
+    //     value3: 'surname',
+    //     value4: 'voeckler',
+    //     value5: 'fame',
+    //     value6: 'wish i was 3kg lighter',
+    //     value7: 'tornado'
+    // }
+    const result10 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: [
+          { property: 'fame', value: 'Wish I Was 3kg Lighter' },
+          { property: 'fame', value: 'Tornado' }
+        ],
+        composite: [
+          { property: 'name', value: 'THOMAS' },
+          { property: 'surname', value: 'Voeckler' }
+        ]
+      })
+
+    expect(result10.violatesUniqueConstraint).toBeTruthy()
+
+    const result11 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: [
+          { property: 'fame', value: 'Wish I Was 5kg Lighter' },
+          { property: 'fame', value: 'Tornado' }
+        ],
+        composite: [
+          { property: 'name', value: 'THOMAS' },
+          { property: 'surname', value: 'Voeckler' }
+        ]
+      })
+
+    expect(result11.violatesUniqueConstraint).toBeFalsy()
+
+    const result12 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: [
+          { property: 'fame', value: 'Wish I Was 5kg Lighter' },
+          { property: 'fame', value: 'Tornado' }
+        ],
+        composite: [
+          { property: 'name', value: 'THOMAS' },
+          { property: 'surname', value: 'DE Gendt' }
+        ]
+      })
+
+    expect(result12.violatesUniqueConstraint).toBeTruthy()
+
+    const thomas = await conn.db(db1).fetchOneByPropertyValue(
+      CONST.userCollection,
+      { property: 'surname', value: 'de Gendt' }
+    )
+
+    // FOR d IN @@value0 FILTER (d._key != @value1) FILTER (
+    //   ( LOWER(d.@value2) == @value3 && LOWER(d.@value4) == @value5 ) || LOWER(d.@value6) == @value7 || LOWER(d.@value6) == @value8
+    // ) RETURN d._key
+    const result13 = await conn.db(db1).validateUniqueConstraint(
+      CONST.userCollection,
+      {
+        singular: [
+          { property: 'fame', value: 'Wish I Was 5kg Lighter' },
+          { property: 'fame', value: 'Tornado' }
+        ],
+        composite: [
+          { property: 'name', value: 'THOMAS' },
+          { property: 'surname', value: 'DE Gendt' }
+        ],
+        excludeDocumentKey: thomas._key
+      })
+
+    expect(result13.violatesUniqueConstraint).toBeFalsy()
   })
 
   test('CRUD', async () => {
@@ -1264,7 +1411,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1K.data.length).toEqual(1)
 
     const result1L = (await conn.db(db1).fetchByPropertyValue(CONST.userCollection, {
-      property: 'favoriteRoads.Portugal.Lisbon', value: 'sintra', options: { caseSensitive: true }
+      property: 'favoriteRoads.Portugal.Lisbon', value: 'sintra', caseSensitive: true
     })) as QueryResult
 
     expect(result1L.data.length).toEqual(0)
@@ -1276,7 +1423,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1M.data.length).toEqual(4)
 
     const result1N = (await conn.db(db1)
-      .fetchByPropertyValue(CONST.userCollection, { property: 'stats.grandTours', value: 21, options: { caseSensitive: true } }
+      .fetchByPropertyValue(CONST.userCollection, { property: 'stats.grandTours', value: 21, caseSensitive: true }
       )) as QueryResult
 
     expect(result1N.data.length).toEqual(4)

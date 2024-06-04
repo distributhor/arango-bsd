@@ -5,8 +5,6 @@ import { DocumentCollection, EdgeCollection } from 'arangojs/collection'
 import {
   MatchTypeOperator,
   UniqueConstraint,
-  isCompositeKey,
-  isUniqueValue,
   FetchOptions,
   PropertyValue,
   SearchTerms,
@@ -185,7 +183,7 @@ function _toPropertyFilter(prop: PropertyValue): AqlQuery {
   const f: AqlValue[] = []
 
   if (prop.property.indexOf('.') > 0) {
-    if (prop.options?.caseSensitive ?? typeof prop.value !== 'string') {
+    if (prop.caseSensitive ?? typeof prop.value !== 'string') {
       f.push(literal(' d'))
     } else {
       f.push(literal(' LOWER(d'))
@@ -197,13 +195,13 @@ function _toPropertyFilter(prop: PropertyValue): AqlQuery {
       f.push(aql`.${nestedProps[i]}`)
     }
 
-    if (prop.options?.caseSensitive ?? typeof prop.value !== 'string') {
+    if (prop.caseSensitive ?? typeof prop.value !== 'string') {
       f.push(aql` == ${prop.value}`)
     } else {
       f.push(aql`) == ${prop.value.toLowerCase()}`)
     }
   } else {
-    if (prop.options?.caseSensitive ?? typeof prop.value !== 'string') {
+    if (prop.caseSensitive ?? typeof prop.value !== 'string') {
       f.push(aql` d.${prop.property} == ${prop.value}`)
     } else {
       f.push(aql` LOWER(d.${prop.property}) == ${prop.value.toLowerCase()}`)
@@ -495,97 +493,74 @@ export function deleteDocumentsByKeyValue(collection: DocumentCollection, identi
       RETURN { _key: d._key }`
 }
 
-// TODO: turn this into safe AQL
-export function uniqueConstraintQuery(constraints: UniqueConstraint): AqlQuery {
-  if (!constraints || constraints.constraints.length === 0) {
-    throw new Error('No constraints specified')
+export function uniqueConstraintQuery(
+  collection: DocumentCollection | EdgeCollection,
+  constraints: UniqueConstraint,
+  options: FetchOptions = {}
+): AqlQuery {
+  if (_debugFiltersEnabled(options)) {
+    _debug.log.filters(constraints)
+  } else {
+    _debug.filters(constraints)
   }
 
-  const params: any = {}
-  let query = `FOR d IN ${constraints.collection} FILTER`
+  const filters: AqlValue[] = []
+
+  if (constraints.composite) {
+    let count = 0
+
+    if (constraints.singular) {
+      filters.push(literal(' ('))
+    }
+
+    for (const constraint of constraints.composite) {
+      count++
+      if (count > 1) {
+        filters.push(literal(' &&'))
+      }
+
+      filters.push(_toPropertyFilter(constraint))
+    }
+
+    if (constraints.singular) {
+      filters.push(literal(' ) ||'))
+    }
+  }
+
+  if (constraints.singular) {
+    const singular = Array.isArray(constraints.singular)
+      ? constraints.singular
+      : [constraints.singular]
+
+    let count = 0
+
+    for (const constraint of singular) {
+      count++
+      if (count > 1) {
+        filters.push(literal(' ||'))
+      }
+
+      filters.push(_toPropertyFilter(constraint))
+    }
+  }
+
+  const excl: AqlValue[] = []
 
   if (constraints.excludeDocumentKey) {
-    params.excludeDocumentKey = constraints.excludeDocumentKey
-    query += ' d._key != @excludeDocumentKey FILTER'
+    excl.push(aql`d._key != ${constraints.excludeDocumentKey}`)
   }
 
-  let constraintCount = 0
+  const query = excl.length > 0
+    ? aql`FOR d IN ${collection} FILTER (${join(excl, '')}) FILTER (${join(filters, '')} ) RETURN d._key`
+    : aql`FOR d IN ${collection} FILTER (${join(filters, '')} ) RETURN d._key`
 
-  for (const constraint of constraints.constraints) {
-    constraintCount++
-
-    if (constraintCount > 1) {
-      query += ' ||'
-    }
-
-    if (isCompositeKey(constraint)) {
-      let propCount = 0
-
-      query += ' ('
-
-      for (const kv of constraint.composite) {
-        propCount++
-
-        if (propCount > 1) {
-          query += ' &&'
-        }
-
-        if (constraints.caseInsensitive) {
-          const bindProp = `${kv.property}_key_${propCount}`
-          const bindValue = `${kv.property}_val_${propCount}`
-
-          params[bindProp] = kv.property
-          params[bindValue] = kv.value
-
-          query += ` d.@${bindProp} == @${bindValue}`
-        } else {
-          const bindProp = `${kv.property}_key_${propCount}`
-          const bindValue = `${kv.property}_val_${propCount}`
-
-          params[bindProp] = kv.property
-
-          if (typeof kv.value === 'string') {
-            params[bindValue] = kv.value.toLowerCase()
-            query += ` LOWER(d.@${bindProp}) == @${bindValue}`
-          } else {
-            params[bindValue] = kv.value
-            query += ` d.@${bindProp} == @${bindValue}`
-          }
-        }
-      }
-
-      query += ' )'
-    }
-
-    if (isUniqueValue(constraint)) {
-      const bindProp = `${constraint.unique.property}_key`
-      const bindValue = `${constraint.unique.property}_val`
-
-      if (constraints.caseInsensitive) {
-        params[bindProp] = constraint.unique.property
-        params[bindValue] = constraint.unique.value
-
-        query += ` d.@${bindProp} == @${bindValue}`
-      } else {
-        params[bindProp] = constraint.unique.property
-
-        if (typeof constraint.unique.value === 'string') {
-          params[bindValue] = constraint.unique.value.toLowerCase()
-          query += ` LOWER(d.@${bindProp}) == @${bindValue}`
-        } else {
-          params[bindValue] = constraint.unique.value
-          query += ` d.@${bindProp} == @${bindValue}`
-        }
-      }
-    }
+  if (_debugFiltersEnabled(options) || _printQuery(options)) {
+    _debug.log.queries(query)
+  } else {
+    _debug.queries(query)
   }
 
-  query += ' RETURN d._key'
-
-  return {
-    query,
-    bindVars: params
-  }
+  return query
 }
 
 export const Queries = {

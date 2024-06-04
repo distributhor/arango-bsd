@@ -674,14 +674,12 @@ export class ArangoDBWithoutGarnish {
   }
 
   public async validateUniqueConstraint(
-    constraints: UniqueConstraint
+    collection: string,
+    constraints: UniqueConstraint,
+    options: FetchOptions = {}
   ): Promise<UniqueConstraintResult> {
-    if (!constraints || constraints.constraints.length === 0) {
-      throw new Error('No constraints specified')
-    }
-
     // const query = uniqueConstraintQuery(constraints, QueryType.STRING) as string;
-    const query = Queries.uniqueConstraintQuery(constraints)
+    const query = Queries.uniqueConstraintQuery(this.col(collection), constraints, this._queryOpts(options))
     const documents = await (await this.query(query)).all()
 
     return {

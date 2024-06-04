@@ -18,34 +18,10 @@ export function isIdentifier(x: any): x is Identifier {
   return x.value
 }
 
-/** @internal */
-export function isUniqueValue(x: any): x is UniqueValue {
-  return x.unique
-}
-
-/** @internal */
-export function isCompositeKey(x: any): x is CompositeKey {
-  return x.composite
-}
-
-export interface UntypedObject {
-  [key: string]: any
-}
-
-export interface KeyValue {
-  key: string
-  value: any
-}
-
-export interface IndexValue {
-  index: number
-  value: string
-}
-
 export interface PropertyValue {
   property: string
   value: any
-  options?: PropertyValueOptions
+  caseSensitive?: boolean
 }
 
 export interface PropertyValues {
@@ -53,27 +29,14 @@ export interface PropertyValues {
   match?: MatchType
 }
 
-export interface PropertyValueOptions {
-  caseSensitive?: boolean
-}
-
-export interface UniqueValue {
-  unique: PropertyValue
-}
-
 export interface Identifier {
   value: string | Number
   property?: string
 }
 
-export interface CompositeKey {
-  composite: PropertyValue[]
-}
-
 export interface UniqueConstraint {
-  collection: string
-  constraints: Array<UniqueValue | CompositeKey>
-  caseInsensitive?: boolean
+  singular?: PropertyValue | PropertyValue[]
+  composite?: PropertyValue[]
   excludeDocumentKey?: string
 }
 
