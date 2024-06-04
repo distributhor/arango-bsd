@@ -1,50 +1,115 @@
 [
   {
-    "name": "US Postal"
+    "name": "US Postal",
+    "members": [
+      { "name": "Lance Armstrong", "role": "GC" },
+      { "name": "George Hincapie", "role": "Super Domestique" }
+    ]
   },
   {
-    "name": "UAE Emirates"
+    "name": "UAE Emirates",
+    "members": [
+      { "name": "Tadej Pogačar", "role": "GC" }
+    ]
   },
   {
-    "name": "Jumbo Visma"
+    "name": "Jumbo Visma",
+    "members": [
+      { "name": "Wout van Aert", "role": "Stage Wins, Lead Out Man" },
+      { "name": "Tony Martin", "role": "Super Domestique" }
+    ]
   },
   {
-    "name": "Alpecin Fenix"
+    "name": "Alpecin Fenix",
+    "members": [
+      { "name": "Mathieu van der Poel", "role": "Stage Wins" }
+    ]
   },
   {
-    "name": "CSC"
+    "name": "CSC",
+    "members": [
+      { "name": "Ivan Basso", "role": "GC" }
+    ]
   },
   {
-    "name": "BMC"
+    "name": "BMC",
+    "members": [
+      { "name": "Greg van Avermaet", "role": "Stage Wins" },
+      { "name": "Rohan Dennis", "role": "Domestique" },
+      { "name": "Matt Beers", "role": "Break Away" },
+      { "name": "Kevin Benkenstein", "role": "Break Away" }
+    ]
   },
   {
-    "name": "T-Mobile"
+    "name": "T-Mobile",
+    "members": [
+      { "name": "Jan Ullrich", "role": "GC" }
+    ]
   },
   {
-    "name": "Movistar"
+    "name": "Movistar",
+    "members": [
+      { "name": "Alejandro Valverde", "role": "GC, Stage Wins" },
+      { "name": "Marc Soler", "role": "Break Away, Climbers Jersey" }
+    ]
   },
   {
-    "name": "Saxobank Tinkoff"
+    "name": "Tinkoff",
+    "members": [
+      { "name": "Alberto Contador", "role": "GC" }
+    ]
   },
   {
-    "name": "Quickstep"
+    "name": "Quickstep",
+    "members": [
+      { "name": "Mark Cavendish", "role": "Sprinters Jersey" },
+      { "name": "Julian Alaphilippe", "role": "Stage Wins" }
+    ]
   },
   {
-    "name": "Team Sky"
+    "name": "Team Sky",
+    "members": [
+      { "name": "Chris Froome", "role": "GC" },
+      { "name": "Geraint Thomas", "role": "GC" }
+    ]
   },
   {
-    "name": "Bora Hansgrohe"
+    "name": "Bora Hansgrohe",
+    "members": [
+      { "name": "Peter Sagan", "role": "Stage Wins, Green Jersey" }
+    ]
   },
   {
-    "name": "Astana"
+    "name": "Astana",
+    "members": [
+      { "name": "Vincenzo Nibali", "role": "GC, Stage Wins" }
+    ]
   },
   {
-    "name": "FDJ"
+    "name": "Groupama FDJ",
+    "members": [
+      { "name": "Arnaud Démare", "role": "Green Jersey" },
+      { "name": "Thibaut Pinot", "role": "Climbers Jersey, Break Away" }
+    ]
   },
   {
-    "name": "Trek Segafredo"
+    "name": "Trek Segafredo",
+    "members": [
+      { "name": "Fabian Cancellara", "role": "Domestique, Stage Wins" }
+    ]
   },
   {
-    "name": "Lotto Soudal"
+    "name": "Lotto Soudal",
+    "members": [
+      { "name": "Thomas de Gendt", "role": "Break Away" },
+      { "name": "Tim Wellens", "role": "Lead Out Man" },
+      { "name": "Caleb Ewan", "role": "Sprinters Jersey" }
+    ]
+  },
+  {
+    "name": "Bahrain Victorious",
+    "members": [
+      { "name": "Matej Mohorič", "role": "Stage Wins" }
+    ]
   }
 ]

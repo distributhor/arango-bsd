@@ -5,10 +5,10 @@ import {
   GuacamoleOptions,
   EntityAvailability,
   GraphDefinition,
-  DBStructure,
-  DBStructureResult,
-  DBStructureValidation,
-  DBClearanceMethod,
+  DbStructure,
+  DbStructureResult,
+  DbStructureValidation,
+  DbClearanceStrategy,
   isGraphDefinitionArray,
   UniqueConstraint,
   UniqueConstraintResult,
@@ -24,7 +24,8 @@ import {
   DocumentMeta,
   DocumentUpdate,
   isIdentifier,
-  isFilter
+  isFilter,
+  GraphRelation
 } from './types'
 import { Queries } from './queries'
 import {
@@ -39,6 +40,7 @@ import {
   Document,
   DocumentData,
   DocumentSelector,
+  Edge,
   ObjectWithKey
 } from 'arangojs/documents'
 import { Database } from 'arangojs'
@@ -1293,6 +1295,121 @@ export class ArangoDBWithSpice extends ArangoDB {
     return await this.updateProperty(collection, identifier, arrayProperty, updatedArray)
   }
 
+  // public async edgeRelationExists(dbName, graphName, edgeCollectionName, relation) {
+  //   const that = this
+  //   const query =
+  //           'FOR e IN ' +
+  //           edgeCollectionName +
+  //           ' FILTER e._from == "' +
+  //           relation.from +
+  //           '" && e._to == "' +
+  //           relation.to +
+  //           '" RETURN e._key'
+  //   // console.log('EDGE RELATION EXISTS QUERY : ' + query);
+  //   return new Promise((resolve, reject) => {
+  //     return that
+  //       .query(dbName, query)
+  //       .then(result => {
+  //         if (result.data.length > 0) {
+  //           resolve(true)
+  //         } else {
+  //           resolve(false)
+  //         }
+  //       })
+  //       .catch(e => {
+  //         if (e.message) {
+  //           reject(e.message)
+  //         } else {
+  //           reject(e)
+  //         }
+  //       })
+  //   })
+  // }
+
+  public async createEdgeRelation<T extends Record<string, any> = any>(
+    // graph: string,
+    edgeCollection: string,
+    relation: GraphRelation | GraphRelation[],
+    options: any = {}
+  ): Promise<Array<DocumentMeta & { new?: Document<T>, old?: Document<T> }>> {
+    if (Array.isArray(relation)) {
+      const edges: Edge[] = []
+
+      for (const r of relation) {
+        if (!r.hasOwnProperty('from') || !r.hasOwnProperty('to')) {
+          continue
+        }
+
+        const data = r.data ? r.data : {}
+        const edge = {
+          _from: r.from,
+          _to: r.to,
+          ...data
+        }
+
+        edges.push(edge)
+      }
+
+      return await this.col(edgeCollection).saveAll(edges)
+    }
+
+    if (!relation?.hasOwnProperty('from') || !relation.hasOwnProperty('to')) {
+      throw new Error('Cannot create edge relation without relational keys')
+    }
+
+    let allowDuplicateRelations = false
+
+    if (options?.hasOwnProperty('allowDuplicates') && options.allowDuplicates === true) {
+      allowDuplicateRelations = options.allowDuplicates
+    }
+
+    const data = relation.data ? relation.data : {}
+    const edge = {
+      _from: relation.from,
+      _to: relation.to,
+      ...data
+    }
+
+    const result = await this.col(edgeCollection).save(edge)
+
+    return [result]
+
+    // if (allowDuplicateRelations) {
+    //   const edge = relation.data ? relation.data : {}
+    //   edge._from = relation.from
+    //   edge._to = relation.to
+
+    //   const result = await this.col(edgeCollection).save(edge)
+    // } else {
+    //   that.edgeRelationExists(dbName, graphName, edgeCollectionName, relation).then(exists => {
+    //     if (exists) {
+    //       resolve({
+    //         error: false,
+    //         status: 'exists',
+    //         message: 'Relation already exists',
+    //         relation
+    //       })
+    //     } else {
+    //       that.connection(dbName).then(db => {
+    //         // db.graph(graphName)
+    //         db.edgeCollection(edgeCollectionName)
+    //           .save(relation.data, relation.from, relation.to)
+    //           .then(result => {
+    //             result.error = false
+    //             result.status = 'created'
+    //             result.message = 'Relation created'
+    //             result.relation = relation
+    //             resolve(result)
+    //           })
+    //           .catch(e => {
+    //             reject(e)
+    //           })
+    //       })
+    //     }
+    //   })
+    // }
+  }
+
   public async dbExists(): Promise<boolean> {
     // if (db) {
     //   driver.listDatabases() will throw an error (database not found) if the db in question doesn't actually exist yet
@@ -1302,13 +1419,13 @@ export class ArangoDBWithSpice extends ArangoDB {
     return await this.driver.exists()
   }
 
-  public async clearDB(method: DBClearanceMethod = DBClearanceMethod.DELETE_DATA): Promise<void> {
+  public async clearDb(method: DbClearanceStrategy = DbClearanceStrategy.DELETE_DATA): Promise<void> {
     const dbExists = await this.dbExists()
     if (!dbExists) {
       return
     }
 
-    if (method === DBClearanceMethod.RECREATE_DB) {
+    if (method === DbClearanceStrategy.RECREATE_DB) {
       try {
         await this.driver.dropDatabase(this.driver.name)
         await this.driver.createDatabase(this.driver.name)
@@ -1325,15 +1442,15 @@ export class ArangoDBWithSpice extends ArangoDB {
     _debug.info(`DB ${this.driver.name} cleaned`)
   }
 
-  public async createDBStructure(
-    structure: DBStructure,
-    clearDB?: DBClearanceMethod
-  ): Promise<DBStructureResult> {
+  public async createDbStructure(
+    structure: DbStructure,
+    clearDb?: DbClearanceStrategy
+  ): Promise<DbStructureResult> {
     if (!structure?.collections) {
       throw new Error('No DB structure specified')
     }
 
-    const response: DBStructureResult = {
+    const response: DbStructureResult = {
       database: undefined,
       collections: [],
       graphs: [],
@@ -1357,17 +1474,17 @@ export class ArangoDBWithSpice extends ArangoDB {
         return response
       }
     } else {
-      if (clearDB) {
-        await this.clearDB(clearDB)
-        _debug.info(`Database '${this.driver.name}' cleared with method ${clearDB}`)
-        response.database = `Database cleared with method ${clearDB}`
+      if (clearDb) {
+        await this.clearDb(clearDb)
+        _debug.info(`Database '${this.driver.name}' cleared with method ${clearDb}`)
+        response.database = `Database cleared with method ${clearDb}`
       } else {
         _debug.info(`Database '${this.driver.name}' found`)
         response.database = 'Database found'
       }
     }
 
-    const validation = await this.validateDBStructure(structure)
+    const validation = await this.validateDbStructure(structure)
 
     if (validation.collections) {
       if (!response.collections) {
@@ -1424,8 +1541,8 @@ export class ArangoDBWithSpice extends ArangoDB {
     return response
   }
 
-  public async validateDBStructure(structure: DBStructure): Promise<DBStructureValidation> {
-    const response: DBStructureValidation = {
+  public async validateDbStructure(structure: DbStructure): Promise<DbStructureValidation> {
+    const response: DbStructureValidation = {
       message: undefined,
       database: undefined,
       collections: [],

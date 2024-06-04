@@ -5,7 +5,7 @@ import * as dotenv from 'dotenv'
 import { aql } from 'arangojs/aql'
 import { ArrayCursor } from 'arangojs/cursor'
 import { ArangoConnection, ArangoDBWithoutGarnish } from '../../src/index'
-import { DBStructure, MatchType, QueryResult } from '../../src/types'
+import { DbStructure, GraphRelation, MatchType, QueryResult } from '../../src/types'
 
 import cyclists from './cyclists.json'
 import teams from './teams.json'
@@ -49,7 +49,7 @@ const CONST = {
   groupMembershipGraph: 'team_membership'
 }
 
-const dbStructure: DBStructure = {
+const dbStructure: DbStructure = {
   collections: [CONST.userCollection, CONST.groupCollection],
   graphs: [
     {
@@ -123,10 +123,10 @@ describe('Guacamole Integration Tests', () => {
 
   test('Create database structure and test multi-driver behaviour', async () => {
     // create structure for existing DB
-    const result1 = await conn.db(db1).createDBStructure(dbStructure)
+    const result1 = await conn.db(db1).createDbStructure(dbStructure)
 
     // create structure for non-existing DB
-    const result2 = await conn.db(db2).createDBStructure(dbStructure)
+    const result2 = await conn.db(db2).createDbStructure(dbStructure)
 
     expect(result1.database).toEqual('Database found')
     expect(result1.graphs).toEqual(expect.arrayContaining([`Graph '${CONST.groupMembershipGraph}' created`]))
@@ -177,7 +177,7 @@ describe('Guacamole Integration Tests', () => {
     const usersCollectionExist2 = await conn.db(db2).col(CONST.userCollection).exists()
     expect(usersCollectionExist2).toBeFalsy()
 
-    const result3 = await conn.db(db2).createDBStructure(dbStructure)
+    const result3 = await conn.db(db2).createDbStructure(dbStructure)
 
     expect(result3.database).toEqual('Database found')
     expect(result3.graphs).toEqual(expect.arrayContaining([`Graph '${CONST.groupMembershipGraph}' found`]))
@@ -193,7 +193,7 @@ describe('Guacamole Integration Tests', () => {
 
     // confirm that empty array values do not break anything, ie, that they
     // are essentially unhandled and nothing happens, so it's a safe operation
-    const dbStructureWithEmptyArrays: DBStructure = {
+    const dbStructureWithEmptyArrays: DbStructure = {
       collections: [],
       graphs: [
         {
@@ -203,7 +203,7 @@ describe('Guacamole Integration Tests', () => {
       ]
     }
 
-    const result4 = await conn.db(db2).createDBStructure(dbStructureWithEmptyArrays)
+    const result4 = await conn.db(db2).createDbStructure(dbStructureWithEmptyArrays)
 
     const collectionLength = result4.collections ? result4.collections.length : 99
     const graphLength = result4.graphs ? result4.graphs.length : 99
@@ -225,7 +225,7 @@ describe('Guacamole Integration Tests', () => {
       })
     }
 
-    const result = await conn.db(db1).validateDBStructure(dbStructure)
+    const result = await conn.db(db1).validateDbStructure(dbStructure)
 
     expect(result.collections).toEqual(
       expect.arrayContaining([
@@ -247,8 +247,37 @@ describe('Guacamole Integration Tests', () => {
     const result1 = await conn.db(db1).create(CONST.userCollection, cyclists)
     const result2 = await conn.db(db1).create(CONST.groupCollection, teams)
 
-    expect(result1.length).toEqual(30)
-    expect(result2.length).toEqual(16)
+    expect(result1.length).toEqual(31)
+    expect(result2.length).toEqual(17)
+
+    const allCyclists = await conn.db(db1).fetchAll(CONST.userCollection) as QueryResult
+    const allTeams = await conn.db(db1).fetchAll(CONST.groupCollection) as QueryResult
+
+    const cyclistsByName = {}
+
+    for (const cyclist of allCyclists.data) {
+      cyclistsByName[`${cyclist.name} ${cyclist.surname}`] = cyclist
+    }
+
+    for (const team of allTeams.data) {
+      if (team.members) {
+        const teamRelations: GraphRelation[] = []
+
+        for (const member of team.members) {
+          if (cyclistsByName[member.name]) {
+            teamRelations.push({
+              from: `${CONST.userCollection}/${cyclistsByName[member.name]._key}`,
+              to: `${CONST.groupCollection}/${team._key}`,
+              data: {
+                role: member.role
+              }
+            })
+          }
+        }
+
+        await conn.db(db1).createEdgeRelation(CONST.userToGroupEdge, teamRelations)
+      }
+    }
   })
 
   test('Unique constraint validation', async () => {
@@ -331,7 +360,7 @@ describe('Guacamole Integration Tests', () => {
         {
           composite: [
             { property: 'name', value: 'Thomas' },
-            { property: 'surname', value: 'de Ghent' }
+            { property: 'surname', value: 'de Gendt' }
           ]
         }
       ]
@@ -345,7 +374,7 @@ describe('Guacamole Integration Tests', () => {
         {
           composite: [
             { property: 'name', value: 'THOMAS' },
-            { property: 'surname', value: 'DE Ghent' }
+            { property: 'surname', value: 'DE Gendt' }
           ]
         }
       ]
@@ -360,7 +389,7 @@ describe('Guacamole Integration Tests', () => {
         {
           composite: [
             { property: 'name', value: 'THOMAS' },
-            { property: 'surname', value: 'DE Ghent' }
+            { property: 'surname', value: 'DE Gendt' }
           ]
         }
       ]
@@ -1301,7 +1330,7 @@ describe('Guacamole Integration Tests', () => {
         }
       }) as QueryResult
 
-    expect(result3A.data.length).toEqual(30)
+    expect(result3A.data.length).toEqual(31)
   })
 
   test('fetchByFilters', async () => {
@@ -1465,7 +1494,7 @@ describe('Guacamole Integration Tests', () => {
         }
       ) as QueryResult
 
-    expect(result1B.data.length).toEqual(29)
+    expect(result1B.data.length).toEqual(30)
 
     const none = 'NULL'
 
@@ -1521,7 +1550,7 @@ describe('Guacamole Integration Tests', () => {
         }
       ) as QueryResult
 
-    expect(result2B.data.length).toEqual(30)
+    expect(result2B.data.length).toEqual(31)
 
     // FOR d IN cyclists FILTER ( ( d.strength != "Zooming" ) && ( LIKE(d.name, "%mar%", true) ) ) RETURN d
     const result2BB = await conn.db(db1)
@@ -2138,7 +2167,7 @@ describe('Guacamole Integration Tests', () => {
         'LIKE(TO_STRING(d.resultsV2), "%Gravel%", true)'
       ) as QueryResult
 
-    expect(result2A.data.length).toEqual(4)
+    expect(result2A.data.length).toEqual(5)
     expect(result2A.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'Alejandro', surname: 'Valverde' }),
@@ -2157,7 +2186,7 @@ describe('Guacamole Integration Tests', () => {
         aql`LIKE(d.${resultsV2}, ${containsGravel}, true)`
       ) as QueryResult
 
-    expect(result2B.data.length).toEqual(4)
+    expect(result2B.data.length).toEqual(5)
     expect(result2B.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'Alejandro', surname: 'Valverde' }),

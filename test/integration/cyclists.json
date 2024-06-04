@@ -984,7 +984,7 @@
   },
   {
     "name": "Thomas",
-    "surname": "de Ghent",
+    "surname": "de Gendt",
     "country": "Belgium",
     "fame": "The Train",
     "strength": "Break Aways",
@@ -1124,6 +1124,74 @@
     "country": "Belgium",
     "strength": "Classics",
     "disciplines": "Road"
+  },
+  {
+    "name": "Matej",
+    "surname": "Mohorič",
+    "country": "Slovenia",
+    "strength": "Descending",
+    "disciplines": "Road, Gravel",
+    "results": [
+      {
+        "year": "2022",
+        "race": "Milano - Sanremo",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2022",
+        "race": "Paris - Roubaix",
+        "position": "5th",
+        "result": 5
+      },
+      {
+        "year": "2022",
+        "race": "Strade Bianche",
+        "position": "DNF",
+        "result": -1
+      },
+      {
+        "year": "2023",
+        "race": "UCI World Champs Gravel",
+        "position": "1st",
+        "result": 1
+      },
+      {
+        "year": "2023",
+        "race": "Strade Bianche",
+        "position": "6th",
+        "result": 6
+      },
+      {
+        "year": "2023",
+        "race": "Paris - Roubaix",
+        "position": "29th",
+        "result": 29
+      },
+      {
+        "year": "2023",
+        "race": "Milano - Sanremo",
+        "position": "8th",
+        "result": 8
+      },
+      {
+        "year": "2024",
+        "race": "Milano - Sanremo",
+        "position": "6th",
+        "result": 6
+      },
+      {
+        "year": "2024",
+        "race": "Strade Bianche",
+        "position": "5th",
+        "result": 5
+      }
+    ],
+    "stats": {
+      "wins": 24,
+      "grandTours": 12,
+      "classics": 27
+    }
   },
   {
     "name": "Nino",

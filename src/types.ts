@@ -168,26 +168,32 @@ export interface EdgeDefinition {
   to: string | string[]
 }
 
-export interface DBStructure {
+export interface GraphRelation<T extends Record<string, any> = any> {
+  from: string
+  to: string
+  data?: DocumentData<T> // EdgeData<T> ???
+}
+
+export interface DbStructure {
   collections?: string[]
   graphs?: GraphDefinition[]
 }
 
-export interface DBStructureValidation {
+export interface DbStructureValidation {
   message?: string
   database?: EntityExists
   collections?: EntityExists[]
   graphs?: EntityExists[]
 }
 
-export interface DBStructureResult {
+export interface DbStructureResult {
   database?: string
   collections?: string[]
   graphs?: string[]
   error?: any
 }
 
-export const enum DBClearanceMethod {
+export const enum DbClearanceStrategy {
   DELETE_DATA = 'DELETE_DATA',
   RECREATE_DB = 'RECREATE_DB',
 }
