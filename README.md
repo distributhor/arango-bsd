@@ -1,4 +1,4 @@
-# Guacamole - A [backseat] driver for ArangoDB
+# Guacamole - A backseat driver for ArangoDB
 
 [![GitHub Release][ico-release]][link-github-release]
 [![License][ico-license]](LICENSE)
