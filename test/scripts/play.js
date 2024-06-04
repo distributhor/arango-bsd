@@ -17,10 +17,10 @@ async function play() {
     // )
 
     const result1 = await db.fetchByCriteria('cyclists', 'd.name == "Lance" || d.name == "Chris"', {
-      printQuery: true
+      printQuery: true, debugFilters: true
     })
 
-    console.log(result1)
+    console.log(result1.data.length)
 
     // const cursor = await db.driver.query(aql`FOR d IN cyclists FILTER d.name == "Lance" RETURN d`)
     // const result2 = await cursor.all()

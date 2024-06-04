@@ -127,8 +127,8 @@ export interface DocumentMeta extends DocumentMetadata {
 }
 
 export interface GuacamoleOptions {
-  debugFunctions?: boolean
   printQueries?: boolean
+  debugFilters?: boolean
 }
 
 export interface DocumentTrimOptions {

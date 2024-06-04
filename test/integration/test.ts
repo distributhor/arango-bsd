@@ -69,7 +69,7 @@ const conn = new ArangoConnection([{
   databaseName: db1,
   url: process.env.GUACAMOLE_TEST_DB_URI,
   auth: { username: dbAdminUser, password: dbAdminPassword }
-}], { printQueries: false })
+}], { printQueries: false, debugFilters: false })
 
 const db = new ArangoDBWithoutGarnish({
   databaseName: db1,
@@ -2333,7 +2333,8 @@ describe('Guacamole Integration Tests', () => {
     const result2L = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(CONST.userCollection,
         { property: 'strength', value: sprinter },
-        { search: { properties: resultsV32015, terms: ['Roubaix', 'Sanremo'] } }
+        { search: { properties: resultsV32015, terms: ['Roubaix', 'Sanremo'] } },
+        { debugFilters: false }
       ) as QueryResult
 
     expect(result2L.data.length).toEqual(2)

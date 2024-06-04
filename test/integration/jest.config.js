@@ -3,5 +3,6 @@ module.exports = {
   clearMocks: true,
   testEnvironment: 'node',
   testMatch: ['**/integration/?(*.)+(spec|test).[t]s?(x)'],
-  transform: { '^.+\\.tsx?$': 'ts-jest' }
+  transform: { '^.+\\.tsx?$': 'ts-jest' },
+  setupFiles: ['<rootDir>/jest.env.js']
 }

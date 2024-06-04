@@ -1,4 +1,5 @@
 /* eslint-disable no-prototype-builtins */
+import debug from 'debug'
 import { aql, AqlQuery, AqlValue, isAqlQuery, join, literal } from 'arangojs/aql'
 import { DocumentCollection, EdgeCollection } from 'arangojs/collection'
 import {
@@ -17,10 +18,37 @@ import {
 } from './index'
 
 /** @internal */
-function _debugFunctions(options?: FetchOptions): boolean {
-  return !!(options?.guacamole?.debugFunctions)
+const debugQueries = debug('guacamole:log:query')
+const debugFilters = debug('guacamole:log:filter')
+
+/** @internal */
+const _debug = {
+  queries: debugQueries,
+  filters: debugFilters,
+  log: {
+    queries: function (data: any) {
+      debug.enable('guacamole:log:query')
+      debugQueries(data)
+      debug.disable()
+    },
+    filters: function (data: any) {
+      debug.enable('guacamole:log:filter')
+      debugFilters(data)
+      debug.disable()
+    }
+  }
 }
 
+/** @internal */
+function _debugFiltersEnabled(options?: FetchOptions): boolean {
+  if (options?.debugFilters) {
+    return true
+  }
+
+  return !!(options?.guacamole?.debugFilters)
+}
+
+/** @internal */
 function _printQuery(options?: FetchOptions): boolean {
   if (options?.printQuery) {
     return true
@@ -185,20 +213,25 @@ function _toPropertyFilter(prop: PropertyValue): AqlQuery {
   return join(f)
 }
 
-function _fetchByPropertyValues(
+function fetchByPropertyValues(
   collection: DocumentCollection | EdgeCollection,
   properties: PropertyValue | PropertyValue[],
   match: MatchType,
   criteria?: Criteria,
   options: FetchOptions = {}
 ): AqlQuery {
-  if (_printQuery(options) || _debugFunctions(options)) {
-    console.log(`_fetchByPropertyValues: ${collection.name}`)
-    console.log(properties)
-    console.log(match)
-    if (criteria) {
-      console.dir(criteria)
+  if (_debugFiltersEnabled(options)) {
+    _debug.log.filters(properties)
+    if (Array.isArray(properties)) {
+      _debug.log.filters(`MATCH: ${match}`)
     }
+    _debug.log.filters(criteria)
+  } else {
+    _debug.filters(properties)
+    if (Array.isArray(properties)) {
+      _debug.filters(`MATCH: ${match}`)
+    }
+    _debug.filters(criteria)
   }
 
   const filters: AqlValue[] = []
@@ -260,9 +293,10 @@ function _fetchByPropertyValues(
     ? aql`FOR d IN ${collection} FILTER (${join(filters, '')} )${join(opts, '')} RETURN d`
     : aql`FOR d IN ${collection} FILTER (${join(filters, '')} ) RETURN d`
 
-  if (_printQuery(options)) {
-    console.log(query)
-    console.log('')
+  if (_debugFiltersEnabled(options) || _printQuery(options)) {
+    _debug.log.queries(query)
+  } else {
+    _debug.queries(query)
   }
 
   return query
@@ -274,11 +308,7 @@ export function fetchByMatchingProperty(
   options: FetchOptions = {},
   criteria?: Criteria
 ): AqlQuery {
-  if (_debugFunctions(options)) {
-    console.log(`fetchByMatchingProperty: ${collection.name}`)
-  }
-
-  return _fetchByPropertyValues(collection, identifier, MatchType.ANY, criteria, options)
+  return fetchByPropertyValues(collection, identifier, MatchType.ANY, criteria, options)
 }
 
 export function fetchByMatchingAnyProperty(
@@ -287,11 +317,7 @@ export function fetchByMatchingAnyProperty(
   options: FetchOptions = {},
   criteria?: Criteria
 ): AqlQuery {
-  if (_debugFunctions(options)) {
-    console.log(`fetchByMatchingAnyProperty: ${collection.name}`)
-  }
-
-  return _fetchByPropertyValues(collection, identifier, MatchType.ANY, criteria, options)
+  return fetchByPropertyValues(collection, identifier, MatchType.ANY, criteria, options)
 }
 
 export function fetchByMatchingAllProperties(
@@ -300,11 +326,7 @@ export function fetchByMatchingAllProperties(
   options: FetchOptions = {},
   criteria?: Criteria
 ): AqlQuery {
-  if (_debugFunctions(options)) {
-    console.log(`fetchByMatchingAllProperties: ${collection.name}`)
-  }
-
-  return _fetchByPropertyValues(collection, identifier, MatchType.ALL, criteria, options)
+  return fetchByPropertyValues(collection, identifier, MatchType.ALL, criteria, options)
 }
 
 export function fetchByCriteria(
@@ -312,11 +334,10 @@ export function fetchByCriteria(
   criteria: Criteria,
   options: FetchOptions = {}
 ): AqlQuery {
-  if (_printQuery(options) || _debugFunctions(options)) {
-    console.log(`fetchByCriteria: ${collection.name}`)
-    if (criteria) {
-      console.dir(criteria)
-    }
+  if (_debugFiltersEnabled(options)) {
+    _debug.log.filters(criteria)
+  } else {
+    _debug.filters(criteria)
   }
 
   const filters: AqlValue[] = []
@@ -359,9 +380,10 @@ export function fetchByCriteria(
   //   query += " RETURN d";
   // }
 
-  if (_printQuery(options)) {
-    console.log(query)
-    console.log('')
+  if (_debugFiltersEnabled(options) || _printQuery(options)) {
+    _debug.log.queries(query)
+  } else {
+    _debug.queries(query)
   }
 
   return query
@@ -625,8 +647,8 @@ export const Queries = {
 //   criteria?: Criteria,
 //   options: FetchOptions = {}
 // ): AqlQuery {
-//   if (_printQuery(options) || _debugFunctions(options)) {
-//     console.log(`_fetchByPropertyValues: ${collection}`)
+//   if (_printQuery(options) || _debugFiltersEnabled(options)) {
+//     console.log(`fetchByPropertyValues: ${collection}`)
 //     console.log(properties)
 //     console.log(match)
 //     if (criteria) {
@@ -755,7 +777,7 @@ export const Queries = {
 //   criteria: Criteria,
 //   options: FetchOptions = {}
 // ): AqlQuery {
-//   if (_printQuery(options) || _debugFunctions(options)) {
+//   if (_printQuery(options) || _debugFiltersEnabled(options)) {
 //     console.log(`fetchByCriteria: ${collection}`)
 //     if (criteria) {
 //       console.dir(criteria)
