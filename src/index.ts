@@ -213,11 +213,11 @@ export class ArangoConnection {
     return this.getInstance(db)
   }
 
-  public col<T extends Record<string, any> = any>(
+  public collection<T extends Record<string, any> = any>(
     db: string,
     collection: string
   ): DocumentCollection<T> | EdgeCollection<T> {
-    return this.db(db).col<T>(collection)
+    return this.db(db).collection<T>(collection)
   }
 
   public listConnections(): string[] {
@@ -276,7 +276,9 @@ export class ArangoDBWithoutGarnish {
     return this.driver.name
   }
 
-  public col<T extends Record<string, any> = any>(collection: string): DocumentCollection<T> | EdgeCollection<T> {
+  public collection<T extends Record<string, any> = any>(
+    collection: string
+  ): DocumentCollection<T> | EdgeCollection<T> {
     return this.driver.collection(collection)
   }
 
@@ -355,11 +357,11 @@ export class ArangoDBWithoutGarnish {
           }
         )
       } else {
-        d = await this.driver.collection<T>(collection).document(`${identifier.value}`, options)
+        d = await this.collection<T>(collection).document(`${identifier.value}`, options)
       }
     } else {
       // LET d = DOCUMENT('${collection}/${id}') RETURN UNSET_RECURSIVE( d, [ "_id", "_rev" ])
-      d = await this.driver.collection<T>(collection).document(identifier, options)
+      d = await this.collection<T>(collection).document(identifier, options)
     }
 
     if (!d) {
@@ -375,10 +377,10 @@ export class ArangoDBWithoutGarnish {
     options?: CollectionInsertOptions
   ): Promise<Array<DocumentMeta & { new?: Document<T> }>> {
     if (Array.isArray(data)) {
-      return await this.driver.collection(collection).saveAll(data, options)
+      return await this.collection(collection).saveAll(data, options)
     }
 
-    const result = await this.driver.collection(collection).save(data, options)
+    const result = await this.collection(collection).save(data, options)
 
     return [result]
   }
@@ -389,12 +391,12 @@ export class ArangoDBWithoutGarnish {
     options: CollectionUpdateOptions = {}
   ): Promise<Array<DocumentMeta & { new?: Document<T>, old?: Document<T> }>> {
     if (Array.isArray(document)) {
-      return await this.driver.collection(collection).updateAll(document, options)
+      return await this.collection(collection).updateAll(document, options)
     }
 
     if (document.property) {
       const query = Queries.updateDocumentsByKeyValue(
-        this.driver.collection(collection),
+        this.collection(collection),
         {
           property: document.property, value: document.value
         },
@@ -406,7 +408,7 @@ export class ArangoDBWithoutGarnish {
       return await result.all()
     }
 
-    const result = await this.driver.collection(collection).update(`${document.value}`, document.data, options)
+    const result = await this.collection(collection).update(`${document.value}`, document.data, options)
 
     return [result]
   }
@@ -417,13 +419,13 @@ export class ArangoDBWithoutGarnish {
     options: CollectionRemoveOptions = {}
   ): Promise<Array<DocumentMeta & { old?: Document<T> }>> {
     if (Array.isArray(identifier)) {
-      return await this.driver.collection(collection).removeAll(identifier, options)
+      return await this.collection(collection).removeAll(identifier, options)
     }
 
     if (isIdentifier(identifier)) {
       if (identifier.property) {
         const query = Queries.deleteDocumentsByKeyValue(
-          this.driver.collection(collection),
+          this.collection(collection),
           {
             property: identifier.property, value: identifier.value
           }
@@ -433,11 +435,11 @@ export class ArangoDBWithoutGarnish {
 
         return await result.all()
       } else {
-        const response = await this.driver.collection(collection).remove(`${identifier.value}`, options)
+        const response = await this.collection(collection).remove(`${identifier.value}`, options)
         return [response]
       }
     } else {
-      const response = await this.driver.collection(collection).remove(identifier, options)
+      const response = await this.collection(collection).remove(identifier, options)
       return [response]
     }
   }
@@ -560,7 +562,7 @@ export class ArangoDBWithoutGarnish {
     if (!Array.isArray(values.properties)) {
       return await this.returnOne<T>(
         Queries.fetchByMatchingProperty(
-          this.col(collection),
+          this.collection(collection),
           values.properties,
           this._queryOpts(options)
         ), options
@@ -570,7 +572,7 @@ export class ArangoDBWithoutGarnish {
     if (values.match && values.match === MatchType.ALL) {
       return await this.returnOne<T>(
         Queries.fetchByMatchingAllProperties(
-          this.col(collection),
+          this.collection(collection),
           values.properties,
           this._queryOpts(options)
         ), options
@@ -579,7 +581,7 @@ export class ArangoDBWithoutGarnish {
 
     return await this.returnOne<T>(
       Queries.fetchByMatchingAnyProperty(
-        this.col(collection),
+        this.collection(collection),
         values.properties,
         this._queryOpts(options)
       ), options
@@ -679,7 +681,7 @@ export class ArangoDBWithoutGarnish {
     options: FetchOptions = {}
   ): Promise<UniqueConstraintResult> {
     // const query = uniqueConstraintQuery(constraints, QueryType.STRING) as string;
-    const query = Queries.uniqueConstraintQuery(this.col(collection), constraints, this._queryOpts(options))
+    const query = Queries.uniqueConstraintQuery(this.collection(collection), constraints, this._queryOpts(options))
     const documents = await (await this.query(query)).all()
 
     return {
@@ -727,7 +729,7 @@ export class ArangoDBWithoutGarnish {
       if (matchType === MatchType.ANY) {
         result = await this.driver.query(
           Queries.fetchByMatchingAnyProperty(
-            this.col(collection),
+            this.collection(collection),
             propertyValues,
             this._queryOpts(options),
             filterCriteria
@@ -736,7 +738,7 @@ export class ArangoDBWithoutGarnish {
       } else {
         result = await this.driver.query(
           Queries.fetchByMatchingAllProperties(
-            this.col(collection),
+            this.collection(collection),
             propertyValues,
             this._queryOpts(options),
             filterCriteria
@@ -746,7 +748,7 @@ export class ArangoDBWithoutGarnish {
     } else {
       result = await this.driver.query(
         Queries.fetchByMatchingProperty(
-          this.col(collection),
+          this.collection(collection),
           propertyValues,
           this._queryOpts(options),
           filterCriteria
@@ -788,7 +790,7 @@ export class ArangoDBWithoutGarnish {
 
     const result = await this.driver.query(
       Queries.fetchByCriteria(
-        this.col(collection),
+        this.collection(collection),
         criteria,
         this._queryOpts(options)
       ), arangojsQueryOptions
@@ -872,7 +874,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
     _debugFilters('fetchOneByPropertyValue', this.guacamole, options)
     return await this.returnOne<T>(
       Queries.fetchByMatchingProperty(
-        this.col(collection),
+        this.collection(collection),
         propertyValue,
         this._queryOpts(options)
       ), options)
@@ -886,7 +888,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
     _debugFilters('fetchOneByAnyPropertyValue', this.guacamole, options)
     return await this.returnOne<T>(
       Queries.fetchByMatchingAnyProperty(
-        this.col(collection),
+        this.collection(collection),
         propertyValues,
         this._queryOpts(options)
       ), options)
@@ -900,7 +902,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
     _debugFilters('fetchOneByAllPropertyValues', this.guacamole, options)
     return await this.returnOne<T>(
       Queries.fetchByMatchingAllProperties(
-        this.col(collection),
+        this.collection(collection),
         propertyValues,
         this._queryOpts(options)
       ), options)
@@ -1348,7 +1350,7 @@ export class ArangoDBWithSpice extends ArangoDB {
         edges.push(edge)
       }
 
-      return await this.col(edgeCollection).saveAll(edges)
+      return await this.collection(edgeCollection).saveAll(edges)
     }
 
     if (!relation?.hasOwnProperty('from') || !relation.hasOwnProperty('to')) {
@@ -1368,7 +1370,7 @@ export class ArangoDBWithSpice extends ArangoDB {
       ...data
     }
 
-    const result = await this.col(edgeCollection).save(edge)
+    const result = await this.collection(edgeCollection).save(edge)
 
     return [result]
 
@@ -1377,7 +1379,7 @@ export class ArangoDBWithSpice extends ArangoDB {
     //   edge._from = relation.from
     //   edge._to = relation.to
 
-    //   const result = await this.col(edgeCollection).save(edge)
+    //   const result = await this.collection(edgeCollection).save(edge)
     // } else {
     //   that.edgeRelationExists(dbName, graphName, edgeCollectionName, relation).then(exists => {
     //     if (exists) {
@@ -1492,7 +1494,7 @@ export class ArangoDBWithSpice extends ArangoDB {
       for (const entity of validation.collections) {
         if (!entity.exists) {
           try {
-            await this.driver.collection(entity.name).create()
+            await this.collection(entity.name).create()
             response.collections.push(`Collection '${entity.name}' created`)
           } catch (e) {
             response.collections.push(`Failed to create collection '${entity.name}'`)

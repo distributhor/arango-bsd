@@ -160,9 +160,9 @@ describe('Guacamole Integration Tests', () => {
 
     const usersCollectionOnSystemDB1 = await conn.system.collection(CONST.userCollection).exists()
 
-    const usersCollectionExist = await conn.db(db1).col(CONST.userCollection).exists()
-    const groupsCollectionExist = await conn.db(db1).col(CONST.groupCollection).exists()
-    const userGroupsCollectionExist = await conn.db(db1).col(CONST.userToGroupEdge).exists()
+    const usersCollectionExist = await conn.db(db1).collection(CONST.userCollection).exists()
+    const groupsCollectionExist = await conn.db(db1).collection(CONST.groupCollection).exists()
+    const userGroupsCollectionExist = await conn.db(db1).collection(CONST.userToGroupEdge).exists()
 
     expect(usersCollectionOnSystemDB1).toBeFalsy()
     expect(usersCollectionExist).toBeTruthy()
@@ -174,7 +174,7 @@ describe('Guacamole Integration Tests', () => {
     await conn.driver(db2).graph(CONST.groupMembershipGraph).removeEdgeDefinition(CONST.userToGroupEdge)
     await conn.driver(db2).graph(CONST.groupMembershipGraph).removeVertexCollection(CONST.userCollection)
     await conn.driver(db2).collection(CONST.userCollection).drop()
-    const usersCollectionExist2 = await conn.db(db2).col(CONST.userCollection).exists()
+    const usersCollectionExist2 = await conn.db(db2).collection(CONST.userCollection).exists()
     expect(usersCollectionExist2).toBeFalsy()
 
     const result3 = await conn.db(db2).createDbStructure(dbStructure)
@@ -188,7 +188,7 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const usersCollectionExist3 = await conn.db(db2).col(CONST.userCollection).exists()
+    const usersCollectionExist3 = await conn.db(db2).collection(CONST.userCollection).exists()
     expect(usersCollectionExist3).toBeTruthy()
 
     // confirm that empty array values do not break anything, ie, that they
@@ -1146,7 +1146,7 @@ describe('Guacamole Integration Tests', () => {
   test('returnAll, returnOne', async () => {
     const result1A = await conn
       .db(db1)
-      .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`)
+      .returnAll(aql`FOR d IN ${conn.collection(db1, CONST.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`)
 
     expect(result1A.data.length).toEqual(3)
     expect(result1A.data[0].surname).toBeDefined()
@@ -1204,7 +1204,7 @@ describe('Guacamole Integration Tests', () => {
     expect(allDocs[0].surname).toBeDefined()
 
     const result2A = await conn.db(db1)
-      .returnAll(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
+      .returnAll(aql`FOR d IN ${conn.collection(db1, CONST.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
 
     expect(result2A.data).toBeDefined()
     expect(Array.isArray(result2A.data)).toBeTruthy()
@@ -1219,7 +1219,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2B.data.length).toEqual(0)
 
     const result3A = await conn.db(db1)
-      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
+      .returnOne(aql`FOR d IN ${conn.collection(db1, CONST.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
 
     expect(result3A).toBeNull()
 
@@ -1230,7 +1230,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result3B).toBeNull()
 
     const result4A = await conn.db(db1)
-      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`)
+      .returnOne(aql`FOR d IN ${conn.collection(db1, CONST.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`)
 
     expect(result4A).toBeDefined()
     expect(result4A.surname).toBeDefined()
@@ -1243,7 +1243,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result4B.surname).toBeDefined()
 
     const result5A = await conn.db(db1)
-      .returnOne(aql`FOR d IN ${conn.col(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
+      .returnOne(aql`FOR d IN ${conn.collection(db1, CONST.userCollection)} FILTER d.surname LIKE "Impey" RETURN d`)
 
     expect(result5A).toBeDefined()
     expect(result5A.name).toEqual('Daryl')

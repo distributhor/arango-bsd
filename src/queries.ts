@@ -481,7 +481,10 @@ export function updateDocumentsByKeyValue(
   // `)
 }
 
-export function deleteDocumentsByKeyValue(collection: DocumentCollection, identifier: PropertyValue): AqlQuery {
+export function deleteDocumentsByKeyValue(
+  collection: DocumentCollection,
+  identifier: PropertyValue
+): AqlQuery {
   // return literal(
   //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
   // )
