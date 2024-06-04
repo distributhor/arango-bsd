@@ -5,6 +5,7 @@ import { DocumentCollection, EdgeCollection } from 'arangojs/collection'
 import {
   MatchTypeOperator,
   UniqueConstraint,
+  Identifier,
   FetchOptions,
   PropertyValue,
   SearchTerms,
@@ -439,7 +440,7 @@ export function fetchAll(
 
 export function updateDocumentsByKeyValue(
   collection: DocumentCollection,
-  identifier: PropertyValue,
+  identifier: Identifier,
   data: any
 ): AqlQuery {
   // return literal(
@@ -483,7 +484,7 @@ export function updateDocumentsByKeyValue(
 
 export function deleteDocumentsByKeyValue(
   collection: DocumentCollection,
-  identifier: PropertyValue
+  identifier: Identifier
 ): AqlQuery {
   // return literal(
   //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`

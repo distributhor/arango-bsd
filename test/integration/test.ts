@@ -927,7 +927,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2B.rating.sprint).toEqual(6)
 
     const result2C = await conn.db(db1).update(CONST.userCollection, {
-      value: result2A[0]._key,
+      key: result2A[0]._key,
       data: {
         fame: "G'day Mate",
         strength: 'All Rounder',
@@ -957,8 +957,10 @@ describe('Guacamole Integration Tests', () => {
     )
 
     const result2E = await conn.db(db1).update(CONST.userCollection, {
-      property: 'surname',
-      value: 'Evans',
+      key: {
+        property: 'surname',
+        value: 'Evans'
+      },
       data: {
         fame: 'Too Nice',
         strength: 'GC',
@@ -1035,8 +1037,10 @@ describe('Guacamole Integration Tests', () => {
     expect(result3D).toBeNull()
 
     const result4A = await conn.db(db1).update(CONST.userCollection, {
-      property: 'strength',
-      value: 'Time Trial',
+      key: {
+        property: 'strength',
+        value: 'Time Trial'
+      },
       data: {
         rating: { timetrial: 9 }
       }
@@ -1090,8 +1094,10 @@ describe('Guacamole Integration Tests', () => {
     )
 
     const result4C = await conn.db(db1).update(CONST.userCollection, {
-      property: 'surname',
-      value: 'Dennis',
+      key: {
+        property: 'surname',
+        value: 'Dennis'
+      },
       data: {
         rating: { timetrial: 8 }
       }

@@ -25,7 +25,8 @@ import {
   DocumentUpdate,
   isIdentifier,
   isFilter,
-  GraphRelation
+  GraphRelation,
+  isDocumentUpdate
 } from './types'
 import { Queries } from './queries'
 import {
@@ -387,29 +388,30 @@ export class ArangoDBWithoutGarnish {
 
   public async update<T extends Record<string, any> = any>(
     collection: string,
-    document: DocumentUpdate | any[],
+    update: DocumentUpdate | any[],
     options: CollectionUpdateOptions = {}
   ): Promise<Array<DocumentMeta & { new?: Document<T>, old?: Document<T> }>> {
-    if (Array.isArray(document)) {
-      return await this.collection(collection).updateAll(document, options)
+    if (Array.isArray(update)) {
+      return await this.collection(collection).updateAll(update, options)
     }
 
-    if (document.property) {
-      const query = Queries.updateDocumentsByKeyValue(
-        this.collection(collection),
-        {
-          property: document.property, value: document.value
-        },
-        document.data
-      )
+    if (isIdentifier(update.key)) {
+      if (update.key.property) {
+        const query = Queries.updateDocumentsByKeyValue(
+          this.collection(collection),
+          update.key,
+          update.data
+        )
 
-      const result = await this.driver.query(query)
+        const result = await this.driver.query(query)
+        return await result.all()
+      }
 
-      return await result.all()
+      const result = await this.collection(collection).update(`${update.key.value}`, update.data, options)
+      return [result]
     }
 
-    const result = await this.collection(collection).update(`${document.value}`, document.data, options)
-
+    const result = await this.collection(collection).update(`${update.key}`, update.data, options)
     return [result]
   }
 
@@ -426,22 +428,19 @@ export class ArangoDBWithoutGarnish {
       if (identifier.property) {
         const query = Queries.deleteDocumentsByKeyValue(
           this.collection(collection),
-          {
-            property: identifier.property, value: identifier.value
-          }
+          identifier
         )
 
         const result = await this.driver.query(query)
-
         return await result.all()
-      } else {
-        const response = await this.collection(collection).remove(`${identifier.value}`, options)
-        return [response]
       }
-    } else {
-      const response = await this.collection(collection).remove(identifier, options)
+
+      const response = await this.collection(collection).remove(`${identifier.value}`, options)
       return [response]
     }
+
+    const response = await this.collection(collection).remove(identifier, options)
+    return [response]
   }
 
   public async fetchProperty<T = any>(
@@ -675,6 +674,7 @@ export class ArangoDBWithoutGarnish {
     return documents
   }
 
+  // WFC should not be FetchOptions
   public async validateUniqueConstraint(
     collection: string,
     constraints: UniqueConstraint,

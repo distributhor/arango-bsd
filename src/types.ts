@@ -18,6 +18,11 @@ export function isIdentifier(x: any): x is Identifier {
   return x.value
 }
 
+/** @internal */
+export function isDocumentUpdate(x: any): x is DocumentUpdate {
+  return x.key && x.data
+}
+
 export interface PropertyValue {
   property: string
   value: any
@@ -81,7 +86,8 @@ export interface Criteria {
 //   guacamole?: GuacamoleOptions
 // }
 
-export interface DocumentUpdate<T extends Record<string, any> = any> extends Identifier {
+export interface DocumentUpdate<T extends Record<string, any> = any> {
+  key: string | Identifier
   data: Patch<DocumentData<T>>
 }
 
