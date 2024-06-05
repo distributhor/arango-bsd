@@ -25,8 +25,7 @@ import {
   DocumentUpdate,
   isIdentifier,
   isFilter,
-  GraphRelation,
-  isDocumentUpdate
+  GraphRelation
 } from './types'
 import { Queries } from './queries'
 import {
