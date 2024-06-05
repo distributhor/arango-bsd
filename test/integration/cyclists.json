@@ -2,54 +2,62 @@
   {
     "name": "Lance",
     "surname": "Armstrong",
-    "fame": "Chief Doper",
+    "trademark": "livestrong",
     "country": "USA",
     "strength": "General Classification",
     "disciplines": "Road, TT, Run, Swim",
-    "results": [
-      {
-        "year": "1993",
-        "race": "UCI World Champs Road",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "1996",
-        "race": "Liège - Bastogne - Liège",
-        "position": "2nd",
-        "result": 2
-      },
-      {
-        "year": "1996",
-        "race": "Paris - Nice",
-        "position": "2nd",
-        "result": 2
-      },
-      {
-        "year": "1998",
-        "race": "La Vuelta a España",
-        "position": "4th",
-        "result": 4
-      },
-      {
-        "year": "2001",
-        "race": "Tour de Suisse",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2003",
-        "race": "Critérium du Dauphiné",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2005",
-        "race": "Tour de France",
-        "position": "1st",
-        "result": 1
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "1993",
+          "race": "UCI World Champs Road",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "1996",
+          "race": "Liège - Bastogne - Liège",
+          "position": "2nd",
+          "result": 2
+        },
+        {
+          "year": "1996",
+          "race": "Paris - Nice",
+          "position": "2nd",
+          "result": 2
+        },
+        {
+          "year": "1998",
+          "race": "La Vuelta a España",
+          "position": "4th",
+          "result": 4
+        },
+        {
+          "year": "2001",
+          "race": "Tour de Suisse",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2003",
+          "race": "Critérium du Dauphiné",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2005",
+          "race": "Tour de France",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "20059",
+          "race": "Tour de France",
+          "position": "3rd",
+          "result": 3
+        }
+      ]
+    },
     "stats": {
       "wins": 71,
       "grandTours": 15,
@@ -59,42 +67,44 @@
   {
     "name": "George",
     "surname": "Hincapie",
-    "fame": "Super Domestique",
+    "trademark": "The Lieutenant",
     "country": "USA",
     "strength": "Domestique",
     "disciplines": "Road, MTB",
-    "results": [
-      {
-        "year": "2001",
-        "race": "Gent - Wevelgem",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2006",
-        "race": "Eneco Tour of Benelux",
-        "position": "2nd",
-        "result": 2
-      },
-      {
-        "year": "2012",
-        "race": "Tour de France",
-        "position": "38th",
-        "result": 38
-      },
-      {
-        "year": "2012",
-        "race": "Paris - Roubaix",
-        "position": "43rd",
-        "result": 43
-      },
-      {
-        "year": "2012",
-        "race": "Tirreno - Adriatico",
-        "position": "42nd",
-        "result": 42
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2001",
+          "race": "Gent - Wevelgem",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2006",
+          "race": "Eneco Tour of Benelux",
+          "position": "2nd",
+          "result": 2
+        },
+        {
+          "year": "2012",
+          "race": "Tour de France",
+          "position": "38th",
+          "result": 38
+        },
+        {
+          "year": "2012",
+          "race": "Paris - Roubaix",
+          "position": "43rd",
+          "result": 43
+        },
+        {
+          "year": "2012",
+          "race": "Tirreno - Adriatico",
+          "position": "42nd",
+          "result": 42
+        }
+      ]
+    },
     "stats": {
       "wins": 19,
       "grandTours": 20,
@@ -104,78 +114,80 @@
   {
     "name": "Ivan",
     "surname": "Basso",
-    "fame": "Close But Not Quite",
+    "trademark": "Close But Not Quite",
     "country": "Italy",
     "strength": "General Classification",
     "disciplines": "Road",
-    "results": [
-      {
-        "year": "2005",
-        "race": "Tour de France",
-        "position": "2nd",
-        "result": 2
-      },
-      {
-        "year": "2006",
-        "race": "Giro d'Italia",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2010",
-        "race": "Giro d'Italia",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2012",
-        "race": "Tour of Britain",
-        "position": "18th",
-        "result": 18
-      },
-      {
-        "year": "2012",
-        "race": "Tour de France",
-        "position": "25th",
-        "result": 25
-      },
-      {
-        "year": "2012",
-        "race": "Giro d'Italia",
-        "position": "5th",
-        "result": 5
-      },
-      {
-        "year": "2012",
-        "race": "Paris - Nice",
-        "position": "DNF",
-        "result": -1
-      },
-      {
-        "year": "2015",
-        "race": "Tour de France",
-        "position": "DNF",
-        "result": -1
-      },
-      {
-        "year": "2015",
-        "race": "Giro d'Italia",
-        "position": "51st",
-        "result": 51
-      },
-      {
-        "year": "2015",
-        "race": "Volta Ciclista a Catalunya",
-        "position": "DNF",
-        "result": -1
-      },
-      {
-        "year": "2015",
-        "race": "Tirreno - Adriatico",
-        "position": "40th",
-        "result": 40
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2005",
+          "race": "Tour de France",
+          "position": "2nd",
+          "result": 2
+        },
+        {
+          "year": "2006",
+          "race": "Giro d'Italia",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2010",
+          "race": "Giro d'Italia",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2012",
+          "race": "Tour of Britain",
+          "position": "18th",
+          "result": 18
+        },
+        {
+          "year": "2012",
+          "race": "Tour de France",
+          "position": "25th",
+          "result": 25
+        },
+        {
+          "year": "2012",
+          "race": "Giro d'Italia",
+          "position": "5th",
+          "result": 5
+        },
+        {
+          "year": "2012",
+          "race": "Paris - Nice",
+          "position": "DNF",
+          "result": -1
+        },
+        {
+          "year": "2015",
+          "race": "Tour de France",
+          "position": "DNF",
+          "result": -1
+        },
+        {
+          "year": "2015",
+          "race": "Giro d'Italia",
+          "position": "51st",
+          "result": 51
+        },
+        {
+          "year": "2015",
+          "race": "Volta Ciclista a Catalunya",
+          "position": "DNF",
+          "result": -1
+        },
+        {
+          "year": "2015",
+          "race": "Tirreno - Adriatico",
+          "position": "40th",
+          "result": 40
+        }
+      ]
+    },
     "stats": {
       "wins": 30,
       "grandTours": 20,
@@ -188,44 +200,46 @@
     "country": "Italy",
     "strength": "Climbing",
     "disciplines": "Road",
-    "results": [
-      {
-        "year": "1994",
-        "race": "Giro d'Italia",
-        "position": "2nd",
-        "result": 2
-      },
-      {
-        "year": "1994",
-        "race": "Tour de France",
-        "position": "3rd",
-        "result": 3
-      },
-      {
-        "year": "1997",
-        "race": "Tour de France",
-        "position": "2nd",
-        "result": 2
-      },
-      {
-        "year": "1998",
-        "race": "Tour de France",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "1998",
-        "race": "Giro d'Italia",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2003",
-        "race": "Giro d'Italia",
-        "position": "14th",
-        "result": 14
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "1994",
+          "race": "Giro d'Italia",
+          "position": "2nd",
+          "result": 2
+        },
+        {
+          "year": "1994",
+          "race": "Tour de France",
+          "position": "3rd",
+          "result": 3
+        },
+        {
+          "year": "1997",
+          "race": "Tour de France",
+          "position": "2nd",
+          "result": 2
+        },
+        {
+          "year": "1998",
+          "race": "Tour de France",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "1998",
+          "race": "Giro d'Italia",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2003",
+          "race": "Giro d'Italia",
+          "position": "14th",
+          "result": 14
+        }
+      ]
+    },
     "stats": {
       "wins": 26,
       "grandTours": 16,
@@ -235,48 +249,50 @@
   {
     "name": "Jan",
     "surname": "Ullrich",
-    "fame": "Wish I Was 3kg Lighter",
+    "trademark": "Wish I Was 3kg Lighter",
     "country": "Germany",
     "strength": "General Classification",
     "disciplines": "Road, TT",
-    "results": [
-      {
-        "year": "1997",
-        "race": "Tour de France",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2000",
-        "race": "Olympic Games Road Race",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2004",
-        "race": "Tour de Suisse",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2004",
-        "race": "Tour de France",
-        "position": "4th",
-        "result": 4
-      },
-      {
-        "year": "2005",
-        "race": "Tour de France",
-        "position": "3rd",
-        "result": 3
-      },
-      {
-        "year": "2005",
-        "race": "Volta Ciclista a Catalunya",
-        "position": "18th",
-        "result": 18
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "1997",
+          "race": "Tour de France",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2000",
+          "race": "Olympic Games Road Race",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2004",
+          "race": "Tour de Suisse",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2004",
+          "race": "Tour de France",
+          "position": "4th",
+          "result": 4
+        },
+        {
+          "year": "2005",
+          "race": "Tour de France",
+          "position": "3rd",
+          "result": 3
+        },
+        {
+          "year": "2005",
+          "race": "Volta Ciclista a Catalunya",
+          "position": "18th",
+          "result": 18
+        }
+      ]
+    },
     "stats": {
       "wins": 32,
       "grandTours": 13,
@@ -286,78 +302,80 @@
   {
     "name": "Alberto",
     "surname": "Contador",
-    "fame": "El Pistolero",
+    "trademark": "El Pistolero",
     "country": "Spain",
     "strength": "General Classification",
     "disciplines": "Road",
-    "results": [
-      {
-        "year": "2007",
-        "race": "Tour de France",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2008",
-        "race": "Giro d'Italia",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2008",
-        "race": "La Vuelta a España",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2009",
-        "race": "Tour de France",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2010",
-        "race": "Paris - Nice",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2014",
-        "race": "Tirreno - Adriatico",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2014",
-        "race": "La Vuelta a España",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2015",
-        "race": "Tour de France",
-        "position": "5th",
-        "result": 5
-      },
-      {
-        "year": "2015",
-        "race": "Giro d'Italia",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2015",
-        "race": "Volta Ciclista a Catalunya",
-        "position": "4th",
-        "result": 4
-      },
-      {
-        "year": "2015",
-        "race": "Tirreno - Adriatico",
-        "position": "5th",
-        "result": 5
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2007",
+          "race": "Tour de France",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2008",
+          "race": "Giro d'Italia",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2008",
+          "race": "La Vuelta a España",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2009",
+          "race": "Tour de France",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2010",
+          "race": "Paris - Nice",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2014",
+          "race": "Tirreno - Adriatico",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2014",
+          "race": "La Vuelta a España",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2015",
+          "race": "Tour de France",
+          "position": "5th",
+          "result": 5
+        },
+        {
+          "year": "2015",
+          "race": "Giro d'Italia",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2015",
+          "race": "Volta Ciclista a Catalunya",
+          "position": "4th",
+          "result": 4
+        },
+        {
+          "year": "2015",
+          "race": "Tirreno - Adriatico",
+          "position": "5th",
+          "result": 5
+        }
+      ]
+    },
     "stats": {
       "wins": 68,
       "grandTours": 18,
@@ -367,77 +385,79 @@
   {
     "name": "Alejandro",
     "surname": "Valverde",
-    "fame": "Still Going",
+    "trademark": "Still Going",
     "country": "Spain",
     "disciplines": "Road, Gravel",
-    "results": [
-      {
-        "year": "2006",
-        "race": "Liège - Bastogne - Liège",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2009",
-        "race": "La Vuelta a España",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2009",
-        "race": "Critérium du Dauphiné",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2015",
-        "race": "Critérium du Dauphiné",
-        "position": "9th",
-        "result": 9
-      },
-      {
-        "year": "2015",
-        "race": "Liège - Bastogne - Liège",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2015",
-        "race": "Tour de France",
-        "position": "3rd",
-        "result": 3
-      },
-      {
-        "year": "2015",
-        "race": "La Vuelta a España",
-        "position": "7th",
-        "result": 7
-      },
-      {
-        "year": "2017",
-        "race": "Liège - Bastogne - Liège",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2023",
-        "race": "UCI World Champs Gravel",
-        "position": "4th",
-        "result": 4
-      },
-      {
-        "year": "2024",
-        "race": "Castellon Gravel Race",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2024",
-        "race": "Belgian Waffle Ride",
-        "position": "25th",
-        "result": 25
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2006",
+          "race": "Liège - Bastogne - Liège",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2009",
+          "race": "La Vuelta a España",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2009",
+          "race": "Critérium du Dauphiné",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2015",
+          "race": "Critérium du Dauphiné",
+          "position": "9th",
+          "result": 9
+        },
+        {
+          "year": "2015",
+          "race": "Liège - Bastogne - Liège",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2015",
+          "race": "Tour de France",
+          "position": "3rd",
+          "result": 3
+        },
+        {
+          "year": "2015",
+          "race": "La Vuelta a España",
+          "position": "7th",
+          "result": 7
+        },
+        {
+          "year": "2017",
+          "race": "Liège - Bastogne - Liège",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2023",
+          "race": "UCI World Champs Gravel",
+          "position": "4th",
+          "result": 4
+        },
+        {
+          "year": "2024",
+          "race": "Castellon Gravel Race",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2024",
+          "race": "Belgian Waffle Ride",
+          "position": "25th",
+          "result": 25
+        }
+      ]
+    },
     "stats": {
       "wins": 133,
       "grandTours": 32,
@@ -447,48 +467,50 @@
   {
     "name": "Mathieu",
     "surname": "van der Poel",
-    "fame": "Boss Of Cross",
+    "trademark": "Boss Of Cross",
     "country": "Netherlands",
     "strength": "Classics",
     "disciplines": "Road, MTB, CX",
-    "results": [
-      {
-        "year": "2022",
-        "race": "UCI World Champs Gravel",
-        "position": "3rd",
-        "result": 3
-      },
-      {
-        "year": "2022",
-        "race": "Tour de France",
-        "position": "DNF",
-        "result": -1
-      },
-      {
-        "year": "2023",
-        "race": "Tour de France",
-        "position": "57th",
-        "result": 57
-      },
-      {
-        "year": "2023",
-        "race": "UCI World Champs Road",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2024",
-        "race": "Ronde van Vlaanderen",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2024",
-        "race": "Paris - Roubaix",
-        "position": "1st",
-        "result": 1
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2022",
+          "race": "UCI World Champs Gravel",
+          "position": "3rd",
+          "result": 3
+        },
+        {
+          "year": "2022",
+          "race": "Tour de France",
+          "position": "DNF",
+          "result": -1
+        },
+        {
+          "year": "2023",
+          "race": "Tour de France",
+          "position": "57th",
+          "result": 57
+        },
+        {
+          "year": "2023",
+          "race": "UCI World Champs Road",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2024",
+          "race": "Ronde van Vlaanderen",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2024",
+          "race": "Paris - Roubaix",
+          "position": "1st",
+          "result": 1
+        }
+      ]
+    },
     "stats": {
       "wins": 49,
       "grandTours": 4,
@@ -498,54 +520,56 @@
   {
     "name": "Wout",
     "surname": "van Aert",
-    "fame": "Can Do It All",
+    "trademark": "Can Do It All",
     "country": "Belgium",
     "strength": "Classics",
     "disciplines": "Road, CX",
-    "results": [
-      {
-        "year": "2021",
-        "race": "Amstel Gold",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2022",
-        "race": "Critérium du Dauphiné",
-        "position": "49th",
-        "result": 49
-      },
-      {
-        "year": "2022",
-        "race": "Tour de France",
-        "position": "21st",
-        "result": 21
-      },
-      {
-        "year": "2023",
-        "race": "Tour of Britain",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2023",
-        "race": "Tour de Suisse",
-        "position": "31st",
-        "result": 31
-      },
-      {
-        "year": "2023",
-        "race": "Paris - Roubaix",
-        "position": "3rd",
-        "result": 3
-      },
-      {
-        "year": "2023",
-        "race": "Tirreno - Adriatico",
-        "position": "53rd",
-        "result": 53
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2021",
+          "race": "Amstel Gold",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2022",
+          "race": "Critérium du Dauphiné",
+          "position": "49th",
+          "result": 49
+        },
+        {
+          "year": "2022",
+          "race": "Tour de France",
+          "position": "21st",
+          "result": 21
+        },
+        {
+          "year": "2023",
+          "race": "Tour of Britain",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2023",
+          "race": "Tour de Suisse",
+          "position": "31st",
+          "result": 31
+        },
+        {
+          "year": "2023",
+          "race": "Paris - Roubaix",
+          "position": "3rd",
+          "result": 3
+        },
+        {
+          "year": "2023",
+          "race": "Tirreno - Adriatico",
+          "position": "53rd",
+          "result": 53
+        }
+      ]
+    },
     "stats": {
       "wins": 46,
       "grandTours": 5,
@@ -555,78 +579,80 @@
   {
     "name": "Tadej",
     "surname": "Pogačar",
-    "fame": "Podgy",
+    "trademark": "Tufts",
     "country": "Slovenia",
     "strength": "General Classification",
     "disciplines": "Road, TT",
-    "results": [
-      {
-        "year": "2015",
-        "race": "UCI World Champs Road",
-        "position": "DNF",
-        "result": -1
-      },
-      {
-        "year": "2017",
-        "race": "UCI World Champs Road",
-        "position": "17th",
-        "result": 17
-      },
-      {
-        "year": "2017",
-        "race": "Tour of Slovenia",
-        "position": "5th",
-        "result": 5
-      },
-      {
-        "year": "2019",
-        "race": "La Vuelta a España",
-        "position": "3rd",
-        "result": 3
-      },
-      {
-        "year": "2019",
-        "race": "Tour of Slovenia",
-        "position": "4th",
-        "result": 4
-      },
-      {
-        "year": "2019",
-        "race": "Strade Bianche",
-        "position": "30th",
-        "result": 30
-      },
-      {
-        "year": "2021",
-        "race": "Tour de France",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2021",
-        "race": "Liège - Bastogne - Liège",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2021",
-        "race": "Tirreno - Adriatico",
-        "position": "53rd",
-        "result": 53
-      },
-      {
-        "year": "2022",
-        "race": "Strade Bianche",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2023",
-        "race": "Paris - Nice",
-        "position": "1st",
-        "result": 1
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2015",
+          "race": "UCI World Champs Road",
+          "position": "DNF",
+          "result": -1
+        },
+        {
+          "year": "2017",
+          "race": "UCI World Champs Road",
+          "position": "17th",
+          "result": 17
+        },
+        {
+          "year": "2017",
+          "race": "Tour of Slovenia",
+          "position": "5th",
+          "result": 5
+        },
+        {
+          "year": "2019",
+          "race": "La Vuelta a España",
+          "position": "3rd",
+          "result": 3
+        },
+        {
+          "year": "2019",
+          "race": "Tour of Slovenia",
+          "position": "4th",
+          "result": 4
+        },
+        {
+          "year": "2019",
+          "race": "Strade Bianche",
+          "position": "30th",
+          "result": 30
+        },
+        {
+          "year": "2021",
+          "race": "Tour de France",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2021",
+          "race": "Liège - Bastogne - Liège",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2021",
+          "race": "Tirreno - Adriatico",
+          "position": "53rd",
+          "result": 53
+        },
+        {
+          "year": "2022",
+          "race": "Strade Bianche",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2023",
+          "race": "Paris - Nice",
+          "position": "1st",
+          "result": 1
+        }
+      ]
+    },
     "stats": {
       "wins": 75,
       "grandTours": 6,
@@ -636,66 +662,68 @@
   {
     "name": "Vincenzo",
     "surname": "Nibali",
-    "fame": "The Shark",
+    "trademark": "The Shark",
     "country": "Italy",
     "strength": "General Classification",
     "disciplines": "Road",
-    "results": [
-      {
-        "year": "2014",
-        "race": "Tour de France",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2015",
-        "race": "Tour de France",
-        "position": "4th",
-        "result": 4
-      },
-      {
-        "year": "2015",
-        "race": "Liège - Bastogne - Liège",
-        "position": "13th",
-        "result": 13
-      },
-      {
-        "year": "2015",
-        "race": "Critérium du Dauphiné",
-        "position": "12th",
-        "result": 12
-      },
-      {
-        "year": "2016",
-        "race": "Giro d'Italia",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2017",
-        "race": "La Vuelta a España",
-        "position": "2nd",
-        "result": 2
-      },
-      {
-        "year": "2017",
-        "race": "Giro d'Italia",
-        "position": "3rd",
-        "result": 3
-      },
-      {
-        "year": "2022",
-        "race": "La Vuelta a España",
-        "position": "45th",
-        "result": 45
-      },
-      {
-        "year": "2022",
-        "race": "Giro d'Italia",
-        "position": "4th",
-        "result": 4
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2014",
+          "race": "Tour de France",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2015",
+          "race": "Tour de France",
+          "position": "4th",
+          "result": 4
+        },
+        {
+          "year": "2015",
+          "race": "Liège - Bastogne - Liège",
+          "position": "13th",
+          "result": 13
+        },
+        {
+          "year": "2015",
+          "race": "Critérium du Dauphiné",
+          "position": "12th",
+          "result": 12
+        },
+        {
+          "year": "2016",
+          "race": "Giro d'Italia",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2017",
+          "race": "La Vuelta a España",
+          "position": "2nd",
+          "result": 2
+        },
+        {
+          "year": "2017",
+          "race": "Giro d'Italia",
+          "position": "3rd",
+          "result": 3
+        },
+        {
+          "year": "2022",
+          "race": "La Vuelta a España",
+          "position": "45th",
+          "result": 45
+        },
+        {
+          "year": "2022",
+          "race": "Giro d'Italia",
+          "position": "4th",
+          "result": 4
+        }
+      ]
+    },
     "stats": {
       "wins": 52,
       "grandTours": 27,
@@ -705,42 +733,44 @@
   {
     "name": "Greg",
     "surname": "van Avermaet",
-    "fame": "Golden Boy",
+    "trademark": "Golden Boy",
     "country": "Belgium",
     "strength": "Classics",
     "disciplines": "Road, Gravel",
-    "results": [
-      {
-        "year": "2016",
-        "race": "Olympic Games Road Race",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2016",
-        "race": "Tirreno - Adriatico",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2017",
-        "race": "Paris - Roubaix",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2023",
-        "race": "Paris - Roubaix",
-        "position": "37st",
-        "result": 37
-      },
-      {
-        "year": "2024",
-        "race": "The Traka 200",
-        "position": "7th",
-        "result": 7
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2016",
+          "race": "Olympic Games Road Race",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2016",
+          "race": "Tirreno - Adriatico",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2017",
+          "race": "Paris - Roubaix",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2023",
+          "race": "Paris - Roubaix",
+          "position": "37st",
+          "result": 37
+        },
+        {
+          "year": "2024",
+          "race": "The Traka 200",
+          "position": "7th",
+          "result": 7
+        }
+      ]
+    },
     "stats": {
       "wins": 42,
       "grandTours": 12,
@@ -750,60 +780,62 @@
   {
     "name": "Peter",
     "surname": "Sagan",
-    "fame": "The Hulk",
+    "trademark": "Wheelie",
     "country": "Slovakia",
     "strength": "Sprinter",
     "disciplines": "Road, MTB",
-    "results": [
-      {
-        "year": "2015",
-        "race": "Strade Bianche",
-        "position": "31st",
-        "result": 31
-      },
-      {
-        "year": "2015",
-        "race": "Paris - Roubaix",
-        "position": "23rd",
-        "result": 23
-      },
-      {
-        "year": "2015",
-        "race": "Tour de France",
-        "position": "46th",
-        "result": 46
-      },
-      {
-        "year": "2015",
-        "race": "UCI World Champs Road",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2016",
-        "race": "UCI World Champs Road",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2017",
-        "race": "UCI World Champs Road",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2018",
-        "race": "Paris - Roubaix",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2022",
-        "race": "UCI World Champs Gravel",
-        "position": "14th",
-        "result": 14
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2015",
+          "race": "Strade Bianche",
+          "position": "31st",
+          "result": 31
+        },
+        {
+          "year": "2015",
+          "race": "Paris - Roubaix",
+          "position": "23rd",
+          "result": 23
+        },
+        {
+          "year": "2015",
+          "race": "Tour de France",
+          "position": "46th",
+          "result": 46
+        },
+        {
+          "year": "2015",
+          "race": "UCI World Champs Road",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2016",
+          "race": "UCI World Champs Road",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2017",
+          "race": "UCI World Champs Road",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2018",
+          "race": "Paris - Roubaix",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2022",
+          "race": "UCI World Champs Gravel",
+          "position": "14th",
+          "result": 14
+        }
+      ]
+    },
     "stats": {
       "wins": 121,
       "grandTours": 18,
@@ -816,14 +848,16 @@
     "country": "France",
     "strength": "Sprinter",
     "disciplines": "Road",
-    "results": [
-      {
-        "year": "2016",
-        "race": "Milano - Sanremo",
-        "position": "1st",
-        "result": 1
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2016",
+          "race": "Milano - Sanremo",
+          "position": "1st",
+          "result": 1
+        }
+      ]
+    },
     "stats": {
       "wins": 95,
       "grandTours": 11,
@@ -835,38 +869,40 @@
     "surname": "Pinot",
     "country": "France",
     "strength": "General Classification",
-    "results": [
-      {
-        "year": "2015",
-        "race": "Tour de France",
-        "position": "16th",
-        "result": 16
-      },
-      {
-        "year": "2015",
-        "race": "Tour de Suisse",
-        "position": "4th",
-        "result": 4
-      },
-      {
-        "year": "2017",
-        "race": "Tour de France",
-        "position": "DNF",
-        "result": -1
-      },
-      {
-        "year": "2017",
-        "race": "Giro d'Italia",
-        "position": "4th",
-        "result": 4
-      },
-      {
-        "year": "2017",
-        "race": "Tirreno - Adriatico",
-        "position": "3rd",
-        "result": 3
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2015",
+          "race": "Tour de France",
+          "position": "16th",
+          "result": 16
+        },
+        {
+          "year": "2015",
+          "race": "Tour de Suisse",
+          "position": "4th",
+          "result": 4
+        },
+        {
+          "year": "2017",
+          "race": "Tour de France",
+          "position": "DNF",
+          "result": -1
+        },
+        {
+          "year": "2017",
+          "race": "Giro d'Italia",
+          "position": "4th",
+          "result": 4
+        },
+        {
+          "year": "2017",
+          "race": "Tirreno - Adriatico",
+          "position": "3rd",
+          "result": 3
+        }
+      ]
+    },
     "stats": {
       "wins": 33,
       "grandTours": 18,
@@ -879,26 +915,28 @@
     "country": "UK",
     "strength": "Sprinter",
     "disciplines": "Road",
-    "results": [
-      {
-        "year": "2009",
-        "race": "Milano - Sanremo",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2011",
-        "race": "UCI World Champs Road",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2015",
-        "race": "Milano - Sanremo",
-        "position": "46th",
-        "result": 46
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2009",
+          "race": "Milano - Sanremo",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2011",
+          "race": "UCI World Champs Road",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2015",
+          "race": "Milano - Sanremo",
+          "position": "46th",
+          "result": 46
+        }
+      ]
+    },
     "stats": {
       "wins": 164,
       "grandTours": 23,
@@ -911,32 +949,34 @@
     "country": "UK",
     "strength": "General Classification",
     "disciplines": "Road",
-    "results": [
-      {
-        "year": "2015",
-        "race": "Tour de France",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2015",
-        "race": "Critérium du Dauphiné",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2017",
-        "race": "Tour de France",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2017",
-        "race": "La Vuelta a España",
-        "position": "1st",
-        "result": 1
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2015",
+          "race": "Tour de France",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2015",
+          "race": "Critérium du Dauphiné",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2017",
+          "race": "Tour de France",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2017",
+          "race": "La Vuelta a España",
+          "position": "1st",
+          "result": 1
+        }
+      ]
+    },
     "stats": {
       "wins": 46,
       "grandTours": 21,
@@ -949,7 +989,9 @@
     "country": "UK",
     "strength": "General Classification",
     "disciplines": "Road, TT",
-    "results": [],
+    "results": {
+      "detail": []
+    },
     "stats": {
       "wins": 25,
       "grandTours": 20,
@@ -962,7 +1004,9 @@
     "country": "Spain",
     "strength": "Climbing",
     "disciplines": "Road",
-    "results": [],
+    "results": {
+      "detail": []
+    },
     "stats": {
       "wins": 6,
       "grandTours": 12,
@@ -975,7 +1019,9 @@
     "country": "Australia",
     "strength": "Time Trial",
     "disciplines": "Road, TT",
-    "results": [],
+    "results": {
+      "detail": []
+    },
     "stats": {
       "wins": 33,
       "grandTours": 12,
@@ -986,7 +1032,7 @@
     "name": "Thomas",
     "surname": "de Gendt",
     "country": "Belgium",
-    "fame": "The Train",
+    "trademark": "The Train",
     "strength": "Break Aways",
     "disciplines": "Road",
     "stats": {
@@ -1001,14 +1047,16 @@
     "country": "Australia",
     "strength": "Sprinter",
     "disciplines": "Road",
-    "results": [
-      {
-        "year": "2018",
-        "race": "Milano - Sanremo",
-        "position": "2nd",
-        "result": 2
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2018",
+          "race": "Milano - Sanremo",
+          "position": "2nd",
+          "result": 2
+        }
+      ]
+    },
     "stats": {
       "wins": 68,
       "grandTours": 12,
@@ -1021,21 +1069,23 @@
     "country": "Germany",
     "strength": "Time Trial",
     "disciplines": "Road, TT",
-    "fame": "Pantzerwagen",
-    "results": [
-      {
-        "year": "2011",
-        "race": "UCI World Champs ITT",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2016",
-        "race": "UCI World Champs ITT",
-        "position": "1st",
-        "result": 1
-      }
-    ],
+    "trademark": "Pantzerwagen",
+    "results": {
+      "detail": [
+        {
+          "year": "2011",
+          "race": "UCI World Champs ITT",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2016",
+          "race": "UCI World Champs ITT",
+          "position": "1st",
+          "result": 1
+        }
+      ]
+    },
     "stats": {
       "wins": 67,
       "grandTours": 21,
@@ -1048,50 +1098,52 @@
     "country": "Switzerland",
     "strength": "Time Trial",
     "disciplines": "TT, Road",
-    "results": [
-      {
-        "year": "2008",
-        "race": "Tirreno - Adriatico",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2009",
-        "race": "Tour de Suisse",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2010",
-        "race": "UCI World Champs ITT",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2010",
-        "race": "Paris - Roubaix",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2015",
-        "race": "Tour de Suisse",
-        "position": "113th",
-        "result": 113
-      },
-      {
-        "year": "2015",
-        "race": "Milano - Sanremo",
-        "position": "7th",
-        "result": 7
-      },
-      {
-        "year": "2016",
-        "race": "Olympic Games ITT",
-        "position": "1st",
-        "result": 1
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2008",
+          "race": "Tirreno - Adriatico",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2009",
+          "race": "Tour de Suisse",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2010",
+          "race": "UCI World Champs ITT",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2010",
+          "race": "Paris - Roubaix",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2015",
+          "race": "Tour de Suisse",
+          "position": "113th",
+          "result": 113
+        },
+        {
+          "year": "2015",
+          "race": "Milano - Sanremo",
+          "position": "7th",
+          "result": 7
+        },
+        {
+          "year": "2016",
+          "race": "Olympic Games ITT",
+          "position": "1st",
+          "result": 1
+        }
+      ]
+    },
     "stats": {
       "wins": 88,
       "grandTours": 21,
@@ -1104,14 +1156,16 @@
     "country": "France",
     "strength": "Classics",
     "disciplines": "Road",
-    "results": [
-      {
-        "year": "2021",
-        "race": "UCI World Champs Road",
-        "position": "1st",
-        "result": 1
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2021",
+          "race": "UCI World Champs Road",
+          "position": "1st",
+          "result": 1
+        }
+      ]
+    },
     "stats": {
       "wins": 88,
       "grandTours": 21,
@@ -1131,62 +1185,64 @@
     "country": "Slovenia",
     "strength": "Descending",
     "disciplines": "Road, Gravel",
-    "results": [
-      {
-        "year": "2022",
-        "race": "Milano - Sanremo",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2022",
-        "race": "Paris - Roubaix",
-        "position": "5th",
-        "result": 5
-      },
-      {
-        "year": "2022",
-        "race": "Strade Bianche",
-        "position": "DNF",
-        "result": -1
-      },
-      {
-        "year": "2023",
-        "race": "UCI World Champs Gravel",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2023",
-        "race": "Strade Bianche",
-        "position": "6th",
-        "result": 6
-      },
-      {
-        "year": "2023",
-        "race": "Paris - Roubaix",
-        "position": "29th",
-        "result": 29
-      },
-      {
-        "year": "2023",
-        "race": "Milano - Sanremo",
-        "position": "8th",
-        "result": 8
-      },
-      {
-        "year": "2024",
-        "race": "Milano - Sanremo",
-        "position": "6th",
-        "result": 6
-      },
-      {
-        "year": "2024",
-        "race": "Strade Bianche",
-        "position": "5th",
-        "result": 5
-      }
-    ],
+    "results": {
+      "detail": [
+        {
+          "year": "2022",
+          "race": "Milano - Sanremo",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2022",
+          "race": "Paris - Roubaix",
+          "position": "5th",
+          "result": 5
+        },
+        {
+          "year": "2022",
+          "race": "Strade Bianche",
+          "position": "DNF",
+          "result": -1
+        },
+        {
+          "year": "2023",
+          "race": "UCI World Champs Gravel",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2023",
+          "race": "Strade Bianche",
+          "position": "6th",
+          "result": 6
+        },
+        {
+          "year": "2023",
+          "race": "Paris - Roubaix",
+          "position": "29th",
+          "result": 29
+        },
+        {
+          "year": "2023",
+          "race": "Milano - Sanremo",
+          "position": "8th",
+          "result": 8
+        },
+        {
+          "year": "2024",
+          "race": "Milano - Sanremo",
+          "position": "6th",
+          "result": 6
+        },
+        {
+          "year": "2024",
+          "race": "Strade Bianche",
+          "position": "5th",
+          "result": 5
+        }
+      ]
+    },
     "stats": {
       "wins": 24,
       "grandTours": 12,
@@ -1213,32 +1269,34 @@
     "country": "South Africa",
     "strength": "Marathon",
     "disciplines": "MTB, Gravel",
-    "results": [
-      {
-        "year": "2022",
-        "race": "UCI World Champs Gravel",
-        "position": "17th",
-        "result": 17
-      },
-      {
-        "year": "2023",
-        "race": "Unbound Gravel",
-        "position": "11th",
-        "result": 11
-      },
-      {
-        "year": "2024",
-        "race": "Cape Epic",
-        "position": "1st",
-        "result": 1
-      },
-      {
-        "year": "2024",
-        "race": "Belgian Waffle Ride",
-        "position": "1st",
-        "result": 1
-      }
-    ]
+    "results": {
+      "detail": [
+        {
+          "year": "2022",
+          "race": "UCI World Champs Gravel",
+          "position": "17th",
+          "result": 17
+        },
+        {
+          "year": "2023",
+          "race": "Unbound Gravel",
+          "position": "11th",
+          "result": 11
+        },
+        {
+          "year": "2024",
+          "race": "Cape Epic",
+          "position": "1st",
+          "result": 1
+        },
+        {
+          "year": "2024",
+          "race": "Belgian Waffle Ride",
+          "position": "1st",
+          "result": 1
+        }
+      ]
+    }
   },
   {
     "name": "Kevin",
@@ -1246,13 +1304,15 @@
     "country": "South Africa",
     "strength": "Ultra Marathon",
     "disciplines": "Gravel",
-    "results": [
-      {
-        "year": "2021",
-        "race": "Tanka Trek",
-        "position": "1st",
-        "result": 1
-      }
-    ]
+    "results": {
+      "detail": [
+        {
+          "year": "2021",
+          "race": "Tanka Trek",
+          "position": "1st",
+          "result": 1
+        }
+      ]
+    }
   }
 ]

@@ -1,115 +1,144 @@
 [
   {
-    "name": "US Postal",
+    "name": "Discovery - US Postal",
     "members": [
-      { "name": "Lance Armstrong", "role": "GC" },
-      { "name": "George Hincapie", "role": "Super Domestique" }
+      { "name": "Lance Armstrong", "from": 1998, "to": 2005 },
+      { "name": "George Hincapie", "from": 1997, "to": 2007 },
+      { "name": "Alberto Contador", "from": 2007, "to": 2007 }
     ]
   },
   {
     "name": "UAE Emirates",
     "members": [
-      { "name": "Tadej Pogačar", "role": "GC" }
+      { "name": "Tadej Pogačar", "from": 2019, "to": 2024 },
+      { "name": "Marc Soler", "from": 2022, "to": 2024 },
+      { "name": "Tim Wellens", "from": 2023, "to": 2024 }
     ]
   },
   {
-    "name": "Jumbo Visma",
+    "name": "Jumbo",
     "members": [
-      { "name": "Wout van Aert", "role": "Stage Wins, Lead Out Man" },
-      { "name": "Tony Martin", "role": "Super Domestique" }
+      { "name": "Wout van Aert", "from": 2019, "to": 2024 },
+      { "name": "Tony Martin", "from": 2019, "to": 2021 },
+      { "name": "Rohan Dennis", "from": 2022, "to": 2023 }
     ]
   },
   {
-    "name": "Alpecin Fenix",
+    "name": "Alpecin",
     "members": [
-      { "name": "Mathieu van der Poel", "role": "Stage Wins" }
+      { "name": "Mathieu van der Poel", "from": 2016, "to": 2024 }
     ]
   },
   {
-    "name": "CSC",
+    "name": "Tinkoff - CSC",
     "members": [
-      { "name": "Ivan Basso", "role": "GC" }
+      { "name": "Ivan Basso", "from": 2004, "to": 2006 },
+      { "name": "Fabian Cancellara", "from": 2006, "to": 2010 },
+      { "name": "Alberto Contador", "from": 2011, "to": 2016 },
+      { "name": "Peter Sagan", "from": 2015, "to": 2016 }
     ]
   },
   {
     "name": "BMC",
     "members": [
-      { "name": "Greg van Avermaet", "role": "Stage Wins" },
-      { "name": "Rohan Dennis", "role": "Domestique" },
-      { "name": "Matt Beers", "role": "Break Away" },
-      { "name": "Kevin Benkenstein", "role": "Break Away" }
+      { "name": "George Hincapie", "from": 2010, "to": 2012 },
+      { "name": "Greg van Avermaet", "from": 2011, "to": 2018 },
+      { "name": "Rohan Dennis", "from": 2014, "to": 2018 }
     ]
   },
   {
-    "name": "T-Mobile",
+    "name": "HTC Columbia - T-Mobile",
     "members": [
-      { "name": "Jan Ullrich", "role": "GC" }
+      { "name": "Jan Ullrich", "from": 1995, "to": 2006 },
+      { "name": "George Hincapie", "from": 2008, "to": 2009 },
+      { "name": "Tony Martin", "from": 2008, "to": 2011 },
+      { "name": "Mark Cavendish", "from": 2006, "to": 2011 }
     ]
   },
   {
-    "name": "Movistar",
+    "name": "Movistar - Caisse d'Epargne",
     "members": [
-      { "name": "Alejandro Valverde", "role": "GC, Stage Wins" },
-      { "name": "Marc Soler", "role": "Break Away, Climbers Jersey" }
-    ]
-  },
-  {
-    "name": "Tinkoff",
-    "members": [
-      { "name": "Alberto Contador", "role": "GC" }
+      { "name": "Alejandro Valverde", "from": 2005, "to": 2022 },
+      { "name": "Marc Soler", "from": 2015, "to": 2021 }
     ]
   },
   {
     "name": "Quickstep",
     "members": [
-      { "name": "Mark Cavendish", "role": "Sprinters Jersey" },
-      { "name": "Julian Alaphilippe", "role": "Stage Wins" }
+      { "name": "Tony Martin", "from": 2012, "to": 2016 },
+      { "name": "Mark Cavendish", "from": 2012, "to": 2022 },
+      { "name": "Julian Alaphilippe", "from": 2014, "to": 2024 }
     ]
   },
   {
-    "name": "Team Sky",
+    "name": "Ineos - Team Sky",
     "members": [
-      { "name": "Chris Froome", "role": "GC" },
-      { "name": "Geraint Thomas", "role": "GC" }
+      { "name": "Rohan Dennis", "from": 2020, "to": 2021 },
+      { "name": "Chris Froome", "from": 2010, "to": 2020 },
+      { "name": "Geraint Thomas", "from": 2010, "to": 2024 }
     ]
   },
   {
     "name": "Bora Hansgrohe",
     "members": [
-      { "name": "Peter Sagan", "role": "Stage Wins, Green Jersey" }
+      { "name": "Peter Sagan", "from": 2017, "to": 2021 }
     ]
   },
   {
     "name": "Astana",
     "members": [
-      { "name": "Vincenzo Nibali", "role": "GC, Stage Wins" }
+      { "name": "Lance Armstrong", "from": 2009, "to": 2009 },
+      { "name": "Alberto Contador", "to": 2010 },
+      { "name": "Mark Cavendish", "from": 2023, "to": 2024 },
+      { "name": "Vincenzo Nibali", "from": 2013, "to": 2016 }
     ]
   },
   {
-    "name": "Groupama FDJ",
+    "name": "FDJ",
     "members": [
-      { "name": "Arnaud Démare", "role": "Green Jersey" },
-      { "name": "Thibaut Pinot", "role": "Climbers Jersey, Break Away" }
+      { "name": "Arnaud Démare", "from": 2011, "to": 2023 },
+      { "name": "Thibaut Pinot", "from": 2011, "to": 2023 }
     ]
   },
   {
-    "name": "Trek Segafredo",
+    "name": "Trek",
     "members": [
-      { "name": "Fabian Cancellara", "role": "Domestique, Stage Wins" }
+      { "name": "Vincenzo Nibali", "from": 2020, "to": 2021 },
+      { "name": "Fabian Cancellara", "from": 2011, "to": 2016 }
     ]
   },
   {
-    "name": "Lotto Soudal",
+    "name": "Lotto",
     "members": [
-      { "name": "Thomas de Gendt", "role": "Break Away" },
-      { "name": "Tim Wellens", "role": "Lead Out Man" },
-      { "name": "Caleb Ewan", "role": "Sprinters Jersey" }
+      { "name": "Greg van Avermaet", "from": 2007, "to": 2010 },
+      { "name": "Thomas de Gendt", "from": 2015, "to": 2024 },
+      { "name": "Tim Wellens", "from": 2012, "to": 2022 },
+      { "name": "Caleb Ewan", "from": 2019, "to": 2023 }
     ]
   },
   {
-    "name": "Bahrain Victorious",
+    "name": "Bahrain",
     "members": [
-      { "name": "Matej Mohorič", "role": "Stage Wins" }
+      { "name": "Vincenzo Nibali", "from": 2017, "to": 2019 },
+      { "name": "Matej Mohorič", "from": 2017, "to": 2024 }
+    ]
+  },
+  {
+    "name": "EF Cannondale - Garmin",
+    "members": []
+  },
+  {
+    "name": "AG2R",
+    "members": [
+      { "name": "Greg van Avermaet", "from": 2021, "to": 2023 }
+    ]
+  },
+  {
+    "name": "Liquigas",
+    "members": [
+      { "name": "Ivan Basso", "from": 2009, "to": 2014 },
+      { "name": "Peter Sagan", "from": 2010, "to": 2014 },
+      { "name": "Vincenzo Nibali", "from": 2006, "to": 2012 }
     ]
   }
 ]

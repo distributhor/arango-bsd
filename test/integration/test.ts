@@ -11,29 +11,29 @@ import cyclists from './cyclists.json'
 import teams from './teams.json'
 
 for (const c of cyclists) {
-  if (c.results) {
-    c['resultsV2'] = c.results.map(r => `${r.year}, ${r.race}, ${r.position}`)
+  if (c.results?.detail) {
+    c.results['list'] = c.results.detail.map(r => `${r.year}, ${r.race}, ${r.position}`)
 
-    c['resultsV3'] = {}
+    c.results['year'] = {}
 
-    for (const r of c.results) {
-      if (!c['resultsV3'][r.year]) {
-        c['resultsV3'][r.year] = []
+    for (const r of c.results.detail) {
+      if (!c.results['year'][r.year]) {
+        c.results['year'][r.year] = []
       }
 
-      c['resultsV3'][r.year].push(`${r.position}, ${r.race}`)
+      c.results['year'][r.year].push(`${r.position}, ${r.race}`)
     }
 
-    if (c['resultsV2']) {
-      c['palmares'] = c['resultsV2'].join('; ')
+    if (c.results['list']) {
+      c['palmares'] = c.results['list'].join('; ')
     }
   }
 }
 
 dotenv.config({ path: path.join(__dirname, '.env') })
 
-const db1 = 'guacamole-test1'
-const db2 = 'guacamole-test2'
+const db1 = 'guacamole_test'
+const db2 = 'guacamole_test2'
 
 const dbAdminUser = process.env.GUACAMOLE_TEST_DB_USER ?? 'root'
 const dbAdminPassword = process.env.GUACAMOLE_TEST_DB_PASSWORD ?? 'letmein'
@@ -248,7 +248,7 @@ describe('Guacamole Integration Tests', () => {
     const result2 = await conn.db(db1).create(CONST.groupCollection, teams)
 
     expect(result1.length).toEqual(31)
-    expect(result2.length).toEqual(17)
+    expect(result2.length).toEqual(19)
 
     const allCyclists = await conn.db(db1).fetchAll(CONST.userCollection) as QueryResult
     const allTeams = await conn.db(db1).fetchAll(CONST.groupCollection) as QueryResult
@@ -269,7 +269,8 @@ describe('Guacamole Integration Tests', () => {
               from: `${CONST.userCollection}/${cyclistsByName[member.name]._key}`,
               to: `${CONST.groupCollection}/${team._key}`,
               data: {
-                role: member.role
+                from: member.from,
+                to: member.to
               }
             })
           }
@@ -283,12 +284,12 @@ describe('Guacamole Integration Tests', () => {
   test('Unique constraint validation', async () => {
     // should be case insensitive PT1
     // FOR d IN @@value0 FILTER ( LOWER(d.@value1) == @value2 ) RETURN d._key
-    // bindVars: { '@value0': 'cyclists', value1: 'fame', value2: 'chief doper' }
+    // bindVars: { '@value0': 'cyclists', value1: 'trademark', value2: 'Live Strong' }
     const result1 = await conn.db(db1).validateUniqueConstraint(
       CONST.userCollection,
       {
         singular: {
-          property: 'fame', value: 'Chief Doper'
+          property: 'trademark', value: 'livestrong'
         }
       })
 
@@ -299,7 +300,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: {
-          property: 'fame', value: 'Chief DOPER'
+          property: 'trademark', value: 'LIVESTRONG'
         }
       })
 
@@ -310,7 +311,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: {
-          property: 'fame', value: 'Chief DOPER', caseSensitive: true
+          property: 'trademark', value: 'LiveStrong', caseSensitive: true
         }
       })
 
@@ -320,7 +321,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: {
-          property: 'fame', value: 'Tornado'
+          property: 'trademark', value: 'Yellow'
         }
       })
 
@@ -328,7 +329,7 @@ describe('Guacamole Integration Tests', () => {
 
     // FOR d IN @@value0 FILTER ( LOWER(d.@value1) == @value2 || LOWER(d.@value3) == @value4 ) RETURN d._key
     // bindVars: {
-    //     value1: 'fame',
+    //     value1: 'trademark',
     //     value2: 'tornado',
     //     value3: 'surname',
     //     value4: 'armstrong'
@@ -337,7 +338,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: [
-          { property: 'fame', value: 'Tornado' },
+          { property: 'trademark', value: 'Yellow' },
           { property: 'surname', value: 'Armstrong' }
         ]
       })
@@ -348,7 +349,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: [
-          { property: 'fame', value: 'Tornado' },
+          { property: 'trademark', value: 'Yellow' },
           { property: 'surname', value: 'ArmSTRONG' }
         ]
       })
@@ -359,7 +360,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: [
-          { property: 'fame', value: 'TORNADO', caseSensitive: true },
+          { property: 'trademark', value: 'TORNADO', caseSensitive: true },
           { property: 'surname', value: 'ArmSTRONG', caseSensitive: true }
         ]
       })
@@ -370,7 +371,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: [
-          { property: 'fame', value: 'Tornado' },
+          { property: 'trademark', value: 'Yellow' },
           { property: 'surname', value: 'Voeckler' }
         ]
       })
@@ -379,7 +380,7 @@ describe('Guacamole Integration Tests', () => {
 
     // FOR d IN @@value0 FILTER ( LOWER(d.@value1) == @value2 && LOWER(d.@value3) == @value4 ) RETURN d._key
     // bindVars: {
-    //     value1: 'fame',
+    //     value1: 'trademark',
     //     value2: 'tornado',
     //     value3: 'surname',
     //     value4: 'voeckler'
@@ -388,7 +389,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         composite: [
-          { property: 'fame', value: 'Tornado' },
+          { property: 'trademark', value: 'Yellow' },
           { property: 'surname', value: 'Voeckler' }
         ]
       })
@@ -434,14 +435,14 @@ describe('Guacamole Integration Tests', () => {
     //     value2: 'thomas',
     //     value3: 'surname',
     //     value4: 'de gendt',
-    //     value5: 'fame',
+    //     value5: 'trademark',
     //     value6: 'tornado'
     // }
     const result7 = await conn.db(db1).validateUniqueConstraint(
       CONST.userCollection,
       {
         singular: {
-          property: 'fame', value: 'Tornado'
+          property: 'trademark', value: 'Yellow'
         },
         composite: [
           { property: 'name', value: 'THOMAS' },
@@ -455,7 +456,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: {
-          property: 'fame', value: 'Tornado'
+          property: 'trademark', value: 'Yellow'
         },
         composite: [
           { property: 'name', value: 'THOMAS' },
@@ -469,7 +470,7 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: {
-          property: 'fame', value: 'Wish I Was 3kg Lighter'
+          property: 'trademark', value: 'Wish I Was 3kg Lighter'
         },
         composite: [
           { property: 'name', value: 'THOMAS' },
@@ -485,7 +486,7 @@ describe('Guacamole Integration Tests', () => {
     //     value2: 'thomas',
     //     value3: 'surname',
     //     value4: 'voeckler',
-    //     value5: 'fame',
+    //     value5: 'trademark',
     //     value6: 'wish i was 3kg lighter',
     //     value7: 'tornado'
     // }
@@ -493,8 +494,8 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: [
-          { property: 'fame', value: 'Wish I Was 3kg Lighter' },
-          { property: 'fame', value: 'Tornado' }
+          { property: 'trademark', value: 'Wish I Was 3kg Lighter' },
+          { property: 'trademark', value: 'Yellow' }
         ],
         composite: [
           { property: 'name', value: 'THOMAS' },
@@ -508,8 +509,8 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: [
-          { property: 'fame', value: 'Wish I Was 5kg Lighter' },
-          { property: 'fame', value: 'Tornado' }
+          { property: 'trademark', value: 'Wish I Was 5kg Lighter' },
+          { property: 'trademark', value: 'Yellow' }
         ],
         composite: [
           { property: 'name', value: 'THOMAS' },
@@ -523,8 +524,8 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: [
-          { property: 'fame', value: 'Wish I Was 5kg Lighter' },
-          { property: 'fame', value: 'Tornado' }
+          { property: 'trademark', value: 'Wish I Was 5kg Lighter' },
+          { property: 'trademark', value: 'Yellow' }
         ],
         composite: [
           { property: 'name', value: 'THOMAS' },
@@ -546,8 +547,8 @@ describe('Guacamole Integration Tests', () => {
       CONST.userCollection,
       {
         singular: [
-          { property: 'fame', value: 'Wish I Was 5kg Lighter' },
-          { property: 'fame', value: 'Tornado' }
+          { property: 'trademark', value: 'Wish I Was 5kg Lighter' },
+          { property: 'trademark', value: 'Yellow' }
         ],
         composite: [
           { property: 'name', value: 'THOMAS' },
@@ -568,7 +569,7 @@ describe('Guacamole Integration Tests', () => {
       country: 'South Africa',
       strength: 'All Rounder',
       _secret: 'Rusks',
-      resultsV3: {
+      year: {
         2014: ['1st, Tour of Alberta', '1st, SA Champs TT', '2nd, SA Champs Road Race'],
         2015: ['2nd, Vuelta a La Rioja'],
         2017: ['1st, 94.7 Cycle Challenge'],
@@ -600,7 +601,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1B.name).toEqual('Daryl')
     expect(result1B.surname).toEqual('Impey')
     expect(result1B._secret).toEqual('Rusks')
-    expect(result1B.resultsV3[2018].length).toEqual(3)
+    expect(result1B.year[2018].length).toEqual(3)
     expect(result1B.rating.timetrial).toEqual(8)
 
     // interface Person {
@@ -615,7 +616,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1C.name).toEqual('Daryl')
     expect(result1C.surname).toEqual('Impey')
     expect(result1C._secret).toBeUndefined()
-    expect(result1C.resultsV3[2018].length).toEqual(3)
+    expect(result1C.year[2018].length).toEqual(3)
     expect(result1C.rating.timetrial).toEqual(8)
 
     const result1D = await conn.db(db1).read(CONST.userCollection, { value: 'Impey', property: 'surname' })
@@ -623,7 +624,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1D.name).toEqual('Daryl')
     expect(result1D.surname).toEqual('Impey')
     expect(result1D._secret).toEqual('Rusks')
-    expect(result1D.resultsV3[2018].length).toEqual(3)
+    expect(result1D.year[2018].length).toEqual(3)
     expect(result1D.rating.timetrial).toEqual(8)
 
     const result1E = await conn.db(db1).read(CONST.userCollection, { value: 'Impey', property: 'surname' }, {
@@ -633,21 +634,21 @@ describe('Guacamole Integration Tests', () => {
     expect(result1E.name).toEqual('Daryl')
     expect(result1E.surname).toEqual('Impey')
     expect(result1E._secret).toBeUndefined()
-    expect(result1E.resultsV3[2018].length).toEqual(3)
+    expect(result1E.year[2018].length).toEqual(3)
     expect(result1E.rating.timetrial).toEqual(8)
 
     const result1F = await conn.db(db1).read(CONST.userCollection, result1A[0]._key)
 
     expect(result1F.name).toEqual('Daryl')
     expect(result1F.surname).toEqual('Impey')
-    expect(result1F.resultsV3[2017].length).toEqual(1)
-    expect(result1F.resultsV3[2018].length).toEqual(3)
+    expect(result1F.year[2017].length).toEqual(1)
+    expect(result1F.year[2018].length).toEqual(3)
 
-    const result1GA = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'resultsV3.2017')
+    const result1GA = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'year.2017')
     expect(Array.isArray(result1GA)).toBeTruthy()
     expect(result1GA.length).toEqual(1)
 
-    const result1GB = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'resultsV3.2018')
+    const result1GB = await conn.db(db1).fetchProperty(CONST.userCollection, result1A[0]._key, 'year.2018')
     expect(Array.isArray(result1GB)).toBeTruthy()
     expect(result1GB.length).toEqual(3)
 
@@ -898,7 +899,7 @@ describe('Guacamole Integration Tests', () => {
       country: 'Australia',
       strength: 'GC',
       _secret: 'Smiling',
-      resultsV3: {
+      year: {
         2010: ['1st, La Flèche Wallonne', "5th, Giro d'Italia", '6th, Tour Down Under'],
         2015: ['1st, Tour de France', '1st, Tirreno–Adriatico', '1st Tour de Romandie'],
         2012: ['7th, Tour de France'],
@@ -923,15 +924,15 @@ describe('Guacamole Integration Tests', () => {
     expect(result2B.name).toEqual('Cadel')
     expect(result2B.surname).toEqual('Evans')
     // expect(result2B._secret).toBeUndefined()
-    expect(result2B.resultsV3[2012].length).toEqual(1)
+    expect(result2B.year[2012].length).toEqual(1)
     expect(result2B.rating.sprint).toEqual(6)
 
     const result2C = await conn.db(db1).update(CONST.userCollection, {
       key: result2A[0]._key,
       data: {
-        fame: "G'day Mate",
+        trademark: "G'day Mate",
         strength: 'All Rounder',
-        resultsV3: { 2012: ['3rd, Critérium du Dauphiné'] },
+        year: { 2012: ['3rd, Critérium du Dauphiné'] },
         rating: { sprint: 7 }
       }
     })
@@ -942,10 +943,10 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2D.name).toEqual('Cadel')
     expect(result2D.surname).toEqual('Evans')
-    expect(result2D.fame).toEqual("G'day Mate")
+    expect(result2D.trademark).toEqual("G'day Mate")
     expect(result2D.strength).toEqual('All Rounder')
-    expect(result2D.resultsV3['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
-    expect(result2D.resultsV3['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
+    expect(result2D.year['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
+    expect(result2D.year['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
     expect(result2D.rating).toEqual(
       expect.objectContaining({
         sprint: 7,
@@ -962,9 +963,9 @@ describe('Guacamole Integration Tests', () => {
         value: 'Evans'
       },
       data: {
-        fame: 'Too Nice',
+        trademark: 'Too Nice',
         strength: 'GC',
-        resultsV3: { 2009: ['1st, UCI Road Race World Champs'] },
+        year: { 2009: ['1st, UCI Road Race World Champs'] },
         rating: { solo: 8 }
       }
     })
@@ -978,11 +979,11 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result2F.name).toEqual('Cadel')
     expect(result2F.surname).toEqual('Evans')
-    expect(result2F.fame).toEqual('Too Nice')
+    expect(result2F.trademark).toEqual('Too Nice')
     expect(result2F.strength).toEqual('GC')
-    expect(result2F.resultsV3['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
-    expect(result2F.resultsV3['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
-    expect(result2F.resultsV3['2009']).toEqual(expect.arrayContaining(['1st, UCI Road Race World Champs']))
+    expect(result2F.year['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
+    expect(result2F.year['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
+    expect(result2F.year['2009']).toEqual(expect.arrayContaining(['1st, UCI Road Race World Champs']))
     expect(result2F.rating).toEqual(
       expect.objectContaining({
         sprint: 7,
@@ -2243,7 +2244,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'strength', value: 'Classics' }
         ],
         {
-          search: { properties: 'fame', terms: 'do it all' }
+          search: { properties: 'trademark', terms: 'do it all' }
         }
       ) as QueryResult
 
@@ -2257,7 +2258,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'strength', value: 'Classics' }
         ],
         {
-          search: { properties: 'fame', terms: 'do it all' }
+          search: { properties: 'trademark', terms: 'do it all' }
         }
       ) as QueryResult
 
@@ -2269,7 +2270,7 @@ describe('Guacamole Integration Tests', () => {
     //   value2: 'slovenia',
     //   value3: 'strength',
     //   value4: 'classics',
-    //   value5: 'fame',
+    //   value5: 'trademark',
     //   value6: '%do it all%'
     // }
     const result2P = await conn.db(db1)
@@ -2280,7 +2281,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'strength', value: 'Classics' }
         ],
         {
-          search: { properties: 'fame', terms: 'do it all' }
+          search: { properties: 'trademark', terms: 'do it all' }
         }
       ) as QueryResult
 
@@ -2294,7 +2295,7 @@ describe('Guacamole Integration Tests', () => {
           { property: 'strength', value: 'Sprinter' }
         ],
         {
-          search: { properties: 'fame', terms: 'do it all' }
+          search: { properties: 'trademark', terms: 'do it all' }
         }
       ) as QueryResult
 
@@ -2302,22 +2303,22 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('Array Search', async () => {
-    const result1A = await conn.db(db1)
+    const result1B = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        '"2024, Castellon Gravel Race, 1st" IN d.resultsV2'
+        '"2024, Castellon Gravel Race, 1st" IN d.results.list'
       ) as QueryResult
 
-    expect(result1A.data.length).toEqual(1)
-    expect(result1A.data).toEqual(
+    expect(result1B.data.length).toEqual(1)
+    expect(result1B.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'Alejandro', surname: 'Valverde' })
       ])
     )
 
-    // FOR d IN @@value0 FILTER ( LIKE(TO_STRING(d.resultsV2), "%Gravel%", true) ) RETURN d
+    // FOR d IN @@value0 FILTER ( LIKE(TO_STRING(d.results.list), "%Gravel%", true) ) RETURN d
     const result2A = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        'LIKE(TO_STRING(d.resultsV2), "%Gravel%", true)'
+        'LIKE(TO_STRING(d.results.list), "%Gravel%", true)'
       ) as QueryResult
 
     expect(result2A.data.length).toEqual(5)
@@ -2330,13 +2331,22 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const resultsV2 = 'resultsV2'
+    const resultsProp = 'results' // results.list doesnt work
+    const summaryProp = 'list'
     const containsGravel = '%Gravel%'
 
+    // FOR d IN @@value0 FILTER ( LIKE(d.@value1.@value2, @value3, true) ) RETURN d
+    // bindVars: {
+    //     value1: 'results',
+    //     value2: 'list',
+    //     value3: '%Gravel%'
+    // }
+    // The test above this one uses a TOSTRING to turn the results array into a string
+    // on which it then performs a LIKE - however, it seems that leaving out the
+    // TOSTRING still works as expected - the filter only returns matching entries
     const result2B = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        // aql`LIKE(TO_STRING(d.${resultsV2}), ${containsGravel}, true)`
-        aql`LIKE(d.${resultsV2}, ${containsGravel}, true)`
+        aql`LIKE(d.${resultsProp}.${summaryProp}, ${containsGravel}, true)`
       ) as QueryResult
 
     expect(result2B.data.length).toEqual(5)
@@ -2349,22 +2359,23 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const resultsV3 = 'resultsV3'
-    const results2015 = '2015'
-    const resultsV32015 = 'resultsV3.2015'
+    const yearProp = 'year'
+    const year2015 = '2015'
+    const results2015 = 'results.year.2015'
     const containsTirreno = '%Tirreno%'
     const containsFrance = '%france%'
 
     // returns correct results and the bind operation results in correct AQL
-    // FOR d IN @@value0 FILTER ( LIKE(d.@value1.@value2, @value3, true) ) RETURN d
+    // FOR d IN @@value0 FILTER ( LIKE(d.@value1.@value2.@value3, @value4, true) ) RETURN d
     // bindVars: {
-    //   value1: 'resultsV3',
-    //   value2: '2015',
-    //   value3: '%Tirreno%'
+    //     value1: 'results',
+    //     value2: 'year',
+    //     value3: '2015',
+    //     value4: '%Tirreno%'
     // }
     const result2C = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        aql`LIKE(d.${resultsV3}.${results2015}, ${containsTirreno}, true)`
+        aql`LIKE(d.${resultsProp}.${yearProp}.${year2015}, ${containsTirreno}, true)`
       ) as QueryResult
 
     expect(result2C.data.length).toEqual(2)
@@ -2377,7 +2388,7 @@ describe('Guacamole Integration Tests', () => {
 
     const result2D = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        aql`LIKE(d.${resultsV3}.${results2015}, ${containsFrance}, true)`
+        aql`LIKE(d.${resultsProp}.${yearProp}.${year2015}, ${containsFrance}, true)`
       ) as QueryResult
 
     expect(result2D.data.length).toEqual(7)
@@ -2392,28 +2403,29 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // returns no results because of the way resultsV32015 is bound, eg
+    // returns no results because of the way results2015 is bound, eg
     // FOR d IN @@value0 FILTER ( LIKE(d.@value1, @value2, true) ) RETURN d
     // bindVars: {
-    //   value1: 'resultsV3.2015',
+    //   value1: 'results.year.2015',
     //   value2: '%Tirreno%'
     // }
     const result2E = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        aql`LIKE(d.${resultsV32015}, ${containsTirreno}, true)`
+        aql`LIKE(d.${results2015}, ${containsTirreno}, true)`
       ) as QueryResult
 
     expect(result2E.data.length).toEqual(0)
 
-    // FOR d IN @@value0 FILTER ( LIKE(d.@value1.@value2, @value3, true) ) RETURN d
+    // FOR d IN @@value0 FILTER ( LIKE(d.@value1.@value2.@value3, @value4, true) ) RETURN d
     // bindVars: {
-    //   value1: 'resultsV3',
-    //   value2: '2015',
-    //   value3: '%Tirreno%'
+    //     value1: 'results',
+    //     value2: 'year',
+    //     value3: '2015',
+    //     value4: '%Tirreno%'
     // }
     const result2F = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        { search: { properties: resultsV32015, terms: 'Tirreno' } }
+        { search: { properties: results2015, terms: 'Tirreno' } }
       ) as QueryResult
 
     // console.log(result2F)
@@ -2430,7 +2442,7 @@ describe('Guacamole Integration Tests', () => {
 
     const result2G = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        aql`LIKE(d.${resultsV3}.${results2015}, ${containsTirreno}, true) || LIKE(d.${resultsV3}.${results2015}, ${containsSanremo}, true)`
+        aql`LIKE(d.${resultsProp}.${yearProp}.${year2015}, ${containsTirreno}, true) || LIKE(d.${resultsProp}.${yearProp}.${year2015}, ${containsSanremo}, true)`
       ) as QueryResult
 
     expect(result2G.data.length).toEqual(4)
@@ -2443,16 +2455,17 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN @@value0 FILTER ( LIKE(d.@value1.@value2, @value3, true) || LIKE(d.@value1.@value2, @value4, true) ) RETURN d
+    // FOR d IN @@value0 FILTER ( LIKE(d.@value1.@value2.@value3, @value4, true) || LIKE(d.@value1.@value2.@value3, @value5, true) ) RETURN d
     // bindVars: {
-    //   value1: 'resultsV3',
-    //   value2: '2015',
-    //   value3: '%Tirreno%',
-    //   value4: '%Sanremo%'
+    //     value1: 'results',
+    //     value2: 'year',
+    //     value3: '2015',
+    //     value4: '%Tirreno%',
+    //     value5: '%Sanremo%'
     // }
     const result2H = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        { search: { properties: resultsV32015, terms: ['Tirreno', 'Sanremo'] } }
+        { search: { properties: results2015, terms: ['Tirreno', 'Sanremo'] } }
       ) as QueryResult
 
     expect(result2H.data.length).toEqual(4)
@@ -2492,7 +2505,7 @@ describe('Guacamole Integration Tests', () => {
 
     const result2K = await conn.db(db1)
       .fetchByCriteria(CONST.userCollection,
-        aql`d.strength == ${sprinter} && (LIKE(d.${resultsV3}.${results2015}, ${containsRoubaix}, true) || LIKE(d.${resultsV3}.${results2015}, ${containsSanremo}, true))`
+        aql`d.strength == ${sprinter} && (LIKE(d.${resultsProp}.${yearProp}.${year2015}, ${containsRoubaix}, true) || LIKE(d.${resultsProp}.${yearProp}.${year2015}, ${containsSanremo}, true))`
       ) as QueryResult
 
     expect(result2K.data.length).toEqual(2)
@@ -2503,19 +2516,20 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( LIKE(d.@value3.@value4, @value5, true) || LIKE(d.@value3.@value4, @value6, true) ) ) RETURN d
+    // OR d IN @@value0 FILTER ( ( LOWER(d.@value1) == @value2 ) AND ( LIKE(d.@value3.@value4.@value5, @value6, true) || LIKE(d.@value3.@value4.@value5, @value7, true) ) ) RETURN d
     // bindVars: {
-    //   value1: 'strength',
-    //   value2: 'sprinter',
-    //   value3: 'resultsV3',
-    //   value4: '2015',
-    //   value5: '%Roubaix%',
-    //   value6: '%Sanremo%'
+    //     value1: 'strength',
+    //     value2: 'sprinter',
+    //     value3: 'results',
+    //     value4: 'year',
+    //     value5: '2015',
+    //     value6: '%Roubaix%',
+    //     value7: '%Sanremo%'
     // }
     const result2L = await conn.db(db1)
       .fetchByPropertyValueAndCriteria(CONST.userCollection,
         { property: 'strength', value: sprinter },
-        { search: { properties: resultsV32015, terms: ['Roubaix', 'Sanremo'] } },
+        { search: { properties: results2015, terms: ['Roubaix', 'Sanremo'] } },
         { debugFilters: false }
       ) as QueryResult
 
@@ -2528,24 +2542,23 @@ describe('Guacamole Integration Tests', () => {
     )
   })
 
-  // test('Delete database', async () => {
-  //   expect.assertions(5)
+  test('Delete database', async () => {
+    expect.assertions(4)
 
-  //   await conn.system.dropDatabase(db1)
-  //   await conn.system.dropDatabase(db2)
+    // await conn.system.dropDatabase(db1)
+    // const testDB1Exists = await conn.db(db1).dbExists()
+    // expect(testDB1Exists).toBeFalsy()
 
-  //   const testDB1Exists = await conn.db(db1).dbExists()
-  //   const db2Exists = await conn.db(db2).dbExists()
+    await conn.system.dropDatabase(db2)
+    const db2Exists = await conn.db(db2).dbExists()
+    expect(db2Exists).toBeFalsy()
 
-  //   expect(testDB1Exists).toBeFalsy()
-  //   expect(db2Exists).toBeFalsy()
-
-  //   try {
-  //     await conn.system.dropDatabase(db1)
-  //   } catch (e) {
-  //     expect(e.response.body.code).toEqual(404)
-  //     expect(e.response.body.errorNum).toEqual(1228)
-  //     expect(e.response.body.errorMessage).toEqual('database not found')
-  //   }
-  // })
+    try {
+      await conn.system.dropDatabase(db2)
+    } catch (e) {
+      expect(e.response.body.code).toEqual(404)
+      expect(e.response.body.errorNum).toEqual(1228)
+      expect(e.response.body.errorMessage).toEqual('database not found')
+    }
+  })
 })
