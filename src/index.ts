@@ -4,12 +4,12 @@ import debug from 'debug'
 import {
   GuacamoleOptions,
   EntityAvailability,
-  GraphDefinition,
+  GraphSchema,
   DbStructure,
   DbStructureResult,
   DbStructureValidation,
   DbClearanceStrategy,
-  isGraphDefinitionArray,
+  isGraphSchemaArray,
   UniqueConstraint,
   UniqueConstraintResult,
   FetchOptions,
@@ -50,6 +50,8 @@ import { ArrayCursor } from 'arangojs/cursor'
 import { Config } from 'arangojs/connection'
 
 import _get from 'lodash.get'
+import _pick from 'lodash.pick'
+import _omit from 'lodash.omit'
 
 export * from './types'
 
@@ -93,13 +95,13 @@ function _debugFilters(
 }
 
 /** @internal */
-function toGraphNames(graphs: string[] | GraphDefinition[]): string[] {
+function toGraphNames(graphs: string[] | GraphSchema[]): string[] {
   if (graphs.length === 0) {
     return []
   }
 
-  if (isGraphDefinitionArray(graphs)) {
-    return graphs.map((g) => g.graph)
+  if (isGraphSchemaArray(graphs)) {
+    return graphs.map((g) => g.name)
   }
 
   return graphs
@@ -119,29 +121,42 @@ function isObject(val: any): boolean {
 }
 
 /** @internal */
-function stripUnderscoreProps(obj: any, keep: string[]): void {
-  // the check for whether this is an object is handled
-  // by the functions that call this utility
-  Object.keys(obj).map((k) => {
-    if (k.startsWith('_') && !keep.includes(k)) {
-      delete obj[k]
-    }
+function stripUnderscoreProps(obj: any, except: string[]): any {
+  if (!isObject(obj)) {
+    return obj
+  }
 
-    return k
-  })
+  const props = except && except.length > 0
+    ? Object.keys(obj).filter(k => k.startsWith('_') && !except.includes(k))
+    : Object.keys(obj).filter(k => k.startsWith('_'))
+
+  if (props && props.length > 0) {
+    return _omit(obj, props)
+  }
+
+  return obj
 }
 
 /** @internal */
-function stripProps(obj: any, props: string[]): void {
-  // the check for whether this is an object is handled
-  // by the functions that call this utility
-  Object.keys(obj).map((k) => {
-    if (props.includes(k)) {
-      delete obj[k]
-    }
+function stripProps(obj: any, props: string | string[]): any {
+  if (!isObject(obj) || !props) {
+    return obj
+  }
 
-    return k
-  })
+  return _omit(obj, props)
+}
+
+/** @internal */
+function keepProps(obj: any, props: string | string[]): any {
+  if (!isObject(obj) || !props) {
+    return obj
+  }
+
+  if (typeof props === 'string') {
+    return _pick(obj, [props])
+  }
+
+  return _pick(obj, props)
 }
 
 /** @internal */
@@ -638,12 +653,16 @@ export class ArangoDBWithoutGarnish {
       return document
     }
 
-    if (options.trimPrivateProps) {
-      stripUnderscoreProps(document, ['_key', '_id', '_rev'])
+    if (options.keep) {
+      return keepProps(document, options.keep)
     }
 
-    if (options.trimProps) {
-      stripProps(document, options.trimProps)
+    if (options.omit) {
+      return stripProps(document, options.omit)
+    }
+
+    if (options.omitPrivateProps) {
+      return stripUnderscoreProps(document, ['_key', '_id', '_rev'])
     }
 
     return document
@@ -659,12 +678,16 @@ export class ArangoDBWithoutGarnish {
         return document
       }
 
-      if (options.trimPrivateProps) {
-        stripUnderscoreProps(document, ['_key', '_id', '_rev'])
+      if (options.keep) {
+        return keepProps(document, options.keep)
       }
 
-      if (options.trimProps) {
-        stripProps(document, options.trimProps)
+      if (options.omit) {
+        return stripProps(document, options.omit)
+      }
+
+      if (options.omitPrivateProps) {
+        return stripUnderscoreProps(document, ['_key', '_id', '_rev'])
       }
 
       return document
@@ -1516,12 +1539,12 @@ export class ArangoDBWithSpice extends ArangoDB {
       for (const entity of validation.graphs) {
         if (!entity.exists) {
           const graph = structure.graphs
-            ? structure.graphs.filter((graph) => graph.graph === entity.name)[0]
+            ? structure.graphs.filter((graph) => graph.name === entity.name)[0]
             : undefined
 
           if (graph?.edges && graph.edges.length > 0) {
             try {
-              await this.driver.graph(graph.graph).create(graph.edges)
+              await this.driver.graph(graph.name).create(graph.edges)
               response.graphs.push(`Graph '${entity.name}' created`)
             } catch (e) {
               response.graphs.push(`Failed to create graph '${entity.name}'`)
@@ -1614,7 +1637,7 @@ export class ArangoDBWithSpice extends ArangoDB {
   }
 
   /** @internal */
-  private async checkAvailableGraphs(graphs: string[] | GraphDefinition[] | undefined): Promise<EntityAvailability> {
+  private async checkAvailableGraphs(graphs: string[] | GraphSchema[] | undefined): Promise<EntityAvailability> {
     const response: EntityAvailability = {
       all: [],
       missing: [],

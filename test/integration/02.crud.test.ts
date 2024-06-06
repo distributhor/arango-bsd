@@ -297,7 +297,7 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('CRUD', async () => {
-    expect.assertions(184)
+    expect.assertions(193)
 
     const result1A = await conn.db(VAR.dbName).create(VAR.userCollection, {
       name: 'Daryl',
@@ -346,7 +346,7 @@ describe('Guacamole Integration Tests', () => {
     // const result1C = await conn.db(VAR.dbName).read<Person>(
 
     const result1C = await conn.db(VAR.dbName).read(VAR.userCollection, result1A[0]._key, {
-      trimPrivateProps: true
+      omitPrivateProps: true
     })
 
     expect(result1C.name).toEqual('Daryl')
@@ -354,6 +354,25 @@ describe('Guacamole Integration Tests', () => {
     expect(result1C._secret).toBeUndefined()
     expect(result1C.year[2018].length).toEqual(3)
     expect(result1C.rating.timetrial).toEqual(8)
+
+    const result1C2 = await conn.db(VAR.dbName).read(VAR.userCollection, result1A[0]._key, {
+      keep: 'favoriteRoads'
+    })
+
+    expect(result1C2.name).toBeUndefined()
+    expect(result1C2.surname).toBeUndefined()
+    expect(result1C2.favoriteRoads).toBeDefined()
+    expect(Object.keys(result1C2).length).toEqual(1)
+
+    const result1CD = await conn.db(VAR.dbName).read(VAR.userCollection, result1A[0]._key, {
+      keep: ['_key', 'name', 'favoriteRoads']
+    })
+
+    expect(result1CD._key).toBeDefined()
+    expect(result1CD.name).toBeDefined()
+    expect(result1CD.surname).toBeUndefined()
+    expect(result1CD.favoriteRoads).toBeDefined()
+    expect(Object.keys(result1CD).length).toEqual(3)
 
     const result1D = await conn.db(VAR.dbName).read(VAR.userCollection, { value: 'Impey', property: 'surname' })
 
@@ -364,7 +383,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1D.rating.timetrial).toEqual(8)
 
     const result1E = await conn.db(VAR.dbName).read(VAR.userCollection, { value: 'Impey', property: 'surname' }, {
-      trimPrivateProps: true
+      omitPrivateProps: true
     })
 
     expect(result1E.name).toEqual('Daryl')
@@ -649,7 +668,6 @@ describe('Guacamole Integration Tests', () => {
         descend: 7
       }
     }
-      // { omit: { trimPrivateProps: true } }
     )
 
     expect(result2A).toBeDefined()

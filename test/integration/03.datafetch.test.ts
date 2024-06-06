@@ -47,7 +47,7 @@ describe('Guacamole Integration Tests', () => {
       VAR.userCollection,
       { properties: { property: 'strength', value: 'Time Trial' } },
       {
-        trim: { trimPrivateProps: true }
+        trim: { omitPrivateProps: true }
       }
     )) as QueryResult
 
@@ -60,7 +60,7 @@ describe('Guacamole Integration Tests', () => {
       VAR.userCollection,
       { properties: { property: 'strength', value: 'Time Trial' } },
       {
-        trim: { trimPrivateProps: true }
+        trim: { omitPrivateProps: true }
       }
     )) as QueryResult
 
@@ -139,7 +139,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchOneByPropertyValue(
         VAR.userCollection,
         { property: 'surname', value: 'Impey' },
-        { trim: { trimPrivateProps: true } }
+        { trim: { omitPrivateProps: true } }
       )
 
     expect(result5C).toBeDefined()
@@ -152,7 +152,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchOneByProperties(
         VAR.userCollection,
         { properties: { property: 'surname', value: 'Impey' } },
-        { trim: { trimPrivateProps: true } }
+        { trim: { omitPrivateProps: true } }
       )
 
     expect(result5D).toBeDefined()

@@ -2,6 +2,7 @@ import { AqlQuery } from 'arangojs/aql'
 import { CursorStats } from 'arangojs/cursor'
 import { QueryOptions } from 'arangojs/database'
 import { DocumentData, DocumentMetadata, Patch } from 'arangojs/documents'
+import { EdgeDefinitionOptions } from 'arangojs/graph'
 
 /** @internal */
 export function isFilter(x: any): x is Filter {
@@ -101,9 +102,9 @@ export interface GuacamoleOptions {
 }
 
 export interface DocumentTrimOptions {
-  trimPrivateProps?: boolean
-  trimProps?: string[]
-  keepProps?: string[]
+  omitPrivateProps?: boolean
+  omit?: string | string[]
+  keep?: string | string[]
 }
 
 export interface FetchOptions {
@@ -126,15 +127,9 @@ export interface QueryResult<T = any> {
   stats?: CursorStats | undefined
 }
 
-export interface GraphDefinition {
-  graph: string
-  edges: EdgeDefinition[]
-}
-
-export interface EdgeDefinition {
-  collection: string
-  from: string | string[]
-  to: string | string[]
+export interface GraphSchema {
+  name: string
+  edges: EdgeDefinitionOptions[]
 }
 
 export interface GraphRelation<T extends Record<string, any> = any> {
@@ -145,7 +140,7 @@ export interface GraphRelation<T extends Record<string, any> = any> {
 
 export interface DbStructure {
   collections?: string[]
-  graphs?: GraphDefinition[]
+  graphs?: GraphSchema[]
 }
 
 export interface DbStructureValidation {
@@ -181,13 +176,13 @@ export interface EntityAvailability {
 }
 
 /** @internal */
-export function isGraphDefinition(x: any): x is GraphDefinition {
-  return x.graph
+export function isGraphSchema(x: any): x is GraphSchema {
+  return x.name
 }
 
 /** @internal */
-export function isGraphDefinitionArray(x: any[]): x is GraphDefinition[] {
-  return x.length > 0 && isGraphDefinition(x[0])
+export function isGraphSchemaArray(x: any[]): x is GraphSchema[] {
+  return x.length > 0 && isGraphSchema(x[0])
 }
 
 /*

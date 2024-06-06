@@ -31,7 +31,7 @@ const dbStructure: DbStructure = {
   collections: [VAR.userCollection, VAR.groupCollection],
   graphs: [
     {
-      graph: VAR.groupMembershipGraph,
+      name: VAR.groupMembershipGraph,
       edges: [
         {
           collection: VAR.userToGroupEdge,
@@ -173,7 +173,7 @@ describe('Guacamole Integration Tests', () => {
       collections: [],
       graphs: [
         {
-          graph: 'xyz',
+          name: 'xyz',
           edges: []
         }
       ]
@@ -196,7 +196,7 @@ describe('Guacamole Integration Tests', () => {
 
     if (dbStructure.graphs) {
       dbStructure.graphs.push({
-        graph: 'def',
+        name: 'def',
         edges: []
       })
     }

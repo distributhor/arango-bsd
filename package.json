@@ -1,6 +1,6 @@
 {
   "name": "@distributhor/guacamole",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "description": "A backseat driver for ArangoDB",
   "homepage": "https://distributhor.github.io/guacamole/",
   "license": "MIT",
@@ -45,6 +45,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@types/lodash": "^4.17.4",
     "arangojs": "^8.1.0",
     "debug": "^4.2.0",
     "lodash.clonedeep": "^4.5.0",
