@@ -1,4 +1,3 @@
-/* eslint-disable no-prototype-builtins */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import debug from 'debug'
 import {
@@ -1009,18 +1008,18 @@ export class ArangoDBWithSpice extends ArangoDB {
       throw new Error('Cannot add array value to an existing field that is not already of type array')
     }
 
-    let unique = !!((options.hasOwnProperty('allowDuplicates') && options.allowDuplicates === true))
+    const allowDuplicates = _get(options, 'allowDuplicates', false)
 
-    if (isObject(arrayValue) && !options.allowDuplicates) {
+    // if the array value is an object we perform a manual uniqueness check,
+    // so the arango parameter can be set to false
+    const preventDuplicates = isObject(arrayValue) ? false : !allowDuplicates
+
+    if (isObject(arrayValue) && !allowDuplicates) {
       if (!options.uniqueObjectField || !arrayValue[options.uniqueObjectField]) {
         throw new Error(
           "The array object must be unique, no 'uniqueObjectField' was provided, or the array object is missing that field"
         )
       }
-
-      // we are manually performing a uniqueness check,
-      // so for the arango query this can be set to false
-      unique = false
 
       if (arr && arr.length > 0) {
         const matchingObject = arr.find(
@@ -1043,9 +1042,9 @@ export class ArangoDBWithSpice extends ArangoDB {
       for (const field of nestedFields) { query += '{ ' + field + ': ' }
 
       if (Array.isArray(arrayValue)) {
-        query += `APPEND(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${unique})`
+        query += `APPEND(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${preventDuplicates})`
       } else {
-        query += `PUSH(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${unique})`
+        query += `PUSH(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${preventDuplicates})`
       }
 
       for (const _f of nestedFields) { query += ' }' }
@@ -1072,10 +1071,10 @@ export class ArangoDBWithSpice extends ArangoDB {
       query += ' }'
     } else {
       if (Array.isArray(arrayValue)) {
-        query += `UPDATE d WITH { ${arrayProperty}: APPEND(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${unique}) } `
+        query += `UPDATE d WITH { ${arrayProperty}: APPEND(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${preventDuplicates}) } `
         query += `IN ${collection} LET updated = NEW RETURN { "_key": updated._key, "${arrayProperty}": updated.${arrayProperty} }`
       } else {
-        query += `UPDATE d WITH { ${arrayProperty}: PUSH(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${unique}) } `
+        query += `UPDATE d WITH { ${arrayProperty}: PUSH(d.${arrayProperty}, ${JSON.stringify(arrayValue)}, ${preventDuplicates}) } `
         query += `IN ${collection} LET updated = NEW RETURN { "_key": updated._key, "${arrayProperty}": updated.${arrayProperty} }`
       }
     }
@@ -1236,12 +1235,12 @@ export class ArangoDBWithSpice extends ArangoDB {
     }
 
     if (!arr || arr.length === 0) {
-      if (options.hasOwnProperty('addIfNotFound') && options.addIfNotFound === true) {
+      if (_get(options, 'addIfNotFound', false)) {
         if (updatedObject[objectIdField] && updatedObject[objectIdField] !== objectIdValue) {
           throw new Error('Specified ID does not match the one provided in the object instance')
         }
 
-        if (options.hasOwnProperty('allowDuplicates') && options.allowDuplicates === true) {
+        if (_get(options, 'allowDuplicates', false)) {
           return await this.addArrayObject(collection, key, arrayProperty, updatedObject)
         }
 
@@ -1272,12 +1271,12 @@ export class ArangoDBWithSpice extends ArangoDB {
       return await this.updateProperty(collection, key, arrayProperty, alteredArray)
     }
 
-    if (options.hasOwnProperty('addIfNotFound') && options.addIfNotFound === true) {
+    if (_get(options, 'addIfNotFound', false)) {
       if (updatedObject[objectIdField] && updatedObject[objectIdField] !== objectIdValue) {
         throw new Error('Specified ID does not match the one provided in the object instance')
       }
 
-      if (options.hasOwnProperty('allowDuplicates') && options.allowDuplicates === true) {
+      if (_get(options, 'allowDuplicates', false)) {
         return await this.addArrayObject(collection, key, arrayProperty, updatedObject)
       }
 
@@ -1358,14 +1357,17 @@ export class ArangoDBWithSpice extends ArangoDB {
       const edges: Edge[] = []
 
       for (const r of relation) {
-        if (!r.hasOwnProperty('from') || !r.hasOwnProperty('to')) {
+        const _from = _get(r, 'from')
+        const _to = _get(r, 'to')
+
+        if (!_from || !_to) {
           continue
         }
 
         const data = r.data ? r.data : {}
         const edge = {
-          _from: r.from,
-          _to: r.to,
+          _from,
+          _to,
           ...data
         }
 
@@ -1375,20 +1377,19 @@ export class ArangoDBWithSpice extends ArangoDB {
       return await this.collection(edgeCollection).saveAll(edges)
     }
 
-    if (!relation?.hasOwnProperty('from') || !relation.hasOwnProperty('to')) {
+    const _from = _get(relation, 'from')
+    const _to = _get(relation, 'to')
+
+    if (!_from || !_to) {
       throw new Error('Cannot create edge relation without relational keys')
     }
 
-    let allowDuplicateRelations = false
-
-    if (options?.hasOwnProperty('allowDuplicates') && options.allowDuplicates === true) {
-      allowDuplicateRelations = options.allowDuplicates
-    }
+    // const allowDuplicateRelations = _get(options, 'allowDuplicates', false)
 
     const data = relation.data ? relation.data : {}
     const edge = {
-      _from: relation.from,
-      _to: relation.to,
+      _from,
+      _to,
       ...data
     }
 

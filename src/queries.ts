@@ -1,4 +1,3 @@
-/* eslint-disable no-prototype-builtins */
 import debug from 'debug'
 import { aql, AqlQuery, AqlValue, isAqlQuery, join, literal } from 'arangojs/aql'
 import { DocumentCollection, EdgeCollection } from 'arangojs/collection'
@@ -155,15 +154,12 @@ function _toAqlFilters(filter: string | AqlValue | Filter | SearchTerms): AqlVal
 function _toQueryOpts(options: FetchOptions = {}): AqlValue[] {
   const opts: AqlValue[] = []
 
-  if (options.hasOwnProperty('sortBy')) {
+  if (options.sortBy) {
     opts.push(aql` SORT d.${options.sortBy}`)
-
-    if (options.hasOwnProperty('sortOrder')) {
-      if (options.sortOrder === 'ascending') {
-        opts.push(literal(' ASC'))
-      } else if (options.sortOrder === 'descending') {
-        opts.push(literal(' DESC'))
-      }
+    if (options.sortOrder && options.sortOrder.toLowerCase() === 'ascending') {
+      opts.push(literal(' ASC'))
+    } else if (options.sortOrder && options.sortOrder.toLowerCase() === 'descending') {
+      opts.push(literal(' DESC'))
     }
   }
 
@@ -369,6 +365,14 @@ export function fetchByCriteria(
 
   const opts = _toQueryOpts(options)
 
+  // if (this._hasKeepOption(options)) {
+  //   query += ' RETURN KEEP( d, [' + this._getKeepInstruction(options) + '])'
+  // } else if (this._hasOmitOption(options)) {
+  //   query += ' RETURN UNSET_RECURSIVE( d, [' + this._getOmitInstruction(options) + '])'
+  // } else {
+  //   query += ' RETURN d'
+  // }
+
   const query = opts.length > 0
     ? aql`FOR d IN ${collection} FILTER (${join(filters, '')} )${join(opts, '')} RETURN d`
     : aql`FOR d IN ${collection} FILTER (${join(filters, '')} ) RETURN d`
@@ -404,15 +408,12 @@ export function fetchAll(
 
   // TODO: Support sorting by multiple criteria ...
   // SORT u.lastName, u.firstName, u.id DESC
-  if (options?.hasOwnProperty('sortBy')) {
+  if (options.sortBy) {
     query += ` SORT d.${options.sortBy}`
-
-    if (options.hasOwnProperty('sortOrder')) {
-      if (options.sortOrder === 'ascending') {
-        query += ' ASC'
-      } else if (options.sortOrder === 'descending') {
-        query += ' DESC'
-      }
+    if (options.sortOrder && options.sortOrder.toLowerCase() === 'ascending') {
+      query += ' ASC'
+    } else if (options.sortOrder && options.sortOrder.toLowerCase() === 'descending') {
+      query += ' DESC'
     }
   }
 
