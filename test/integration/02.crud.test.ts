@@ -832,7 +832,7 @@ describe('Guacamole Integration Tests', () => {
 
     expect(result4BWithLimit1.data.length).toEqual(2)
     expect(result4BWithLimit2.size).toEqual(2)
-    expect(result4BWithLimit2.total).toEqual(3)
+    expect(result4BWithLimit2.fullCount).toEqual(3)
 
     expect(result4BWithLimit1.data).toEqual(
       expect.arrayContaining([

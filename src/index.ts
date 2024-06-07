@@ -159,6 +159,25 @@ function keepProps(obj: any, props: string | string[]): any {
 }
 
 /** @internal */
+function toQueryResult(data: any[], cursor: ArrayCursor, options: FetchOptions): QueryResult {
+  const result: QueryResult = {
+    data
+  }
+
+  const dataLength = !data ? 0 : data.length
+
+  if (cursor) {
+    result.size = cursor.count ? cursor.count : dataLength
+    result.fullCount = cursor.extra?.stats ? cursor.extra.stats.fullCount : undefined
+    if (options.returnStats) {
+      result.stats = cursor.extra?.stats ? cursor.extra?.stats : undefined
+    }
+  }
+
+  return result
+}
+
+/** @internal */
 interface InstancePool {
   [key: string]: ArangoDBWithSpice
 }
@@ -559,14 +578,7 @@ export class ArangoDBWithoutGarnish {
       ? stripUnderscoreProps(documents, ['_key', '_id', '_rev'])
       : documents
 
-    const response = {
-      size: result.count,
-      total: result.extra?.stats ? result.extra.stats.fullCount : undefined,
-      // stats: result.extra.stats
-      data
-    }
-
-    return response
+    return toQueryResult(data, result, options)
   }
 
   public async fetchByProperties<T = any>(
@@ -816,14 +828,7 @@ export class ArangoDBWithoutGarnish {
       ? stripUnderscoreProps(documents, ['_key', '_id', '_rev'])
       : documents
 
-    const response = {
-      size: result.count,
-      total: result.extra?.stats ? result.extra.stats.fullCount : undefined,
-      // stats: result.extra.stats
-      data
-    }
-
-    return response
+    return toQueryResult(data, result, options)
   }
 
   /** @internal */
@@ -860,14 +865,7 @@ export class ArangoDBWithoutGarnish {
       ? stripUnderscoreProps(documents, ['_key', '_id', '_rev'])
       : documents
 
-    const response = {
-      size: result.count,
-      total: result.extra?.stats ? result.extra.stats.fullCount : undefined,
-      // stats: result.extra.stats
-      data
-    }
-
-    return response
+    return toQueryResult(data, result, options)
   }
 }
 

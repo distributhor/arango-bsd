@@ -5,7 +5,7 @@ const { ArangoDB } = require('../../dist/index')
 async function play() {
   try {
     const db = new ArangoDB({
-      databaseName: 'guacamole-test1',
+      databaseName: 'guacamole_test',
       url: 'http://root:letmein@localhost:8529'
     })
 
