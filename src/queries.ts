@@ -284,9 +284,27 @@ function fetchByPropertyValues(
 
   const opts = _toQueryOpts(options)
 
+  const trim: AqlValue[] = []
+
+  if (options.trim?.keep) {
+    if (Array.isArray(options.trim.keep)) {
+      trim.push(literal(`KEEP(d, "${options.trim.keep.join('", "')}")`))
+    } else {
+      trim.push(literal(`KEEP(d, "${options.trim.keep}")`))
+    }
+  } else if (options.trim?.omit) {
+    if (Array.isArray(options.trim.omit)) {
+      trim.push(literal(`UNSET_RECURSIVE(d, "${options.trim.omit.join('", "')}")`))
+    } else {
+      trim.push(literal(`UNSET_RECURSIVE(d, "${options.trim.omit}")`))
+    }
+  } else {
+    trim.push(literal('d'))
+  }
+
   const query = opts.length > 0
-    ? aql`FOR d IN ${collection} FILTER (${join(filters, '')} )${join(opts, '')} RETURN d`
-    : aql`FOR d IN ${collection} FILTER (${join(filters, '')} ) RETURN d`
+    ? aql`FOR d IN ${collection} FILTER (${join(filters, '')} )${join(opts, '')} RETURN ${join(trim, '')}`
+    : aql`FOR d IN ${collection} FILTER (${join(filters, '')} ) RETURN ${join(trim, '')}`
 
   if (_debugFiltersEnabled(options) || _printQuery(options)) {
     _debug.log.queries(query)
@@ -299,29 +317,29 @@ function fetchByPropertyValues(
 
 export function fetchByMatchingProperty(
   collection: DocumentCollection | EdgeCollection,
-  identifier: PropertyValue,
+  property: PropertyValue,
   options: FetchOptions = {},
   criteria?: Criteria
 ): AqlQuery {
-  return fetchByPropertyValues(collection, identifier, MatchType.ANY, criteria, options)
+  return fetchByPropertyValues(collection, property, MatchType.ANY, criteria, options)
 }
 
 export function fetchByMatchingAnyProperty(
   collection: DocumentCollection | EdgeCollection,
-  identifier: PropertyValue[],
+  property: PropertyValue[],
   options: FetchOptions = {},
   criteria?: Criteria
 ): AqlQuery {
-  return fetchByPropertyValues(collection, identifier, MatchType.ANY, criteria, options)
+  return fetchByPropertyValues(collection, property, MatchType.ANY, criteria, options)
 }
 
 export function fetchByMatchingAllProperties(
   collection: DocumentCollection | EdgeCollection,
-  identifier: PropertyValue[],
+  properties: PropertyValue[],
   options: FetchOptions = {},
   criteria?: Criteria
 ): AqlQuery {
-  return fetchByPropertyValues(collection, identifier, MatchType.ALL, criteria, options)
+  return fetchByPropertyValues(collection, properties, MatchType.ALL, criteria, options)
 }
 
 export function fetchByCriteria(
@@ -365,23 +383,27 @@ export function fetchByCriteria(
 
   const opts = _toQueryOpts(options)
 
-  // if (this._hasKeepOption(options)) {
-  //   query += ' RETURN KEEP( d, [' + this._getKeepInstruction(options) + '])'
-  // } else if (this._hasOmitOption(options)) {
-  //   query += ' RETURN UNSET_RECURSIVE( d, [' + this._getOmitInstruction(options) + '])'
-  // } else {
-  //   query += ' RETURN d'
-  // }
+  const trim: AqlValue[] = []
+
+  if (options.trim?.keep) {
+    if (Array.isArray(options.trim.keep)) {
+      trim.push(literal(`KEEP(d, "${options.trim.keep.join('", "')}")`))
+    } else {
+      trim.push(literal(`KEEP(d, "${options.trim.keep}")`))
+    }
+  } else if (options.trim?.omit) {
+    if (Array.isArray(options.trim.omit)) {
+      trim.push(literal(`UNSET_RECURSIVE(d, "${options.trim.omit.join('", "')}")`))
+    } else {
+      trim.push(literal(`UNSET_RECURSIVE(d, "${options.trim.omit}")`))
+    }
+  } else {
+    trim.push(literal('d'))
+  }
 
   const query = opts.length > 0
-    ? aql`FOR d IN ${collection} FILTER (${join(filters, '')} )${join(opts, '')} RETURN d`
-    : aql`FOR d IN ${collection} FILTER (${join(filters, '')} ) RETURN d`
-
-  // if (_hasOmitOption(options)) {
-  //   query += " RETURN UNSET_RECURSIVE( d, [" + _getOmitInstruction(options) + "])";
-  // } else {
-  //   query += " RETURN d";
-  // }
+    ? aql`FOR d IN ${collection} FILTER (${join(filters, '')} )${join(opts, '')} RETURN ${join(trim, '')}`
+    : aql`FOR d IN ${collection} FILTER (${join(filters, '')} ) RETURN ${join(trim, '')}`
 
   if (_debugFiltersEnabled(options) || _printQuery(options)) {
     _debug.log.queries(query)

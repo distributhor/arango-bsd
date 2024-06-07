@@ -318,6 +318,7 @@ export class ArangoDBWithoutGarnish {
   public async returnAll<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<QueryResult<T>> {
     const response = await this.query<T>(query, options?.query)
     const documents = await response.all()
+
     return {
       data: ArangoDB.trimDocuments(documents, options?.trim)
     }
@@ -346,6 +347,24 @@ export class ArangoDBWithoutGarnish {
     }
 
     return ArangoDB.trimDocument(documents[0], options?.trim)
+  }
+
+  /** @internal */
+  async returnOneInternal<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | T[] | null> {
+    const response = await this.query<T>(query, options?.query)
+    const documents = await response.all()
+
+    if (!documents || documents.length === 0 || !documents[0]) {
+      return null
+    }
+
+    // since we already know that we have constructed a query with the trim options included,
+    // we only have to additionally trim private props if the option for it is set
+    if (options?.trim?.stripPrivateProps) {
+      return stripUnderscoreProps(documents[0], ['_key', '_id', '_rev'])
+    }
+
+    return documents[0]
   }
 
   public async read<T extends Record<string, any> = any>(
@@ -382,6 +401,8 @@ export class ArangoDBWithoutGarnish {
       return null
     }
 
+    // have to call manual trim operation, since there was no trim
+    // in the query itself with a .document()
     return ArangoDB.trimDocument(d, trim)
   }
 
@@ -462,7 +483,7 @@ export class ArangoDBWithoutGarnish {
     property: string
   ): Promise<T | T[] | null> {
     // in the query below, properties such as prop.nested should be converted into prop[nested] for the query to work
-    // return await this.returnOne(`LET d = DOCUMENT("${collection}/${key}") RETURN d.${property}`)
+    // return await this.returnOneInternal(`LET d = DOCUMENT("${collection}/${key}") RETURN d.${property}`)
     const d = await this.read(collection, identifier, undefined)
 
     if (!d) {
@@ -534,11 +555,15 @@ export class ArangoDBWithoutGarnish {
 
     const documents = await result.all()
 
+    const data = options?.trim?.stripPrivateProps
+      ? stripUnderscoreProps(documents, ['_key', '_id', '_rev'])
+      : documents
+
     const response = {
-      data: ArangoDB.trimDocuments(documents, options?.trim),
       size: result.count,
-      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
+      total: result.extra?.stats ? result.extra.stats.fullCount : undefined,
       // stats: result.extra.stats
+      data
     }
 
     return response
@@ -572,7 +597,7 @@ export class ArangoDBWithoutGarnish {
     _debugFilters('fetchOneByProperties', this.guacamole, options)
 
     if (!Array.isArray(values.properties)) {
-      return await this.returnOne<T>(
+      return await this.returnOneInternal<T>(
         Queries.fetchByMatchingProperty(
           this.collection(collection),
           values.properties,
@@ -582,7 +607,7 @@ export class ArangoDBWithoutGarnish {
     }
 
     if (values.match && values.match === MatchType.ALL) {
-      return await this.returnOne<T>(
+      return await this.returnOneInternal<T>(
         Queries.fetchByMatchingAllProperties(
           this.collection(collection),
           values.properties,
@@ -591,7 +616,7 @@ export class ArangoDBWithoutGarnish {
       )
     }
 
-    return await this.returnOne<T>(
+    return await this.returnOneInternal<T>(
       Queries.fetchByMatchingAnyProperty(
         this.collection(collection),
         values.properties,
@@ -657,10 +682,13 @@ export class ArangoDBWithoutGarnish {
     }
 
     if (options.omit) {
-      return stripProps(document, options.omit)
+      const trimmed = stripProps(document, options.omit)
+      return options.stripPrivateProps
+        ? stripUnderscoreProps(trimmed, ['_key', '_id', '_rev'])
+        : trimmed
     }
 
-    if (options.omitPrivateProps) {
+    if (options.stripPrivateProps) {
       return stripUnderscoreProps(document, ['_key', '_id', '_rev'])
     }
 
@@ -672,7 +700,7 @@ export class ArangoDBWithoutGarnish {
       return documents
     }
 
-    documents.map((document) => {
+    return documents.map((document) => {
       if (!isObject(document)) {
         return document
       }
@@ -682,17 +710,18 @@ export class ArangoDBWithoutGarnish {
       }
 
       if (options.omit) {
-        return stripProps(document, options.omit)
+        const trimmed = stripProps(document, options.omit)
+        return options.stripPrivateProps
+          ? stripUnderscoreProps(trimmed, ['_key', '_id', '_rev'])
+          : trimmed
       }
 
-      if (options.omitPrivateProps) {
+      if (options.stripPrivateProps) {
         return stripUnderscoreProps(document, ['_key', '_id', '_rev'])
       }
 
       return document
     })
-
-    return documents
   }
 
   // WFC should not be FetchOptions
@@ -783,11 +812,15 @@ export class ArangoDBWithoutGarnish {
 
     const documents = await result.all()
 
+    const data = options?.trim?.stripPrivateProps
+      ? stripUnderscoreProps(documents, ['_key', '_id', '_rev'])
+      : documents
+
     const response = {
-      data: ArangoDB.trimDocuments(documents, options?.trim),
       size: result.count,
-      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
+      total: result.extra?.stats ? result.extra.stats.fullCount : undefined,
       // stats: result.extra.stats
+      data
     }
 
     return response
@@ -823,11 +856,15 @@ export class ArangoDBWithoutGarnish {
 
     const documents = await result.all()
 
+    const data = options?.trim?.stripPrivateProps
+      ? stripUnderscoreProps(documents, ['_key', '_id', '_rev'])
+      : documents
+
     const response = {
-      data: ArangoDB.trimDocuments(documents, options?.trim),
       size: result.count,
-      total: result.extra?.stats ? result.extra.stats.fullCount : undefined
+      total: result.extra?.stats ? result.extra.stats.fullCount : undefined,
       // stats: result.extra.stats
+      data
     }
 
     return response
@@ -893,7 +930,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
     options: FetchOptions = {}
   ): Promise<T | T[] | null> {
     _debugFilters('fetchOneByPropertyValue', this.guacamole, options)
-    return await this.returnOne<T>(
+    return await this.returnOneInternal<T>(
       Queries.fetchByMatchingProperty(
         this.collection(collection),
         propertyValue,
@@ -907,7 +944,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
     options: FetchOptions = {}
   ): Promise<T | T[] | null> {
     _debugFilters('fetchOneByAnyPropertyValue', this.guacamole, options)
-    return await this.returnOne<T>(
+    return await this.returnOneInternal<T>(
       Queries.fetchByMatchingAnyProperty(
         this.collection(collection),
         propertyValues,
@@ -921,7 +958,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
     options: FetchOptions = {}
   ): Promise<T | T[] | null> {
     _debugFilters('fetchOneByAllPropertyValues', this.guacamole, options)
-    return await this.returnOne<T>(
+    return await this.returnOneInternal<T>(
       Queries.fetchByMatchingAllProperties(
         this.collection(collection),
         propertyValues,

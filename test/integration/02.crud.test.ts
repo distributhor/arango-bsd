@@ -346,7 +346,7 @@ describe('Guacamole Integration Tests', () => {
     // const result1C = await conn.db(VAR.dbName).read<Person>(
 
     const result1C = await conn.db(VAR.dbName).read(VAR.userCollection, result1A[0]._key, {
-      omitPrivateProps: true
+      stripPrivateProps: true
     })
 
     expect(result1C.name).toEqual('Daryl')
@@ -383,7 +383,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result1D.rating.timetrial).toEqual(8)
 
     const result1E = await conn.db(VAR.dbName).read(VAR.userCollection, { value: 'Impey', property: 'surname' }, {
-      omitPrivateProps: true
+      stripPrivateProps: true
     })
 
     expect(result1E.name).toEqual('Daryl')

@@ -102,7 +102,7 @@ export interface GuacamoleOptions {
 }
 
 export interface DocumentTrimOptions {
-  omitPrivateProps?: boolean
+  stripPrivateProps?: boolean
   omit?: string | string[]
   keep?: string | string[]
 }

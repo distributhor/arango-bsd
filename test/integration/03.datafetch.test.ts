@@ -47,7 +47,7 @@ describe('Guacamole Integration Tests', () => {
       VAR.userCollection,
       { properties: { property: 'strength', value: 'Time Trial' } },
       {
-        trim: { omitPrivateProps: true }
+        trim: { stripPrivateProps: true }
       }
     )) as QueryResult
 
@@ -60,7 +60,7 @@ describe('Guacamole Integration Tests', () => {
       VAR.userCollection,
       { properties: { property: 'strength', value: 'Time Trial' } },
       {
-        trim: { omitPrivateProps: true }
+        trim: { stripPrivateProps: true }
       }
     )) as QueryResult
 
@@ -139,7 +139,7 @@ describe('Guacamole Integration Tests', () => {
       .fetchOneByPropertyValue(
         VAR.userCollection,
         { property: 'surname', value: 'Impey' },
-        { trim: { omitPrivateProps: true } }
+        { trim: { stripPrivateProps: true } }
       )
 
     expect(result5C).toBeDefined()
@@ -152,14 +152,41 @@ describe('Guacamole Integration Tests', () => {
       .fetchOneByProperties(
         VAR.userCollection,
         { properties: { property: 'surname', value: 'Impey' } },
-        { trim: { omitPrivateProps: true } }
+        { trim: { stripPrivateProps: true } }
       )
 
     expect(result5D).toBeDefined()
     expect(result5D.name).toEqual('Daryl')
     expect(result5D.surname).toEqual('Impey')
-    expect(result5B._secret).toEqual('Rusks')
+    expect(result5D._secret).toBeUndefined()
     expect(result5D._key).toBeDefined()
+    expect(result5D.year).toBeDefined()
+    expect(result5D.blah).toBeDefined()
+    expect(result5D.foo).toBeDefined()
+
+    const result5DTrimmed1 = await db
+      .fetchOneByProperties(
+        VAR.userCollection,
+        { properties: { property: 'surname', value: 'Impey' } },
+        { trim: { omit: ['year', 'blah', 'foo'] } }
+      )
+
+    expect(result5DTrimmed1._secret).toBeDefined()
+    expect(result5DTrimmed1.year).toBeUndefined()
+    expect(result5DTrimmed1.blah).toBeUndefined()
+    expect(result5DTrimmed1.foo).toBeUndefined()
+
+    const result5DTrimmed2 = await db
+      .fetchOneByProperties(
+        VAR.userCollection,
+        { properties: { property: 'surname', value: 'Impey' } },
+        { trim: { keep: ['name', 'favoriteRoads'] } }
+      )
+
+    expect(result5DTrimmed2.name).toBeDefined()
+    expect(result5DTrimmed2.surname).toBeUndefined()
+    expect(result5DTrimmed2.country).toBeUndefined()
+    expect(result5DTrimmed2.favoriteRoads).toBeDefined()
 
     const result6A = (await db.fetchByProperties(VAR.userCollection, {
       properties: [
@@ -443,9 +470,12 @@ describe('Guacamole Integration Tests', () => {
           filters: ['LIKE(d.name, "%mar%", true)', 'd.strength == "Climbing"'],
           match: MatchType.ANY
         }
-      }) as QueryResult
+      }, { trim: { omit: 'country' } }) as QueryResult
 
     expect(result2D.data.length).toEqual(3)
+    expect(result2D.data[0].name).toBeDefined()
+    expect(result2D.data[0].results).toBeDefined()
+    expect(result2D.data[0].country).toBeUndefined()
     expect(result2D.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'Marco', surname: 'Pantani' }),
@@ -453,6 +483,18 @@ describe('Guacamole Integration Tests', () => {
         expect.objectContaining({ name: 'Marc', surname: 'Soler' })
       ])
     )
+
+    const result2DTrimmed2 = await conn.db(VAR.dbName)
+      .fetchByCriteria(VAR.userCollection, {
+        filter: {
+          filters: ['LIKE(d.name, "%mar%", true)', 'd.strength == "Climbing"'],
+          match: MatchType.ANY
+        }
+      }, { trim: { omit: ['country', 'results'] } }) as QueryResult
+
+    expect(result2DTrimmed2.data[0].name).toBeDefined()
+    expect(result2DTrimmed2.data[0].results).toBeUndefined()
+    expect(result2DTrimmed2.data[0].country).toBeUndefined()
 
     // const result2B = await conn.db(VAR.dbName)
     //   .fetchByFilterCriteria(VAR.userCollection, 'name LIKE "%mar%"') as QueryResult // does not return a result
@@ -779,7 +821,8 @@ describe('Guacamole Integration Tests', () => {
           search: { properties: 'country', terms: 'ia' },
           filter: 'LIKE(d.surname, "%cav%", true)',
           match: MatchType.ANY
-        }
+        },
+        { trim: { keep: ['name', 'surname', 'country'] } }
       ) as QueryResult
 
     expect(result1M.data.length).toEqual(3)
@@ -788,6 +831,31 @@ describe('Guacamole Integration Tests', () => {
         expect.objectContaining({ name: 'Peter', surname: 'Sagan', country: 'Slovakia' }),
         expect.objectContaining({ name: 'Caleb', surname: 'Ewan', country: 'Australia' }),
         expect.objectContaining({ name: 'Mark', surname: 'Cavendish', country: 'UK' })
+      ])
+    )
+    expect(result1M.data[0].results).toBeUndefined()
+    expect(result1M.data[0].stats).toBeUndefined()
+
+    const result1MTrimmed1 = await db
+      .fetchByPropertiesAndCriteria(
+        VAR.userCollection,
+        { properties: { property: 'strength', value: 'Sprinter' } },
+        {
+          search: { properties: 'country', terms: 'ia' },
+          filter: 'LIKE(d.surname, "%cav%", true)',
+          match: MatchType.ANY
+        },
+        { trim: { keep: 'name' } }
+      ) as QueryResult
+
+    expect(result1MTrimmed1.data[0].results).toBeUndefined()
+    expect(result1MTrimmed1.data[0].surname).toBeUndefined()
+    expect(result1MTrimmed1.data.length).toEqual(3)
+    expect(result1MTrimmed1.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Peter' }),
+        expect.objectContaining({ name: 'Caleb' }),
+        expect.objectContaining({ name: 'Mark' })
       ])
     )
 
