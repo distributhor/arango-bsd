@@ -1,6 +1,6 @@
 {
   "name": "@distributhor/guacamole",
-  "version": "0.8.14",
+  "version": "0.8.16",
   "description": "A backseat driver for ArangoDB",
   "homepage": "https://distributhor.github.io/guacamole/",
   "license": "MIT",
@@ -37,7 +37,7 @@
     "clean": "tsc -b --clean",
     "build": "tsc -b --clean && tsc -b",
     "test": "jest -c test/unit/jest.config.js --passWithNoTests",
-    "integration:test": "jest -c test/integration/jest.config.js --runInBand",
+    "integration:test": "jest -c test/integration/jest.config.js --runInBand --verbose",
     "lint": "eslint --ignore-path .eslintignore .",
     "lint:fix": "eslint --fix --ignore-path .eslintignore .",
     "lint:staged": "lint-staged",

@@ -38,7 +38,7 @@ const _debug = {
 }
 
 /** @internal */
-function _debugFiltersEnabled(options?: FetchOptions): boolean {
+function _debugFiltersEnabled(options: FetchOptions | undefined): boolean {
   if (options?.debugFilters) {
     return true
   }
@@ -47,7 +47,7 @@ function _debugFiltersEnabled(options?: FetchOptions): boolean {
 }
 
 /** @internal */
-function _printQuery(options?: FetchOptions): boolean {
+function _printQuery(options: FetchOptions | undefined): boolean {
   if (options?.printQuery) {
     return true
   }
@@ -57,6 +57,12 @@ function _printQuery(options?: FetchOptions): boolean {
 
 /** @internal */
 function _toSearchFilter(search: SearchTerms): Filter {
+  if (!search?.properties || !search.terms) {
+    return {
+      filters: []
+    }
+  }
+
   const filters: AqlQuery[] = []
 
   const props = typeof search.properties === 'string'
@@ -115,7 +121,11 @@ function _toSearchFilter(search: SearchTerms): Filter {
 }
 
 /** @internal */
-function _toAqlFilters(filter: string | AqlValue | Filter | SearchTerms): AqlValue {
+function _toAqlFilter(filter: string | Filter | SearchTerms | AqlValue): AqlValue {
+  if (!filter) {
+    return undefined
+  }
+
   if (typeof filter === 'string') {
     return literal(filter)
   }
@@ -125,11 +135,15 @@ function _toAqlFilters(filter: string | AqlValue | Filter | SearchTerms): AqlVal
   }
 
   if (isSearch(filter)) {
-    return _toAqlFilters(_toSearchFilter(filter))
+    return _toAqlFilter(_toSearchFilter(filter))
   }
 
   if (!isFilter(filter)) {
     throw new Error('Invalid input received for filter string conversion')
+  }
+
+  if (!filter.filters || !Array.isArray(filter.filters) || filter.filters.length === 0) {
+    return undefined
   }
 
   const filters: AqlValue[] = []
@@ -151,10 +165,14 @@ function _toAqlFilters(filter: string | AqlValue | Filter | SearchTerms): AqlVal
 }
 
 /** @internal */
-function _toQueryOpts(options: FetchOptions = {}): AqlValue[] {
+function _toQueryOpts(options: FetchOptions | undefined): AqlValue[] {
   const opts: AqlValue[] = []
 
-  if (options?.sortBy) {
+  if (!options) {
+    return opts
+  }
+
+  if (options.sortBy) {
     opts.push(aql` SORT d.${options.sortBy}`)
     if (options.sortOrder && options.sortOrder.toLowerCase() === 'ascending') {
       opts.push(literal(' ASC'))
@@ -164,8 +182,8 @@ function _toQueryOpts(options: FetchOptions = {}): AqlValue[] {
   }
 
   // getting unexpected results when using `aql` here instead of literal
-  if (options?.limit && options.limit > 0) {
-    if (options?.offset) {
+  if (options.limit && options.limit > 0) {
+    if (options.offset) {
       opts.push(literal(` LIMIT ${options.offset}, ${options.limit}`))
     } else {
       opts.push(literal(` LIMIT ${options.limit}`))
@@ -179,14 +197,17 @@ function _toQueryOpts(options: FetchOptions = {}): AqlValue[] {
 function _toPropertyFilter(prop: PropertyValue): AqlQuery {
   const f: AqlValue[] = []
 
-  if (prop.property.indexOf('.') > 0) {
+  // an undocumented graceful lenience ... 'name' will also work instead of 'property'
+  const accessor = prop.property ? 'property' : 'name'
+
+  if (prop[accessor].indexOf('.') > 0) {
     if (prop.caseSensitive ?? typeof prop.value !== 'string') {
       f.push(literal(' d'))
     } else {
       f.push(literal(' LOWER(d'))
     }
 
-    const nestedProps = prop.property.split('.')
+    const nestedProps = prop[accessor].split('.')
 
     for (let i = 0; i < nestedProps.length; i++) {
       f.push(aql`.${nestedProps[i]}`)
@@ -199,9 +220,9 @@ function _toPropertyFilter(prop: PropertyValue): AqlQuery {
     }
   } else {
     if (prop.caseSensitive ?? typeof prop.value !== 'string') {
-      f.push(aql` d.${prop.property} == ${prop.value}`)
+      f.push(aql` d.${prop[accessor]} == ${prop.value}`)
     } else {
-      f.push(aql` LOWER(d.${prop.property}) == ${prop.value.toLowerCase()}`)
+      f.push(aql` LOWER(d.${prop[accessor]}) == ${prop.value.toLowerCase()}`)
     }
   }
 
@@ -213,7 +234,7 @@ function fetchByPropertyValues(
   properties: PropertyValue | PropertyValue[],
   match: MatchType,
   criteria?: Criteria,
-  options: FetchOptions = {}
+  options?: FetchOptions
 ): AqlQuery {
   if (_debugFiltersEnabled(options)) {
     _debug.log.filters(properties)
@@ -258,8 +279,11 @@ function fetchByPropertyValues(
 
   if (criteria) {
     if (criteria.filter) {
-      filters.push(literal(' '))
-      filters.push(_toAqlFilters(criteria.filter))
+      const filter = _toAqlFilter(criteria.filter)
+      if (filter) {
+        filters.push(literal(' '))
+        filters.push(filter)
+      }
     }
 
     if (criteria.filter && criteria.search) {
@@ -267,8 +291,11 @@ function fetchByPropertyValues(
     }
 
     if (criteria.search) {
-      filters.push(literal(' '))
-      filters.push(_toAqlFilters(criteria.search))
+      const filter = _toAqlFilter(criteria.search)
+      if (filter) {
+        filters.push(literal(' '))
+        filters.push(filter)
+      }
     }
   }
 
@@ -279,21 +306,19 @@ function fetchByPropertyValues(
   }
 
   if (filters.length === 0) {
-    throw new Error('Unexpected input received for query construction')
+    throw new Error('No filters received for valid query construction')
   }
-
-  const opts = _toQueryOpts(options)
 
   const trim: AqlValue[] = []
 
-  if (options.trim?.keep) {
+  if (options?.trim?.keep) {
     if (Array.isArray(options.trim.keep)) {
       trim.push(literal(`KEEP(d, "${options.trim.keep.join('", "')}")`))
     } else {
       trim.push(literal(`KEEP(d, "${options.trim.keep}")`))
     }
-  } else if (options.trim?.omit) {
-    if (Array.isArray(options.trim.omit)) {
+  } else if (options?.trim?.omit) {
+    if (Array.isArray(options?.trim.omit)) {
       trim.push(literal(`UNSET_RECURSIVE(d, "${options.trim.omit.join('", "')}")`))
     } else {
       trim.push(literal(`UNSET_RECURSIVE(d, "${options.trim.omit}")`))
@@ -302,7 +327,9 @@ function fetchByPropertyValues(
     trim.push(literal('d'))
   }
 
-  const query = opts.length > 0
+  const opts = _toQueryOpts(options)
+
+  const query = opts && opts.length > 0
     ? aql`FOR d IN ${collection} FILTER (${join(filters, '')} )${join(opts, '')} RETURN ${join(trim, '')}`
     : aql`FOR d IN ${collection} FILTER (${join(filters, '')} ) RETURN ${join(trim, '')}`
 
@@ -318,7 +345,7 @@ function fetchByPropertyValues(
 export function fetchByMatchingProperty(
   collection: DocumentCollection | EdgeCollection,
   property: PropertyValue,
-  options: FetchOptions = {},
+  options?: FetchOptions,
   criteria?: Criteria
 ): AqlQuery {
   return fetchByPropertyValues(collection, property, MatchType.ANY, criteria, options)
@@ -327,7 +354,7 @@ export function fetchByMatchingProperty(
 export function fetchByMatchingAnyProperty(
   collection: DocumentCollection | EdgeCollection,
   property: PropertyValue[],
-  options: FetchOptions = {},
+  options?: FetchOptions,
   criteria?: Criteria
 ): AqlQuery {
   return fetchByPropertyValues(collection, property, MatchType.ANY, criteria, options)
@@ -336,7 +363,7 @@ export function fetchByMatchingAnyProperty(
 export function fetchByMatchingAllProperties(
   collection: DocumentCollection | EdgeCollection,
   properties: PropertyValue[],
-  options: FetchOptions = {},
+  options?: FetchOptions,
   criteria?: Criteria
 ): AqlQuery {
   return fetchByPropertyValues(collection, properties, MatchType.ALL, criteria, options)
@@ -345,7 +372,7 @@ export function fetchByMatchingAllProperties(
 export function fetchByCriteria(
   collection: DocumentCollection | EdgeCollection,
   criteria: Criteria,
-  options: FetchOptions = {}
+  options?: FetchOptions
 ): AqlQuery {
   if (_debugFiltersEnabled(options)) {
     _debug.log.filters(criteria)
@@ -360,8 +387,11 @@ export function fetchByCriteria(
   }
 
   if (criteria.filter) {
-    filters.push(literal(' '))
-    filters.push(_toAqlFilters(criteria.filter))
+    const filter = _toAqlFilter(criteria.filter)
+    if (filter) {
+      filters.push(literal(' '))
+      filters.push(filter)
+    }
   }
 
   if (criteria.filter && criteria.search) {
@@ -369,8 +399,11 @@ export function fetchByCriteria(
   }
 
   if (criteria.search) {
-    filters.push(literal(' '))
-    filters.push(_toAqlFilters(criteria.search))
+    const filter = _toAqlFilter(criteria.search)
+    if (filter) {
+      filters.push(literal(' '))
+      filters.push(filter)
+    }
   }
 
   if (criteria.filter && criteria.search) {
@@ -378,21 +411,19 @@ export function fetchByCriteria(
   }
 
   if (filters.length === 0) {
-    throw new Error('Unexpected input received for query construction')
+    throw new Error('No filters received for valid query construction')
   }
-
-  const opts = _toQueryOpts(options)
 
   const trim: AqlValue[] = []
 
-  if (options.trim?.keep) {
+  if (options?.trim?.keep) {
     if (Array.isArray(options.trim.keep)) {
       trim.push(literal(`KEEP(d, "${options.trim.keep.join('", "')}")`))
     } else {
       trim.push(literal(`KEEP(d, "${options.trim.keep}")`))
     }
-  } else if (options.trim?.omit) {
-    if (Array.isArray(options.trim.omit)) {
+  } else if (options?.trim?.omit) {
+    if (Array.isArray(options?.trim.omit)) {
       trim.push(literal(`UNSET_RECURSIVE(d, "${options.trim.omit.join('", "')}")`))
     } else {
       trim.push(literal(`UNSET_RECURSIVE(d, "${options.trim.omit}")`))
@@ -401,7 +432,9 @@ export function fetchByCriteria(
     trim.push(literal('d'))
   }
 
-  const query = opts.length > 0
+  const opts = _toQueryOpts(options)
+
+  const query = opts && opts.length > 0
     ? aql`FOR d IN ${collection} FILTER (${join(filters, '')} )${join(opts, '')} RETURN ${join(trim, '')}`
     : aql`FOR d IN ${collection} FILTER (${join(filters, '')} ) RETURN ${join(trim, '')}`
 
@@ -416,51 +449,40 @@ export function fetchByCriteria(
 
 // TODO: turn this into safe AQL
 export function fetchAll(
-  collection: string,
-  options: FetchOptions = {}
+  collection: DocumentCollection | EdgeCollection,
+  options?: FetchOptions
 ): AqlQuery {
-  const params: any = {}
-  let query = 'FOR d IN ' + collection
-
   // TODO: enable and document this ??
   // if (options.restrictTo) {
   //   params.restrictTo = options.restrictTo
   //   query += ' FILTER d.@restrictTo'
   // }
 
-  // TODO: Support sorting by multiple criteria ...
-  // SORT u.lastName, u.firstName, u.id DESC
-  if (options.sortBy) {
-    query += ` SORT d.${options.sortBy}`
-    if (options.sortOrder && options.sortOrder.toLowerCase() === 'ascending') {
-      query += ' ASC'
-    } else if (options.sortOrder && options.sortOrder.toLowerCase() === 'descending') {
-      query += ' DESC'
-    }
-  }
+  const trim: AqlValue[] = []
 
-  if (options.limit && options.limit > 0) {
-    if (options.offset) {
-      query += ` LIMIT ${options.offset}, ${options.limit}`
+  if (options?.trim?.keep) {
+    if (Array.isArray(options.trim.keep)) {
+      trim.push(literal(`KEEP(d, "${options.trim.keep.join('", "')}")`))
     } else {
-      query += ` LIMIT ${options.limit}`
+      trim.push(literal(`KEEP(d, "${options.trim.keep}")`))
     }
+  } else if (options?.trim?.omit) {
+    if (Array.isArray(options?.trim.omit)) {
+      trim.push(literal(`UNSET_RECURSIVE(d, "${options.trim.omit.join('", "')}")`))
+    } else {
+      trim.push(literal(`UNSET_RECURSIVE(d, "${options.trim.omit}")`))
+    }
+  } else {
+    trim.push(literal('d'))
   }
 
-  // WFC TODO: print queries and debug info etc
+  const opts = _toQueryOpts(options)
 
-  // if (_hasOmitOption(options)) {
-  //   query += " RETURN UNSET_RECURSIVE( d, [" + _getOmitInstruction(options) + "])";
-  // } else {
-  //   query += " RETURN d";
-  // }
+  const query = opts && opts.length > 0
+    ? aql`FOR d IN ${collection} ${join(opts, '')} RETURN ${join(trim, '')}`
+    : aql`FOR d IN ${collection} RETURN ${join(trim, '')}`
 
-  query += ' RETURN d'
-
-  return {
-    query,
-    bindVars: params
-  }
+  return query
 }
 
 export function updateDocumentsByKeyValue(
@@ -525,7 +547,7 @@ export function deleteDocumentsByKeyValue(
 export function uniqueConstraintQuery(
   collection: DocumentCollection | EdgeCollection,
   constraints: UniqueConstraint,
-  options: FetchOptions = {}
+  options?: FetchOptions
 ): AqlQuery {
   if (_debugFiltersEnabled(options)) {
     _debug.log.filters(constraints)
@@ -613,7 +635,7 @@ export const Queries = {
 //   }
 
 //   if (isSearch(filter)) {
-//     return _toAqlFilters(_toSearchFilter(filter))
+//     return _toAqlFilter(_toSearchFilter(filter))
 //   }
 
 //   if (!isFilter(filter)) {
@@ -721,7 +743,7 @@ export const Queries = {
 
 //   if (criteria) {
 //     if (criteria.filter) {
-//       query += _toAqlFilters(criteria.filter)
+//       query += _toAqlFilter(criteria.filter)
 //     }
 
 //     if (criteria.filter && criteria.search) {
@@ -730,7 +752,7 @@ export const Queries = {
 //     }
 
 //     if (criteria.search) {
-//       query += _toAqlFilters(criteria.search)
+//       query += _toAqlFilter(criteria.search)
 //     }
 //   }
 
@@ -797,7 +819,7 @@ export const Queries = {
 //   }
 
 //   if (criteria.filter) {
-//     query += _toAqlFilters(criteria.filter)
+//     query += _toAqlFilter(criteria.filter)
 //   }
 
 //   if (criteria.filter && criteria.search) {
@@ -806,7 +828,7 @@ export const Queries = {
 //   }
 
 //   if (criteria.search) {
-//     query += _toAqlFilters(criteria.search)
+//     query += _toAqlFilter(criteria.search)
 //   }
 
 //   if (criteria.filter && criteria.search) {

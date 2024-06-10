@@ -333,6 +333,8 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('fetchByPropertySearch', async () => {
+    expect.assertions(5)
+
     // FOR d IN @@value0 FILTER ( LIKE(d.@value1, @value2, true) || LIKE(d.@value1, @value3, true) ) RETURN d
     // bindVars: {
     //   '@value0': 'cyclists',
@@ -371,16 +373,20 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // FOR d IN @@value0 FILTER (LIKE(d.@value1, @value2, true) ) RETURN d
-    // bindVars: { '@value0': 'cyclists', value1: 'name', value2: '%%' }
-    const result3A = await conn.db(VAR.dbName)
-      .fetchByCriteria(VAR.userCollection, {
-        search: {
-          properties: 'name', terms: ''
-        }
-      }) as QueryResult
+    try {
+      // FOR d IN @@value0 FILTER ( LIKE(d.@value1, @value2, true) ) RETURN d
+      // bindVars: { '@value0': 'cyclists', value1: 'name', value2: '%' }
+      await conn.db(VAR.dbName)
+        .fetchByCriteria(VAR.userCollection, {
+          search: {
+            properties: 'name', terms: ''
+          }
+        }, { printQuery: true }) as QueryResult
 
-    expect(result3A.data.length).toEqual(31)
+      // expect(result3A.data.length).toEqual(31)
+    } catch (e) {
+      expect(e.message).toEqual('No filters received for valid query construction')
+    }
   })
 
   test('fetchByFilters', async () => {

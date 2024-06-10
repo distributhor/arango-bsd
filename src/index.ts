@@ -159,7 +159,7 @@ function keepProps(obj: any, props: string | string[]): any {
 }
 
 /** @internal */
-function toQueryResult(data: any[], cursor: ArrayCursor, options: FetchOptions): QueryResult {
+function toQueryResult(data: any[], cursor: ArrayCursor, options?: FetchOptions): QueryResult {
   const result: QueryResult = {
     data
   }
@@ -170,7 +170,7 @@ function toQueryResult(data: any[], cursor: ArrayCursor, options: FetchOptions):
     result.size = cursor.count ? cursor.count : dataLength
     result.total = cursor.extra?.stats ? cursor.extra.stats.fullCount : undefined
     result.fullCount = cursor.extra?.stats ? cursor.extra.stats.fullCount : undefined
-    if (options.returnStats) {
+    if (options?.returnStats) {
       result.stats = cursor.extra?.stats ? cursor.extra?.stats : undefined
     }
   }
@@ -218,13 +218,13 @@ interface InstancePool {
  * ```
  */
 export class ArangoConnection {
-  private readonly guacamole: GuacamoleOptions
+  private readonly guacamole: GuacamoleOptions | undefined
   private readonly arangojs: Database
   private readonly pool: InstancePool = {}
 
   public readonly system: Database
 
-  constructor(dbs: Config | Database | Config[] | Database[], options: GuacamoleOptions = {}) {
+  constructor(dbs: Config | Database | Config[] | Database[], options?: GuacamoleOptions) {
     this.guacamole = options
 
     const listOfDb = Array.isArray(dbs) ? dbs : [dbs]
@@ -294,7 +294,11 @@ export class ArangoDBWithoutGarnish {
   }
 
   /** @internal */
-  _queryOpts(fetchOptions: FetchOptions = {}): FetchOptions {
+  _queryOpts(fetchOptions: FetchOptions | undefined): FetchOptions | undefined {
+    if (!fetchOptions) {
+      return undefined
+    }
+
     if (fetchOptions) {
       fetchOptions.guacamole = this.guacamole
     }
@@ -392,10 +396,14 @@ export class ArangoDBWithoutGarnish {
   public async read<T extends Record<string, any> = any>(
     collection: string,
     identifier: Identifier | DocumentSelector,
-    trim: DocumentTrimOptions = {},
-    options: CollectionReadOptions = {}
+    trim?: DocumentTrimOptions,
+    options?: CollectionReadOptions
   ): Promise<Document<T> | null> {
     let d
+
+    if (!options) {
+      options = {}
+    }
 
     if (options.graceful !== false) {
       options.graceful = true
@@ -445,7 +453,7 @@ export class ArangoDBWithoutGarnish {
   public async update<T extends Record<string, any> = any>(
     collection: string,
     update: DocumentUpdate | any[],
-    options: CollectionUpdateOptions = {}
+    options?: CollectionUpdateOptions
   ): Promise<Array<DocumentMeta & { new?: Document<T>, old?: Document<T> }>> {
     if (Array.isArray(update)) {
       return await this.collection(collection).updateAll(update, options)
@@ -474,7 +482,7 @@ export class ArangoDBWithoutGarnish {
   public async delete<T extends Record<string, any> = any>(
     collection: string,
     identifier: DocumentSelector | Identifier | Array<string | ObjectWithKey>,
-    options: CollectionRemoveOptions = {}
+    options?: CollectionRemoveOptions
   ): Promise<Array<DocumentMeta & { old?: Document<T> }>> {
     if (Array.isArray(identifier)) {
       return await this.collection(collection).removeAll(identifier, options)
@@ -554,11 +562,11 @@ export class ArangoDBWithoutGarnish {
 
   public async fetchAll<T = any>(
     collection: string,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
     let arangojsQueryOptions = options?.query
 
-    if (options.limit) {
+    if (options?.limit) {
       if (!arangojsQueryOptions) {
         arangojsQueryOptions = {}
       }
@@ -567,11 +575,11 @@ export class ArangoDBWithoutGarnish {
     }
 
     const result = await this.driver.query(
-      Queries.fetchAll(collection, this._queryOpts(options)),
+      Queries.fetchAll(this.collection(collection), this._queryOpts(options)),
       arangojsQueryOptions
     )
 
-    if (options.returnCursor) {
+    if (options?.returnCursor) {
       return result
     }
 
@@ -587,7 +595,7 @@ export class ArangoDBWithoutGarnish {
   public async fetchByProperties<T = any>(
     collection: string,
     values: PropertyValues,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor | QueryResult<T>> {
     _debugFilters('fetchByProperties', this.guacamole, options)
 
@@ -607,7 +615,7 @@ export class ArangoDBWithoutGarnish {
   public async fetchOneByProperties<T = any>(
     collection: string,
     values: PropertyValues,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<T | T[] | null> {
     _debugFilters('fetchOneByProperties', this.guacamole, options)
 
@@ -643,7 +651,7 @@ export class ArangoDBWithoutGarnish {
   public async fetchByCriteria<T = any>(
     collection: string,
     criteria: string | AqlQuery | Filter | Criteria,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
     _debugFilters('fetchByCriteria', this.guacamole, options)
 
@@ -666,7 +674,7 @@ export class ArangoDBWithoutGarnish {
     collection: string,
     values: PropertyValues,
     criteria: string | Filter | Criteria,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor | QueryResult<T>> {
     _debugFilters('fetchByPropertiesAndCriteria', this.guacamole, options)
 
@@ -687,30 +695,30 @@ export class ArangoDBWithoutGarnish {
     )
   }
 
-  public static trimDocument(document: any, options: DocumentTrimOptions = {}): any {
+  public static trimDocument(document: any, options?: DocumentTrimOptions): any {
     if (!document || !isObject(document)) {
       return document
     }
 
-    if (options.keep) {
+    if (options?.keep) {
       return keepProps(document, options.keep)
     }
 
-    if (options.omit) {
+    if (options?.omit) {
       const trimmed = stripProps(document, options.omit)
       return options.stripPrivateProps
         ? stripUnderscoreProps(trimmed, ['_key', '_id', '_rev'])
         : trimmed
     }
 
-    if (options.stripPrivateProps) {
+    if (options?.stripPrivateProps) {
       return stripUnderscoreProps(document, ['_key', '_id', '_rev'])
     }
 
     return document
   }
 
-  public static trimDocuments(documents: any[], options: DocumentTrimOptions = {}): any[] {
+  public static trimDocuments(documents: any[], options?: DocumentTrimOptions): any[] {
     if (!documents) {
       return documents
     }
@@ -720,18 +728,18 @@ export class ArangoDBWithoutGarnish {
         return document
       }
 
-      if (options.keep) {
+      if (options?.keep) {
         return keepProps(document, options.keep)
       }
 
-      if (options.omit) {
+      if (options?.omit) {
         const trimmed = stripProps(document, options.omit)
         return options.stripPrivateProps
           ? stripUnderscoreProps(trimmed, ['_key', '_id', '_rev'])
           : trimmed
       }
 
-      if (options.stripPrivateProps) {
+      if (options?.stripPrivateProps) {
         return stripUnderscoreProps(document, ['_key', '_id', '_rev'])
       }
 
@@ -743,7 +751,7 @@ export class ArangoDBWithoutGarnish {
   public async validateUniqueConstraint(
     collection: string,
     constraints: UniqueConstraint,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<UniqueConstraintResult> {
     // const query = uniqueConstraintQuery(constraints, QueryType.STRING) as string;
     const query = Queries.uniqueConstraintQuery(this.collection(collection), constraints, this._queryOpts(options))
@@ -761,7 +769,7 @@ export class ArangoDBWithoutGarnish {
     propertyValues: PropertyValue | PropertyValue[],
     matchType: MatchType,
     criteria?: string | AqlQuery | Filter | Criteria,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor | QueryResult<T>> {
     let filterCriteria: Criteria | undefined
 
@@ -779,7 +787,7 @@ export class ArangoDBWithoutGarnish {
 
     let arangojsQueryOptions = options?.query
 
-    if (options.limit) {
+    if (options?.limit) {
       if (!arangojsQueryOptions) {
         arangojsQueryOptions = {}
       }
@@ -821,7 +829,7 @@ export class ArangoDBWithoutGarnish {
       )
     }
 
-    if (options.returnCursor) {
+    if (options?.returnCursor) {
       return result
     }
 
@@ -838,11 +846,11 @@ export class ArangoDBWithoutGarnish {
   async _fetchByCriteria<T = any>(
     collection: string,
     criteria: Criteria,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
     let arangojsQueryOptions = options?.query
 
-    if (options.limit) {
+    if (options?.limit) {
       if (!arangojsQueryOptions) {
         arangojsQueryOptions = {}
       }
@@ -858,7 +866,7 @@ export class ArangoDBWithoutGarnish {
       ), arangojsQueryOptions
     )
 
-    if (options.returnCursor) {
+    if (options?.returnCursor) {
       return result
     }
 
@@ -894,14 +902,15 @@ export class ArangoDBWithoutGarnish {
  * ```
  */
 export class ArangoDB extends ArangoDBWithoutGarnish {
-  constructor(db: Config | Database, options: GuacamoleOptions = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(db: Config | Database, options?: GuacamoleOptions) {
     super(db, options)
   }
 
   public async fetchByPropertyValue<T = any>(
     collection: string,
     propertyValue: PropertyValue,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor | QueryResult<T>> {
     _debugFilters('fetchByPropertyValue', this.guacamole, options)
     return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
@@ -910,7 +919,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
   public async fetchByAnyPropertyValue<T = any>(
     collection: string,
     propertyValue: PropertyValue[],
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor | QueryResult<T>> {
     _debugFilters('fetchByAnyPropertyValue', this.guacamole, options)
     return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
@@ -919,7 +928,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
   public async fetchByAllPropertyValues<T = any>(
     collection: string,
     propertyValues: PropertyValue[],
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor | QueryResult<T>> {
     _debugFilters('fetchByAllPropertyValues', this.guacamole, options)
     return await this._fetchByPropValues(collection, propertyValues, MatchType.ALL, undefined, options)
@@ -928,7 +937,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
   public async fetchOneByPropertyValue<T = any>(
     collection: string,
     propertyValue: PropertyValue,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<T | T[] | null> {
     _debugFilters('fetchOneByPropertyValue', this.guacamole, options)
     return await this.returnOneInternal<T>(
@@ -942,7 +951,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
   public async fetchOneByAnyPropertyValue<T = any>(
     collection: string,
     propertyValues: PropertyValue[],
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<T | T[] | null> {
     _debugFilters('fetchOneByAnyPropertyValue', this.guacamole, options)
     return await this.returnOneInternal<T>(
@@ -956,7 +965,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
   public async fetchOneByAllPropertyValues<T = any>(
     collection: string,
     propertyValues: PropertyValue[],
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<T | T[] | null> {
     _debugFilters('fetchOneByAllPropertyValues', this.guacamole, options)
     return await this.returnOneInternal<T>(
@@ -971,7 +980,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
     collection: string,
     propertyValue: PropertyValue,
     criteria: string | AqlQuery | Filter | Criteria,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor | QueryResult<T>> {
     _debugFilters('fetchByPropertyValueAndCriteria', this.guacamole, options)
     const filterCriteria = typeof criteria === 'string'
@@ -991,7 +1000,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
     collection: string,
     propertyValue: PropertyValue[],
     criteria: string | Filter | Criteria,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor | QueryResult<T>> {
     _debugFilters('fetchByAnyPropertyValueAndCriteria', this.guacamole, options)
     const filterCriteria = typeof criteria === 'string'
@@ -1011,7 +1020,7 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
     collection: string,
     propertyValues: PropertyValue[],
     criteria: string | Filter | Criteria,
-    options: FetchOptions = {}
+    options?: FetchOptions
   ): Promise<ArrayCursor | QueryResult<T>> {
     _debugFilters('fetchByAllPropertyValuesAndCriteria', this.guacamole, options)
     const filterCriteria = typeof criteria === 'string'
@@ -1029,7 +1038,8 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
 }
 
 export class ArangoDBWithSpice extends ArangoDB {
-  constructor(db: Config | Database, options: GuacamoleOptions = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(db: Config | Database, options?: GuacamoleOptions) {
     super(db, options)
   }
 
@@ -1038,12 +1048,16 @@ export class ArangoDBWithSpice extends ArangoDB {
     key: string,
     arrayProperty: string,
     arrayValue: any,
-    options: any = {}
+    options?: any
   ): Promise<DocumentMeta[]> {
     const arr = await this.fetchProperty(collection, key, arrayProperty)
 
     if (arr && !Array.isArray(arr)) {
       throw new Error('Cannot add array value to an existing field that is not already of type array')
+    }
+
+    if (!options) {
+      options = {}
     }
 
     const allowDuplicates = _get(options, 'allowDuplicates', false)
@@ -1187,10 +1201,14 @@ export class ArangoDBWithSpice extends ArangoDB {
     arrayProperty: string,
     arrayObject: any,
     uniqueObjectField?: string,
-    options: any = {}
+    options?: any
   ): Promise<DocumentMeta[]> {
     if (!isObject(arrayObject)) {
       throw new Error('Array value is not an object')
+    }
+
+    if (!options) {
+      options = {}
     }
 
     if (uniqueObjectField) {
@@ -1244,7 +1262,7 @@ export class ArangoDBWithSpice extends ArangoDB {
     objectIdField: string,
     objectIdValue: any,
     updatedObject: any,
-    options: any = {}
+    options?: any
   ): Promise<DocumentMeta[] | null> {
     // FOR document in complexCollection
     //   LET alteredList = (
@@ -1266,6 +1284,10 @@ export class ArangoDBWithSpice extends ArangoDB {
 
     if (arr && !Array.isArray(arr)) {
       throw new Error('Cannot update array value from an existing field that is not already of type array')
+    }
+
+    if (!options) {
+      options = {}
     }
 
     if (!updatedObject[objectIdField]) {
@@ -1331,8 +1353,11 @@ export class ArangoDBWithSpice extends ArangoDB {
     objectIdField: string,
     objectIdValue: any,
     updatedObject: any,
-    options: any = {}
+    options?: any
   ): Promise<DocumentMeta[] | null> {
+    if (!options) {
+      options = {}
+    }
     options.strategy = 'replace'
     return await this.updateArrayObject(
       collection,
@@ -1389,7 +1414,7 @@ export class ArangoDBWithSpice extends ArangoDB {
     // graph: string,
     edgeCollection: string,
     relation: GraphRelation | GraphRelation[],
-    options: any = {}
+    options?: any
   ): Promise<Array<DocumentMeta & { new?: Document<T>, old?: Document<T> }>> {
     if (Array.isArray(relation)) {
       const edges: Edge[] = []

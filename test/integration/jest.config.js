@@ -1,6 +1,7 @@
 module.exports = {
   automock: false,
   clearMocks: true,
+  verbose: true,
   testEnvironment: 'node',
   testMatch: ['**/integration/?(*.)+(spec|test).[t]s?(x)'],
   transform: { '^.+\\.tsx?$': 'ts-jest' },
