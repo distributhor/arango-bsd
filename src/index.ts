@@ -168,6 +168,7 @@ function toQueryResult(data: any[], cursor: ArrayCursor, options: FetchOptions):
 
   if (cursor) {
     result.size = cursor.count ? cursor.count : dataLength
+    result.total = cursor.extra?.stats ? cursor.extra.stats.fullCount : undefined
     result.fullCount = cursor.extra?.stats ? cursor.extra.stats.fullCount : undefined
     if (options.returnStats) {
       result.stats = cursor.extra?.stats ? cursor.extra?.stats : undefined
@@ -294,7 +295,9 @@ export class ArangoDBWithoutGarnish {
 
   /** @internal */
   _queryOpts(fetchOptions: FetchOptions = {}): FetchOptions {
-    fetchOptions.guacamole = this.guacamole
+    if (fetchOptions) {
+      fetchOptions.guacamole = this.guacamole
+    }
 
     return fetchOptions
 

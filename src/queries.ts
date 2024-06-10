@@ -447,6 +447,8 @@ export function fetchAll(
     }
   }
 
+  // WFC TODO: print queries and debug info etc
+
   // if (_hasOmitOption(options)) {
   //   query += " RETURN UNSET_RECURSIVE( d, [" + _getOmitInstruction(options) + "])";
   // } else {

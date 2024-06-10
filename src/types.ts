@@ -124,6 +124,7 @@ export interface FetchOptions {
 export interface QueryResult<T = any> {
   data: T[]
   size?: number | undefined
+  total?: number | undefined
   fullCount?: number | undefined
   stats?: CursorStats | undefined
 }
