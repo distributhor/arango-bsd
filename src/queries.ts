@@ -154,7 +154,7 @@ function _toAqlFilters(filter: string | AqlValue | Filter | SearchTerms): AqlVal
 function _toQueryOpts(options: FetchOptions = {}): AqlValue[] {
   const opts: AqlValue[] = []
 
-  if (options.sortBy) {
+  if (options?.sortBy) {
     opts.push(aql` SORT d.${options.sortBy}`)
     if (options.sortOrder && options.sortOrder.toLowerCase() === 'ascending') {
       opts.push(literal(' ASC'))
@@ -164,8 +164,8 @@ function _toQueryOpts(options: FetchOptions = {}): AqlValue[] {
   }
 
   // getting unexpected results when using `aql` here instead of literal
-  if (options.limit && options.limit > 0) {
-    if (options.offset) {
+  if (options?.limit && options.limit > 0) {
+    if (options?.offset) {
       opts.push(literal(` LIMIT ${options.offset}, ${options.limit}`))
     } else {
       opts.push(literal(` LIMIT ${options.limit}`))
