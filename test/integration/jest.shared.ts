@@ -13,7 +13,8 @@ export const CONST = {
   userCollection: 'cyclists',
   groupCollection: 'teams',
   userToGroupEdge: 'team_members',
-  groupMembershipGraph: 'team_membership'
+  groupMembershipGraph: 'team_membership',
+  altUserCollection: 'cyclists_alt'
 }
 
 export const VAR = {

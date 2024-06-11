@@ -28,7 +28,7 @@ for (const c of cyclists) {
 }
 
 const dbStructure: DbStructure = {
-  collections: [VAR.userCollection, VAR.groupCollection],
+  collections: [VAR.userCollection, VAR.groupCollection, VAR.altUserCollection],
   graphs: [
     {
       name: VAR.groupMembershipGraph,
@@ -131,8 +131,8 @@ describe('Guacamole Integration Tests', () => {
     const collecionList1 = await conn.driver(VAR.dbName).listCollections()
     const collecionList2 = await conn.driver(VAR.dbName2).listCollections()
 
-    expect(collecionList1.length).toEqual(3)
-    expect(collecionList2.length).toEqual(3)
+    expect(collecionList1.length).toEqual(4)
+    expect(collecionList2.length).toEqual(4)
 
     const usersCollectionOnSystemDB1 = await conn.system.collection(VAR.userCollection).exists()
 
@@ -222,9 +222,11 @@ describe('Guacamole Integration Tests', () => {
   test('Import test data', async () => {
     const result1 = await conn.db(VAR.dbName).create(VAR.userCollection, cyclists)
     const result2 = await conn.db(VAR.dbName).create(VAR.groupCollection, teams)
+    const result3 = await conn.db(VAR.dbName).driver.collection(VAR.altUserCollection).import(cyclists)
 
     expect(result1.length).toEqual(31)
     expect(result2.length).toEqual(19)
+    expect(result3.created).toEqual(31)
 
     const allCyclists = await conn.db(VAR.dbName).fetchAll(VAR.userCollection) as QueryResult
     const allTeams = await conn.db(VAR.dbName).fetchAll(VAR.groupCollection) as QueryResult
