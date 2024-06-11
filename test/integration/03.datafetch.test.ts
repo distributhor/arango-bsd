@@ -19,8 +19,8 @@ const db = new ArangoDBWithoutGarnish({
 }, { printQueries: false })
 
 describe('Guacamole Integration Tests', () => {
-  test('returnAll, returnOne', async () => {
-    const result1A = await conn.db(VAR.dbName).returnAll(
+  test('query, queryOne', async () => {
+    const result1A = await conn.db(VAR.dbName).return(
       aql`FOR d IN ${conn.collection(VAR.dbName, VAR.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`,
       { fullCount: true }
     )
@@ -32,7 +32,7 @@ describe('Guacamole Integration Tests', () => {
 
     const result1ALiteral = await conn
       .db(VAR.dbName)
-      .returnAll(`FOR d IN ${VAR.userCollection} FILTER d.strength LIKE "Time Trial" RETURN d`)
+      .return(`FOR d IN ${VAR.userCollection} FILTER d.strength LIKE "Time Trial" RETURN d`)
 
     expect(result1ALiteral.data.length).toEqual(3)
     expect(result1ALiteral.data[0].surname).toBeDefined()
@@ -83,7 +83,7 @@ describe('Guacamole Integration Tests', () => {
     expect(allDocs[0].surname).toBeDefined()
 
     const result2A = await conn.db(VAR.dbName)
-      .returnAll(aql`FOR d IN ${conn.collection(VAR.dbName, VAR.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
+      .return(aql`FOR d IN ${conn.collection(VAR.dbName, VAR.userCollection)} FILTER d.strength LIKE "Trail Running" RETURN d`)
 
     expect(result2A.data).toBeDefined()
     expect(Array.isArray(result2A.data)).toBeTruthy()

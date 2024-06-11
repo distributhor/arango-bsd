@@ -349,7 +349,7 @@ export class ArangoDBWithoutGarnish {
 
   // WFC - Can't be FetchOptions, because in manual query you can't handle limit, sort etc
   // should differentiate by GuacamoleQueryOptions and FetchOptions and OtherOptionTypes
-  public async returnAll<T = any>(
+  public async return<T = any>(
     query: string | LiteralQuery | AqlQuery,
     options?: FetchOptions
   ): Promise<QueryResult<T>> {
@@ -376,7 +376,10 @@ export class ArangoDBWithoutGarnish {
    * @param options  Driver options that may be passed in along with the query
    * @returns an object
    */
-  public async returnOne<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | T[] | null> {
+  public async returnOne<T = any>(
+    query: string | LiteralQuery | AqlQuery,
+    options?: FetchOptions
+  ): Promise<T | T[] | null> {
     const response = await this.query<T>(query, options?.query)
     const documents = await response.all()
 
@@ -392,7 +395,10 @@ export class ArangoDBWithoutGarnish {
   }
 
   /** @internal */
-  async returnOneInternal<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<T | T[] | null> {
+  async returnOneInternal<T = any>(
+    query: string | LiteralQuery | AqlQuery,
+    options?: FetchOptions
+  ): Promise<T | T[] | null> {
     const response = await this.query<T>(query, options?.query)
     const documents = await response.all()
 
@@ -925,7 +931,7 @@ export class ArangoDBWithoutGarnish {
  *
  * // the backseat driver method, which immediately calls cursor.all()
  * // on the results, returning all the documents, and not the cursor
- * db.returnAll(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ * db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
  * ```
  */
 export class ArangoDB extends ArangoDBWithoutGarnish {
