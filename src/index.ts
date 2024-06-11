@@ -24,7 +24,9 @@ import {
   DocumentUpdate,
   isIdentifier,
   isFilter,
-  GraphRelation
+  GraphRelation,
+  LiteralQuery,
+  isLiteralQuery
 } from './types'
 import { Queries } from './queries'
 import {
@@ -43,7 +45,7 @@ import {
   ObjectWithKey
 } from 'arangojs/documents'
 import { Database } from 'arangojs'
-import { AqlQuery, isAqlQuery, literal } from 'arangojs/aql'
+import { AqlLiteral, AqlQuery, isAqlLiteral, isAqlQuery, literal } from 'arangojs/aql'
 import { QueryOptions } from 'arangojs/database'
 import { ArrayCursor } from 'arangojs/cursor'
 import { Config } from 'arangojs/connection'
@@ -332,9 +334,14 @@ export class ArangoDBWithoutGarnish {
    * @param options  Driver options that may be passed in along with the query
    * @returns a list of objects
    */
-  public async query<T = any>(query: string | AqlQuery, options?: QueryOptions): Promise<ArrayCursor<T>> {
+  public async query<T = any>(
+    query: string | LiteralQuery | AqlQuery,
+    options?: QueryOptions
+  ): Promise<ArrayCursor<T>> {
     if (typeof query === 'string') {
-      return await this.driver.query<T>(literal(query), options)
+      return await this.driver.query<T>(literal(query), undefined, options)
+    } else if (isLiteralQuery(query)) {
+      return await this.driver.query<T>(literal(query.query), query.bindVars, options)
     }
 
     return await this.driver.query<T>(query, options)
@@ -342,7 +349,10 @@ export class ArangoDBWithoutGarnish {
 
   // WFC - Can't be FetchOptions, because in manual query you can't handle limit, sort etc
   // should differentiate by GuacamoleQueryOptions and FetchOptions and OtherOptionTypes
-  public async returnAll<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<QueryResult<T>> {
+  public async returnAll<T = any>(
+    query: string | LiteralQuery | AqlQuery,
+    options?: FetchOptions
+  ): Promise<QueryResult<T>> {
     const arangojsQueryOptions: QueryOptions = options?.query ? options.query : {}
 
     if (options?.fullCount) {

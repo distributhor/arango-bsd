@@ -1,4 +1,4 @@
-import { AqlQuery } from 'arangojs/aql'
+import { AqlLiteral, AqlQuery } from 'arangojs/aql'
 import { CursorStats } from 'arangojs/cursor'
 import { QueryOptions } from 'arangojs/database'
 import { DocumentData, DocumentMetadata, Patch } from 'arangojs/documents'
@@ -22,6 +22,10 @@ export function isIdentifier(x: any): x is Identifier {
 /** @internal */
 export function isDocumentUpdate(x: any): x is DocumentUpdate {
   return x.key && x.data
+}
+
+export function isLiteralQuery(x: any): x is LiteralQuery {
+  return x.query
 }
 
 export interface PropertyValue {
@@ -120,6 +124,11 @@ export interface FetchOptions {
   returnStats?: boolean
   printQuery?: boolean
   debugFilters?: boolean
+}
+
+export interface LiteralQuery {
+  query: string | AqlLiteral
+  bindVars?: Record<string, any>
 }
 
 export interface QueryResult<T = any> {
