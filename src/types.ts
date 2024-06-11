@@ -115,6 +115,7 @@ export interface FetchOptions {
   offset?: number
   sortBy?: string
   sortOrder?: string
+  fullCount?: boolean
   returnCursor?: boolean
   returnStats?: boolean
   printQuery?: boolean

@@ -339,6 +339,14 @@ function fetchByPropertyValues(
     _debug.queries(query)
   }
 
+  // if (options?.printQuery) {
+  //   if (query.indexOf('..') > -1) {
+  //     console.log('[AQL] ' + query.replace(/\.\./g, 'xx'))
+  //   } else {
+  //     console.log('[AQL] ' + query)
+  //   }
+  // }
+
   return query
 }
 

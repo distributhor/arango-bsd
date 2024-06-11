@@ -18,6 +18,8 @@ const db = new ArangoDBWithoutGarnish({
 
 describe('Guacamole Integration Tests', () => {
   test('Unique constraint validation', async () => {
+    expect.assertions(23)
+
     // should be case insensitive PT1
     // FOR d IN @@value0 FILTER ( LOWER(d.@value1) == @value2 ) RETURN d._key
     // bindVars: { '@value0': 'cyclists', value1: 'trademark', value2: 'Live Strong' }
@@ -294,6 +296,43 @@ describe('Guacamole Integration Tests', () => {
       })
 
     expect(result13.violatesUniqueConstraint).toBeFalsy()
+
+    try {
+      await conn.db(VAR.dbName).validateUniqueConstraint(
+        VAR.userCollection,
+        {
+          singular: []
+        })
+    } catch (e) {
+      expect(e.message).toEqual('No unique constraints specified')
+    }
+
+    try {
+      await conn.db(VAR.dbName).validateUniqueConstraint(
+        VAR.userCollection,
+        {
+          composite: undefined
+        })
+    } catch (e) {
+      expect(e.message).toEqual('No unique constraints specified')
+    }
+
+    try {
+      await conn.db(VAR.dbName).validateUniqueConstraint(VAR.userCollection, {})
+    } catch (e) {
+      expect(e.message).toEqual('No unique constraints specified')
+    }
+
+    try {
+      await conn.db(VAR.dbName).validateUniqueConstraint(
+        VAR.userCollection,
+        {
+          singular: [],
+          composite: undefined
+        })
+    } catch (e) {
+      expect(e.message).toEqual('No unique constraints specified')
+    }
   })
 
   test('CRUD', async () => {

@@ -20,12 +20,15 @@ const db = new ArangoDBWithoutGarnish({
 
 describe('Guacamole Integration Tests', () => {
   test('returnAll, returnOne', async () => {
-    const result1A = await conn
-      .db(VAR.dbName)
-      .returnAll(aql`FOR d IN ${conn.collection(VAR.dbName, VAR.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`)
+    const result1A = await conn.db(VAR.dbName).returnAll(
+      aql`FOR d IN ${conn.collection(VAR.dbName, VAR.userCollection)} FILTER d.strength LIKE "Time Trial" RETURN d`,
+      { fullCount: true }
+    )
 
     expect(result1A.data.length).toEqual(3)
     expect(result1A.data[0].surname).toBeDefined()
+    expect(result1A.size).toEqual(3)
+    expect(result1A.total).toEqual(3)
 
     const result1ALiteral = await conn
       .db(VAR.dbName)

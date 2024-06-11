@@ -340,13 +340,20 @@ export class ArangoDBWithoutGarnish {
     return await this.driver.query<T>(query, options)
   }
 
+  // WFC - Can't be FetchOptions, because in manual query you can't handle limit, sort etc
+  // should differentiate by GuacamoleQueryOptions and FetchOptions and OtherOptionTypes
   public async returnAll<T = any>(query: string | AqlQuery, options?: FetchOptions): Promise<QueryResult<T>> {
-    const response = await this.query<T>(query, options?.query)
-    const documents = await response.all()
+    const arangojsQueryOptions: QueryOptions = options?.query ? options.query : {}
 
-    return {
-      data: ArangoDB.trimDocuments(documents, options?.trim)
+    if (options?.fullCount) {
+      arangojsQueryOptions.count = true
+      arangojsQueryOptions.fullCount = true
     }
+
+    const result = await this.query<T>(query, arangojsQueryOptions)
+    const documents = await result.all()
+
+    return toQueryResult(ArangoDB.trimDocuments(documents, options?.trim), result, options)
   }
 
   /**
@@ -565,7 +572,7 @@ export class ArangoDBWithoutGarnish {
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
     let arangojsQueryOptions = options?.query
 
-    if (options?.limit) {
+    if (options?.limit ?? options?.fullCount) {
       if (!arangojsQueryOptions) {
         arangojsQueryOptions = {}
       }
@@ -752,6 +759,17 @@ export class ArangoDBWithoutGarnish {
     constraints: UniqueConstraint,
     options?: FetchOptions
   ): Promise<UniqueConstraintResult> {
+    if (!constraints) {
+      throw new Error('No unique constraints specified')
+    }
+
+    if (
+      (!constraints.singular || (Array.isArray(constraints.singular) && constraints.singular.length === 0)) &&
+      (!constraints.composite || (Array.isArray(constraints.composite) && constraints.composite.length === 0))
+    ) {
+      throw new Error('No unique constraints specified')
+    }
+
     // const query = uniqueConstraintQuery(constraints, QueryType.STRING) as string;
     const query = Queries.uniqueConstraintQuery(this.collection(collection), constraints, this._queryOpts(options))
     const documents = await (await this.query(query)).all()
@@ -786,7 +804,7 @@ export class ArangoDBWithoutGarnish {
 
     let arangojsQueryOptions = options?.query
 
-    if (options?.limit) {
+    if (options?.limit ?? options?.fullCount) {
       if (!arangojsQueryOptions) {
         arangojsQueryOptions = {}
       }
@@ -849,7 +867,7 @@ export class ArangoDBWithoutGarnish {
   ): Promise<ArrayCursor<T> | QueryResult<T>> {
     let arangojsQueryOptions = options?.query
 
-    if (options?.limit) {
+    if (options?.limit ?? options?.fullCount) {
       if (!arangojsQueryOptions) {
         arangojsQueryOptions = {}
       }
