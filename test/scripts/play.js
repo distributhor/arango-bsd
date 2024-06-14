@@ -1,13 +1,22 @@
 // eslint-disable-next-line func-call-spacing
 // const { aql } = require('arangojs/aql')
-const { ArangoDB } = require('../../dist/index')
+const { ArangoDBWithSpice } = require('../../dist/index')
 
 async function play() {
   try {
-    const db = new ArangoDB({
+    const db = new ArangoDBWithSpice({
       databaseName: 'guacamole_test',
       url: 'http://root:letmein@localhost:8529'
     })
+
+    const exists = await db.util.dbExists()
+    console.log(exists)
+
+    // const conn = new ArangoConnection([{
+    //   databaseName: 'guacamole_test',
+    //   url: 'http://root:letmein@localhost:8529'
+    // }])
+    // console.log(conn.db('guacamole_test').name)
 
     // const result1 = await db.fetchByPropertiesAndCriteria(
     //   'cyclists',
@@ -16,11 +25,11 @@ async function play() {
     //   { printQuery: true }
     // )
 
-    const result1 = await db.fetchByCriteria('cyclists', 'd.name == "Lance" || d.name == "Chris"', {
-      printQuery: true, debugFilters: true
-    })
+    // const result1 = await db.fetchByCriteria('cyclists', 'd.name == "Lance" || d.name == "Chris"', {
+    //   printQuery: true, debugFilters: true
+    // })
 
-    console.log(result1.data.length)
+    // console.log(result1.data.length)
 
     // const cursor = await db.driver.query(aql`FOR d IN cyclists FILTER d.name == "Lance" RETURN d`)
     // const result2 = await cursor.all()

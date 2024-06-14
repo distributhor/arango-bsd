@@ -1,8 +1,8 @@
 import { AqlLiteral, AqlQuery } from 'arangojs/aql'
+import { DocumentOperationFailure } from 'arangojs/collection'
 import { CursorStats } from 'arangojs/cursor'
 import { QueryOptions } from 'arangojs/database'
-import { DocumentData, DocumentMetadata, Patch } from 'arangojs/documents'
-import { EdgeDefinitionOptions } from 'arangojs/graph'
+import { DocumentData, DocumentMetadata, ObjectWithKey, Patch } from 'arangojs/documents'
 
 /** @internal */
 export function isFilter(x: any): x is Filter {
@@ -20,12 +20,20 @@ export function isIdentifier(x: any): x is Identifier {
 }
 
 /** @internal */
+export function isDocumentOperationFailure(x: any): x is DocumentOperationFailure {
+  return x.errorMessage
+}
+
 export function isDocumentUpdate(x: any): x is DocumentUpdate {
   return x.key && x.data
 }
 
 export function isLiteralQuery(x: any): x is LiteralQuery {
   return x.query
+}
+
+export function isObjectWithKey(x: any): x is ObjectWithKey {
+  return x._key
 }
 
 export interface PropertyValue {
@@ -96,6 +104,20 @@ export interface DocumentUpdate<T extends Record<string, any> = any> {
   data: Patch<DocumentData<T>>
 }
 
+export type DocumentDataWithKey<T extends Record<string, any> = any> = T & Patch<DocumentData<T>> & ({
+  _key: string
+} | {
+  _id: string
+})
+
+// export interface BulkDocumentUpdate<T extends Record<string, any> = any> {
+//   data: Array<Patch<DocumentData<T>> & ({
+//     _key: string
+//   } | {
+//     _id: string
+//   })>
+// }
+
 export interface DocumentMeta extends DocumentMetadata {
   [key: string]: any
 }
@@ -138,62 +160,10 @@ export interface QueryResult<T = any> {
   stats?: CursorStats | undefined
 }
 
-export interface GraphSchema {
-  name: string
-  edges: EdgeDefinitionOptions[]
-}
-
 export interface GraphRelation<T extends Record<string, any> = any> {
   from: string
   to: string
   data?: DocumentData<T> // EdgeData<T> ???
-}
-
-export interface DbStructure {
-  collections?: string[]
-  graphs?: GraphSchema[]
-}
-
-export interface DbStructureValidation {
-  message?: string
-  database?: EntityExists
-  collections?: EntityExists[]
-  graphs?: EntityExists[]
-}
-
-export interface DbStructureResult {
-  database?: string
-  collections?: string[]
-  graphs?: string[]
-  error?: any
-}
-
-export const enum DbClearanceStrategy {
-  DELETE_DATA = 'DELETE_DATA',
-  RECREATE_DB = 'RECREATE_DB',
-}
-
-export interface EntityExists {
-  name: string
-  exists: boolean
-}
-
-/** @internal */
-export interface EntityAvailability {
-  all: EntityExists[]
-  missing: string[]
-  existing: string[]
-  allExist: boolean
-}
-
-/** @internal */
-export function isGraphSchema(x: any): x is GraphSchema {
-  return x.name
-}
-
-/** @internal */
-export function isGraphSchemaArray(x: any[]): x is GraphSchema[] {
-  return x.length > 0 && isGraphSchema(x[0])
 }
 
 /*

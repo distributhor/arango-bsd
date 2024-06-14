@@ -336,7 +336,7 @@ describe('Guacamole Integration Tests', () => {
   })
 
   test('CRUD', async () => {
-    expect.assertions(193)
+    expect.assertions(199)
 
     const result1A = await conn.db(VAR.dbName).create(VAR.userCollection, {
       name: 'Daryl',
@@ -369,6 +369,7 @@ describe('Guacamole Integration Tests', () => {
     })
 
     expect(result1A).toBeDefined()
+    expect(result1A.length).toEqual(1)
     expect(result1A[0]._key).toBeDefined()
 
     const result1B = await conn.db(VAR.dbName).read(VAR.userCollection, { value: result1A[0]._key })
@@ -730,17 +731,18 @@ describe('Guacamole Integration Tests', () => {
       }
     })
 
+    expect(result2C.length).toEqual(1)
     expect(result2C[0]._key).toBeDefined()
 
-    const result2D = await conn.db(VAR.dbName).read(VAR.userCollection, { value: result2A[0]._key })
+    const result2Validate = await conn.db(VAR.dbName).read(VAR.userCollection, { value: result2A[0]._key })
 
-    expect(result2D.name).toEqual('Cadel')
-    expect(result2D.surname).toEqual('Evans')
-    expect(result2D.trademark).toEqual("G'day Mate")
-    expect(result2D.strength).toEqual('All Rounder')
-    expect(result2D.year['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
-    expect(result2D.year['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
-    expect(result2D.rating).toEqual(
+    expect(result2Validate.name).toEqual('Cadel')
+    expect(result2Validate.surname).toEqual('Evans')
+    expect(result2Validate.trademark).toEqual("G'day Mate")
+    expect(result2Validate.strength).toEqual('All Rounder')
+    expect(result2Validate.year['2012']).toEqual(expect.arrayContaining(['3rd, Critérium du Dauphiné']))
+    expect(result2Validate.year['2013']).toEqual(expect.arrayContaining(["3rd, Giro d'Italia"]))
+    expect(result2Validate.rating).toEqual(
       expect.objectContaining({
         sprint: 7,
         climb: 8,
@@ -749,6 +751,23 @@ describe('Guacamole Integration Tests', () => {
         descend: 7
       })
     )
+
+    const result2D = await conn.db(VAR.dbName).update(VAR.userCollection, [
+      { _key: result1A[0]._key, yetAnotherProp: 'OK' },
+      { _key: result2A[0]._key, rating: { sprint: 7.5 } }
+    ])
+
+    expect(result2D.length).toEqual(2)
+    expect(result2D[0]._key).toBeDefined()
+
+    try {
+      await conn.db(VAR.dbName).update(VAR.userCollection, [{ _key: '', yetAnotherProp: 'OK' }])
+    } catch (e) {
+      expect(e.message).toEqual('Invalid _key supplied')
+    }
+
+    const result2DValidate = await conn.db(VAR.dbName).read(VAR.userCollection, { value: result1A[0]._key })
+    expect(result2DValidate.yetAnotherProp).toEqual('OK')
 
     const result2E = await conn.db(VAR.dbName).update(VAR.userCollection, {
       key: {
@@ -762,6 +781,9 @@ describe('Guacamole Integration Tests', () => {
         rating: { solo: 8 }
       }
     })
+
+    // console.log(result2D)
+    // console.log(result2E)
 
     expect(result2E).toBeDefined()
     expect(Array.isArray(result2E)).toBeTruthy()
@@ -779,7 +801,7 @@ describe('Guacamole Integration Tests', () => {
     expect(result2F.year['2009']).toEqual(expect.arrayContaining(['1st, UCI Road Race World Champs']))
     expect(result2F.rating).toEqual(
       expect.objectContaining({
-        sprint: 7,
+        sprint: 7.5,
         climb: 8,
         timetrial: 9,
         punch: 8,

@@ -38,6 +38,15 @@ const _debug = {
 }
 
 /** @internal */
+export function _toPrintableQuery(query: string): string {
+  if (query.includes('..')) {
+    return query.replace(/\.\./g, 'xx')
+  }
+
+  return query
+}
+
+/** @internal */
 function _debugFiltersEnabled(options: FetchOptions | undefined): boolean {
   if (options?.debugFilters) {
     return true
@@ -339,14 +348,6 @@ function fetchByPropertyValues(
     _debug.queries(query)
   }
 
-  // if (options?.printQuery) {
-  //   if (query.indexOf('..') > -1) {
-  //     console.log('[AQL] ' + query.replace(/\.\./g, 'xx'))
-  //   } else {
-  //     console.log('[AQL] ' + query)
-  //   }
-  // }
-
   return query
 }
 
@@ -498,58 +499,63 @@ export function updateDocumentsByKeyValue(
   identifier: Identifier,
   data: any
 ): AqlQuery {
-  // return literal(
-  //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" UPDATE d WITH ${JSON.stringify(
-  //     data
-  //   )} IN ${collection} RETURN { _key: NEW._key, _id: NEW._id, _rev: NEW._rev, _oldRev: OLD._rev }`
-  // )
-
   return aql`
       FOR d IN ${collection}
       FILTER d.${identifier.property} == ${identifier.value}
       UPDATE d WITH ${data} IN ${collection}
-      RETURN { _key: NEW._key }`
-
-  //
-  // Some examples of using aql and helpers - from the docs
-  //
-  // var query = "FOR doc IN collection";
-  // var params = {};
-  // if (useFilter) {
-  //   query += " FILTER doc.value == @what";
-  //   params.what = req.params("searchValue");
-  // }
-
-  // const filter = aql`FILTER d.color == ${color}'`
-  // const result = await db.query(aql`
-  //   FOR d IN ${collection}
-  //   ${filter}
-  //   RETURN d
-  // `)
-
-  // const filters = []
-  // if (adminsOnly) filters.push(aql`FILTER user.admin`)
-  // if (activeOnly) filters.push(aql`FILTER user.active`)
-  // const result = await db.query(aql`
-  //   FOR user IN ${users}
-  //   ${join(filters)}
-  //   RETURN user
-  // `)
+      RETURN { _id: NEW._id, _key: NEW._key, _rev: NEW._rev, _oldRev: OLD._rev }`
 }
 
 export function deleteDocumentsByKeyValue(
   collection: DocumentCollection,
-  identifier: Identifier
+  identifier: Identifier,
+  dependencies?: any[]
 ): AqlQuery {
-  // return literal(
-  //   `FOR d IN ${collection} FILTER d.${identifier.property} == "${identifier.value}" REMOVE d IN ${collection} RETURN { _key: d._key, _id: d._id, _rev: d._rev }`
-  // )
+  if (dependencies && dependencies.length > 0) {
+    const query: AqlValue[] = []
+
+    if (identifier.property) {
+      query.push(aql`FOR d IN ${collection} FILTER d.${identifier.property} == ${identifier.value}`)
+    } else {
+      query.push(aql`FOR d IN ${collection} FILTER d._key == ${identifier.value}`)
+    }
+
+    for (const link of dependencies) {
+      query.push(literal(`LET ${link.edge}_keys = (FOR v, e, p IN 1..1 ANY d GRAPH ${link.graph} RETURN e._key)`))
+      // query.push(aql` LET ${link.edge}_keys = (FOR v, e, p IN 1..1 ANY d GRAPH '${link.graph}' RETURN e._key)`)
+    }
+
+    for (const link of dependencies) {
+      query.push(literal(`LET ${link.edge}_removed = (FOR key IN ${link.edge}_keys REMOVE key IN ${link.edge} RETURN { _id: OLD._id, _key: OLD._key, _rev: OLD._rev })`))
+      // query.push(aql` LET ${link.edge}_removed = (FOR key IN ${link.edge}_keys REMOVE key IN ${link.edge})`)
+    }
+
+    query.push(literal(`REMOVE d IN ${collection.name}`))
+    // query.push(aql` REMOVE d IN ${collection}`)
+
+    query.push(literal('RETURN MERGE({ _id: OLD._id, _key: OLD._key, _rev: OLD._rev },'))
+    // query.push(aql` RETURN { ${collection}: { _id: OLD._id, _key: OLD._key, _rev: OLD._rev },`)
+
+    for (let i = 0; i < dependencies.length; i++) {
+      if (i === dependencies.length - 1) {
+        query.push(literal(`{ ${dependencies[i].edge}: ${dependencies[i].edge}_removed }`))
+        // query.push(aql` ${dependencies[i].edge}: ${dependencies[i].edge}_keys`)
+      } else {
+        query.push(literal(`{ ${dependencies[i].edge}: ${dependencies[i].edge}_removed },`))
+        // query.push(aql` ${dependencies[i].edge}: ${dependencies[i].edge}_keys,`)
+      }
+    }
+
+    query.push(aql`)`)
+
+    return join(query)
+  }
 
   return aql`
       FOR d IN ${collection}
       FILTER d.${identifier.property} == ${identifier.value}
       REMOVE d IN ${collection}
-      RETURN { _key: d._key }`
+      RETURN { _id: OLD._id, _key: OLD._key, _rev: OLD._rev }`
 }
 
 export function uniqueConstraintQuery(

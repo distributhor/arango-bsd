@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 
+import { DbStructure } from '../../src/dbms'
 import { ArangoConnection } from '../../src/index'
-import { DbStructure, GraphRelation, QueryResult } from '../../src/types'
+import { GraphRelation, QueryResult } from '../../src/types'
 
 import { VAR } from './jest.shared'
 
@@ -55,14 +56,14 @@ const conn = new ArangoConnection([{
 
 describe('Guacamole Integration Tests', () => {
   test('Connection and instance management', async () => {
-    expect(conn.db(VAR.dbName).name).toEqual(VAR.dbName)
+    expect(conn.db(VAR.dbName).dbName).toEqual(VAR.dbName)
     expect(conn.listConnections()).toEqual([VAR.dbName])
 
     conn.db(VAR.dbName) // should NOT create additional instance, because it already exists
     conn.db(VAR.dbName2) // should create an additional instance, because it doesn't exist
 
-    expect(conn.db(VAR.dbName).name).toEqual(VAR.dbName)
-    expect(conn.db(VAR.dbName2).name).toEqual(VAR.dbName2)
+    expect(conn.db(VAR.dbName).dbName).toEqual(VAR.dbName)
+    expect(conn.db(VAR.dbName2).dbName).toEqual(VAR.dbName2)
     expect(conn.listConnections()).toEqual([VAR.dbName, VAR.dbName2])
   })
 
@@ -99,10 +100,10 @@ describe('Guacamole Integration Tests', () => {
 
   test('Create database structure and test multi-driver behaviour', async () => {
     // create structure for existing DB
-    const result1 = await conn.db(VAR.dbName).createDbStructure(dbStructure)
+    const result1 = await conn.db(VAR.dbName).manage.createDbStructure(dbStructure)
 
     // create structure for non-existing DB
-    const result2 = await conn.db(VAR.dbName2).createDbStructure(dbStructure)
+    const result2 = await conn.db(VAR.dbName2).manage.createDbStructure(dbStructure)
 
     expect(result1.database).toEqual('Database found')
     expect(result1.graphs).toEqual(expect.arrayContaining([`Graph '${VAR.groupMembershipGraph}' created`]))
@@ -153,7 +154,7 @@ describe('Guacamole Integration Tests', () => {
     const usersCollectionExist2 = await conn.db(VAR.dbName2).collection(VAR.userCollection).exists()
     expect(usersCollectionExist2).toBeFalsy()
 
-    const result3 = await conn.db(VAR.dbName2).createDbStructure(dbStructure)
+    const result3 = await conn.db(VAR.dbName2).manage.createDbStructure(dbStructure)
 
     expect(result3.database).toEqual('Database found')
     expect(result3.graphs).toEqual(expect.arrayContaining([`Graph '${VAR.groupMembershipGraph}' found`]))
@@ -179,7 +180,7 @@ describe('Guacamole Integration Tests', () => {
       ]
     }
 
-    const result4 = await conn.db(VAR.dbName2).createDbStructure(dbStructureWithEmptyArrays)
+    const result4 = await conn.db(VAR.dbName2).manage.createDbStructure(dbStructureWithEmptyArrays)
 
     const collectionLength = result4.collections ? result4.collections.length : 99
     const graphLength = result4.graphs ? result4.graphs.length : 99
@@ -201,7 +202,7 @@ describe('Guacamole Integration Tests', () => {
       })
     }
 
-    const result = await conn.db(VAR.dbName).validateDbStructure(dbStructure)
+    const result = await conn.db(VAR.dbName).manage.compareDbStructure(dbStructure)
 
     expect(result.collections).toEqual(
       expect.arrayContaining([
@@ -227,6 +228,8 @@ describe('Guacamole Integration Tests', () => {
     expect(result1.length).toEqual(31)
     expect(result2.length).toEqual(19)
     expect(result3.created).toEqual(31)
+
+    expect(result1[0]._key).toBeDefined()
 
     const allCyclists = await conn.db(VAR.dbName).fetchAll(VAR.userCollection) as QueryResult
     const allTeams = await conn.db(VAR.dbName).fetchAll(VAR.groupCollection) as QueryResult

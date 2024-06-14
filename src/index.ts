@@ -2,13 +2,6 @@
 import debug from 'debug'
 import {
   GuacamoleOptions,
-  EntityAvailability,
-  GraphSchema,
-  DbStructure,
-  DbStructureResult,
-  DbStructureValidation,
-  DbClearanceStrategy,
-  isGraphSchemaArray,
   UniqueConstraint,
   UniqueConstraintResult,
   FetchOptions,
@@ -26,8 +19,12 @@ import {
   isFilter,
   GraphRelation,
   LiteralQuery,
-  isLiteralQuery
+  isLiteralQuery,
+  isDocumentOperationFailure,
+  DocumentDataWithKey,
+  isObjectWithKey
 } from './types'
+import { DbAdmin } from './dbms'
 import { Queries } from './queries'
 import {
   CollectionInsertOptions,
@@ -35,21 +32,25 @@ import {
   CollectionRemoveOptions,
   CollectionUpdateOptions,
   DocumentCollection,
+  DocumentOperationFailure,
+  DocumentOperationMetadata,
   EdgeCollection
 } from 'arangojs/collection'
 import {
   Document,
   DocumentData,
+  DocumentMetadata,
   DocumentSelector,
   Edge,
   ObjectWithKey
 } from 'arangojs/documents'
 import { Database } from 'arangojs'
-import { AqlLiteral, AqlQuery, isAqlLiteral, isAqlQuery, literal } from 'arangojs/aql'
+import { AqlQuery, isAqlQuery, literal } from 'arangojs/aql'
 import { QueryOptions } from 'arangojs/database'
 import { ArrayCursor } from 'arangojs/cursor'
 import { Config } from 'arangojs/connection'
 
+import _has from 'lodash.has'
 import _get from 'lodash.get'
 import _pick from 'lodash.pick'
 import _omit from 'lodash.omit'
@@ -58,13 +59,20 @@ export * from './types'
 
 /** @internal */
 const debugFunctions = debug('guacamole:log:function')
+const debugQueries = debug('guacamole:log:query')
 
 /** @internal */
 const _debug = {
   functions: debugFunctions,
+  queries: debugQueries,
   errors: debug('guacamole:debug:error'),
   info: debug('guacamole:debug:info'),
   log: {
+    queries: function (data: any) {
+      debug.enable('guacamole:log:query')
+      debugQueries(data)
+      debug.disable()
+    },
     functions: function (data: any) {
       debug.enable('guacamole:log:function')
       debugFunctions(data)
@@ -93,19 +101,6 @@ function _debugFilters(
   } else {
     _debug.functions(functionName)
   }
-}
-
-/** @internal */
-function toGraphNames(graphs: string[] | GraphSchema[]): string[] {
-  if (graphs.length === 0) {
-    return []
-  }
-
-  if (isGraphSchemaArray(graphs)) {
-    return graphs.map((g) => g.name)
-  }
-
-  return graphs
 }
 
 /** @internal */
@@ -248,12 +243,12 @@ export class ArangoConnection {
     return this.getInstance(db)
   }
 
-  public collection<T extends Record<string, any> = any>(
-    db: string,
-    collection: string
-  ): DocumentCollection<T> | EdgeCollection<T> {
-    return this.db(db).collection<T>(collection)
-  }
+  // public collection<T extends Record<string, any> = any>(
+  //   db: string,
+  //   collection: string
+  // ): DocumentCollection<T> | EdgeCollection<T> {
+  //   return this.db(db).collection<T>(collection)
+  // }
 
   public listConnections(): string[] {
     return Object.keys(this.pool)
@@ -313,8 +308,12 @@ export class ArangoDBWithoutGarnish {
     // return Object.assign(fetchOptions, this.guacamole)
   }
 
-  public get name(): string {
+  public get dbName(): string {
     return this.driver.name
+  }
+
+  public async dbExists(): Promise<boolean> {
+    return await this.driver.exists()
   }
 
   public collection<T extends Record<string, any> = any>(
@@ -358,6 +357,12 @@ export class ArangoDBWithoutGarnish {
     if (options?.fullCount) {
       arangojsQueryOptions.count = true
       arangojsQueryOptions.fullCount = true
+    }
+
+    if (options?.printQuery) {
+      _debug.log.queries(query)
+    } else {
+      _debug.queries(query)
     }
 
     const result = await this.query<T>(query, arangojsQueryOptions)
@@ -415,6 +420,7 @@ export class ArangoDBWithoutGarnish {
     return documents[0]
   }
 
+  // document not found will throw an error from arango, instead of returning null
   public async read<T extends Record<string, any> = any>(
     collection: string,
     identifier: Identifier | DocumentSelector,
@@ -462,9 +468,39 @@ export class ArangoDBWithoutGarnish {
     collection: string,
     data: DocumentData<T> | Array<DocumentData<T>>,
     options?: CollectionInsertOptions
-  ): Promise<Array<DocumentMeta & { new?: Document<T> }>> {
+  ): Promise<Array<DocumentOperationMetadata & {
+      new?: Document<T>
+      old?: Document<T>
+    }>> {
     if (Array.isArray(data)) {
-      return await this.collection(collection).saveAll(data, options)
+      for (const item of data) {
+        if (_has(item, '_key') && (item._key === '' || typeof item._key !== 'string')) {
+          throw new Error('Invalid _key supplied')
+        }
+
+        if (_has(item, '_id') && (item._id === '' || typeof item._id !== 'string')) {
+          throw new Error('Invalid _id supplied')
+        }
+      }
+
+      const result = await this.collection(collection).saveAll(data, options)
+
+      if (isDocumentOperationFailure(result)) {
+        throw new Error(result.errorMessage)
+      }
+
+      return result as Array<DocumentOperationMetadata & {
+        new?: Document<T>
+        old?: Document<T>
+      }>
+    }
+
+    if (_has(data, '_key') && (data._key === '' || typeof data._key !== 'string')) {
+      throw new Error('Invalid _key supplied')
+    }
+
+    if (_has(data, '_id') && (data._id === '' || typeof data._id !== 'string')) {
+      throw new Error('Invalid _id supplied')
     }
 
     const result = await this.collection(collection).save(data, options)
@@ -474,11 +510,33 @@ export class ArangoDBWithoutGarnish {
 
   public async update<T extends Record<string, any> = any>(
     collection: string,
-    update: DocumentUpdate | any[],
+    update: DocumentUpdate<T> | Array<DocumentDataWithKey<T>>,
     options?: CollectionUpdateOptions
-  ): Promise<Array<DocumentMeta & { new?: Document<T>, old?: Document<T> }>> {
+  ): Promise<Array<DocumentOperationMetadata & {
+      new?: Document<T>
+      old?: Document<T>
+    }>> {
     if (Array.isArray(update)) {
-      return await this.collection(collection).updateAll(update, options)
+      for (const item of update) {
+        if (_has(item, '_key') && (item._key === '' || typeof item._key !== 'string')) {
+          throw new Error('Invalid _key supplied')
+        }
+
+        if (_has(item, '_id') && (item._id === '' || typeof item._id !== 'string')) {
+          throw new Error('Invalid _id supplied')
+        }
+      }
+
+      const result = await this.collection(collection).updateAll(update, options)
+
+      if (isDocumentOperationFailure(result)) {
+        throw new Error(result.errorMessage)
+      }
+
+      return result as Array<DocumentOperationMetadata & {
+        new?: Document<T>
+        old?: Document<T>
+      }>
     }
 
     if (isIdentifier(update.key)) {
@@ -490,7 +548,7 @@ export class ArangoDBWithoutGarnish {
         )
 
         const result = await this.driver.query(query)
-        return await result.all()
+        return await result.all() as DocumentOperationMetadata[]
       }
 
       const result = await this.collection(collection).update(`${update.key.value}`, update.data, options)
@@ -504,10 +562,74 @@ export class ArangoDBWithoutGarnish {
   public async delete<T extends Record<string, any> = any>(
     collection: string,
     identifier: DocumentSelector | Identifier | Array<string | ObjectWithKey>,
+    dependencies?: any[],
     options?: CollectionRemoveOptions
-  ): Promise<Array<DocumentMeta & { old?: Document<T> }>> {
+  ): Promise<Array<DocumentMetadata & {
+      old?: Document<T>
+    }>> {
+    if (dependencies && dependencies.length > 0) {
+      if (Array.isArray(identifier)) {
+        const response: any[] = []
+
+        for (const i of identifier) {
+          const id: Identifier = isObjectWithKey(i)
+            ? { property: '_key', value: i._key }
+            : { property: '_key', value: i }
+
+          const query = Queries.deleteDocumentsByKeyValue(
+            this.collection(collection),
+            id, dependencies
+          )
+
+          // _debug.log.queries(query)
+          // if (options?.printQuery) {
+          //   _debug.log.queries(query)
+          // } else {
+          //   _debug.queries(query)
+          // }
+
+          const result = await this.driver.query(query)
+          const resultData = await result.all() as DocumentMetadata[]
+
+          response.push(resultData)
+        }
+
+        return response
+      }
+
+      let id: Identifier
+
+      if (isIdentifier(identifier)) {
+        id = identifier
+      } else if (isObjectWithKey(identifier)) {
+        id = { property: '_key', value: identifier._key }
+      } else if (typeof identifier === 'string') {
+        id = { property: '_key', value: identifier }
+      } else {
+        throw new Error('Invalid identifier received')
+      }
+
+      const query = Queries.deleteDocumentsByKeyValue(
+        this.collection(collection),
+        id, dependencies
+      )
+
+      // _debug.log.queries(query)
+
+      const result = await this.driver.query(query)
+      return await result.all() as DocumentMetadata[]
+    }
+
     if (Array.isArray(identifier)) {
-      return await this.collection(collection).removeAll(identifier, options)
+      const result = await this.collection(collection).removeAll(identifier, options)
+
+      if (isDocumentOperationFailure(result)) {
+        throw new Error(result.errorMessage)
+      }
+
+      return result as Array<DocumentMetadata & {
+        old?: Document<T>
+      }>
     }
 
     if (isIdentifier(identifier)) {
@@ -518,7 +640,7 @@ export class ArangoDBWithoutGarnish {
         )
 
         const result = await this.driver.query(query)
-        return await result.all()
+        return await result.all() as DocumentMetadata[]
       }
 
       const response = await this.collection(collection).remove(`${identifier.value}`, options)
@@ -529,6 +651,7 @@ export class ArangoDBWithoutGarnish {
     return [response]
   }
 
+  // add an optional default return value, ie [] for arrays?
   public async fetchProperty<T = any>(
     collection: string,
     identifier: Identifier | DocumentSelector,
@@ -571,6 +694,15 @@ export class ArangoDBWithoutGarnish {
       for (const _nf of nestedFields) { query += ' }' }
 
       query += ` IN ${collection} OPTIONS { keepNull: false } `
+
+      // I have found no reliable way to replace a sub-document. If that document does not have sibling fields,
+      // then it works fine, but if it has sibling fields, those fields will vanish with mergeObject = false
+      //
+      // if ((options) && (options.hasOwnProperty('replace')) && (options.replace === true)) {
+      //    query += ' OPTIONS { keepNull: false, mergeObjects: false } ';
+      // } else {
+      //    query += ' OPTIONS { keepNull: false } ';
+      // }
     } else {
       query += `UPDATE d WITH { ${property}: ${JSON.stringify(value)} } IN ${collection} OPTIONS { keepNull: false } `
     }
@@ -1071,9 +1203,15 @@ export class ArangoDB extends ArangoDBWithoutGarnish {
 }
 
 export class ArangoDBWithSpice extends ArangoDB {
+  /** @internal */
+  manage: DbAdmin
+
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(db: Config | Database, options?: GuacamoleOptions) {
     super(db, options)
+
+    /** @internal */
+    this.manage = new DbAdmin(db)
   }
 
   public async addArrayValue(
@@ -1447,8 +1585,11 @@ export class ArangoDBWithSpice extends ArangoDB {
     // graph: string,
     edgeCollection: string,
     relation: GraphRelation | GraphRelation[],
-    options?: any
-  ): Promise<Array<DocumentMeta & { new?: Document<T>, old?: Document<T> }>> {
+    options?: CollectionInsertOptions
+  ): Promise<Array<DocumentOperationMetadata & {
+      new?: Document<T>
+      old?: Document<T>
+    }>> {
     if (Array.isArray(relation)) {
       const edges: Edge[] = []
 
@@ -1470,7 +1611,16 @@ export class ArangoDBWithSpice extends ArangoDB {
         edges.push(edge)
       }
 
-      return await this.collection(edgeCollection).saveAll(edges)
+      const result = await this.collection(edgeCollection).saveAll(edges, options)
+
+      if (isDocumentOperationFailure(result)) {
+        throw new Error(result.errorMessage)
+      }
+
+      return result as Array<DocumentOperationMetadata & {
+        new?: Document<T>
+        old?: Document<T>
+      }>
     }
 
     const _from = _get(relation, 'from')
@@ -1489,7 +1639,7 @@ export class ArangoDBWithSpice extends ArangoDB {
       ...data
     }
 
-    const result = await this.collection(edgeCollection).save(edge)
+    const result = await this.collection(edgeCollection).save(edge, options)
 
     return [result]
 
@@ -1528,239 +1678,13 @@ export class ArangoDBWithSpice extends ArangoDB {
     //   })
     // }
   }
-
-  public async dbExists(): Promise<boolean> {
-    // if (db) {
-    //   driver.listDatabases() will throw an error (database not found) if the db in question doesn't actually exist yet
-    //   return (await this.driver.listDatabases()).includes(db)
-    // }
-
-    return await this.driver.exists()
-  }
-
-  public async clearDb(method: DbClearanceStrategy = DbClearanceStrategy.DELETE_DATA): Promise<void> {
-    const dbExists = await this.dbExists()
-    if (!dbExists) {
-      return
-    }
-
-    if (method === DbClearanceStrategy.RECREATE_DB) {
-      try {
-        await this.driver.dropDatabase(this.driver.name)
-        await this.driver.createDatabase(this.driver.name)
-        _debug.info(`DB ${this.driver.name} re-created`)
-        return
-      } catch (e) {
-        throw new Error(`Failed to re-create DB ${this.driver.name}`)
-      }
-    }
-
-    // TODO: graphs are not cleared yet ?
-
-    (await this.driver.collections()).map(async (collection) => await collection.truncate())
-    _debug.info(`DB ${this.driver.name} cleaned`)
-  }
-
-  public async createDbStructure(
-    structure: DbStructure,
-    clearDb?: DbClearanceStrategy
-  ): Promise<DbStructureResult> {
-    if (!structure?.collections) {
-      throw new Error('No DB structure specified')
-    }
-
-    const response: DbStructureResult = {
-      database: undefined,
-      collections: [],
-      graphs: [],
-      error: false
-    }
-
-    const dbExists = await this.dbExists()
-
-    if (!dbExists) {
-      _debug.info(`Database '${this.driver.name}' not found`)
-
-      try {
-        await this.system.createDatabase(this.driver.name)
-        _debug.info(`Database '${this.driver.name}' created`)
-        response.database = 'Database created'
-      } catch (e) {
-        response.database = 'Failed to create database'
-        response.error = e
-        _debug.info(`Failed to create database '${this.driver.name}'`)
-        _debug.errors(e)
-        return response
-      }
-    } else {
-      if (clearDb) {
-        await this.clearDb(clearDb)
-        _debug.info(`Database '${this.driver.name}' cleared with method ${clearDb}`)
-        response.database = `Database cleared with method ${clearDb}`
-      } else {
-        _debug.info(`Database '${this.driver.name}' found`)
-        response.database = 'Database found'
-      }
-    }
-
-    const validation = await this.validateDbStructure(structure)
-
-    if (validation.collections) {
-      if (!response.collections) {
-        response.collections = []
-      }
-
-      for (const entity of validation.collections) {
-        if (!entity.exists) {
-          try {
-            await this.collection(entity.name).create()
-            response.collections.push(`Collection '${entity.name}' created`)
-          } catch (e) {
-            response.collections.push(`Failed to create collection '${entity.name}'`)
-            response.error = e
-            _debug.errors(`Failed to create collection '${entity.name}'`)
-            _debug.errors(e)
-            return response
-          }
-        } else {
-          response.collections.push(`Collection '${entity.name}' found`)
-        }
-      }
-    }
-
-    if (validation.graphs) {
-      if (!response.graphs) {
-        response.graphs = []
-      }
-
-      for (const entity of validation.graphs) {
-        if (!entity.exists) {
-          const graph = structure.graphs
-            ? structure.graphs.filter((graph) => graph.name === entity.name)[0]
-            : undefined
-
-          if (graph?.edges && graph.edges.length > 0) {
-            try {
-              await this.driver.graph(graph.name).create(graph.edges)
-              response.graphs.push(`Graph '${entity.name}' created`)
-            } catch (e) {
-              response.graphs.push(`Failed to create graph '${entity.name}'`)
-              response.error = e
-              _debug.errors(`Failed to create graph '${entity.name}'`)
-              _debug.errors(e)
-              return response
-            }
-          }
-        } else {
-          response.graphs.push(`Graph '${entity.name}' found`)
-        }
-      }
-    }
-
-    return response
-  }
-
-  public async validateDbStructure(structure: DbStructure): Promise<DbStructureValidation> {
-    const response: DbStructureValidation = {
-      message: undefined,
-      database: undefined,
-      collections: [],
-      graphs: []
-    }
-
-    if (!structure?.collections) {
-      return response
-    }
-
-    const dbExists = await this.dbExists()
-    if (!dbExists) {
-      response.message = 'Database does not exist'
-      response.database = { name: this.driver.name, exists: false }
-      return response
-    }
-
-    response.database = { name: this.driver.name, exists: true }
-
-    const collectionAvailability = await this.checkAvailableCollections(structure.collections)
-    response.collections = collectionAvailability.all
-
-    if (!collectionAvailability.allExist) {
-      response.message = 'Required collections do not exist'
-    }
-
-    const graphAvailability = await this.checkAvailableGraphs(structure.graphs)
-    response.graphs = graphAvailability.all
-
-    if (!graphAvailability.allExist) {
-      if (response.message) {
-        response.message = response.message + ', and required graphs do not exist'
-      } else {
-        response.message = 'Required graphs do not exist'
-      }
-    }
-
-    return response
-  }
-
-  /** @internal */
-  private async checkAvailableCollections(collections: string[] | undefined): Promise<EntityAvailability> {
-    const response: EntityAvailability = {
-      all: [],
-      missing: [],
-      existing: [],
-      allExist: false
-    }
-
-    if (!collections || collections.length === 0) {
-      return response
-    }
-
-    response.existing = (await this.driver.listCollections()).map((c) => c.name)
-
-    for (const collection of collections) {
-      if (response.existing.includes(collection)) {
-        response.all.push({ name: collection, exists: true })
-      } else {
-        response.all.push({ name: collection, exists: false })
-        response.missing.push(collection)
-      }
-    }
-
-    if (response.missing.length === 0) {
-      response.allExist = true
-    }
-
-    return response
-  }
-
-  /** @internal */
-  private async checkAvailableGraphs(graphs: string[] | GraphSchema[] | undefined): Promise<EntityAvailability> {
-    const response: EntityAvailability = {
-      all: [],
-      missing: [],
-      existing: [],
-      allExist: false
-    }
-
-    if (!graphs || graphs.length === 0) {
-      return response
-    }
-
-    response.existing = (await this.driver.listGraphs()).map((c) => c.name)
-
-    for (const graph of toGraphNames(graphs)) {
-      if (response.existing.includes(graph)) {
-        response.all.push({ name: graph, exists: true })
-      } else {
-        response.all.push({ name: graph, exists: false })
-        response.missing.push(graph)
-      }
-    }
-
-    if (response.missing.length === 0) {
-      response.allExist = true
-    }
-
-    return response
-  }
 }
+
+// _isConnectionError(e) {
+//   if (e.code && e.code === 'ECONNREFUSED') {
+//     return true
+//   } else if (e.message && e.message.includes('ECONNREFUSED')) {
+//     return true
+//   }
+//   return false
+// }
