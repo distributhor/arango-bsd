@@ -1,6 +1,6 @@
 {
   "name": "@distributhor/guacamole",
-  "version": "0.8.20",
+  "version": "0.8.21",
   "description": "A backseat driver for ArangoDB",
   "homepage": "https://distributhor.github.io/guacamole/",
   "license": "MIT",
@@ -17,6 +17,10 @@
   "files": [
     "LICENSE.md",
     "README.md",
+    "/dist/dbms.d.ts",
+    "/dist/dbms.d.ts.map",
+    "/dist/dbms.js",
+    "/dist/dbms.js.map",
     "/dist/index.d.ts",
     "/dist/index.d.ts.map",
     "/dist/index.js",
