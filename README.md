@@ -126,7 +126,6 @@ const peopleNamedNicoV4 = await fetchByPropertyValueAndCriteria(
 
 The documentation below does not replace the official [API Reference](https://distributhor.github.io/guacamole/) (which contain additional details), but it does provide simple introductions and usage examples for each function. The snippets without checkmarks imply that the documentation is not yet done for that section, but gives an interim overview of what is to come.
 
-### Without Garnish
 #### - Constructors & Connection Management
 - [x] [ArangoDB](#ArangoDB)
 - [x] [ArangoConnection](#ArangoConnection)
@@ -147,7 +146,6 @@ The documentation below does not replace the official [API Reference](https://di
 - [ ] [fetchByCriteria](#fetchByCriteria)
 - [ ] [fetchByPropertiesAndCriteria](#fetchByPropertiesAndCriteria)
 
-### Regular Guacamole
 #### - Criteria Queries - But For Easier Human Digestion
 - [ ] [fetchByPropertyValue](#fetchByPropertyValue)
 - [ ] [fetchByAnyPropertyValue](#fetchByAnyPropertyValue)
