@@ -267,7 +267,28 @@ export class ArangoConnection {
   }
 }
 
-export class ArangoDBWithoutGarnish {
+/**
+ * A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html)
+ * instance. It provides direct and easy access to the ArangoJS instance itself, but also adds a few convenience methods,
+ * for optional use.
+ *
+ * The constructor accepts an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html)
+ *
+ * ```typescript
+ * import { aql } from "arangojs/aql";
+ * import { ArangoDB } from "@distributhor/guacamole";
+ *
+ * const db = new ArangoDB({ databaseName: "name", url: "http://127.0.0.1:8529", auth: { username: "admin", password: "letmein" } });
+ *
+ * // the native ArangoJS driver instance is exposed on the `db.driver` property
+ * db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ *
+ * // the backseat driver method, which immediately calls cursor.all()
+ * // on the results, returning all the documents, and not the cursor
+ * db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
+ * ```
+ */
+export class ArangoDB {
   /**
    * A property that exposes the native `ArangoJS`
    * [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html) instance.
@@ -901,6 +922,135 @@ export class ArangoDBWithoutGarnish {
     })
   }
 
+  public async fetchByPropertyValue<T = any>(
+    collection: string,
+    propertyValue: PropertyValue,
+    options?: FetchOptions
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    _debugFilters('fetchByPropertyValue', this.guacamole, options)
+    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
+  }
+
+  public async fetchByAnyPropertyValue<T = any>(
+    collection: string,
+    propertyValue: PropertyValue[],
+    options?: FetchOptions
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    _debugFilters('fetchByAnyPropertyValue', this.guacamole, options)
+    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
+  }
+
+  public async fetchByAllPropertyValues<T = any>(
+    collection: string,
+    propertyValues: PropertyValue[],
+    options?: FetchOptions
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    _debugFilters('fetchByAllPropertyValues', this.guacamole, options)
+    return await this._fetchByPropValues(collection, propertyValues, MatchType.ALL, undefined, options)
+  }
+
+  public async fetchOneByPropertyValue<T = any>(
+    collection: string,
+    propertyValue: PropertyValue,
+    options?: FetchOptions
+  ): Promise<T | T[] | null> {
+    _debugFilters('fetchOneByPropertyValue', this.guacamole, options)
+    return await this.returnOneInternal<T>(
+      Queries.fetchByMatchingProperty(
+        this.collection(collection),
+        propertyValue,
+        this._queryOpts(options)
+      ), options)
+  }
+
+  public async fetchOneByAnyPropertyValue<T = any>(
+    collection: string,
+    propertyValues: PropertyValue[],
+    options?: FetchOptions
+  ): Promise<T | T[] | null> {
+    _debugFilters('fetchOneByAnyPropertyValue', this.guacamole, options)
+    return await this.returnOneInternal<T>(
+      Queries.fetchByMatchingAnyProperty(
+        this.collection(collection),
+        propertyValues,
+        this._queryOpts(options)
+      ), options)
+  }
+
+  public async fetchOneByAllPropertyValues<T = any>(
+    collection: string,
+    propertyValues: PropertyValue[],
+    options?: FetchOptions
+  ): Promise<T | T[] | null> {
+    _debugFilters('fetchOneByAllPropertyValues', this.guacamole, options)
+    return await this.returnOneInternal<T>(
+      Queries.fetchByMatchingAllProperties(
+        this.collection(collection),
+        propertyValues,
+        this._queryOpts(options)
+      ), options)
+  }
+
+  public async fetchByPropertyValueAndCriteria<T = any>(
+    collection: string,
+    propertyValue: PropertyValue,
+    criteria: string | AqlQuery | Filter | Criteria,
+    options?: FetchOptions
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    _debugFilters('fetchByPropertyValueAndCriteria', this.guacamole, options)
+    const filterCriteria = typeof criteria === 'string'
+      ? { filter: criteria }
+      : criteria
+
+    return await this._fetchByPropValues(
+      collection,
+      propertyValue,
+      MatchType.ANY,
+      filterCriteria,
+      options
+    )
+  }
+
+  public async fetchByAnyPropertyValueAndCriteria<T = any>(
+    collection: string,
+    propertyValue: PropertyValue[],
+    criteria: string | Filter | Criteria,
+    options?: FetchOptions
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    _debugFilters('fetchByAnyPropertyValueAndCriteria', this.guacamole, options)
+    const filterCriteria = typeof criteria === 'string'
+      ? { filter: criteria }
+      : criteria
+
+    return await this._fetchByPropValues(
+      collection,
+      propertyValue,
+      MatchType.ANY,
+      filterCriteria,
+      options
+    )
+  }
+
+  public async fetchByAllPropertyValuesAndCriteria<T = any>(
+    collection: string,
+    propertyValues: PropertyValue[],
+    criteria: string | Filter | Criteria,
+    options?: FetchOptions
+  ): Promise<ArrayCursor | QueryResult<T>> {
+    _debugFilters('fetchByAllPropertyValuesAndCriteria', this.guacamole, options)
+    const filterCriteria = typeof criteria === 'string'
+      ? { filter: criteria }
+      : criteria
+
+    return await this._fetchByPropValues(
+      collection,
+      propertyValues,
+      MatchType.ALL,
+      filterCriteria,
+      options
+    )
+  }
+
   // WFC should not be FetchOptions
   public async validateUniqueConstraint(
     collection: string,
@@ -1042,163 +1192,6 @@ export class ArangoDBWithoutGarnish {
       : documents
 
     return toQueryResult(data, result, options)
-  }
-}
-
-/**
- * A thin wrapper around an `ArangoJS` [Database](https://arangodb.github.io/arangojs/8.1.0/classes/database.Database.html)
- * instance. It provides direct and easy access to the ArangoJS instance itself, but also adds a few convenience methods,
- * for optional use.
- *
- * The constructor accepts an `ArangoJS` [Config](https://arangodb.github.io/arangojs/8.1.0/types/connection.Config.html)
- *
- * ```typescript
- * import { aql } from "arangojs/aql";
- * import { ArangoDB } from "@distributhor/guacamole";
- *
- * const db = new ArangoDB({ databaseName: "name", url: "http://127.0.0.1:8529", auth: { username: "admin", password: "letmein" } });
- *
- * // the native ArangoJS driver instance is exposed on the `db.driver` property
- * db.driver.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
- *
- * // the backseat driver method, which immediately calls cursor.all()
- * // on the results, returning all the documents, and not the cursor
- * db.query(aql`FOR d IN user FILTER d.name LIKE ${name} RETURN d`);
- * ```
- */
-export class ArangoDB extends ArangoDBWithoutGarnish {
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(db: Config | Database, options?: GuacamoleOptions) {
-    super(db, options)
-  }
-
-  public async fetchByPropertyValue<T = any>(
-    collection: string,
-    propertyValue: PropertyValue,
-    options?: FetchOptions
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    _debugFilters('fetchByPropertyValue', this.guacamole, options)
-    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
-  }
-
-  public async fetchByAnyPropertyValue<T = any>(
-    collection: string,
-    propertyValue: PropertyValue[],
-    options?: FetchOptions
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    _debugFilters('fetchByAnyPropertyValue', this.guacamole, options)
-    return await this._fetchByPropValues(collection, propertyValue, MatchType.ANY, undefined, options)
-  }
-
-  public async fetchByAllPropertyValues<T = any>(
-    collection: string,
-    propertyValues: PropertyValue[],
-    options?: FetchOptions
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    _debugFilters('fetchByAllPropertyValues', this.guacamole, options)
-    return await this._fetchByPropValues(collection, propertyValues, MatchType.ALL, undefined, options)
-  }
-
-  public async fetchOneByPropertyValue<T = any>(
-    collection: string,
-    propertyValue: PropertyValue,
-    options?: FetchOptions
-  ): Promise<T | T[] | null> {
-    _debugFilters('fetchOneByPropertyValue', this.guacamole, options)
-    return await this.returnOneInternal<T>(
-      Queries.fetchByMatchingProperty(
-        this.collection(collection),
-        propertyValue,
-        this._queryOpts(options)
-      ), options)
-  }
-
-  public async fetchOneByAnyPropertyValue<T = any>(
-    collection: string,
-    propertyValues: PropertyValue[],
-    options?: FetchOptions
-  ): Promise<T | T[] | null> {
-    _debugFilters('fetchOneByAnyPropertyValue', this.guacamole, options)
-    return await this.returnOneInternal<T>(
-      Queries.fetchByMatchingAnyProperty(
-        this.collection(collection),
-        propertyValues,
-        this._queryOpts(options)
-      ), options)
-  }
-
-  public async fetchOneByAllPropertyValues<T = any>(
-    collection: string,
-    propertyValues: PropertyValue[],
-    options?: FetchOptions
-  ): Promise<T | T[] | null> {
-    _debugFilters('fetchOneByAllPropertyValues', this.guacamole, options)
-    return await this.returnOneInternal<T>(
-      Queries.fetchByMatchingAllProperties(
-        this.collection(collection),
-        propertyValues,
-        this._queryOpts(options)
-      ), options)
-  }
-
-  public async fetchByPropertyValueAndCriteria<T = any>(
-    collection: string,
-    propertyValue: PropertyValue,
-    criteria: string | AqlQuery | Filter | Criteria,
-    options?: FetchOptions
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    _debugFilters('fetchByPropertyValueAndCriteria', this.guacamole, options)
-    const filterCriteria = typeof criteria === 'string'
-      ? { filter: criteria }
-      : criteria
-
-    return await this._fetchByPropValues(
-      collection,
-      propertyValue,
-      MatchType.ANY,
-      filterCriteria,
-      options
-    )
-  }
-
-  public async fetchByAnyPropertyValueAndCriteria<T = any>(
-    collection: string,
-    propertyValue: PropertyValue[],
-    criteria: string | Filter | Criteria,
-    options?: FetchOptions
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    _debugFilters('fetchByAnyPropertyValueAndCriteria', this.guacamole, options)
-    const filterCriteria = typeof criteria === 'string'
-      ? { filter: criteria }
-      : criteria
-
-    return await this._fetchByPropValues(
-      collection,
-      propertyValue,
-      MatchType.ANY,
-      filterCriteria,
-      options
-    )
-  }
-
-  public async fetchByAllPropertyValuesAndCriteria<T = any>(
-    collection: string,
-    propertyValues: PropertyValue[],
-    criteria: string | Filter | Criteria,
-    options?: FetchOptions
-  ): Promise<ArrayCursor | QueryResult<T>> {
-    _debugFilters('fetchByAllPropertyValuesAndCriteria', this.guacamole, options)
-    const filterCriteria = typeof criteria === 'string'
-      ? { filter: criteria }
-      : criteria
-
-    return await this._fetchByPropValues(
-      collection,
-      propertyValues,
-      MatchType.ALL,
-      filterCriteria,
-      options
-    )
   }
 }
 

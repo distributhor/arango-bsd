@@ -1,7 +1,7 @@
 /* eslint-disable jest/no-conditional-expect */
 import { aql } from 'arangojs/aql'
 import { ArrayCursor } from 'arangojs/cursor'
-import { ArangoConnection, ArangoDBWithoutGarnish } from '../../src/index'
+import { ArangoConnection, ArangoDB } from '../../src/index'
 import { MatchType, QueryResult } from '../../src/types'
 
 import { VAR } from './jest.shared'
@@ -12,7 +12,7 @@ const conn = new ArangoConnection([{
   auth: { username: VAR.dbAdminUser, password: VAR.dbAdminPassword }
 }], { printQueries: false, debugFilters: false })
 
-const db = new ArangoDBWithoutGarnish({
+const db = new ArangoDB({
   databaseName: VAR.dbName,
   url: VAR.dbUrl,
   auth: { username: VAR.dbAdminUser, password: VAR.dbAdminPassword }
