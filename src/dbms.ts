@@ -1,9 +1,7 @@
 import debug from 'debug'
-
 import { Database } from 'arangojs'
 import { Config } from 'arangojs/connection'
 
-/** @internal */
 const _debug = {
   errors: debug('guacamole:debug:error'),
   info: debug('guacamole:debug:info')
@@ -59,12 +57,12 @@ export interface DbStructureResponse {
 }
 
 /** @internal */
-export function isGraphDefinition(x: any): x is GraphDefinition {
+function isGraphDefinition(x: any): x is GraphDefinition {
   return x.name
 }
 
 /** @internal */
-export function isGraphDefinitionArray(x: any[]): x is GraphDefinition[] {
+function isGraphDefinitionArray(x: any[]): x is GraphDefinition[] {
   return x.length > 0 && isGraphDefinition(x[0])
 }
 

@@ -7,6 +7,6 @@
     "excludePrivate": true,
     "excludeProtected": true,
     "githubPages": true,
-    "entryPoints": ["./src/index.ts", "./src/types.ts", "./src/queries.ts"],
+    "entryPoints": ["./src/index.ts", "./src/types.ts"],
     "titleLink": "https://distributhor.github.io/guacamole/index.html"
 }
