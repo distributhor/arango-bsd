@@ -24,7 +24,8 @@ import {
   DocumentDataWithKey,
   isObjectWithKey,
   GraphFetchInstruction,
-  GraphFetchStrategy
+  GraphFetchStrategy,
+  GraphFetchOptions
 } from './types'
 import { DbAdmin } from './dbms'
 import { Queries } from './queries'
@@ -1606,7 +1607,7 @@ export class ArangoDBWithSpice extends ArangoDB {
 
   public async fetchRelations<T = any>(
     fetch: GraphFetchInstruction,
-    options?: any
+    options?: GraphFetchOptions
   ): Promise<QueryResult<T>> {
     return await this.return(Queries.fetchRelations(fetch, options))
   }

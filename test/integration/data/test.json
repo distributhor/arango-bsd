@@ -1,12 +1,85 @@
 {
-    "data": [
+    "_id": "cyclists/416513161",
+    "_key": "416513161",
+    "_rev": "_iAB49E----",
+    "country": "USA",
+    "disciplines": "Road, TT, Run, Swim",
+    "name": "Lance",
+    "results": {
+        "list": [
+            "1993, UCI World Champs Road, 1st",
+            "1996, Liège - Bastogne - Liège, 2nd",
+            "1996, Paris - Nice, 2nd",
+            "1998, La Vuelta a España, 4th",
+            "2001, Tour de Suisse, 1st",
+            "2003, Critérium du Dauphiné, 1st",
+            "2005, Tour de France, 1st",
+            "2009, Tour de France, 3rd"
+        ],
+        "year": {
+            "1993": [
+                "1st, UCI World Champs Road"
+            ],
+            "1996": [
+                "2nd, Liège - Bastogne - Liège",
+                "2nd, Paris - Nice"
+            ],
+            "1998": [
+                "4th, La Vuelta a España"
+            ],
+            "2001": [
+                "1st, Tour de Suisse"
+            ],
+            "2003": [
+                "1st, Critérium du Dauphiné"
+            ],
+            "2005": [
+                "1st, Tour de France"
+            ],
+            "2009": [
+                "3rd, Tour de France"
+            ]
+        },
+        "palmares": "1993, UCI World Champs Road, 1st; 1996, Liège - Bastogne - Liège, 2nd; 1996, Paris - Nice, 2nd; 1998, La Vuelta a España, 4th; 2001, Tour de Suisse, 1st; 2003, Critérium du Dauphiné, 1st; 2005, Tour de France, 1st; 2009, Tour de France, 3rd"
+    },
+    "stats": {
+        "wins": 71,
+        "grandTours": 15,
+        "classics": 18
+    },
+    "strength": "General Classification",
+    "surname": "Armstrong",
+    "trademark": "livestrong",
+    "races": [
         {
-            "_key": "416435754",
-            "_id": "cyclists/416435754",
-            "name": "Alejandro",
-            "surname": "Valverde",
-            "country": "Spain"
+            "_from": "races/416513215",
+            "_id": "race_attendance/416513356",
+            "_key": "416513356",
+            "_rev": "_iAB49F2--_",
+            "_to": "cyclists/416513161",
+            "position": "3rd",
+            "result": 3,
+            "year": "2009",
+            "vertex": {
+                "discipline": "road",
+                "name": "Tour de France",
+                "type": "grand_tour"
+            }
+        },
+        {
+            "_from": "races/416513215",
+            "_id": "race_attendance/416513355",
+            "_key": "416513355",
+            "_rev": "_iAB49F2---",
+            "_to": "cyclists/416513161",
+            "position": "1st",
+            "result": 1,
+            "year": "2005",
+            "vertex": {
+                "discipline": "road",
+                "name": "Tour de France",
+                "type": "grand_tour"
+            }
         }
-    ],
-    "size": 2
+    ]
 }

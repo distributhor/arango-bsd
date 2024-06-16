@@ -14,7 +14,9 @@ import {
   isSearch,
   isFilter,
   GraphFetchInstruction,
-  GraphFetchStrategy
+  GraphFetchStrategy,
+  EdgeDataScope,
+  GraphFetchOptions
 } from './types'
 
 const debugQueries = debug('guacamole:log:query')
@@ -627,25 +629,75 @@ export function uniqueConstraintQuery(
   return query
 }
 
-export function fetchRelations(fetch: GraphFetchInstruction, options?: any): string {
-  const { strategy, direction, startFrom, usingGraph } = fetch
+// function reverseDirection(direction: string) {
+//   if (direction === 'OUTBOUND') {
+//     return 'INBOUND'
+//   }
+
+//   return 'OUTBOUND'
+// }
+
+export function fetchRelations(
+  fetch: GraphFetchInstruction,
+  options?: GraphFetchOptions
+): string {
+  const { startFrom, usingGraph, direction } = fetch
 
   const bound = (direction.toUpperCase() === 'IN' || direction.toUpperCase() === 'INBOUND')
     ? 'INBOUND'
     : 'OUTBOUND'
 
-  const propNameVertex = fetch.vertexPropName ? fetch.vertexPropName : 'vertex'
-  const propNameEdges = fetch.edgePropName ? fetch.edgePropName : 'edges'
+  const propNameVertex: string = fetch.vertexPropName ? fetch.vertexPropName : 'vertex'
+  const propNameEdges: string = fetch.edgePropName ? fetch.edgePropName : 'edges'
+
+  let strategy = GraphFetchStrategy.NON_DISTINCT_VERTEX
+  let edgeDataScope = EdgeDataScope.NONE
+
+  if (fetch?.strategy) {
+    strategy = fetch.strategy
+  }
+
+  if (options?.strategy) {
+    strategy = options.strategy
+  }
+
+  if (fetch?.edgeDataScope) {
+    edgeDataScope = fetch.edgeDataScope
+  }
+
+  if (options?.edgeDataScope) {
+    edgeDataScope = options.edgeDataScope
+  }
 
   if (
     strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES ||
-    strategy === GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_MERGED
+    strategy === GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_JOINED
   ) {
-    let query = 'LET ve = ('
-    query += 'FOR v,e IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null '
-    // query += 'RETURN MERGE(e, { "_vertex": v._key })'
-    query += 'RETURN e'
-    query += ') ' // query += ') RETURN ve'
+    let query = ''
+    if (edgeDataScope !== EdgeDataScope.NONE) {
+      query += 'LET ve = ('
+      query += 'FOR v,e IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null '
+      // if (bound === 'OUTBOUND') {
+      //   query += 'LET reverseDoc = DOCUMENT(e._from) '
+      // } else {
+      //   query += 'LET reverseDoc = DOCUMENT(e._to) '
+      // }
+      query += 'LET reverseDoc = DOCUMENT(e._from) '
+      if (edgeDataScope === EdgeDataScope.JOINED) {
+        query += 'RETURN MERGE_RECURSIVE(e, { "vertex": reverseDoc }) '
+      } else {
+        // edgeDataScope === EdgeDataScope.JOINED
+        query += 'RETURN MERGE_RECURSIVE(e, UNSET(reverseDoc, "_key", "_id", "_rev", "_from", "_to" )) '
+        // trim.push(literal(`UNSET_RECURSIVE(d, "${options.trim.omit.join('", "')}")`))
+      }
+      query += ') '
+    } else {
+      query += 'LET ve = ('
+      query += 'FOR v,e IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null '
+      // query += 'RETURN MERGE_RECURSIVE(e, { "_vertex": v._key })'
+      query += 'RETURN e'
+      query += ') ' // query += ') RETURN ve'
+    }
 
     query += 'LET distinctVsGroupedByE = ('
     query += 'FOR i IN ve COLLECT vertexId = i._to INTO edgesGrouped = i RETURN { "vertex": vertexId, "edges": edgesGrouped }'
@@ -653,11 +705,13 @@ export function fetchRelations(fetch: GraphFetchInstruction, options?: any): str
     query += ') '
 
     if (strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES) {
-      query += 'FOR dve IN distinctVsGroupedByE LET d = DOCUMENT(dve.vertex) '
+      query += 'FOR dve IN distinctVsGroupedByE '
+      query += 'LET d = DOCUMENT(dve.vertex) '
       query += 'RETURN { "' + propNameVertex + '": d, "' + propNameEdges + '": dve.edges}'
-    } else if (strategy === GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_MERGED) {
-      query += 'FOR dve IN distinctVsGroupedByE LET d = DOCUMENT(dve.vertex) '
-      query += 'RETURN MERGE(d, { "' + propNameEdges + '": dve.edges})'
+    } else if (strategy === GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_JOINED) {
+      query += 'FOR dve IN distinctVsGroupedByE '
+      query += 'LET d = DOCUMENT(dve.vertex) '
+      query += 'RETURN MERGE_RECURSIVE(d, { "' + propNameEdges + '": dve.edges})'
     }
 
     if (options?.printQuery) {

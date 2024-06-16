@@ -1,4 +1,4 @@
-import { ArangoConnection, GraphFetchInstruction, GraphFetchStrategy } from '../../src/index'
+import { ArangoConnection, EdgeDataScope, GraphFetchInstruction, GraphFetchStrategy } from '../../src/index'
 
 import { VAR } from './jest.shared'
 
@@ -23,6 +23,12 @@ function fetchAllCyclistsInTeam(id: string): GraphFetchInstruction {
 function fetchAllCyclistsInRace(id: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
     id, VAR.raceCollection, VAR.raceAttendanceGraph, 'OUTBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES, 'cyclist', 'races'
+  )
+}
+
+function fetchAllRacesForCyclist(id: string): GraphFetchInstruction {
+  return ArangoConnection.util.toGraphFetchInstruction(
+    id, VAR.cyclistCollection, VAR.raceAttendanceGraph, 'INBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES, 'cyclist', 'races'
   )
 }
 
@@ -174,12 +180,22 @@ describe('Guacamole Integration Tests', () => {
     )
 
     const tourDeFranceHistory = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllCyclistsInRace(tourDeFrance._key)
+      fetchAllCyclistsInRace(tourDeFrance._key), {
+        strategy: GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_JOINED,
+        edgeDataScope: EdgeDataScope.JOINED
+      }
     )
 
     // console.log(JSON.stringify(tourDeFranceHistory))
+    console.log(JSON.stringify(tourDeFranceHistory.data[0]))
     console.log(tourDeFranceHistory.size)
-    console.log(tourDeFranceHistory.data[0])
+
+    const nibaliHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllRacesForCyclist(nibali._key), { edgeDataScope: EdgeDataScope.JOINED }
+    )
+
+    console.log(JSON.stringify(nibaliHistory.data[0]))
+    console.log(nibaliHistory.size)
 
     // //////////////////////////////////////////////////////////////////////////////////
     //
@@ -197,26 +213,6 @@ describe('Guacamole Integration Tests', () => {
       { graph: VAR.teamMembershipGraph, edge: VAR.teamMembershipEdge }
     ])
 
-    // console.log(result1A[0])
-    // [
-    //   {
-    //     _id: 'cyclists/416043956',
-    //     _key: '416043956',
-    //     _rev: '_i_YPJHC--O',
-    //     team_members: [
-    //       {
-    //         _id: 'team_members/416044057',
-    //         _key: '416044057',
-    //         _rev: '_i_YPJIG--_'
-    //       },
-    //       {
-    //         _id: 'team_members/416044033',
-    //         _key: '416044033',
-    //         _rev: '_i_YPJH2--_'
-    //       }
-    //     ]
-    //   }
-    // ]
     expect(result1A.length).toEqual(1)
     expect(result1A).toBeDefined()
     expect(Array.isArray(result1A)).toBeTruthy()

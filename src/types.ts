@@ -109,16 +109,29 @@ export enum GraphFetchStrategy {
   NON_DISTINCT_VERTEX = 'NON_DISTINCT_VERTEX',
   DISTINCT_VERTEX_EDGE_TUPLES = 'DISTINCT_VERTEX_EDGE_TUPLES',
   NON_DISTINCT_VERTEX_EDGE_TUPLES = 'NON_DISTINCT_VERTEX_EDGE_TUPLES',
-  DISTINCT_VERTEX_WITH_EDGES_MERGED = 'DISTINCT_VERTEX_WITH_EDGES_MERGED'
+  DISTINCT_VERTEX_WITH_EDGES_JOINED = 'DISTINCT_VERTEX_WITH_EDGES_JOINED'
+}
+
+export enum EdgeDataScope {
+  JOINED = 'JOINED',
+  MERGED = 'MERGED',
+  NONE = 'NONE'
 }
 
 export interface GraphFetchInstruction {
-  strategy: GraphFetchStrategy
+  strategy?: GraphFetchStrategy
   startFrom: DocumentId
   usingGraph: string
   direction: string
   vertexPropName?: string
   edgePropName?: string
+  edgeDataScope?: EdgeDataScope
+}
+
+export interface GraphFetchOptions {
+  strategy?: GraphFetchStrategy
+  edgeDataScope?: EdgeDataScope
+  printQuery?: boolean
 }
 
 export interface DocumentUpdate<T extends Record<string, any> = any> {

@@ -144,7 +144,7 @@
     ]
   },
   {
-    "stategy": "DISTINCT_VERTEX_WITH_EDGES_MERGED",
+    "stategy": "DISTINCT_VERTEX_WITH_EDGES_JOINED",
     "examples": [
       {
         "description": "fetchAllCyclistsInRace",
