@@ -188,8 +188,8 @@ const staticUtils = {
     graph: string,
     direction: string,
     strategy: GraphFetchStrategy,
-    propNameVertex?: string,
-    propNameEdges?: string
+    vertexPropName?: string,
+    edgePropName?: string
   ): GraphFetchInstruction {
     return {
       usingGraph: graph,
@@ -199,8 +199,8 @@ const staticUtils = {
       },
       direction,
       strategy,
-      propNameVertex,
-      propNameEdges
+      vertexPropName,
+      edgePropName
     }
   }
 }

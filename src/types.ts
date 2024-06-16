@@ -105,11 +105,11 @@ export interface DocumentId {
 }
 
 export enum GraphFetchStrategy {
-  DISTINCT_VERTEX_ONLY = 'DISTINCT_VERTEX_ONLY',
-  NON_DISTINCT_VERTEX_ONLY = 'NON_DISTINCT_VERTEX_ONLY',
+  DISTINCT_VERTEX = 'DISTINCT_VERTEX',
+  NON_DISTINCT_VERTEX = 'NON_DISTINCT_VERTEX',
+  DISTINCT_VERTEX_EDGE_TUPLES = 'DISTINCT_VERTEX_EDGE_TUPLES',
   NON_DISTINCT_VERTEX_EDGE_TUPLES = 'NON_DISTINCT_VERTEX_EDGE_TUPLES',
-  DISTINCT_VERTEX_WITH_EDGES_MERGED = 'DISTINCT_VERTEX_WITH_EDGES_MERGED',
-  DISTINCT_VERTEX_EDGES_TUPLES = 'DISTINCT_VERTEX_EDGES_TUPLES',
+  DISTINCT_VERTEX_WITH_EDGES_MERGED = 'DISTINCT_VERTEX_WITH_EDGES_MERGED'
 }
 
 export interface GraphFetchInstruction {
@@ -117,8 +117,8 @@ export interface GraphFetchInstruction {
   startFrom: DocumentId
   usingGraph: string
   direction: string
-  propNameVertex?: string
-  propNameEdges?: string
+  vertexPropName?: string
+  edgePropName?: string
 }
 
 export interface DocumentUpdate<T extends Record<string, any> = any> {

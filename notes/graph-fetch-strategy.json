@@ -1,0 +1,186 @@
+[
+  {
+    "stategy": "DISTINCT_VERTEX",
+    "examples": [
+      {
+        "description": "fetchAllCyclistsInTeam",
+        "result": {
+          "data": [
+            {
+              "_key": "416435754",
+              "_id": "cyclists/416435754",
+              "name": "Alejandro",
+              "surname": "Valverde",
+              "country": "Spain"
+            }
+          ],
+          "size": 2
+        }
+      }
+    ]
+  },
+  {
+    "stategy": "NON_DISTINCT_VERTEX",
+    "examples": [
+      {
+        "description": "fetchAllCyclistsInTeam",
+        "result": {
+          "data": [
+            {
+              "_key": "416417687",
+              "_id": "cyclists/416417687",
+              "name": "Marc",
+              "surname": "Soler",
+              "country": "Spain"
+            }
+          ],
+          "size": 2
+        }
+      },
+      {
+        "description": "fetchAllTeamsForCyclist",
+        "result": {
+          "data": [
+            {
+              "_key": "416416356",
+              "_id": "teams/416416356",
+              "name": "Movistar - Caisse d'Epargne"
+            }
+          ],
+          "size": 2
+        }
+      }
+    ]
+  },
+  {
+    "stategy": "DISTINCT_VERTEX_EDGE_TUPLES",
+    "examples": [
+      {
+        "description": "fetchAllCyclistsInRace",
+        "result": {
+          "data": [
+            {
+              "cyclist": {
+                "_key": "416427102",
+                "_id": "cyclists/416427102",
+                "name": "Lance",
+                "surname": "Armstrong",
+                "country": "USA"
+              },
+              "races": [
+                {
+                  "_key": "416427297",
+                  "_id": "race_attendance/416427297",
+                  "_from": "races/416427156",
+                  "_to": "cyclists/416427102",
+                  "year": "2009",
+                  "position": "3rd",
+                  "result": 3
+                },
+                {
+                  "_key": "416427296",
+                  "_id": "race_attendance/416427296",
+                  "_from": "races/416427156",
+                  "_to": "cyclists/416427102",
+                  "year": "2005",
+                  "position": "1st",
+                  "result": 1
+                }
+              ]
+            }
+          ],
+          "size": 14
+        }
+      }
+    ]
+  },
+  {
+    "stategy": "NON_DISTINCT_VERTEX_EDGE_TUPLES",
+    "examples": [
+      {
+        "description": "fetchAllCyclistsInRace",
+        "result": {
+          "data": [
+            {
+              "cyclist": {
+                "_key": "416432888",
+                "_id": "cyclists/416432888",
+                "name": "Chris",
+                "surname": "Froome",
+                "country": "UK"
+              },
+              "races": {
+                "_key": "416433092",
+                "_id": "race_attendance/416433092",
+                "_from": "races/416432926",
+                "_to": "cyclists/416432888",
+                "year": "2017",
+                "position": "1st",
+                "result": 1
+              }
+            },
+            {
+              "cyclist": {
+                "_key": "416432888",
+                "_id": "cyclists/416432888",
+                "name": "Chris",
+                "surname": "Froome",
+                "country": "UK"
+              },
+              "races": {
+                "_key": "416433091",
+                "_id": "race_attendance/416433091",
+                "_from": "races/416432926",
+                "_to": "cyclists/416432888",
+                "year": "2015",
+                "position": "1st",
+                "result": 1
+              }
+            }
+          ],
+          "size": 27
+        }
+      }
+    ]
+  },
+  {
+    "stategy": "DISTINCT_VERTEX_WITH_EDGES_MERGED",
+    "examples": [
+      {
+        "description": "fetchAllCyclistsInRace",
+        "result": {
+          "data": [
+            {
+              "_id": "cyclists/416430078",
+              "_key": "416430078",
+              "country": "USA",
+              "name": "Lance",
+              "surname": "Armstrong",
+              "races": [
+                {
+                  "_key": "416430275",
+                  "_id": "race_attendance/416430275",
+                  "_from": "races/416430132",
+                  "_to": "cyclists/416430078",
+                  "year": "2009",
+                  "position": "3rd",
+                  "result": 3
+                },
+                {
+                  "_key": "416430274",
+                  "_id": "race_attendance/416430274",
+                  "_from": "races/416430132",
+                  "_to": "cyclists/416430078",
+                  "year": "2005",
+                  "position": "1st",
+                  "result": 1
+                }
+              ]
+            }
+          ],
+          "size": 14
+        }
+      }
+    ]
+  }
+]

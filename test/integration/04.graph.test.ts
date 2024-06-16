@@ -10,19 +10,19 @@ const conn = new ArangoConnection([{
 
 function fetchAllTeamsForCyclist(id: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
-    id, VAR.cyclistCollection, VAR.teamMembershipGraph, 'OUTBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX_ONLY
+    id, VAR.cyclistCollection, VAR.teamMembershipGraph, 'OUTBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX
   )
 }
 
 function fetchAllCyclistsInTeam(id: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
-    id, VAR.teamCollection, VAR.teamMembershipGraph, 'INBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX_ONLY
+    id, VAR.teamCollection, VAR.teamMembershipGraph, 'INBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX
   )
 }
 
 function fetchAllCyclistsInRace(id: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
-    id, VAR.raceCollection, VAR.raceAttendanceGraph, 'OUTBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGES_TUPLES
+    id, VAR.raceCollection, VAR.raceAttendanceGraph, 'OUTBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES, 'cyclist', 'races'
   )
 }
 
@@ -177,7 +177,7 @@ describe('Guacamole Integration Tests', () => {
       fetchAllCyclistsInRace(tourDeFrance._key)
     )
 
-    console.log(tourDeFranceHistory.data)
+    // console.log(JSON.stringify(tourDeFranceHistory))
     console.log(tourDeFranceHistory.size)
     console.log(tourDeFranceHistory.data[0])
 
