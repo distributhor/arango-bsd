@@ -7,10 +7,11 @@
         "result": {
           "data": [
             {
-              "_key": "416435754",
-              "_id": "cyclists/416435754",
-              "name": "Alejandro",
-              "surname": "Valverde",
+              "_key": "416522315",
+              "_id": "cyclists/416522315",
+              "_rev": "_iAC8tsi--Q",
+              "name": "Marc",
+              "surname": "Soler",
               "country": "Spain"
             }
           ],
@@ -27,8 +28,9 @@
         "result": {
           "data": [
             {
-              "_key": "416417687",
-              "_id": "cyclists/416417687",
+              "_key": "416522315",
+              "_id": "cyclists/416522315",
+              "_rev": "_iAC8tsi--Q",
               "name": "Marc",
               "surname": "Soler",
               "country": "Spain"
@@ -42,9 +44,16 @@
         "result": {
           "data": [
             {
-              "_key": "416416356",
-              "_id": "teams/416416356",
+              "_key": "416529195",
+              "_id": "teams/416529195",
+              "_rev": "_iADEJOW--F",
               "name": "Movistar - Caisse d'Epargne"
+            },
+            {
+              "_key": "416529189",
+              "_id": "teams/416529189",
+              "_rev": "_iADEJOW--_",
+              "name": "UAE Emirates"
             }
           ],
           "size": 2
@@ -57,39 +66,246 @@
     "examples": [
       {
         "description": "fetchAllCyclistsInRace",
+        "options": "EdgeDataScope.NONE",
         "result": {
           "data": [
             {
               "cyclist": {
-                "_key": "416427102",
-                "_id": "cyclists/416427102",
+                "_key": "416530651",
+                "_id": "cyclists/416530651",
+                "_rev": "_iADHHUW---",
                 "name": "Lance",
                 "surname": "Armstrong",
                 "country": "USA"
               },
               "races": [
                 {
-                  "_key": "416427297",
-                  "_id": "race_attendance/416427297",
-                  "_from": "races/416427156",
-                  "_to": "cyclists/416427102",
+                  "_key": "416530846",
+                  "_id": "race_attendance/416530846",
+                  "_from": "races/416530705",
+                  "_to": "cyclists/416530651",
+                  "_rev": "_iADHHVa--A",
                   "year": "2009",
                   "position": "3rd",
                   "result": 3
                 },
                 {
-                  "_key": "416427296",
-                  "_id": "race_attendance/416427296",
-                  "_from": "races/416427156",
-                  "_to": "cyclists/416427102",
+                  "_key": "416530845",
+                  "_id": "race_attendance/416530845",
+                  "_from": "races/416530705",
+                  "_to": "cyclists/416530651",
+                  "_rev": "_iADHHVa--_",
                   "year": "2005",
                   "position": "1st",
                   "result": 1
                 }
+              ],
+              "size": 2
+            }
+          ]
+        }
+      },
+      {
+        "description": "fetchAllCyclistsInRace",
+        "options": "EdgeDataScope.JOINED",
+        "result": {
+          "data": [
+            {
+              "cyclist": {
+                "_key": "416532105",
+                "_id": "cyclists/416532105",
+                "_rev": "_iADJIia---",
+                "name": "Lance",
+                "surname": "Armstrong",
+                "country": "USA"
+              },
+              "races": [
+                {
+                  "_from": "races/416532159",
+                  "_id": "race_attendance/416532300",
+                  "_key": "416532300",
+                  "_rev": "_iADJIkW--_",
+                  "_to": "cyclists/416532105",
+                  "position": "3rd",
+                  "result": 3,
+                  "year": "2009",
+                  "vertex": {
+                    "_key": "416532159",
+                    "_id": "races/416532159",
+                    "_rev": "_iADJIiq--F",
+                    "name": "Tour de France",
+                    "discipline": "road",
+                    "type": "grand_tour"
+                  }
+                },
+                {
+                  "_from": "races/416532159",
+                  "_id": "race_attendance/416532299",
+                  "_key": "416532299",
+                  "_rev": "_iADJIkW---",
+                  "_to": "cyclists/416532105",
+                  "position": "1st",
+                  "result": 1,
+                  "year": "2005",
+                  "vertex": {
+                    "_key": "416532159",
+                    "_id": "races/416532159",
+                    "_rev": "_iADJIiq--F",
+                    "name": "Tour de France",
+                    "discipline": "road",
+                    "type": "grand_tour"
+                  }
+                }
               ]
             }
           ],
-          "size": 14
+          "size": 2
+        }
+      },
+      {
+        "description": "fetchAllCyclistsInRace",
+        "options": "EdgeDataScope.MERGED",
+        "result": {
+          "data": [
+            {
+              "cyclist": {
+                "_key": "416533488",
+                "_id": "cyclists/416533488",
+                "_rev": "_iADKkfK---",
+                "name": "Lance",
+                "surname": "Armstrong",
+                "country": "USA"
+              },
+              "races": [
+                {
+                  "_from": "races/416533542",
+                  "_id": "race_attendance/416533683",
+                  "_key": "416533683",
+                  "_rev": "_iADKkg6--_",
+                  "_to": "cyclists/416533488",
+                  "position": "3rd",
+                  "result": 3,
+                  "year": "2009",
+                  "type": "grand_tour",
+                  "name": "Tour de France",
+                  "discipline": "road"
+                },
+                {
+                  "_from": "races/416533542",
+                  "_id": "race_attendance/416533682",
+                  "_key": "416533682",
+                  "_rev": "_iADKkg6---",
+                  "_to": "cyclists/416533488",
+                  "position": "1st",
+                  "result": 1,
+                  "year": "2005",
+                  "type": "grand_tour",
+                  "name": "Tour de France",
+                  "discipline": "road"
+                }
+              ]
+            }
+          ],
+          "size": 2
+        }
+      },
+      {
+        "description": "fetchAllRacesForCyclist",
+        "options": "EdgeDataScope.NONE",
+        "result": {
+          "data": [
+            {
+              "_id": "cyclists/416540178",
+              "_key": "416540178",
+              "_rev": "_iADcIhG--B",
+              "country": "Italy",
+              "name": "Vincenzo",
+              "surname": "Nibali",
+              "races": [
+                  {
+                      "_key": "416540468",
+                      "_id": "race_attendance/416540468",
+                      "_from": "races/416540233",
+                      "_to": "cyclists/416540178",
+                      "_rev": "_iADcIj6--C",
+                      "year": "2015",
+                      "position": "12th",
+                      "result": 12
+                  }
+              ]
+            }
+          ],
+          "size": 2
+        }
+      },
+      {
+        "description": "fetchAllRacesForCyclist",
+        "options": "EdgeDataScope.JOINED",
+        "result": {
+          "data": [
+            {
+              "_id": "cyclists/416541617",
+              "_key": "416541617",
+              "_rev": "_iADeEim--C",
+              "country": "Italy",
+              "disciplines": "Road",
+              "name": "Vincenzo",
+              "surname": "Nibali",
+              "races": [
+                  {
+                      "_from": "races/416541672",
+                      "_id": "race_attendance/416541907",
+                      "_key": "416541907",
+                      "_rev": "_iADeEkK--I",
+                      "_to": "cyclists/416541617",
+                      "position": "12th",
+                      "result": 12,
+                      "year": "2015",
+                      "vertex": {
+                          "_key": "416541672",
+                          "_id": "races/416541672",
+                          "_rev": "_iADeEiu--L",
+                          "name": "Critérium du Dauphiné",
+                          "discipline": "road",
+                          "type": "stage"
+                      }
+                  }
+              ]
+            }
+          ],
+          "size": 2
+        }
+      },
+      {
+        "description": "fetchAllRacesForCyclist",
+        "options": "EdgeDataScope.MERGED",
+        "result": {
+          "data": [
+            {
+              "_id": "cyclists/416543017",
+              "_key": "416543017",
+              "_rev": "_iADfQlm--I",
+              "country": "Italy",
+              "name": "Vincenzo",
+              "surname": "Nibali",
+              "races": [
+                  {
+                      "_from": "races/416543072",
+                      "_id": "race_attendance/416543307",
+                      "_key": "416543307",
+                      "_rev": "_iADfQnO--C",
+                      "_to": "cyclists/416543017",
+                      "position": "12th",
+                      "result": 12,
+                      "year": "2015",
+                      "type": "stage",
+                      "name": "Critérium du Dauphiné",
+                      "discipline": "road"
+                  }
+              ]
+            }
+          ],
+          "size": 2
         }
       }
     ]
@@ -148,33 +364,137 @@
     "examples": [
       {
         "description": "fetchAllCyclistsInRace",
+        "options": "EdgeDataScope.NONE",
         "result": {
           "data": [
             {
-              "_id": "cyclists/416430078",
-              "_key": "416430078",
+              "_id": "cyclists/416534917",
+              "_key": "416534917",
+              "_rev": "_iADMitC---",
               "country": "USA",
               "name": "Lance",
               "surname": "Armstrong",
               "races": [
                 {
-                  "_key": "416430275",
-                  "_id": "race_attendance/416430275",
-                  "_from": "races/416430132",
-                  "_to": "cyclists/416430078",
+                  "_key": "416535114",
+                  "_id": "race_attendance/416535114",
+                  "_from": "races/416534971",
+                  "_to": "cyclists/416534917",
+                  "_rev": "_iADMiuW--_",
                   "year": "2009",
                   "position": "3rd",
                   "result": 3
                 },
                 {
-                  "_key": "416430274",
-                  "_id": "race_attendance/416430274",
-                  "_from": "races/416430132",
-                  "_to": "cyclists/416430078",
+                  "_key": "416535113",
+                  "_id": "race_attendance/416535113",
+                  "_from": "races/416534971",
+                  "_to": "cyclists/416534917",
+                  "_rev": "_iADMiuW---",
                   "year": "2005",
                   "position": "1st",
                   "result": 1
                 }
+              ]
+            }
+          ],
+          "size": 14
+        }
+      },
+      {
+        "description": "fetchAllCyclistsInRace",
+        "options": "EdgeDataScope.JOINED",
+        "result": {
+          "data": [
+            {
+              "_id": "cyclists/416537006",
+              "_key": "416537006",
+              "_rev": "_iADVBFu---",
+              "country": "USA",
+              "name": "Lance",
+              "surname": "Armstrong",
+              "races": [
+                  {
+                      "_from": "races/416537060",
+                      "_id": "race_attendance/416537201",
+                      "_key": "416537201",
+                      "_rev": "_iADVBG2--_",
+                      "_to": "cyclists/416537006",
+                      "position": "3rd",
+                      "result": 3,
+                      "year": "2009",
+                      "vertex": {
+                          "_key": "416537060",
+                          "_id": "races/416537060",
+                          "_rev": "_iADVBF2--A",
+                          "name": "Tour de France",
+                          "discipline": "road",
+                          "type": "grand_tour"
+                      }
+                  },
+                  {
+                      "_from": "races/416537060",
+                      "_id": "race_attendance/416537200",
+                      "_key": "416537200",
+                      "_rev": "_iADVBG2---",
+                      "_to": "cyclists/416537006",
+                      "position": "1st",
+                      "result": 1,
+                      "year": "2005",
+                      "vertex": {
+                          "_key": "416537060",
+                          "_id": "races/416537060",
+                          "_rev": "_iADVBF2--A",
+                          "name": "Tour de France",
+                          "discipline": "road",
+                          "type": "grand_tour"
+                      }
+                  }
+              ]
+            }
+          ],
+          "size": 14
+        }
+      },
+      {
+        "description": "fetchAllCyclistsInRace",
+        "options": "EdgeDataScope.MERGED",
+        "result": {
+          "data": [
+            {
+              "_id": "cyclists/416538392",
+              "_key": "416538392",
+              "_rev": "_iADWrFi---",
+              "country": "USA",
+              "name": "Lance",
+              "surname": "Armstrong",
+              "races": [
+                  {
+                      "_from": "races/416538446",
+                      "_id": "race_attendance/416538587",
+                      "_key": "416538587",
+                      "_rev": "_iADWrHK--A",
+                      "_to": "cyclists/416538392",
+                      "position": "3rd",
+                      "result": 3,
+                      "year": "2009",
+                      "type": "grand_tour",
+                      "name": "Tour de France",
+                      "discipline": "road"
+                  },
+                  {
+                      "_from": "races/416538446",
+                      "_id": "race_attendance/416538586",
+                      "_key": "416538586",
+                      "_rev": "_iADWrHK--_",
+                      "_to": "cyclists/416538392",
+                      "position": "1st",
+                      "result": 1,
+                      "year": "2005",
+                      "type": "grand_tour",
+                      "name": "Tour de France",
+                      "discipline": "road"
+                  }
               ]
             }
           ],

@@ -180,22 +180,22 @@ describe('Guacamole Integration Tests', () => {
     )
 
     const tourDeFranceHistory = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllCyclistsInRace(tourDeFrance._key), {
-        strategy: GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_JOINED,
-        edgeDataScope: EdgeDataScope.JOINED
-      }
+      fetchAllCyclistsInRace(tourDeFrance._key)
     )
 
-    // console.log(JSON.stringify(tourDeFranceHistory))
-    console.log(JSON.stringify(tourDeFranceHistory.data[0]))
+    // // console.log(JSON.stringify(tourDeFranceHistory))
+    // console.log(JSON.stringify(tourDeFranceHistory.data[0]))
     console.log(tourDeFranceHistory.size)
 
     const nibaliHistory = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllRacesForCyclist(nibali._key), { edgeDataScope: EdgeDataScope.JOINED }
+      fetchAllRacesForCyclist(nibali._key), {
+        strategy: GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_JOINED,
+        edgeDataScope: EdgeDataScope.MERGED
+      }
     )
 
     console.log(JSON.stringify(nibaliHistory.data[0]))
-    console.log(nibaliHistory.size)
+    // console.log(nibaliHistory.size)
 
     // //////////////////////////////////////////////////////////////////////////////////
     //
