@@ -22,7 +22,9 @@ import {
   isLiteralQuery,
   isDocumentOperationFailure,
   DocumentDataWithKey,
-  isObjectWithKey
+  isObjectWithKey,
+  GraphFetchInstruction,
+  GraphFetchStrategy
 } from './types'
 import { DbAdmin } from './dbms'
 import { Queries } from './queries'
@@ -179,6 +181,30 @@ interface InstancePool {
   [key: string]: ArangoDBWithSpice
 }
 
+const staticUtils = {
+  toGraphFetchInstruction: function (
+    key: string,
+    collection: string,
+    graph: string,
+    direction: string,
+    strategy: GraphFetchStrategy,
+    propNameVertex?: string,
+    propNameEdges?: string
+  ): GraphFetchInstruction {
+    return {
+      usingGraph: graph,
+      startFrom: {
+        collection,
+        key
+      },
+      direction,
+      strategy,
+      propNameVertex,
+      propNameEdges
+    }
+  }
+}
+
 /**
  * A class that manages instances of {@link ArangoDB} classes.
  *
@@ -219,6 +245,8 @@ export class ArangoConnection {
   private readonly pool: InstancePool = {}
 
   public readonly system: Database
+
+  public static util = staticUtils
 
   constructor(dbs: Config | Database | Config[] | Database[], options?: GuacamoleOptions) {
     this.guacamole = options
@@ -1199,6 +1227,8 @@ export class ArangoDBWithSpice extends ArangoDB {
   /** @internal */
   manage: DbAdmin
 
+  public static util = staticUtils
+
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(db: Config | Database, options?: GuacamoleOptions) {
     super(db, options)
@@ -1573,6 +1603,13 @@ export class ArangoDBWithSpice extends ArangoDB {
   //       })
   //   })
   // }
+
+  public async fetchRelations<T = any>(
+    fetch: GraphFetchInstruction,
+    options?: any
+  ): Promise<QueryResult<T>> {
+    return await this.return(Queries.fetchRelations(fetch, options))
+  }
 
   public async createEdgeRelation<T extends Record<string, any> = any>(
     // graph: string,

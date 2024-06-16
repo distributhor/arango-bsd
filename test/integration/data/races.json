@@ -1,0 +1,137 @@
+[
+    {
+        "name": "Gent - Wevelgem",
+        "discipline": "road",
+        "type": "classic"
+    },
+    {
+        "name": "Tour of Benelux",
+        "discipline": "road",
+        "type": "stage"
+    },
+    {
+        "name": "Tour de France",
+        "discipline": "road",
+        "type": "grand_tour"
+    },
+    {
+        "name": "Paris - Roubaix",
+        "discipline": "road",
+        "type": "classic"
+    },
+    {
+        "name": "Tirreno - Adriatico",
+        "discipline": "road",
+        "type": "stage"
+    },
+    {
+        "name": "Giro d'Italia",
+        "discipline": "road",
+        "type": "grand_tour"
+    },
+    {
+        "name": "Tour of Britain",
+        "discipline": "road",
+        "type": "stage"
+    },
+    {
+        "name": "Paris - Nice",
+        "discipline": "road",
+        "type": "stage"
+    },
+    {
+        "name": "Volta Ciclista a Catalunya",
+        "discipline": "road",
+        "type": "stage"
+    },
+    {
+        "name": "Olympic Games Road Race",
+        "discipline": "road"
+    },
+    {
+        "name": "Tour de Suisse",
+        "discipline": "road",
+        "type": "stage"
+    },
+    {
+        "name": "La Vuelta a España",
+        "discipline": "road",
+        "type": "grand_tour"
+    },
+    {
+        "name": "Liège - Bastogne - Liège",
+        "discipline": "road",
+        "type": "classic"
+    },
+    {
+        "name": "Critérium du Dauphiné",
+        "discipline": "road",
+        "type": "stage"
+    },
+    {
+        "name": "UCI World Champs Gravel",
+        "discipline": "gravel"
+    },
+    {
+        "name": "Castellon Gravel Race",
+        "discipline": "gravel"
+    },
+    {
+        "name": "Belgian Waffle Ride",
+        "discipline": "gravel"
+    },
+    {
+        "name": "UCI World Champs Road",
+        "discipline": "road"
+    },
+    {
+        "name": "Ronde van Vlaanderen",
+        "discipline": "road",
+        "type": "classic"
+    },
+    {
+        "name": "Amstel Gold",
+        "discipline": "road",
+        "type": "classic"
+    },
+    {
+        "name": "Tour of Slovenia",
+        "discipline": "road",
+        "type": "stage"
+    },
+    {
+        "name": "Strade Bianche",
+        "discipline": "road",
+        "type": "classic"
+    },
+    {
+        "name": "The Traka 200",
+        "discipline": "gravel"
+    },
+    {
+        "name": "Milano - Sanremo",
+        "discipline": "road",
+        "type": "classic"
+    },
+    {
+        "name": "UCI World Champs ITT",
+        "discipline": "tt"
+    },
+    {
+        "name": "Olympic Games ITT",
+        "discipline": "tt"
+    },
+    {
+        "name": "Unbound Gravel",
+        "discipline": "gravel"
+    },
+    {
+        "name": "Cape Epic",
+        "discipline": "mtb",
+        "type": "stage"
+    },
+    {
+        "name": "Tankwa Trek",
+        "discipline": "gravel"
+    }
+]

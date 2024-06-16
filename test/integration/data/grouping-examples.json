@@ -1,0 +1,145 @@
+[
+  {
+    "description": "Find the distinct values in c.strength and makes them available in variable strength",
+    "query": "FOR c IN cyclists COLLECT strength = c.strength RETURN strength",
+    "result": [
+      null,
+      "Classics",
+      "Climbing"
+    ]
+  },
+  {
+    "description": "Expansion of the example above",
+    "query": "FOR c IN cyclists COLLECT strength = c.strength RETURN { \"strength\": strength }",
+    "result": [
+      {
+        "strength": null
+      },
+      {
+        "strength": "Classics"
+      }
+    ]
+  },
+  {
+    "added": "INTO statement which will contain all matches for that grouping",
+    "description": "Introduce a variable (cyclists) that contains all elements that fell into the group",
+    "query": "FOR c IN cyclists COLLECT strength = c.strength INTO cyclistByStrength RETURN { \"strength\": strength, \"cyclists\": cyclistByStrength }",
+    "result": [
+      {
+        "strength": null,
+        "cyclists": [
+          {
+            "c": {
+              "_key": "416257601",
+              "name": "Alejandro",
+              "surname": "Valverde"
+            }
+          }
+        ]
+      },
+      {
+        "strength": "Classics",
+        "cyclists": [
+          {
+            "c": {
+              "_key": "416257602",
+              "name": "Mathieu",
+              "surname": "van der Poel",
+              "trademark": "Boss Of Cross",
+              "country": "Netherlands"
+            }
+          },
+          {
+            "c": {
+              "_key": "416257603",
+              "_id": "cyclists/416257603",
+              "_rev": "_i_spEDS--G",
+              "name": "Wout",
+              "surname": "van Aert"
+            }
+          },
+          {
+            "c": {
+              "_key": "416257606",
+              "_id": "cyclists/416257606",
+              "_rev": "_i_spEDS--J",
+              "name": "Greg",
+              "surname": "van Avermaet"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "added": "a projection = c.name to include only specific properties",
+    "description": "Using a projection (= c.name) include only those attributes in the cyclistByStrength data",
+    "query": "FOR c IN cyclists COLLECT strength = c.strength INTO cyclistByStrength = c.name RETURN { \"strength\": strength, \"cyclists\": cyclistByStrength }",
+    "result": [
+      {
+        "strength": null,
+        "cyclists": [
+          "Alejandro"
+        ]
+      },
+      {
+        "strength": "Classics",
+        "cyclists": [
+          "Mathieu",
+          "Wout",
+          "Greg",
+          "Julian",
+          "Tim"
+        ]
+      }
+    ]
+  },
+  {
+    "description": "Another projection example",
+    "more": "Can also do FOR c IN cyclists COLLECT strength = c.strength INTO cyclistByStrength KEEP name",
+    "query": "FOR c IN cyclists COLLECT strength = c.strength INTO cyclistByStrength = { \"name\": c.name } RETURN { \"strength\": strength, \"cyclists\": cyclistByStrength }",
+    "result": [
+      {
+        "strength": null,
+        "cyclists": [
+          {
+            "name": "Alejandro"
+          }
+        ]
+      },
+      {
+        "strength": "All Rounder",
+        "cyclists": [
+          {
+            "name": "Daryl"
+          }
+        ]
+      },
+      {
+        "strength": "Classics",
+        "cyclists": [
+          {
+            "name": "Mathieu"
+          },
+          {
+            "name": "Wout"
+          },
+          {
+            "name": "Greg"
+          },
+          {
+            "name": "Julian"
+          },
+          {
+            "name": "Tim"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "description": "Can alternatively specify a KEEP",
+    "query": "FOR c IN cyclists COLLECT strength = c.strength INTO cyclistByStrength KEEP name",
+    "result": []
+  }
+]

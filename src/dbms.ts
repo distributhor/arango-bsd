@@ -190,6 +190,7 @@ export class DbAdmin {
     } else {
       if (clearDb) {
         await this.clearDb(clearDb)
+
         _debug.info(`Database '${this.db.name}' cleared with method ${clearDb}`)
         response.database = `Database cleared with method ${clearDb}`
       } else {

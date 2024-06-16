@@ -1,0 +1,73 @@
+[
+  {
+    "stategy": "DISTINCT_VERTEX_ONLY",
+    "examples": [
+      {
+        "description": "",
+        "result": {}
+      }
+    ]
+  },
+  {
+    "stategy": "NON_DISTINCT_VERTEX_ONLY",
+    "examples": [
+      {
+        "description": "fetchAllTeamsForCyclist",
+        "result": {
+          "data": [
+            {
+              "_key": "416416356",
+              "_id": "teams/416416356",
+              "_rev": "_i_9ZWoS--F",
+              "name": "Movistar - Caisse d'Epargne"
+            }
+          ],
+          "size": 2
+        }
+      },
+      {
+        "description": "fetchAllCyclistsInTeam",
+        "result": {
+          "data": [
+            {
+              "_key": "416417687",
+              "_id": "cyclists/416417687",
+              "_rev": "_i_9aXxa--D",
+              "name": "Marc",
+              "surname": "Soler",
+              "country": "Spain"
+            }
+          ],
+          "size": 2
+        }
+      }
+    ]
+  },
+  {
+    "stategy": "NON_DISTINCT_VERTEX_EDGE_TUPLES",
+    "examples": [
+      {
+        "description": "fetchAllCyclistsInRace",
+        "result": {}
+      }
+    ]
+  },
+  {
+    "stategy": "DISTINCT_VERTEX_WITH_EDGES_MERGED",
+    "examples": [
+      {
+        "description": "fetchAllCyclistsInRace",
+        "result": {}
+      }
+    ]
+  },
+  {
+    "stategy": "DISTINCT_VERTEX_EDGES_TUPLES",
+    "examples": [
+      {
+        "description": "fetchAllCyclistsInRace",
+        "result": {}
+      }
+    ]
+  }
+]

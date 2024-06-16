@@ -99,6 +99,28 @@ export interface Criteria {
 //   guacamole?: GuacamoleOptions
 // }
 
+export interface DocumentId {
+  collection: string
+  key: string
+}
+
+export enum GraphFetchStrategy {
+  DISTINCT_VERTEX_ONLY = 'DISTINCT_VERTEX_ONLY',
+  NON_DISTINCT_VERTEX_ONLY = 'NON_DISTINCT_VERTEX_ONLY',
+  NON_DISTINCT_VERTEX_EDGE_TUPLES = 'NON_DISTINCT_VERTEX_EDGE_TUPLES',
+  DISTINCT_VERTEX_WITH_EDGES_MERGED = 'DISTINCT_VERTEX_WITH_EDGES_MERGED',
+  DISTINCT_VERTEX_EDGES_TUPLES = 'DISTINCT_VERTEX_EDGES_TUPLES',
+}
+
+export interface GraphFetchInstruction {
+  strategy: GraphFetchStrategy
+  startFrom: DocumentId
+  usingGraph: string
+  direction: string
+  propNameVertex?: string
+  propNameEdges?: string
+}
+
 export interface DocumentUpdate<T extends Record<string, any> = any> {
   key: string | Identifier
   data: Patch<DocumentData<T>>

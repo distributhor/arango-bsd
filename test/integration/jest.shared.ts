@@ -10,11 +10,14 @@ export const dbAdminUser = process.env.GUACAMOLE_TEST_DB_USER ?? 'root'
 export const dbAdminPassword = process.env.GUACAMOLE_TEST_DB_PASSWORD ?? 'letmein'
 
 export const CONST = {
-  userCollection: 'cyclists',
-  groupCollection: 'teams',
-  userToGroupEdge: 'team_members',
-  groupMembershipGraph: 'team_membership',
-  altUserCollection: 'cyclists_alt'
+  cyclistCollection: 'cyclists',
+  teamCollection: 'teams',
+  raceCollection: 'races',
+  teamMembershipEdge: 'team_membership',
+  teamMembershipGraph: 'team_membership_graph',
+  raceAttendanceEdge: 'race_attendance',
+  raceAttendanceGraph: 'race_attendance_graph',
+  altCyclistCollection: 'cyclists_alt'
 }
 
 export const VAR = {

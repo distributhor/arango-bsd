@@ -12,8 +12,10 @@ import {
   Criteria,
   MatchType,
   isSearch,
-  isFilter
-} from './index'
+  isFilter,
+  GraphFetchInstruction,
+  GraphFetchStrategy
+} from './types'
 
 const debugQueries = debug('guacamole:log:query')
 const debugFilters = debug('guacamole:log:filter')
@@ -625,6 +627,78 @@ export function uniqueConstraintQuery(
   return query
 }
 
+export function fetchRelations(fetch: GraphFetchInstruction, options?: any): string {
+  const { strategy, direction, startFrom, usingGraph } = fetch
+
+  const bound = (direction.toUpperCase() === 'IN' || direction.toUpperCase() === 'INBOUND')
+    ? 'INBOUND'
+    : 'OUTBOUND'
+
+  const propNameVertex = fetch.propNameVertex ? fetch.propNameVertex : 'vertex'
+  const propNameEdges = fetch.propNameEdges ? fetch.propNameEdges : 'edges'
+
+  if (
+    strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGES_TUPLES ||
+    strategy === GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_MERGED
+  ) {
+    let query = 'LET ve = ('
+    query += 'FOR v,e IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null '
+    // query += 'RETURN MERGE(e, { "_vertex": v._key })'
+    query += 'RETURN e'
+    query += ') ' // query += ') RETURN ve'
+
+    query += 'LET distinctVsGroupedByE = ('
+    query += 'FOR i IN ve COLLECT vertexId = i._to INTO edgesGrouped = i RETURN { "": vertexId, "edges": edgesGrouped }'
+    /// query += ') RETURN distinctVsGroupedByE'
+    query += ') '
+
+    if (strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGES_TUPLES) {
+      query += 'FOR dve IN distinctVsGroupedByE LET d = DOCUMENT(dve.vertex) '
+      query += 'RETURN { "' + propNameVertex + '": d, "' + propNameEdges + '": dve.edges}'
+    } else if (strategy === GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_MERGED) {
+      query += 'FOR dve IN distinctVsGroupedByE LET d = DOCUMENT(dve.vertex) '
+      query += 'RETURN MERGE(d, { "' + propNameEdges + '": dve.edges})'
+    }
+
+    if (options?.printQuery) {
+      console.log(query)
+    }
+
+    return query
+  }
+
+  if (strategy === GraphFetchStrategy.NON_DISTINCT_VERTEX_EDGE_TUPLES) {
+    let query = 'FOR v,e IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null '
+    query += 'RETURN { "' + propNameVertex + '": v, "' + propNameEdges + '": e }'
+
+    if (options?.printQuery) {
+      console.log(query)
+    }
+
+    return query
+  }
+
+  if (strategy === GraphFetchStrategy.NON_DISTINCT_VERTEX_ONLY) {
+    const query = 'FOR v IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null RETURN v'
+
+    if (options?.printQuery) {
+      console.log(query)
+    }
+
+    return query
+  }
+
+  // strategy === GraphFetchStrategy.DISTINCT_VERTEX_ONLY}
+  let query = 'FOR v IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null '
+  query += 'COLLECT vertexId = v._key INTO vertexGrouped = v RETURN FIRST(vertexGrouped)'
+
+  if (options?.printQuery) {
+    console.log(query)
+  }
+
+  return query
+}
+
 export const Queries = {
   fetchAll,
   fetchByCriteria,
@@ -633,5 +707,6 @@ export const Queries = {
   fetchByMatchingAllProperties,
   uniqueConstraintQuery,
   updateDocumentsByKeyValue,
-  deleteDocumentsByKeyValue
+  deleteDocumentsByKeyValue,
+  fetchRelations
 }

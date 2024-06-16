@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-/* eslint-disable jest/no-conditional-expect */
-import { ArangoConnection } from '../../src/index'
+import { ArangoConnection, GraphFetchInstruction, GraphFetchStrategy } from '../../src/index'
 
 import { VAR } from './jest.shared'
 
@@ -10,95 +8,57 @@ const conn = new ArangoConnection([{
   auth: { username: VAR.dbAdminUser, password: VAR.dbAdminPassword }
 }], { printQueries: false, debugFilters: false })
 
-function fetchAllUsersInGroup(groupId: string, options?: any): string {
-  // if (options?.fetchTheGroupItselfAndIncludeMembersip) {
-  //   let query = 'LET group = DOCUMENT("' + VAR.groupCollection + '/' + groupId + '") '
-  //   query += 'LET ve = ('
-  //   query += 'FOR v, e IN 1 INBOUND "' + VAR.groupCollection + '/' + groupId + '" GRAPH ' + VAR.groupMembershipGraph + ' FILTER v != null RETURN MERGE(v, { "' + VAR.groupMembershipGraph + '": e })'
-  //   query += ') RETURN MERGE(group, { "' + VAR.userCollection + '": ve })'
-  //   return query
-  // }
-
-  let query = 'FOR v, e, p IN 1 INBOUND "' + VAR.groupCollection + '/' + groupId + '" GRAPH ' + VAR.groupMembershipGraph + ' FILTER v != null'
-
-  // if (options.hasOwnProperty('filter') && options.filter) {
-  //   query += ' FILTER v.' + options.filter
-  // }
-
-  if (options?.includeGroupData) {
-    if (typeof options.includeGroupData === 'string') {
-      query += ' RETURN MERGE(v, { "' + options.includeGroupData + '": e })'
-    } else {
-      query += ' RETURN MERGE(v, { "' + VAR.groupMembershipGraph + '": e })'
-    }
-  } else {
-    query += ' RETURN v'
-  }
-
-  return query
+function fetchAllTeamsForCyclist(id: string): GraphFetchInstruction {
+  return ArangoConnection.util.toGraphFetchInstruction(
+    id, VAR.cyclistCollection, VAR.teamMembershipGraph, 'OUTBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX_ONLY
+  )
 }
 
-function fetchAllGroupsForUser(userId: string, options?: any): string {
-  // if (options?.fetchTheGroupItselfAndIncludeMembersip) {
-  //   let query = 'LET group = DOCUMENT("' + VAR.groupCollection + '/' + groupId + '") '
-  //   query += 'LET ve = ('
-  //   query += 'FOR v, e IN 1 INBOUND "' + VAR.groupCollection + '/' + groupId + '" GRAPH ' + VAR.groupMembershipGraph + ' FILTER v != null RETURN MERGE(v, { "' + VAR.groupMembershipGraph + '": e })'
-  //   query += ') RETURN MERGE(group, { "' + VAR.userCollection + '": ve })'
-  //   return query
-  // }
+function fetchAllCyclistsInTeam(id: string): GraphFetchInstruction {
+  return ArangoConnection.util.toGraphFetchInstruction(
+    id, VAR.teamCollection, VAR.teamMembershipGraph, 'INBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX_ONLY
+  )
+}
 
-  let query = 'FOR v, e, p IN 1 OUTBOUND "' + VAR.userCollection + '/' + userId + '" GRAPH ' + VAR.groupMembershipGraph + ' FILTER v != null'
-
-  // if (options.hasOwnProperty('filter') && options.filter) {
-  //   query += ' FILTER v.' + options.filter
-  // }
-
-  if (options?.includeGroupData) {
-    if (typeof options.includeGroupData === 'string') {
-      query += ' RETURN MERGE(v, { "' + options.includeGroupData + '": e })'
-    } else {
-      query += ' RETURN MERGE(v, { "' + VAR.groupMembershipGraph + '": e })'
-    }
-  } else {
-    query += ' RETURN v'
-  }
-
-  return query
+function fetchAllCyclistsInRace(id: string): GraphFetchInstruction {
+  return ArangoConnection.util.toGraphFetchInstruction(
+    id, VAR.raceCollection, VAR.raceAttendanceGraph, 'OUTBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGES_TUPLES
+  )
 }
 
 describe('Guacamole Integration Tests', () => {
   test('CRUD', async () => {
     // expect.assertions(199)
 
-    const soler = await conn.db(VAR.dbName).read(VAR.userCollection, { property: 'surname', value: 'Soler' })
-    const nibali = await conn.db(VAR.dbName).read(VAR.userCollection, { property: 'surname', value: 'Nibali' })
-    const basso = await conn.db(VAR.dbName).read(VAR.userCollection, { property: 'surname', value: 'Basso' })
+    const soler = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Soler' })
+    const nibali = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Nibali' })
+    const basso = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Basso' })
 
-    const movistar = await conn.db(VAR.dbName).read(VAR.groupCollection, { property: 'name', value: "Movistar - Caisse d'Epargne" })
-    const bahrain = await conn.db(VAR.dbName).read(VAR.groupCollection, { property: 'name', value: 'Bahrain' })
-    const astana = await conn.db(VAR.dbName).read(VAR.groupCollection, { property: 'name', value: 'Astana' })
-    const uae = await conn.db(VAR.dbName).read(VAR.groupCollection, { property: 'name', value: 'UAE Emirates' })
-    const liquigas = await conn.db(VAR.dbName).read(VAR.groupCollection, { property: 'name', value: 'Liquigas' })
-    const thinkoff = await conn.db(VAR.dbName).read(VAR.groupCollection, { property: 'name', value: 'Tinkoff - CSC' })
+    const movistar = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: "Movistar - Caisse d'Epargne" })
+    const bahrain = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Bahrain' })
+    const astana = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Astana' })
+    const uae = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'UAE Emirates' })
+    const liquigas = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Liquigas' })
+    const thinkoff = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Tinkoff - CSC' })
+
+    const tourDeFrance = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Tour de France' })
+    // const parisRoubaix = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Paris - Roubaix' })
+    // const liegeBastogne = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Liège - Bastogne - Liège' })
+    // const stradeBianche = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Strade Bianche' })
+    // const milanoSanremo = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Milano - Sanremo' })
+    // const gravelWorldChamps = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'UCI World Champs Gravel' })
 
     expect(soler._key).toBeDefined()
-    expect(nibali._key).toBeDefined()
-    expect(basso._key).toBeDefined()
-
     expect(movistar._key).toBeDefined()
-    expect(bahrain._key).toBeDefined()
-    expect(astana._key).toBeDefined()
-    expect(uae._key).toBeDefined()
-    expect(liquigas._key).toBeDefined()
-    expect(thinkoff._key).toBeDefined()
+    expect(tourDeFrance._key).toBeDefined()
 
     // includeGroupData: false
     // FOR v, e, p IN 1 INBOUND "teams/416000141" GRAPH team_membership FILTER v != null RETURN v
     //
     // includeGroupData: true
     // FOR v, e, p IN 1 INBOUND "teams/416001064" GRAPH team_membership FILTER v != null RETURN MERGE(v, { "team_membership": e })
-    const movistarTeam1 = await conn.db(VAR.dbName).return(
-      fetchAllUsersInGroup(movistar._key, { includeGroupData: true })
+    const movistarTeam1 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(movistar._key)
     )
 
     expect(movistarTeam1.data.length).toEqual(2)
@@ -109,7 +69,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const bahrainTeam1 = await conn.db(VAR.dbName).return(fetchAllUsersInGroup(bahrain._key))
+    const bahrainTeam1 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(bahrain._key)
+    )
 
     expect(bahrainTeam1.data.length).toEqual(2)
     expect(bahrainTeam1.data).toEqual(
@@ -119,7 +81,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const astanaTeam1 = await conn.db(VAR.dbName).return(fetchAllUsersInGroup(astana._key))
+    const astanaTeam1 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(astana._key)
+    )
 
     expect(astanaTeam1.data.length).toEqual(4)
     expect(astanaTeam1.data).toEqual(
@@ -131,7 +95,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const uaeTeam1 = await conn.db(VAR.dbName).return(fetchAllUsersInGroup(uae._key))
+    const uaeTeam1 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(uae._key)
+    )
 
     expect(uaeTeam1.data.length).toEqual(3)
     expect(uaeTeam1.data).toEqual(
@@ -142,7 +108,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const liquigasTeam1 = await conn.db(VAR.dbName).return(fetchAllUsersInGroup(liquigas._key))
+    const liquigasTeam1 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(liquigas._key)
+    )
 
     expect(liquigasTeam1.data.length).toEqual(3)
     expect(liquigasTeam1.data).toEqual(
@@ -153,7 +121,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const thinkoffTeam1 = await conn.db(VAR.dbName).return(fetchAllUsersInGroup(thinkoff._key))
+    const thinkoffTeam1 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(thinkoff._key)
+    )
 
     expect(thinkoffTeam1.data.length).toEqual(4)
     expect(thinkoffTeam1.data).toEqual(
@@ -165,7 +135,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const solerTeams = await conn.db(VAR.dbName).return(fetchAllGroupsForUser(soler._key))
+    const solerTeams = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllTeamsForCyclist(soler._key)
+    )
 
     expect(solerTeams.data.length).toEqual(2)
     expect(solerTeams.data).toEqual(
@@ -175,7 +147,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const nibaliTeams = await conn.db(VAR.dbName).return(fetchAllGroupsForUser(nibali._key))
+    const nibaliTeams = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllTeamsForCyclist(nibali._key)
+    )
 
     expect(nibaliTeams.data.length).toEqual(4)
     expect(nibaliTeams.data).toEqual(
@@ -187,7 +161,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const bassoTeams = await conn.db(VAR.dbName).return(fetchAllGroupsForUser(basso._key))
+    const bassoTeams = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllTeamsForCyclist(basso._key)
+    )
 
     expect(bassoTeams.data.length).toEqual(2)
     expect(bassoTeams.data).toEqual(
@@ -197,13 +173,28 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
+    const tourDeFranceHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInRace(tourDeFrance._key)
+    )
+
+    console.log(tourDeFranceHistory.data)
+    console.log(tourDeFranceHistory.size)
+    console.log(tourDeFranceHistory.data[0])
+
+    // //////////////////////////////////////////////////////////////////////////////////
+    //
+    // Up to here we just validated that the original unmodified data is what we expect,
+    // so that we can validate and compare subsequent actions against the original data.
+    //
+    // //////////////////////////////////////////////////////////////////////////////////
+
     // FOR d IN @@value0 FILTER d.@value1 == @value2
     // LET team_members_keys = (FOR v, e, p IN 1..1 ANY d GRAPH team_membership RETURN e._key)
     // LET team_members_removed = (FOR key IN team_members_keys REMOVE key IN team_members RETURN { _id: OLD._id, _key: OLD._key, _rev: OLD._rev })
     // REMOVE d IN cyclists RETURN MERGE({ _id: OLD._id, _key: OLD._key, _rev: OLD._rev }, { team_members: team_members_removed } )
     // bindVars: { '@value0': 'cyclists', value1: '_key', value2: '416049399' }
-    const result1A = await conn.db(VAR.dbName).delete(VAR.userCollection, soler._key, [
-      { graph: VAR.groupMembershipGraph, edge: VAR.userToGroupEdge }
+    const result1A = await conn.db(VAR.dbName).delete(VAR.cyclistCollection, soler._key, [
+      { graph: VAR.teamMembershipGraph, edge: VAR.teamMembershipEdge }
     ])
 
     // console.log(result1A[0])
@@ -234,11 +225,15 @@ describe('Guacamole Integration Tests', () => {
     // expect(result1A[0].team_members).toBeDefined()
     // expect(result1A[0].team_members.length).toEqual(2)
 
-    const result1ValidationA = await conn.db(VAR.dbName).return(fetchAllGroupsForUser(soler._key))
+    const result1ValidationA = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllTeamsForCyclist(soler._key)
+    )
 
     expect(result1ValidationA.data.length).toEqual(0)
 
-    const movistarTeam2 = await await conn.db(VAR.dbName).return(fetchAllUsersInGroup(movistar._key))
+    const movistarTeam2 = await await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(movistar._key)
+    )
 
     expect(movistarTeam2.data.length).toEqual(1)
     expect(movistarTeam2.data).toEqual(
@@ -247,7 +242,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const uaeTeam2 = await conn.db(VAR.dbName).return(fetchAllUsersInGroup(uae._key))
+    const uaeTeam2 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(uae._key)
+    )
 
     expect(uaeTeam2.data.length).toEqual(2)
     expect(uaeTeam2.data).toEqual(
@@ -262,8 +259,8 @@ describe('Guacamole Integration Tests', () => {
     // LET team_members_removed = (FOR key IN team_members_keys REMOVE key IN team_members RETURN { _id: OLD._id, _key: OLD._key, _rev: OLD._rev })
     // REMOVE d IN cyclists RETURN MERGE({ _id: OLD._id, _key: OLD._key, _rev: OLD._rev }, { team_members: team_members_removed } )
     // bindVars: { '@value0': 'cyclists', value1: 'surname', value2: 'Basso' }
-    const result3C = await conn.db(VAR.dbName).delete(VAR.userCollection, { value: 'Basso', property: 'surname' }, [
-      { graph: VAR.groupMembershipGraph, edge: VAR.userToGroupEdge }
+    const result3C = await conn.db(VAR.dbName).delete(VAR.cyclistCollection, { value: 'Basso', property: 'surname' }, [
+      { graph: VAR.teamMembershipGraph, edge: VAR.teamMembershipEdge }
     ])
 
     // console.log(result3C)
@@ -275,7 +272,9 @@ describe('Guacamole Integration Tests', () => {
     // expect(result3C[0].team_members).toBeDefined()
     // expect(result3C[0].team_members.length).toEqual(2)
 
-    const liquigasTeam2 = await conn.db(VAR.dbName).return(fetchAllUsersInGroup(liquigas._key))
+    const liquigasTeam2 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(liquigas._key)
+    )
 
     expect(liquigasTeam2.data.length).toEqual(2)
     expect(liquigasTeam2.data).toEqual(
@@ -285,7 +284,9 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const thinkoffTeam2 = await conn.db(VAR.dbName).return(fetchAllUsersInGroup(thinkoff._key))
+    const thinkoffTeam2 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(thinkoff._key)
+    )
 
     expect(thinkoffTeam2.data.length).toEqual(3)
     expect(thinkoffTeam2.data).toEqual(
