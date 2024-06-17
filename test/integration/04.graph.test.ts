@@ -20,15 +20,15 @@ function fetchAllCyclistsInTeam(id: string): GraphFetchInstruction {
   )
 }
 
-function fetchAllCyclistsInRace(raceId: string): GraphFetchInstruction {
-  return ArangoConnection.util.toGraphFetchInstruction(
-    raceId, VAR.raceCollection, VAR.raceAttendanceGraph, 'OUTBOUND', GraphFetchStrategy.DISTINCT_VERTEX, 'race1', 'cyclist1', 'attendance1'
-  )
-}
+// function fetchAllCyclistsInRace(raceId: string): GraphFetchInstruction {
+//   return ArangoConnection.util.toGraphFetchInstruction(
+//     raceId, VAR.raceCollection, VAR.raceAttendanceGraph, 'OUTBOUND', GraphFetchStrategy.DISTINCT_VERTEX, 'race', 'cyclist', 'attendance'
+//   )
+// }
 
 function fetchAllRacesForCyclist(cyclistId: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
-    cyclistId, VAR.cyclistCollection, VAR.raceAttendanceGraph, 'INBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES, 'race2', 'cyclist2', 'attendance2'
+    cyclistId, VAR.cyclistCollection, VAR.raceAttendanceGraph, 'INBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGES_TUPLE, 'race', 'cyclist', 'attendance'
   )
 }
 
@@ -39,6 +39,7 @@ describe('Guacamole Integration Tests', () => {
     const soler = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Soler' })
     const nibali = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Nibali' })
     const basso = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Basso' })
+    const greg = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'van Avermaet' })
 
     const movistar = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: "Movistar - Caisse d'Epargne" })
     const bahrain = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Bahrain' })
@@ -47,7 +48,7 @@ describe('Guacamole Integration Tests', () => {
     const liquigas = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Liquigas' })
     const thinkoff = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Tinkoff - CSC' })
 
-    const tourDeFrance = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Tour de France' })
+    // const tourDeFrance = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Tour de France' })
     // const parisRoubaix = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Paris - Roubaix' })
     // const liegeBastogne = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Liège - Bastogne - Liège' })
     // const stradeBianche = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Strade Bianche' })
@@ -56,7 +57,7 @@ describe('Guacamole Integration Tests', () => {
 
     expect(soler._key).toBeDefined()
     expect(movistar._key).toBeDefined()
-    expect(tourDeFrance._key).toBeDefined()
+    // expect(tourDeFrance._key).toBeDefined()
 
     // includeGroupData: false
     // FOR v, e, p IN 1 INBOUND "teams/416000141" GRAPH team_membership FILTER v != null RETURN v
@@ -179,23 +180,23 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const tourDeFranceHistory = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllCyclistsInRace(tourDeFrance._key), {
-        strategy: GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES,
-        edgeDataScope: EdgeDataScope.MERGED
+    // const parisRoubaixHistory = await conn.db(VAR.dbName).fetchRelations(
+    //   fetchAllCyclistsInRace(parisRoubaix._key), {
+    //     strategy: GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED,
+    //     edgeDataScope: EdgeDataScope.NONE
+    //   }
+    // )
+
+    // console.log(JSON.stringify(parisRoubaixHistory))
+
+    const gregHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllRacesForCyclist(greg._key), {
+        strategy: GraphFetchStrategy.NON_DISTINCT_VERTEX_EDGE_TUPLE,
+        edgeDataScope: EdgeDataScope.NONE
       }
     )
 
-    console.log(JSON.stringify(tourDeFranceHistory))
-
-    const nibaliHistory = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllRacesForCyclist(nibali._key), {
-        strategy: GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES,
-        edgeDataScope: EdgeDataScope.MERGED
-      }
-    )
-
-    console.log(JSON.stringify(nibaliHistory))
+    console.log(JSON.stringify(gregHistory))
 
     // //////////////////////////////////////////////////////////////////////////////////
     //

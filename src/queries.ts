@@ -696,8 +696,8 @@ export function fetchRelations(
   }
 
   if (
-    strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES ||
-    strategy === GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_JOINED
+    strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGES_TUPLE ||
+    strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED
   ) {
     let query = ''
     if (edgeDataScope !== EdgeDataScope.NONE) {
@@ -741,12 +741,12 @@ export function fetchRelations(
     /// query += ') RETURN distinctVsGroupedByE'
     query += ') '
 
-    if (strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES) {
+    if (strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGES_TUPLE) {
       const propName = bound === 'INBOUND' ? propNameVertexTo : propNameVertexFrom
       query += 'FOR dve IN distinctVsGroupedByE '
       query += 'LET d = DOCUMENT(dve.vertex) '
       query += 'RETURN { "' + propName + '": d, "' + propNameEdges + '": dve.edges}'
-    } else if (strategy === GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_JOINED) {
+    } else if (strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED) {
       query += 'FOR dve IN distinctVsGroupedByE '
       query += 'LET d = DOCUMENT(dve.vertex) '
       query += 'RETURN MERGE_RECURSIVE(d, { "' + propNameEdges + '": dve.edges})'
@@ -759,7 +759,7 @@ export function fetchRelations(
     return query
   }
 
-  if (strategy === GraphFetchStrategy.NON_DISTINCT_VERTEX_EDGE_TUPLES) {
+  if (strategy === GraphFetchStrategy.NON_DISTINCT_VERTEX_EDGE_TUPLE) {
     let query = 'FOR v,e IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null '
     query += 'RETURN { "' + propNameVertexTo + '": v, "' + propNameEdges + '": e }'
 

@@ -7,20 +7,20 @@
         "result": {
           "data": [
             {
-                "_key": "416648560",
-                "_id": "cyclists/416648560",
-                "_rev": "_iASJQpq--D",
-                "name": "Marc",
-                "surname": "Soler",
-                "country": "Spain"
+              "_key": "416648560",
+              "_id": "cyclists/416648560",
+              "_rev": "_iASJQpq--D",
+              "name": "Marc",
+              "surname": "Soler",
+              "country": "Spain"
             },
             {
-                "_key": "416648548",
-                "_id": "cyclists/416648548",
-                "_rev": "_iASJQpm--E",
-                "name": "Alejandro",
-                "surname": "Valverde",
-                "country": "Spain"
+              "_key": "416648548",
+              "_id": "cyclists/416648548",
+              "_rev": "_iASJQpm--E",
+              "name": "Alejandro",
+              "surname": "Valverde",
+              "country": "Spain"
             }
           ],
           "size": 2
@@ -31,16 +31,16 @@
         "result": {
           "data": [
             {
-                "_key": "416649954",
-                "_id": "teams/416649954",
-                "_rev": "_iASK3mm--F",
-                "name": "Movistar - Caisse d'Epargne"
+              "_key": "416649954",
+              "_id": "teams/416649954",
+              "_rev": "_iASK3mm--F",
+              "name": "Movistar - Caisse d'Epargne"
             },
             {
-                "_key": "416649948",
-                "_id": "teams/416649948",
-                "_rev": "_iASK3mm--_",
-                "name": "UAE Emirates"
+              "_key": "416649948",
+              "_id": "teams/416649948",
+              "_rev": "_iASK3mm--_",
+              "name": "UAE Emirates"
             }
           ],
           "size": 2
@@ -56,20 +56,20 @@
         "result": {
           "data": [
             {
-                "_key": "416648560",
-                "_id": "cyclists/416648560",
-                "_rev": "_iASJQpq--D",
-                "name": "Marc",
-                "surname": "Soler",
-                "country": "Spain"
+              "_key": "416648560",
+              "_id": "cyclists/416648560",
+              "_rev": "_iASJQpq--D",
+              "name": "Marc",
+              "surname": "Soler",
+              "country": "Spain"
             },
             {
-                "_key": "416648548",
-                "_id": "cyclists/416648548",
-                "_rev": "_iASJQpm--E",
-                "name": "Alejandro",
-                "surname": "Valverde",
-                "country": "Spain"
+              "_key": "416648548",
+              "_id": "cyclists/416648548",
+              "_rev": "_iASJQpm--E",
+              "name": "Alejandro",
+              "surname": "Valverde",
+              "country": "Spain"
             }
           ],
           "size": 2
@@ -80,16 +80,16 @@
         "result": {
           "data": [
             {
-                "_key": "416649954",
-                "_id": "teams/416649954",
-                "_rev": "_iASK3mm--F",
-                "name": "Movistar - Caisse d'Epargne"
+              "_key": "416649954",
+              "_id": "teams/416649954",
+              "_rev": "_iASK3mm--F",
+              "name": "Movistar - Caisse d'Epargne"
             },
             {
-                "_key": "416649948",
-                "_id": "teams/416649948",
-                "_rev": "_iASK3mm--_",
-                "name": "UAE Emirates"
+              "_key": "416649948",
+              "_id": "teams/416649948",
+              "_rev": "_iASK3mm--_",
+              "name": "UAE Emirates"
             }
           ],
           "size": 2
@@ -98,7 +98,7 @@
     ]
   },
   {
-    "stategy": "DISTINCT_VERTEX_EDGE_TUPLES",
+    "stategy": "DISTINCT_VERTEX_EDGES_TUPLE",
     "examples": [
       {
         "description": "fetchAllCyclistsInRace",
@@ -107,38 +107,38 @@
           "data": [
             {
               "cyclist": {
-                "_key": "416530651",
-                "_id": "cyclists/416530651",
-                "_rev": "_iADHHUW---",
-                "name": "Lance",
-                "surname": "Armstrong",
-                "country": "USA"
+                "_key": "416744258",
+                "_id": "cyclists/416744258",
+                "_rev": "_iAWBLn6--E",
+                "name": "Greg",
+                "surname": "van Avermaet",
+                "country": "Belgium"
               },
-              "races": [
+              "attendance": [
                 {
-                  "_key": "416530846",
-                  "_id": "race_attendance/416530846",
-                  "_from": "races/416530705",
-                  "_to": "cyclists/416530651",
-                  "_rev": "_iADHHVa--A",
-                  "year": "2009",
-                  "position": "3rd",
-                  "result": 3
+                  "_key": "416744473",
+                  "_id": "race_attendance/416744473",
+                  "_from": "races/416744302",
+                  "_to": "cyclists/416744258",
+                  "_rev": "_iAWBLp2--A",
+                  "year": "2023",
+                  "position": "37st",
+                  "result": 37
                 },
                 {
-                  "_key": "416530845",
-                  "_id": "race_attendance/416530845",
-                  "_from": "races/416530705",
-                  "_to": "cyclists/416530651",
-                  "_rev": "_iADHHVa--_",
-                  "year": "2005",
+                  "_key": "416744472",
+                  "_id": "race_attendance/416744472",
+                  "_from": "races/416744302",
+                  "_to": "cyclists/416744258",
+                  "_rev": "_iAWBLp2--_",
+                  "year": "2017",
                   "position": "1st",
                   "result": 1
                 }
-              ],
-              "size": 2
+              ]
             }
-          ]
+          ],
+          "size": 7
         }
       },
       {
@@ -205,44 +205,54 @@
           "data": [
             {
               "cyclist": {
-                "_key": "416533488",
-                "_id": "cyclists/416533488",
-                "_rev": "_iADKkfK---",
-                "name": "Lance",
-                "surname": "Armstrong",
-                "country": "USA"
+                "_key": "416747158",
+                "_id": "cyclists/416747158",
+                "_rev": "_iAWFmNi--C",
+                "name": "Greg",
+                "surname": "van Avermaet",
+                "country": "Belgium"
               },
-              "races": [
+              "attendance": [
                 {
-                  "_from": "races/416533542",
-                  "_id": "race_attendance/416533683",
-                  "_key": "416533683",
-                  "_rev": "_iADKkg6--_",
-                  "_to": "cyclists/416533488",
-                  "position": "3rd",
-                  "result": 3,
-                  "year": "2009",
-                  "type": "grand_tour",
-                  "name": "Tour de France",
-                  "discipline": "road"
+                  "_from": "races/416747202",
+                  "_id": "race_attendance/416747373",
+                  "_key": "416747373",
+                  "_rev": "_iAWFmOm--C",
+                  "_to": "cyclists/416747158",
+                  "position": "37st",
+                  "result": 37,
+                  "year": "2023",
+                  "race": {
+                    "_key": "416747202",
+                    "_id": "races/416747202",
+                    "_rev": "_iAWFmNq--B",
+                    "name": "Paris - Roubaix",
+                    "discipline": "road",
+                    "type": "classic"
+                  }
                 },
                 {
-                  "_from": "races/416533542",
-                  "_id": "race_attendance/416533682",
-                  "_key": "416533682",
-                  "_rev": "_iADKkg6---",
-                  "_to": "cyclists/416533488",
+                  "_from": "races/416747202",
+                  "_id": "race_attendance/416747372",
+                  "_key": "416747372",
+                  "_rev": "_iAWFmOm--B",
+                  "_to": "cyclists/416747158",
                   "position": "1st",
                   "result": 1,
-                  "year": "2005",
-                  "type": "grand_tour",
-                  "name": "Tour de France",
-                  "discipline": "road"
+                  "year": "2017",
+                  "race": {
+                    "_key": "416747202",
+                    "_id": "races/416747202",
+                    "_rev": "_iAWFmNq--B",
+                    "name": "Paris - Roubaix",
+                    "discipline": "road",
+                    "type": "classic"
+                  }
                 }
               ]
             }
           ],
-          "size": 2
+          "size": 7
         }
       },
       {
@@ -251,29 +261,61 @@
         "result": {
           "data": [
             {
-                "cyclist": {
-                    "_key": "416591320",
-                    "_id": "cyclists/416591320",
-                    "_rev": "_iAOL3Eq--I",
-                    "name": "Vincenzo",
-                    "surname": "Nibali",
-                    "country": "Italy"
+              "race": {
+                "_key": "416753074",
+                "_id": "races/416753074",
+                "_rev": "_iAWOkgi--B",
+                "name": "Paris - Roubaix",
+                "discipline": "road",
+                "type": "classic"
+              },
+              "attendance": [
+                {
+                  "_key": "416753245",
+                  "_id": "race_attendance/416753245",
+                  "_from": "races/416753074",
+                  "_to": "cyclists/416753030",
+                  "_rev": "_iAWOkiK--C",
+                  "year": "2023",
+                  "position": "37st",
+                  "result": 37
                 },
-                "races": [
-                    {
-                        "_key": "416591610",
-                        "_id": "race_attendance/416591610",
-                        "_from": "races/416591375",
-                        "_to": "cyclists/416591320",
-                        "_rev": "_iAOL3GG--I",
-                        "year": "2015",
-                        "position": "12th",
-                        "result": 12
-                    }
-                ]
+                {
+                  "_key": "416753244",
+                  "_id": "race_attendance/416753244",
+                  "_from": "races/416753074",
+                  "_to": "cyclists/416753030",
+                  "_rev": "_iAWOkiK--B",
+                  "year": "2017",
+                  "position": "1st",
+                  "result": 1
+                }
+              ]
+            },
+            {
+              "race": {
+                "_key": "416753075",
+                "_id": "races/416753075",
+                "_rev": "_iAWOkgi--C",
+                "name": "Tirreno - Adriatico",
+                "discipline": "road",
+                "type": "stage"
+              },
+              "attendance": [
+                {
+                  "_key": "416753258",
+                  "_id": "race_attendance/416753258",
+                  "_from": "races/416753075",
+                  "_to": "cyclists/416753030",
+                  "_rev": "_iAWOkiO--E",
+                  "year": "2016",
+                  "position": "1st",
+                  "result": 1
+                }
+              ]
             }
           ],
-          "size": 8
+          "size": 4
         }
       },
       {
@@ -282,38 +324,85 @@
         "result": {
           "data": [
             {
-                "cyclist": {
-                    "_key": "416594074",
-                    "_id": "cyclists/416594074",
-                    "_rev": "_iAOOVOW--B",
-                    "name": "Vincenzo",
-                    "surname": "Nibali",
-                    "country": "Italy",
-                    "strength": "General Classification"
+              "race": {
+                "_key": "416754489",
+                "_id": "races/416754489",
+                "_rev": "_iAWQOiC--S",
+                "name": "Paris - Roubaix",
+                "discipline": "road",
+                "type": "classic"
+              },
+              "attendance": [
+                {
+                  "_from": "races/416754489",
+                  "_id": "race_attendance/416754660",
+                  "_key": "416754660",
+                  "_rev": "_iAWQOjK--H",
+                  "_to": "cyclists/416754445",
+                  "position": "37st",
+                  "result": 37,
+                  "year": "2023",
+                  "cyclist": {
+                    "_key": "416754445",
+                    "_id": "cyclists/416754445",
+                    "_rev": "_iAWQOi---A",
+                    "name": "Greg",
+                    "surname": "van Avermaet",
+                    "country": "Belgium"
+                  }
                 },
-                "races": [
-                    {
-                        "_from": "races/416594129",
-                        "_id": "race_attendance/416594364",
-                        "_key": "416594364",
-                        "_rev": "_iAOOVR---I",
-                        "_to": "cyclists/416594074",
-                        "position": "12th",
-                        "result": 12,
-                        "year": "2015",
-                        "_ref": {
-                            "_key": "416594129",
-                            "_id": "races/416594129",
-                            "_rev": "_iAOOVOm--L",
-                            "name": "Critérium du Dauphiné",
-                            "discipline": "road",
-                            "type": "stage"
-                        }
-                    }
-                ]
+                {
+                  "_from": "races/416754489",
+                  "_id": "race_attendance/416754659",
+                  "_key": "416754659",
+                  "_rev": "_iAWQOjK--G",
+                  "_to": "cyclists/416754445",
+                  "position": "1st",
+                  "result": 1,
+                  "year": "2017",
+                  "cyclist": {
+                    "_key": "416754445",
+                    "_id": "cyclists/416754445",
+                    "_rev": "_iAWQOi---A",
+                    "name": "Greg",
+                    "surname": "van Avermaet",
+                    "country": "Belgium"
+                  }
+                }
+              ]
+            },
+            {
+              "race": {
+                "_key": "416754490",
+                "_id": "races/416754490",
+                "_rev": "_iAWQOiC--T",
+                "name": "Tirreno - Adriatico",
+                "discipline": "road",
+                "type": "stage"
+              },
+              "attendance": [
+                {
+                  "_from": "races/416754490",
+                  "_id": "race_attendance/416754673",
+                  "_key": "416754673",
+                  "_rev": "_iAWQOjO--E",
+                  "_to": "cyclists/416754445",
+                  "position": "1st",
+                  "result": 1,
+                  "year": "2016",
+                  "cyclist": {
+                    "_key": "416754445",
+                    "_id": "cyclists/416754445",
+                    "_rev": "_iAWQOi---A",
+                    "name": "Greg",
+                    "surname": "van Avermaet",
+                    "country": "Belgium"
+                  }
+                }
+              ]
             }
           ],
-          "size": 8
+          "size": 4
         }
       },
       {
@@ -322,43 +411,85 @@
         "result": {
           "data": [
             {
-                "cyclist": {
-                    "_key": "416595467",
-                    "_id": "cyclists/416595467",
-                    "_rev": "_iAOPkgu--_",
-                    "name": "Vincenzo",
-                    "surname": "Nibali",
-                    "country": "Italy"
+              "race": {
+                "_key": "416755926",
+                "_id": "races/416755926",
+                "_rev": "_iAWSZ3u--B",
+                "name": "Paris - Roubaix",
+                "discipline": "road",
+                "type": "classic"
+              },
+              "attendance": [
+                {
+                  "_from": "races/416755926",
+                  "_id": "race_attendance/416756097",
+                  "_key": "416756097",
+                  "_rev": "_iAWSZ5S--C",
+                  "_to": "cyclists/416755882",
+                  "country": "Belgium",
+                  "disciplines": "Road, Gravel",
+                  "name": "Greg",
+                  "position": "37st",
+                  "result": 37,
+                  "surname": "van Avermaet",
+                  "year": "2023",
+                  "_cyclist._key": "416755882",
+                  "_cyclist._id": "cyclists/416755882"
                 },
-                "races": [
-                    {
-                        "_from": "races/416595522",
-                        "_id": "race_attendance/416595757",
-                        "_key": "416595757",
-                        "_rev": "_iAOPkjC--C",
-                        "_to": "cyclists/416595467",
-                        "discipline": "road",
-                        "name": "Critérium du Dauphiné",
-                        "position": "12th",
-                        "result": 12,
-                        "type": "stage",
-                        "year": "2015",
-                        "_ref": {
-                            "_id": "races/416595522",
-                            "_key": "416595522",
-                            "_rev": "races/416595522"
-                        }
-                    }
-                ]
+                {
+                  "_from": "races/416755926",
+                  "_id": "race_attendance/416756096",
+                  "_key": "416756096",
+                  "_rev": "_iAWSZ5S--B",
+                  "_to": "cyclists/416755882",
+                  "country": "Belgium",
+                  "disciplines": "Road, Gravel",
+                  "name": "Greg",
+                  "position": "1st",
+                  "result": 1,
+                  "surname": "van Avermaet",
+                  "year": "2017",
+                  "_cyclist._key": "416755882",
+                  "_cyclist._id": "cyclists/416755882"
+                }
+              ]
+            },
+            {
+              "race": {
+                "_key": "416755927",
+                "_id": "races/416755927",
+                "_rev": "_iAWSZ3u--C",
+                "name": "Tirreno - Adriatico",
+                "discipline": "road",
+                "type": "stage"
+              },
+              "attendance": [
+                {
+                  "_from": "races/416755927",
+                  "_id": "race_attendance/416756110",
+                  "_key": "416756110",
+                  "_rev": "_iAWSZ5W--E",
+                  "_to": "cyclists/416755882",
+                  "country": "Belgium",
+                  "disciplines": "Road, Gravel",
+                  "name": "Greg",
+                  "position": "1st",
+                  "result": 1,
+                  "surname": "van Avermaet",
+                  "year": "2016",
+                  "_cyclist._key": "416755882",
+                  "_cyclist._id": "cyclists/416755882"
+                }
+              ]
             }
           ],
-          "size": 8
+          "size": 4
         }
       }
     ]
   },
   {
-    "stategy": "DISTINCT_VERTEX_WITH_EDGES_JOINED",
+    "stategy": "DISTINCT_VERTEX_EDGES_JOINED",
     "examples": [
       {
         "description": "fetchAllCyclistsInRace",
@@ -366,37 +497,38 @@
         "result": {
           "data": [
             {
-              "_id": "cyclists/416534917",
-              "_key": "416534917",
-              "_rev": "_iADMitC---",
-              "country": "USA",
-              "name": "Lance",
-              "surname": "Armstrong",
-              "races": [
+              "_id": "cyclists/416751471",
+              "_key": "416751471",
+              "_rev": "_iAWLdD---G",
+              "country": "Belgium",
+              "disciplines": "Road, Gravel",
+              "name": "Greg",
+              "surname": "van Avermaet",
+              "attendance": [
                 {
-                  "_key": "416535114",
-                  "_id": "race_attendance/416535114",
-                  "_from": "races/416534971",
-                  "_to": "cyclists/416534917",
-                  "_rev": "_iADMiuW--_",
-                  "year": "2009",
-                  "position": "3rd",
-                  "result": 3
+                  "_key": "416751686",
+                  "_id": "race_attendance/416751686",
+                  "_from": "races/416751515",
+                  "_to": "cyclists/416751471",
+                  "_rev": "_iAWLdFG--C",
+                  "year": "2023",
+                  "position": "37st",
+                  "result": 37
                 },
                 {
-                  "_key": "416535113",
-                  "_id": "race_attendance/416535113",
-                  "_from": "races/416534971",
-                  "_to": "cyclists/416534917",
-                  "_rev": "_iADMiuW---",
-                  "year": "2005",
+                  "_key": "416751685",
+                  "_id": "race_attendance/416751685",
+                  "_from": "races/416751515",
+                  "_to": "cyclists/416751471",
+                  "_rev": "_iAWLdFG--B",
+                  "year": "2017",
                   "position": "1st",
                   "result": 1
                 }
               ]
             }
           ],
-          "size": 14
+          "size": 7
         }
       },
       {
@@ -405,53 +537,53 @@
         "result": {
           "data": [
             {
-              "_id": "cyclists/416537006",
-              "_key": "416537006",
-              "_rev": "_iADVBFu---",
-              "country": "USA",
-              "name": "Lance",
-              "surname": "Armstrong",
-              "races": [
-                  {
-                      "_from": "races/416537060",
-                      "_id": "race_attendance/416537201",
-                      "_key": "416537201",
-                      "_rev": "_iADVBG2--_",
-                      "_to": "cyclists/416537006",
-                      "position": "3rd",
-                      "result": 3,
-                      "year": "2009",
-                      "_ref": {
-                          "_key": "416537060",
-                          "_id": "races/416537060",
-                          "_rev": "_iADVBF2--A",
-                          "name": "Tour de France",
-                          "discipline": "road",
-                          "type": "grand_tour"
-                      }
-                  },
-                  {
-                      "_from": "races/416537060",
-                      "_id": "race_attendance/416537200",
-                      "_key": "416537200",
-                      "_rev": "_iADVBG2---",
-                      "_to": "cyclists/416537006",
-                      "position": "1st",
-                      "result": 1,
-                      "year": "2005",
-                      "_ref": {
-                          "_key": "416537060",
-                          "_id": "races/416537060",
-                          "_rev": "_iADVBF2--A",
-                          "name": "Tour de France",
-                          "discipline": "road",
-                          "type": "grand_tour"
-                      }
+              "_id": "cyclists/416748624",
+              "_key": "416748624",
+              "_rev": "_iAWH0Aa--J",
+              "country": "Belgium",
+              "name": "Greg",
+              "surname": "van Avermaet",
+              "attendance": [
+                {
+                  "_from": "races/416748668",
+                  "_id": "race_attendance/416748839",
+                  "_key": "416748839",
+                  "_rev": "_iAWH0CK--C",
+                  "_to": "cyclists/416748624",
+                  "position": "37st",
+                  "result": 37,
+                  "year": "2023",
+                  "race": {
+                    "_key": "416748668",
+                    "_id": "races/416748668",
+                    "_rev": "_iAWH0Aq--B",
+                    "name": "Paris - Roubaix",
+                    "discipline": "road",
+                    "type": "classic"
                   }
+                },
+                {
+                  "_from": "races/416748668",
+                  "_id": "race_attendance/416748838",
+                  "_key": "416748838",
+                  "_rev": "_iAWH0CK--B",
+                  "_to": "cyclists/416748624",
+                  "position": "1st",
+                  "result": 1,
+                  "year": "2017",
+                  "race": {
+                    "_key": "416748668",
+                    "_id": "races/416748668",
+                    "_rev": "_iAWH0Aq--B",
+                    "name": "Paris - Roubaix",
+                    "discipline": "road",
+                    "type": "classic"
+                  }
+                }
               ]
             }
           ],
-          "size": 14
+          "size": 7
         }
       },
       {
@@ -460,53 +592,48 @@
         "result": {
           "data": [
             {
-              "_id": "cyclists/416538392",
-              "_key": "416538392",
-              "_rev": "_iADWrFi---",
-              "country": "USA",
-              "name": "Lance",
-              "surname": "Armstrong",
-              "races": [
-                  {
-                      "_from": "races/416538446",
-                      "_id": "race_attendance/416538587",
-                      "_key": "416538587",
-                      "_rev": "_iADWrHK--A",
-                      "_to": "cyclists/416538392",
-                      "position": "3rd",
-                      "result": 3,
-                      "year": "2009",
-                      "type": "grand_tour",
-                      "name": "Tour de France",
-                      "discipline": "road",
-                      "_ref": {
-                        "_id": "races/416597219",
-                        "_key": "416597219",
-                        "_rev": "races/416597219"
-                      }
-                  },
-                  {
-                      "_from": "races/416538446",
-                      "_id": "race_attendance/416538586",
-                      "_key": "416538586",
-                      "_rev": "_iADWrHK--_",
-                      "_to": "cyclists/416538392",
-                      "position": "1st",
-                      "result": 1,
-                      "year": "2005",
-                      "type": "grand_tour",
-                      "name": "Tour de France",
-                      "discipline": "road",
-                      "_ref": {
-                        "_id": "races/416597219",
-                        "_key": "416597219",
-                        "_rev": "races/416597219"
-                      }
-                  }
+              "_id": "cyclists/416750087",
+              "_key": "416750087",
+              "_rev": "_iAWKCYy--J",
+              "country": "Belgium",
+              "disciplines": "Road, Gravel",
+              "name": "Greg",
+              "surname": "van Avermaet",
+              "attendance": [
+                {
+                  "_from": "races/416750131",
+                  "_id": "race_attendance/416750302",
+                  "_key": "416750302",
+                  "_rev": "_iAWKCaC--C",
+                  "_to": "cyclists/416750087",
+                  "discipline": "road",
+                  "name": "Paris - Roubaix",
+                  "position": "37st",
+                  "result": 37,
+                  "type": "classic",
+                  "year": "2023",
+                  "_race._key": "416750131",
+                  "_race._id": "races/416750131"
+                },
+                {
+                  "_from": "races/416750131",
+                  "_id": "race_attendance/416750301",
+                  "_key": "416750301",
+                  "_rev": "_iAWKCaC--B",
+                  "_to": "cyclists/416750087",
+                  "discipline": "road",
+                  "name": "Paris - Roubaix",
+                  "position": "1st",
+                  "result": 1,
+                  "type": "classic",
+                  "year": "2017",
+                  "_race._key": "416750131",
+                  "_race._id": "races/416750131"
+                }
               ]
             }
           ],
-          "size": 14
+          "size": 7
         }
       },
       {
@@ -515,27 +642,57 @@
         "result": {
           "data": [
             {
-              "_id": "cyclists/416540178",
-              "_key": "416540178",
-              "_rev": "_iADcIhG--B",
-              "country": "Italy",
-              "name": "Vincenzo",
-              "surname": "Nibali",
-              "races": [
-                  {
-                      "_key": "416540468",
-                      "_id": "race_attendance/416540468",
-                      "_from": "races/416540233",
-                      "_to": "cyclists/416540178",
-                      "_rev": "_iADcIj6--C",
-                      "year": "2015",
-                      "position": "12th",
-                      "result": 12
-                  }
+              "_id": "races/416760187",
+              "_key": "416760187",
+              "_rev": "_iAWXm1S--B",
+              "discipline": "road",
+              "name": "Paris - Roubaix",
+              "type": "classic",
+              "attendance": [
+                {
+                  "_key": "416760358",
+                  "_id": "race_attendance/416760358",
+                  "_from": "races/416760187",
+                  "_to": "cyclists/416760143",
+                  "_rev": "_iAWXm3O--A",
+                  "year": "2023",
+                  "position": "37st",
+                  "result": 37
+                },
+                {
+                  "_key": "416760357",
+                  "_id": "race_attendance/416760357",
+                  "_from": "races/416760187",
+                  "_to": "cyclists/416760143",
+                  "_rev": "_iAWXm3O--_",
+                  "year": "2017",
+                  "position": "1st",
+                  "result": 1
+                }
+              ]
+            },
+            {
+              "_id": "races/416760188",
+              "_key": "416760188",
+              "_rev": "_iAWXm1S--C",
+              "discipline": "road",
+              "name": "Tirreno - Adriatico",
+              "type": "stage",
+              "attendance": [
+                {
+                  "_key": "416760371",
+                  "_id": "race_attendance/416760371",
+                  "_from": "races/416760188",
+                  "_to": "cyclists/416760143",
+                  "_rev": "_iAWXm3S--E",
+                  "year": "2016",
+                  "position": "1st",
+                  "result": 1
+                }
               ]
             }
           ],
-          "size": 2
+          "size": 4
         }
       },
       {
@@ -544,36 +701,81 @@
         "result": {
           "data": [
             {
-              "_id": "cyclists/416541617",
-              "_key": "416541617",
-              "_rev": "_iADeEim--C",
-              "country": "Italy",
-              "disciplines": "Road",
-              "name": "Vincenzo",
-              "surname": "Nibali",
-              "races": [
-                  {
-                      "_from": "races/416541672",
-                      "_id": "race_attendance/416541907",
-                      "_key": "416541907",
-                      "_rev": "_iADeEkK--I",
-                      "_to": "cyclists/416541617",
-                      "position": "12th",
-                      "result": 12,
-                      "year": "2015",
-                      "_ref": {
-                          "_key": "416541672",
-                          "_id": "races/416541672",
-                          "_rev": "_iADeEiu--L",
-                          "name": "Critérium du Dauphiné",
-                          "discipline": "road",
-                          "type": "stage"
-                      }
+              "_id": "races/416758764",
+              "_key": "416758764",
+              "_rev": "_iAWVy0---U",
+              "discipline": "road",
+              "name": "Paris - Roubaix",
+              "type": "classic",
+              "attendance": [
+                {
+                  "_from": "races/416758764",
+                  "_id": "race_attendance/416758937",
+                  "_key": "416758937",
+                  "_rev": "_iAWVy1C--I",
+                  "_to": "cyclists/416758720",
+                  "position": "37st",
+                  "result": 37,
+                  "year": "2023",
+                  "cyclist": {
+                    "_key": "416758720",
+                    "_id": "cyclists/416758720",
+                    "_rev": "_iAWVyz2--J",
+                    "name": "Greg",
+                    "surname": "van Avermaet",
+                    "country": "Belgium"
                   }
+                },
+                {
+                  "_from": "races/416758764",
+                  "_id": "race_attendance/416758936",
+                  "_key": "416758936",
+                  "_rev": "_iAWVy1C--H",
+                  "_to": "cyclists/416758720",
+                  "position": "1st",
+                  "result": 1,
+                  "year": "2017",
+                  "cyclist": {
+                    "_key": "416758720",
+                    "_id": "cyclists/416758720",
+                    "_rev": "_iAWVyz2--J",
+                    "name": "Greg",
+                    "surname": "van Avermaet",
+                    "country": "Belgium"
+                  }
+                }
+              ]
+            },
+            {
+              "_id": "races/416758765",
+              "_key": "416758765",
+              "_rev": "_iAWVy0---V",
+              "discipline": "road",
+              "name": "Tirreno - Adriatico",
+              "type": "stage",
+              "attendance": [
+                {
+                  "_from": "races/416758765",
+                  "_id": "race_attendance/416758950",
+                  "_key": "416758950",
+                  "_rev": "_iAWVy1G--E",
+                  "_to": "cyclists/416758720",
+                  "position": "1st",
+                  "result": 1,
+                  "year": "2016",
+                  "cyclist": {
+                    "_key": "416758720",
+                    "_id": "cyclists/416758720",
+                    "_rev": "_iAWVyz2--J",
+                    "name": "Greg",
+                    "surname": "van Avermaet",
+                    "country": "Belgium"
+                  }
+                }
               ]
             }
           ],
-          "size": 2
+          "size": 4
         }
       },
       {
@@ -582,41 +784,151 @@
         "result": {
           "data": [
             {
-              "_id": "cyclists/416543017",
-              "_key": "416543017",
-              "_rev": "_iADfQlm--I",
-              "country": "Italy",
-              "name": "Vincenzo",
-              "surname": "Nibali",
-              "races": [
-                  {
-                      "_from": "races/416543072",
-                      "_id": "race_attendance/416543307",
-                      "_key": "416543307",
-                      "_rev": "_iADfQnO--C",
-                      "_to": "cyclists/416543017",
-                      "position": "12th",
-                      "result": 12,
-                      "year": "2015",
-                      "type": "stage",
-                      "name": "Critérium du Dauphiné",
-                      "discipline": "road",
-                      "_ref": {
-                        "_id": "races/416589802",
-                        "_key": "416589802",
-                        "_rev": "races/416589802"
-                      }
-                  }
+              "_id": "races/416757389",
+              "_key": "416757389",
+              "_rev": "_iAWUiJ6--B",
+              "discipline": "road",
+              "name": "Paris - Roubaix",
+              "type": "classic",
+              "attendance": [
+                {
+                  "_from": "races/416757389",
+                  "_id": "race_attendance/416757560",
+                  "_key": "416757560",
+                  "_rev": "_iAWUiLG--C",
+                  "_to": "cyclists/416757345",
+                  "country": "Belgium",
+                  "disciplines": "Road, Gravel",
+                  "name": "Greg",
+                  "position": "37st",
+                  "result": 37,
+                  "surname": "van Avermaet",
+                  "year": "2023",
+                  "_cyclist._key": "416757345",
+                  "_cyclist._id": "cyclists/416757345"
+                },
+                {
+                  "_from": "races/416757389",
+                  "_id": "race_attendance/416757559",
+                  "_key": "416757559",
+                  "_rev": "_iAWUiLG--B",
+                  "_to": "cyclists/416757345",
+                  "country": "Belgium",
+                  "disciplines": "Road, Gravel",
+                  "name": "Greg",
+                  "position": "1st",
+                  "result": 1,
+                  "surname": "van Avermaet",
+                  "year": "2017",
+                  "_cyclist._key": "416757345",
+                  "_cyclist._id": "cyclists/416757345"
+                }
+              ]
+            },
+            {
+              "_id": "races/416757390",
+              "_key": "416757390",
+              "_rev": "_iAWUiJ6--C",
+              "discipline": "road",
+              "name": "Tirreno - Adriatico",
+              "type": "stage",
+              "attendance": [
+                {
+                  "_from": "races/416757390",
+                  "_id": "race_attendance/416757573",
+                  "_key": "416757573",
+                  "_rev": "_iAWUiLK--E",
+                  "_to": "cyclists/416757345",
+                  "country": "Belgium",
+                  "disciplines": "Road, Gravel",
+                  "name": "Greg",
+                  "position": "1st",
+                  "result": 1,
+                  "surname": "van Avermaet",
+                  "year": "2016",
+                  "_cyclist._key": "416757345",
+                  "_cyclist._id": "cyclists/416757345"
+                }
               ]
             }
           ],
-          "size": 2
+          "size": 4
         }
       }
     ]
   },
-    {
-    "stategy": "NON_DISTINCT_VERTEX_EDGE_TUPLES",
-    "examples": []
+  {
+    "stategy": "NON_DISTINCT_VERTEX_EDGE_TUPLE",
+    "examples": [
+      {
+        "description": "fetchAllCyclistsInRace",
+        "options": "EdgeDataScope.NONE",
+        "result": {
+          "data": [
+            {
+              "race": {
+                "_key": "416761577",
+                "_id": "races/416761577",
+                "_rev": "_iAWZRTK--_",
+                "name": "Tirreno - Adriatico",
+                "discipline": "road",
+                "type": "stage"
+              },
+              "attendance": {
+                "_key": "416761760",
+                "_id": "race_attendance/416761760",
+                "_from": "races/416761577",
+                "_to": "cyclists/416761532",
+                "_rev": "_iAWZRUq--E",
+                "year": "2016",
+                "position": "1st",
+                "result": 1
+              }
+            },
+            {
+              "race": {
+                "_key": "416761576",
+                "_id": "races/416761576",
+                "_rev": "_iAWZRTK---",
+                "name": "Paris - Roubaix",
+                "discipline": "road",
+                "type": "classic"
+              },
+              "attendance": {
+                "_key": "416761747",
+                "_id": "race_attendance/416761747",
+                "_from": "races/416761576",
+                "_to": "cyclists/416761532",
+                "_rev": "_iAWZRUm--C",
+                "year": "2023",
+                "position": "37st",
+                "result": 37
+              }
+            },
+            {
+              "race": {
+                "_key": "416761576",
+                "_id": "races/416761576",
+                "_rev": "_iAWZRTK---",
+                "name": "Paris - Roubaix",
+                "discipline": "road",
+                "type": "classic"
+              },
+              "attendance": {
+                "_key": "416761746",
+                "_id": "race_attendance/416761746",
+                "_from": "races/416761576",
+                "_to": "cyclists/416761532",
+                "_rev": "_iAWZRUm--B",
+                "year": "2017",
+                "position": "1st",
+                "result": 1
+              }
+            }
+          ],
+          "size": 5
+        }
+      }
+    ]
   }
 ]
