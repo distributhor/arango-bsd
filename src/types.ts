@@ -99,7 +99,7 @@ export interface Criteria {
 //   guacamole?: GuacamoleOptions
 // }
 
-export interface DocumentId {
+export interface DocumentKey {
   collection: string
   key: string
 }
@@ -119,10 +119,10 @@ export enum EdgeDataScope {
 }
 
 export interface GraphFetchInstruction {
-  strategy?: GraphFetchStrategy
-  startFrom: DocumentId
-  usingGraph: string
+  from: DocumentKey
+  graph: string
   direction: string
+  strategy?: GraphFetchStrategy
   fromVertexName?: string
   toVertexName?: string
   edgesName?: string

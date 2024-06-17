@@ -25,7 +25,8 @@ import {
   isObjectWithKey,
   GraphFetchInstruction,
   GraphFetchStrategy,
-  GraphFetchOptions
+  GraphFetchOptions,
+  EdgeDataScope
 } from './types'
 import { DbAdmin } from './dbms'
 import { Queries } from './queries'
@@ -191,19 +192,21 @@ const staticUtils = {
     strategy: GraphFetchStrategy,
     toVertexName?: string,
     fromVertexName?: string,
-    edgesName?: string
+    edgesName?: string,
+    edgeDataScope?: EdgeDataScope
   ): GraphFetchInstruction {
     return {
-      usingGraph: graph,
-      startFrom: {
+      from: {
         collection,
         key
       },
+      graph,
       direction,
       strategy,
       toVertexName,
       fromVertexName,
-      edgesName
+      edgesName,
+      edgeDataScope
     }
   }
 }

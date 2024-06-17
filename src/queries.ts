@@ -641,7 +641,7 @@ export function fetchRelations(
   fetch: GraphFetchInstruction,
   options?: GraphFetchOptions
 ): string {
-  const { startFrom, usingGraph, direction } = fetch
+  const { from, graph, direction } = fetch
 
   const bound = (direction.toUpperCase() === 'IN' || direction.toUpperCase() === 'INBOUND')
     ? 'INBOUND'
@@ -702,7 +702,7 @@ export function fetchRelations(
     let query = ''
     if (edgeDataScope !== EdgeDataScope.NONE) {
       query += 'LET ve = ('
-      query += 'FOR v,e IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null '
+      query += 'FOR v,e IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null '
 
       // if (bound === 'OUTBOUND') {
       //   query += 'LET reverseDoc = DOCUMENT(e._from) '
@@ -728,7 +728,7 @@ export function fetchRelations(
       query += ') '
     } else {
       query += 'LET ve = ('
-      query += 'FOR v,e IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null '
+      query += 'FOR v,e IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null '
       // query += 'RETURN MERGE_RECURSIVE(e, { "_vertex": v._key })'
       query += 'RETURN e'
       query += ') ' // query += ') RETURN ve'
@@ -760,7 +760,7 @@ export function fetchRelations(
   }
 
   if (strategy === GraphFetchStrategy.NON_DISTINCT_VERTEX_EDGE_TUPLES) {
-    let query = 'FOR v,e IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null '
+    let query = 'FOR v,e IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null '
     query += 'RETURN { "' + propNameVertexTo + '": v, "' + propNameEdges + '": e }'
 
     if (options?.printQuery) {
@@ -771,7 +771,7 @@ export function fetchRelations(
   }
 
   if (strategy === GraphFetchStrategy.DISTINCT_VERTEX) {
-    let query = 'FOR v IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null '
+    let query = 'FOR v IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null '
     query += 'COLLECT vertexId = v._key INTO vertexGrouped = v RETURN FIRST(vertexGrouped)'
 
     if (options?.printQuery) {
@@ -782,7 +782,7 @@ export function fetchRelations(
   }
 
   // strategy === GraphFetchStrategy.NON_DISTINCT_VERTEX}
-  const query = 'FOR v IN 1 ' + bound + ' "' + startFrom.collection + '/' + startFrom.key + '" GRAPH ' + usingGraph + ' FILTER v != null RETURN v'
+  const query = 'FOR v IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null RETURN v'
 
   if (options?.printQuery) {
     console.log(query)
