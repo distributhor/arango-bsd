@@ -20,15 +20,15 @@ function fetchAllCyclistsInTeam(id: string): GraphFetchInstruction {
   )
 }
 
-function fetchAllCyclistsInRace(id: string): GraphFetchInstruction {
+function fetchAllCyclistsInRace(raceId: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
-    id, VAR.raceCollection, VAR.raceAttendanceGraph, 'OUTBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES, 'cyclist', 'races'
+    raceId, VAR.raceCollection, VAR.raceAttendanceGraph, 'OUTBOUND', GraphFetchStrategy.DISTINCT_VERTEX, 'race1', 'cyclist1', 'attendance1'
   )
 }
 
-function fetchAllRacesForCyclist(id: string): GraphFetchInstruction {
+function fetchAllRacesForCyclist(cyclistId: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
-    id, VAR.cyclistCollection, VAR.raceAttendanceGraph, 'INBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES, 'cyclist', 'races'
+    cyclistId, VAR.cyclistCollection, VAR.raceAttendanceGraph, 'INBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES, 'race2', 'cyclist2', 'attendance2'
   )
 }
 
@@ -180,22 +180,22 @@ describe('Guacamole Integration Tests', () => {
     )
 
     const tourDeFranceHistory = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllCyclistsInRace(tourDeFrance._key)
-    )
-
-    // // console.log(JSON.stringify(tourDeFranceHistory))
-    // console.log(JSON.stringify(tourDeFranceHistory.data[0]))
-    console.log(tourDeFranceHistory.size)
-
-    const nibaliHistory = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllRacesForCyclist(nibali._key), {
-        strategy: GraphFetchStrategy.DISTINCT_VERTEX_WITH_EDGES_JOINED,
+      fetchAllCyclistsInRace(tourDeFrance._key), {
+        strategy: GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES,
         edgeDataScope: EdgeDataScope.MERGED
       }
     )
 
-    console.log(JSON.stringify(nibaliHistory.data[0]))
-    // console.log(nibaliHistory.size)
+    console.log(JSON.stringify(tourDeFranceHistory))
+
+    const nibaliHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllRacesForCyclist(nibali._key), {
+        strategy: GraphFetchStrategy.DISTINCT_VERTEX_EDGE_TUPLES,
+        edgeDataScope: EdgeDataScope.MERGED
+      }
+    )
+
+    console.log(JSON.stringify(nibaliHistory))
 
     // //////////////////////////////////////////////////////////////////////////////////
     //

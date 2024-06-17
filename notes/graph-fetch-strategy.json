@@ -7,12 +7,40 @@
         "result": {
           "data": [
             {
-              "_key": "416522315",
-              "_id": "cyclists/416522315",
-              "_rev": "_iAC8tsi--Q",
-              "name": "Marc",
-              "surname": "Soler",
-              "country": "Spain"
+                "_key": "416648560",
+                "_id": "cyclists/416648560",
+                "_rev": "_iASJQpq--D",
+                "name": "Marc",
+                "surname": "Soler",
+                "country": "Spain"
+            },
+            {
+                "_key": "416648548",
+                "_id": "cyclists/416648548",
+                "_rev": "_iASJQpm--E",
+                "name": "Alejandro",
+                "surname": "Valverde",
+                "country": "Spain"
+            }
+          ],
+          "size": 2
+        }
+      },
+      {
+        "description": "fetchAllTeamsForCyclist",
+        "result": {
+          "data": [
+            {
+                "_key": "416649954",
+                "_id": "teams/416649954",
+                "_rev": "_iASK3mm--F",
+                "name": "Movistar - Caisse d'Epargne"
+            },
+            {
+                "_key": "416649948",
+                "_id": "teams/416649948",
+                "_rev": "_iASK3mm--_",
+                "name": "UAE Emirates"
             }
           ],
           "size": 2
@@ -28,12 +56,20 @@
         "result": {
           "data": [
             {
-              "_key": "416522315",
-              "_id": "cyclists/416522315",
-              "_rev": "_iAC8tsi--Q",
-              "name": "Marc",
-              "surname": "Soler",
-              "country": "Spain"
+                "_key": "416648560",
+                "_id": "cyclists/416648560",
+                "_rev": "_iASJQpq--D",
+                "name": "Marc",
+                "surname": "Soler",
+                "country": "Spain"
+            },
+            {
+                "_key": "416648548",
+                "_id": "cyclists/416648548",
+                "_rev": "_iASJQpm--E",
+                "name": "Alejandro",
+                "surname": "Valverde",
+                "country": "Spain"
             }
           ],
           "size": 2
@@ -44,16 +80,16 @@
         "result": {
           "data": [
             {
-              "_key": "416529195",
-              "_id": "teams/416529195",
-              "_rev": "_iADEJOW--F",
-              "name": "Movistar - Caisse d'Epargne"
+                "_key": "416649954",
+                "_id": "teams/416649954",
+                "_rev": "_iASK3mm--F",
+                "name": "Movistar - Caisse d'Epargne"
             },
             {
-              "_key": "416529189",
-              "_id": "teams/416529189",
-              "_rev": "_iADEJOW--_",
-              "name": "UAE Emirates"
+                "_key": "416649948",
+                "_id": "teams/416649948",
+                "_rev": "_iASK3mm--_",
+                "name": "UAE Emirates"
             }
           ],
           "size": 2
@@ -129,7 +165,7 @@
                   "position": "3rd",
                   "result": 3,
                   "year": "2009",
-                  "vertex": {
+                  "_ref": {
                     "_key": "416532159",
                     "_id": "races/416532159",
                     "_rev": "_iADJIiq--F",
@@ -147,7 +183,7 @@
                   "position": "1st",
                   "result": 1,
                   "year": "2005",
-                  "vertex": {
+                  "_ref": {
                     "_key": "416532159",
                     "_id": "races/416532159",
                     "_rev": "_iADJIiq--F",
@@ -215,27 +251,29 @@
         "result": {
           "data": [
             {
-              "_id": "cyclists/416540178",
-              "_key": "416540178",
-              "_rev": "_iADcIhG--B",
-              "country": "Italy",
-              "name": "Vincenzo",
-              "surname": "Nibali",
-              "races": [
-                  {
-                      "_key": "416540468",
-                      "_id": "race_attendance/416540468",
-                      "_from": "races/416540233",
-                      "_to": "cyclists/416540178",
-                      "_rev": "_iADcIj6--C",
-                      "year": "2015",
-                      "position": "12th",
-                      "result": 12
-                  }
-              ]
+                "cyclist": {
+                    "_key": "416591320",
+                    "_id": "cyclists/416591320",
+                    "_rev": "_iAOL3Eq--I",
+                    "name": "Vincenzo",
+                    "surname": "Nibali",
+                    "country": "Italy"
+                },
+                "races": [
+                    {
+                        "_key": "416591610",
+                        "_id": "race_attendance/416591610",
+                        "_from": "races/416591375",
+                        "_to": "cyclists/416591320",
+                        "_rev": "_iAOL3GG--I",
+                        "year": "2015",
+                        "position": "12th",
+                        "result": 12
+                    }
+                ]
             }
           ],
-          "size": 2
+          "size": 8
         }
       },
       {
@@ -244,36 +282,38 @@
         "result": {
           "data": [
             {
-              "_id": "cyclists/416541617",
-              "_key": "416541617",
-              "_rev": "_iADeEim--C",
-              "country": "Italy",
-              "disciplines": "Road",
-              "name": "Vincenzo",
-              "surname": "Nibali",
-              "races": [
-                  {
-                      "_from": "races/416541672",
-                      "_id": "race_attendance/416541907",
-                      "_key": "416541907",
-                      "_rev": "_iADeEkK--I",
-                      "_to": "cyclists/416541617",
-                      "position": "12th",
-                      "result": 12,
-                      "year": "2015",
-                      "vertex": {
-                          "_key": "416541672",
-                          "_id": "races/416541672",
-                          "_rev": "_iADeEiu--L",
-                          "name": "Critérium du Dauphiné",
-                          "discipline": "road",
-                          "type": "stage"
-                      }
-                  }
-              ]
+                "cyclist": {
+                    "_key": "416594074",
+                    "_id": "cyclists/416594074",
+                    "_rev": "_iAOOVOW--B",
+                    "name": "Vincenzo",
+                    "surname": "Nibali",
+                    "country": "Italy",
+                    "strength": "General Classification"
+                },
+                "races": [
+                    {
+                        "_from": "races/416594129",
+                        "_id": "race_attendance/416594364",
+                        "_key": "416594364",
+                        "_rev": "_iAOOVR---I",
+                        "_to": "cyclists/416594074",
+                        "position": "12th",
+                        "result": 12,
+                        "year": "2015",
+                        "_ref": {
+                            "_key": "416594129",
+                            "_id": "races/416594129",
+                            "_rev": "_iAOOVOm--L",
+                            "name": "Critérium du Dauphiné",
+                            "discipline": "road",
+                            "type": "stage"
+                        }
+                    }
+                ]
             }
           ],
-          "size": 2
+          "size": 8
         }
       },
       {
@@ -282,79 +322,37 @@
         "result": {
           "data": [
             {
-              "_id": "cyclists/416543017",
-              "_key": "416543017",
-              "_rev": "_iADfQlm--I",
-              "country": "Italy",
-              "name": "Vincenzo",
-              "surname": "Nibali",
-              "races": [
-                  {
-                      "_from": "races/416543072",
-                      "_id": "race_attendance/416543307",
-                      "_key": "416543307",
-                      "_rev": "_iADfQnO--C",
-                      "_to": "cyclists/416543017",
-                      "position": "12th",
-                      "result": 12,
-                      "year": "2015",
-                      "type": "stage",
-                      "name": "Critérium du Dauphiné",
-                      "discipline": "road"
-                  }
-              ]
+                "cyclist": {
+                    "_key": "416595467",
+                    "_id": "cyclists/416595467",
+                    "_rev": "_iAOPkgu--_",
+                    "name": "Vincenzo",
+                    "surname": "Nibali",
+                    "country": "Italy"
+                },
+                "races": [
+                    {
+                        "_from": "races/416595522",
+                        "_id": "race_attendance/416595757",
+                        "_key": "416595757",
+                        "_rev": "_iAOPkjC--C",
+                        "_to": "cyclists/416595467",
+                        "discipline": "road",
+                        "name": "Critérium du Dauphiné",
+                        "position": "12th",
+                        "result": 12,
+                        "type": "stage",
+                        "year": "2015",
+                        "_ref": {
+                            "_id": "races/416595522",
+                            "_key": "416595522",
+                            "_rev": "races/416595522"
+                        }
+                    }
+                ]
             }
           ],
-          "size": 2
-        }
-      }
-    ]
-  },
-  {
-    "stategy": "NON_DISTINCT_VERTEX_EDGE_TUPLES",
-    "examples": [
-      {
-        "description": "fetchAllCyclistsInRace",
-        "result": {
-          "data": [
-            {
-              "cyclist": {
-                "_key": "416432888",
-                "_id": "cyclists/416432888",
-                "name": "Chris",
-                "surname": "Froome",
-                "country": "UK"
-              },
-              "races": {
-                "_key": "416433092",
-                "_id": "race_attendance/416433092",
-                "_from": "races/416432926",
-                "_to": "cyclists/416432888",
-                "year": "2017",
-                "position": "1st",
-                "result": 1
-              }
-            },
-            {
-              "cyclist": {
-                "_key": "416432888",
-                "_id": "cyclists/416432888",
-                "name": "Chris",
-                "surname": "Froome",
-                "country": "UK"
-              },
-              "races": {
-                "_key": "416433091",
-                "_id": "race_attendance/416433091",
-                "_from": "races/416432926",
-                "_to": "cyclists/416432888",
-                "year": "2015",
-                "position": "1st",
-                "result": 1
-              }
-            }
-          ],
-          "size": 27
+          "size": 8
         }
       }
     ]
@@ -423,7 +421,7 @@
                       "position": "3rd",
                       "result": 3,
                       "year": "2009",
-                      "vertex": {
+                      "_ref": {
                           "_key": "416537060",
                           "_id": "races/416537060",
                           "_rev": "_iADVBF2--A",
@@ -441,7 +439,7 @@
                       "position": "1st",
                       "result": 1,
                       "year": "2005",
-                      "vertex": {
+                      "_ref": {
                           "_key": "416537060",
                           "_id": "races/416537060",
                           "_rev": "_iADVBF2--A",
@@ -480,7 +478,12 @@
                       "year": "2009",
                       "type": "grand_tour",
                       "name": "Tour de France",
-                      "discipline": "road"
+                      "discipline": "road",
+                      "_ref": {
+                        "_id": "races/416597219",
+                        "_key": "416597219",
+                        "_rev": "races/416597219"
+                      }
                   },
                   {
                       "_from": "races/416538446",
@@ -493,14 +496,127 @@
                       "year": "2005",
                       "type": "grand_tour",
                       "name": "Tour de France",
-                      "discipline": "road"
+                      "discipline": "road",
+                      "_ref": {
+                        "_id": "races/416597219",
+                        "_key": "416597219",
+                        "_rev": "races/416597219"
+                      }
                   }
               ]
             }
           ],
           "size": 14
         }
+      },
+      {
+        "description": "fetchAllRacesForCyclist",
+        "options": "EdgeDataScope.NONE",
+        "result": {
+          "data": [
+            {
+              "_id": "cyclists/416540178",
+              "_key": "416540178",
+              "_rev": "_iADcIhG--B",
+              "country": "Italy",
+              "name": "Vincenzo",
+              "surname": "Nibali",
+              "races": [
+                  {
+                      "_key": "416540468",
+                      "_id": "race_attendance/416540468",
+                      "_from": "races/416540233",
+                      "_to": "cyclists/416540178",
+                      "_rev": "_iADcIj6--C",
+                      "year": "2015",
+                      "position": "12th",
+                      "result": 12
+                  }
+              ]
+            }
+          ],
+          "size": 2
+        }
+      },
+      {
+        "description": "fetchAllRacesForCyclist",
+        "options": "EdgeDataScope.JOINED",
+        "result": {
+          "data": [
+            {
+              "_id": "cyclists/416541617",
+              "_key": "416541617",
+              "_rev": "_iADeEim--C",
+              "country": "Italy",
+              "disciplines": "Road",
+              "name": "Vincenzo",
+              "surname": "Nibali",
+              "races": [
+                  {
+                      "_from": "races/416541672",
+                      "_id": "race_attendance/416541907",
+                      "_key": "416541907",
+                      "_rev": "_iADeEkK--I",
+                      "_to": "cyclists/416541617",
+                      "position": "12th",
+                      "result": 12,
+                      "year": "2015",
+                      "_ref": {
+                          "_key": "416541672",
+                          "_id": "races/416541672",
+                          "_rev": "_iADeEiu--L",
+                          "name": "Critérium du Dauphiné",
+                          "discipline": "road",
+                          "type": "stage"
+                      }
+                  }
+              ]
+            }
+          ],
+          "size": 2
+        }
+      },
+      {
+        "description": "fetchAllRacesForCyclist",
+        "options": "EdgeDataScope.MERGED",
+        "result": {
+          "data": [
+            {
+              "_id": "cyclists/416543017",
+              "_key": "416543017",
+              "_rev": "_iADfQlm--I",
+              "country": "Italy",
+              "name": "Vincenzo",
+              "surname": "Nibali",
+              "races": [
+                  {
+                      "_from": "races/416543072",
+                      "_id": "race_attendance/416543307",
+                      "_key": "416543307",
+                      "_rev": "_iADfQnO--C",
+                      "_to": "cyclists/416543017",
+                      "position": "12th",
+                      "result": 12,
+                      "year": "2015",
+                      "type": "stage",
+                      "name": "Critérium du Dauphiné",
+                      "discipline": "road",
+                      "_ref": {
+                        "_id": "races/416589802",
+                        "_key": "416589802",
+                        "_rev": "races/416589802"
+                      }
+                  }
+              ]
+            }
+          ],
+          "size": 2
+        }
       }
     ]
+  },
+    {
+    "stategy": "NON_DISTINCT_VERTEX_EDGE_TUPLES",
+    "examples": []
   }
 ]

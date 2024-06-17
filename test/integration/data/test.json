@@ -1,23 +1,1122 @@
 {
-    "_id": "cyclists/416543017",
-    "_key": "416543017",
-    "_rev": "_iADfQlm--I",
-    "country": "Italy",
-    "name": "Vincenzo",
-    "surname": "Nibali",
-    "races": [
+    "description": "fetchAllCyclistsInRace",
+    "data": [
         {
-            "_from": "races/416543072",
-            "_id": "race_attendance/416543307",
-            "_key": "416543307",
-            "_rev": "_iADfQnO--C",
-            "_to": "cyclists/416543017",
-            "position": "12th",
-            "result": 12,
-            "year": "2015",
-            "type": "stage",
-            "name": "Critérium du Dauphiné",
-            "discipline": "road"
+            "cyclist": {
+                "_key": "416655793",
+                "_id": "cyclists/416655793",
+                "_rev": "_iASVpjy---",
+                "name": "Lance",
+                "surname": "Armstrong",
+                "trademark": "livestrong",
+                "country": "USA",
+                "strength": "General Classification",
+                "disciplines": "Road, TT, Run, Swim",
+                "stats": {
+                    "wins": 71,
+                    "grandTours": 15,
+                    "classics": 18
+                },
+                "results": {
+                    "list": [
+                        "1993, UCI World Champs Road, 1st",
+                        "1996, Liège - Bastogne - Liège, 2nd",
+                        "1996, Paris - Nice, 2nd",
+                        "1998, La Vuelta a España, 4th",
+                        "2001, Tour de Suisse, 1st",
+                        "2003, Critérium du Dauphiné, 1st",
+                        "2005, Tour de France, 1st",
+                        "2009, Tour de France, 3rd"
+                    ],
+                    "year": {
+                        "1993": [
+                            "1st, UCI World Champs Road"
+                        ],
+                        "1996": [
+                            "2nd, Liège - Bastogne - Liège",
+                            "2nd, Paris - Nice"
+                        ],
+                        "1998": [
+                            "4th, La Vuelta a España"
+                        ],
+                        "2001": [
+                            "1st, Tour de Suisse"
+                        ],
+                        "2003": [
+                            "1st, Critérium du Dauphiné"
+                        ],
+                        "2005": [
+                            "1st, Tour de France"
+                        ],
+                        "2009": [
+                            "3rd, Tour de France"
+                        ]
+                    },
+                    "palmares": "1993, UCI World Champs Road, 1st; 1996, Liège - Bastogne - Liège, 2nd; 1996, Paris - Nice, 2nd; 1998, La Vuelta a España, 4th; 2001, Tour de Suisse, 1st; 2003, Critérium du Dauphiné, 1st; 2005, Tour de France, 1st; 2009, Tour de France, 3rd"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655988",
+                    "_key": "416655988",
+                    "_rev": "_iASVplK--_",
+                    "_to": "cyclists/416655793",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "3rd",
+                    "result": 3,
+                    "type": "grand_tour",
+                    "year": "2009",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655987",
+                    "_key": "416655987",
+                    "_rev": "_iASVplK---",
+                    "_to": "cyclists/416655793",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "1st",
+                    "result": 1,
+                    "type": "grand_tour",
+                    "year": "2005",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655794",
+                "_id": "cyclists/416655794",
+                "_rev": "_iASVpjy--_",
+                "name": "George",
+                "surname": "Hincapie",
+                "trademark": "The Lieutenant",
+                "country": "USA",
+                "strength": "Domestique",
+                "disciplines": "Road, MTB",
+                "stats": {
+                    "wins": 19,
+                    "grandTours": 20,
+                    "classics": 49
+                },
+                "results": {
+                    "list": [
+                        "2001, Gent - Wevelgem, 1st",
+                        "2006, Tour of Benelux, 2nd",
+                        "2012, Tour de France, 38th",
+                        "2012, Paris - Roubaix, 43rd",
+                        "2012, Tirreno - Adriatico, 42nd"
+                    ],
+                    "year": {
+                        "2001": [
+                            "1st, Gent - Wevelgem"
+                        ],
+                        "2006": [
+                            "2nd, Tour of Benelux"
+                        ],
+                        "2012": [
+                            "38th, Tour de France",
+                            "43rd, Paris - Roubaix",
+                            "42nd, Tirreno - Adriatico"
+                        ]
+                    },
+                    "palmares": "2001, Gent - Wevelgem, 1st; 2006, Tour of Benelux, 2nd; 2012, Tour de France, 38th; 2012, Paris - Roubaix, 43rd; 2012, Tirreno - Adriatico, 42nd"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655989",
+                    "_key": "416655989",
+                    "_rev": "_iASVplK--A",
+                    "_to": "cyclists/416655794",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "38th",
+                    "result": 38,
+                    "type": "grand_tour",
+                    "year": "2012",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655795",
+                "_id": "cyclists/416655795",
+                "_rev": "_iASVpjy--A",
+                "name": "Ivan",
+                "surname": "Basso",
+                "trademark": "Close But Not Quite",
+                "country": "Italy",
+                "strength": "General Classification",
+                "disciplines": "Road",
+                "stats": {
+                    "wins": 30,
+                    "grandTours": 20,
+                    "classics": 21
+                },
+                "results": {
+                    "list": [
+                        "2005, Tour de France, 2nd",
+                        "2006, Giro d'Italia, 1st",
+                        "2010, Giro d'Italia, 1st",
+                        "2012, Tour of Britain, 18th",
+                        "2012, Tour de France, 25th",
+                        "2012, Giro d'Italia, 5th",
+                        "2012, Paris - Nice, DNF",
+                        "2015, Tour de France, DNF",
+                        "2015, Giro d'Italia, 51st",
+                        "2015, Volta Ciclista a Catalunya, DNF",
+                        "2015, Tirreno - Adriatico, 40th"
+                    ],
+                    "year": {
+                        "2005": [
+                            "2nd, Tour de France"
+                        ],
+                        "2006": [
+                            "1st, Giro d'Italia"
+                        ],
+                        "2010": [
+                            "1st, Giro d'Italia"
+                        ],
+                        "2012": [
+                            "18th, Tour of Britain",
+                            "25th, Tour de France",
+                            "5th, Giro d'Italia",
+                            "DNF, Paris - Nice"
+                        ],
+                        "2015": [
+                            "DNF, Tour de France",
+                            "51st, Giro d'Italia",
+                            "DNF, Volta Ciclista a Catalunya",
+                            "40th, Tirreno - Adriatico"
+                        ]
+                    },
+                    "palmares": "2005, Tour de France, 2nd; 2006, Giro d'Italia, 1st; 2010, Giro d'Italia, 1st; 2012, Tour of Britain, 18th; 2012, Tour de France, 25th; 2012, Giro d'Italia, 5th; 2012, Paris - Nice, DNF; 2015, Tour de France, DNF; 2015, Giro d'Italia, 51st; 2015, Volta Ciclista a Catalunya, DNF; 2015, Tirreno - Adriatico, 40th"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655992",
+                    "_key": "416655992",
+                    "_rev": "_iASVplK--D",
+                    "_to": "cyclists/416655795",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "DNF",
+                    "result": -1,
+                    "type": "grand_tour",
+                    "year": "2015",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655991",
+                    "_key": "416655991",
+                    "_rev": "_iASVplK--C",
+                    "_to": "cyclists/416655795",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "25th",
+                    "result": 25,
+                    "type": "grand_tour",
+                    "year": "2012",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655990",
+                    "_key": "416655990",
+                    "_rev": "_iASVplK--B",
+                    "_to": "cyclists/416655795",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "2nd",
+                    "result": 2,
+                    "type": "grand_tour",
+                    "year": "2005",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655796",
+                "_id": "cyclists/416655796",
+                "_rev": "_iASVpjy--B",
+                "name": "Marco",
+                "surname": "Pantani",
+                "country": "Italy",
+                "strength": "Climbing",
+                "disciplines": "Road",
+                "stats": {
+                    "wins": 26,
+                    "grandTours": 16,
+                    "classics": 11
+                },
+                "results": {
+                    "list": [
+                        "1994, Giro d'Italia, 2nd",
+                        "1994, Tour de France, 3rd",
+                        "1997, Tour de France, 2nd",
+                        "1998, Tour de France, 1st",
+                        "1998, Giro d'Italia, 1st",
+                        "2003, Giro d'Italia, 14th"
+                    ],
+                    "year": {
+                        "1994": [
+                            "2nd, Giro d'Italia",
+                            "3rd, Tour de France"
+                        ],
+                        "1997": [
+                            "2nd, Tour de France"
+                        ],
+                        "1998": [
+                            "1st, Tour de France",
+                            "1st, Giro d'Italia"
+                        ],
+                        "2003": [
+                            "14th, Giro d'Italia"
+                        ]
+                    },
+                    "palmares": "1994, Giro d'Italia, 2nd; 1994, Tour de France, 3rd; 1997, Tour de France, 2nd; 1998, Tour de France, 1st; 1998, Giro d'Italia, 1st; 2003, Giro d'Italia, 14th"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655995",
+                    "_key": "416655995",
+                    "_rev": "_iASVplK--G",
+                    "_to": "cyclists/416655796",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "1st",
+                    "result": 1,
+                    "type": "grand_tour",
+                    "year": "1998",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655994",
+                    "_key": "416655994",
+                    "_rev": "_iASVplK--F",
+                    "_to": "cyclists/416655796",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "2nd",
+                    "result": 2,
+                    "type": "grand_tour",
+                    "year": "1997",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655993",
+                    "_key": "416655993",
+                    "_rev": "_iASVplK--E",
+                    "_to": "cyclists/416655796",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "3rd",
+                    "result": 3,
+                    "type": "grand_tour",
+                    "year": "1994",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655797",
+                "_id": "cyclists/416655797",
+                "_rev": "_iASVpjy--C",
+                "name": "Jan",
+                "surname": "Ullrich",
+                "trademark": "Wish I Was 3kg Lighter",
+                "country": "Germany",
+                "strength": "General Classification",
+                "disciplines": "Road, TT",
+                "stats": {
+                    "wins": 32,
+                    "grandTours": 13,
+                    "classics": 4
+                },
+                "results": {
+                    "list": [
+                        "1997, Tour de France, 1st",
+                        "2000, Olympic Games Road Race, 1st",
+                        "2004, Tour de Suisse, 1st",
+                        "2004, Tour de France, 4th",
+                        "2005, Tour de France, 3rd",
+                        "2005, Volta Ciclista a Catalunya, 18th"
+                    ],
+                    "year": {
+                        "1997": [
+                            "1st, Tour de France"
+                        ],
+                        "2000": [
+                            "1st, Olympic Games Road Race"
+                        ],
+                        "2004": [
+                            "1st, Tour de Suisse",
+                            "4th, Tour de France"
+                        ],
+                        "2005": [
+                            "3rd, Tour de France",
+                            "18th, Volta Ciclista a Catalunya"
+                        ]
+                    },
+                    "palmares": "1997, Tour de France, 1st; 2000, Olympic Games Road Race, 1st; 2004, Tour de Suisse, 1st; 2004, Tour de France, 4th; 2005, Tour de France, 3rd; 2005, Volta Ciclista a Catalunya, 18th"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655998",
+                    "_key": "416655998",
+                    "_rev": "_iASVplK--J",
+                    "_to": "cyclists/416655797",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "3rd",
+                    "result": 3,
+                    "type": "grand_tour",
+                    "year": "2005",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655997",
+                    "_key": "416655997",
+                    "_rev": "_iASVplK--I",
+                    "_to": "cyclists/416655797",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "4th",
+                    "result": 4,
+                    "type": "grand_tour",
+                    "year": "2004",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655996",
+                    "_key": "416655996",
+                    "_rev": "_iASVplK--H",
+                    "_to": "cyclists/416655797",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "1st",
+                    "result": 1,
+                    "type": "grand_tour",
+                    "year": "1997",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655798",
+                "_id": "cyclists/416655798",
+                "_rev": "_iASVpjy--D",
+                "name": "Alberto",
+                "surname": "Contador",
+                "trademark": "El Pistolero",
+                "country": "Spain",
+                "strength": "General Classification",
+                "disciplines": "Road",
+                "stats": {
+                    "wins": 68,
+                    "grandTours": 18,
+                    "classics": 8
+                },
+                "results": {
+                    "list": [
+                        "2007, Tour de France, 1st",
+                        "2008, Giro d'Italia, 1st",
+                        "2008, La Vuelta a España, 1st",
+                        "2009, Tour de France, 1st",
+                        "2010, Paris - Nice, 1st",
+                        "2014, Tirreno - Adriatico, 1st",
+                        "2014, La Vuelta a España, 1st",
+                        "2015, Tour de France, 5th",
+                        "2015, Giro d'Italia, 1st",
+                        "2015, Volta Ciclista a Catalunya, 4th",
+                        "2015, Tirreno - Adriatico, 5th"
+                    ],
+                    "year": {
+                        "2007": [
+                            "1st, Tour de France"
+                        ],
+                        "2008": [
+                            "1st, Giro d'Italia",
+                            "1st, La Vuelta a España"
+                        ],
+                        "2009": [
+                            "1st, Tour de France"
+                        ],
+                        "2010": [
+                            "1st, Paris - Nice"
+                        ],
+                        "2014": [
+                            "1st, Tirreno - Adriatico",
+                            "1st, La Vuelta a España"
+                        ],
+                        "2015": [
+                            "5th, Tour de France",
+                            "1st, Giro d'Italia",
+                            "4th, Volta Ciclista a Catalunya",
+                            "5th, Tirreno - Adriatico"
+                        ]
+                    },
+                    "palmares": "2007, Tour de France, 1st; 2008, Giro d'Italia, 1st; 2008, La Vuelta a España, 1st; 2009, Tour de France, 1st; 2010, Paris - Nice, 1st; 2014, Tirreno - Adriatico, 1st; 2014, La Vuelta a España, 1st; 2015, Tour de France, 5th; 2015, Giro d'Italia, 1st; 2015, Volta Ciclista a Catalunya, 4th; 2015, Tirreno - Adriatico, 5th"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656001",
+                    "_key": "416656001",
+                    "_rev": "_iASVplK--M",
+                    "_to": "cyclists/416655798",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "5th",
+                    "result": 5,
+                    "type": "grand_tour",
+                    "year": "2015",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656000",
+                    "_key": "416656000",
+                    "_rev": "_iASVplK--L",
+                    "_to": "cyclists/416655798",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "1st",
+                    "result": 1,
+                    "type": "grand_tour",
+                    "year": "2009",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416655999",
+                    "_key": "416655999",
+                    "_rev": "_iASVplK--K",
+                    "_to": "cyclists/416655798",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "1st",
+                    "result": 1,
+                    "type": "grand_tour",
+                    "year": "2007",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655799",
+                "_id": "cyclists/416655799",
+                "_rev": "_iASVpjy--E",
+                "name": "Alejandro",
+                "surname": "Valverde",
+                "trademark": "Still Going",
+                "country": "Spain",
+                "disciplines": "Road, Gravel",
+                "stats": {
+                    "wins": 133,
+                    "grandTours": 32,
+                    "classics": 35
+                },
+                "results": {
+                    "list": [
+                        "2006, Liège - Bastogne - Liège, 1st",
+                        "2009, La Vuelta a España, 1st",
+                        "2009, Critérium du Dauphiné, 1st",
+                        "2015, Critérium du Dauphiné, 9th",
+                        "2015, Liège - Bastogne - Liège, 1st",
+                        "2015, Tour de France, 3rd",
+                        "2015, La Vuelta a España, 7th",
+                        "2017, Liège - Bastogne - Liège, 1st",
+                        "2023, UCI World Champs Gravel, 4th",
+                        "2024, Castellon Gravel Race, 1st",
+                        "2024, Belgian Waffle Ride, 25th"
+                    ],
+                    "year": {
+                        "2006": [
+                            "1st, Liège - Bastogne - Liège"
+                        ],
+                        "2009": [
+                            "1st, La Vuelta a España",
+                            "1st, Critérium du Dauphiné"
+                        ],
+                        "2015": [
+                            "9th, Critérium du Dauphiné",
+                            "1st, Liège - Bastogne - Liège",
+                            "3rd, Tour de France",
+                            "7th, La Vuelta a España"
+                        ],
+                        "2017": [
+                            "1st, Liège - Bastogne - Liège"
+                        ],
+                        "2023": [
+                            "4th, UCI World Champs Gravel"
+                        ],
+                        "2024": [
+                            "1st, Castellon Gravel Race",
+                            "25th, Belgian Waffle Ride"
+                        ]
+                    },
+                    "palmares": "2006, Liège - Bastogne - Liège, 1st; 2009, La Vuelta a España, 1st; 2009, Critérium du Dauphiné, 1st; 2015, Critérium du Dauphiné, 9th; 2015, Liège - Bastogne - Liège, 1st; 2015, Tour de France, 3rd; 2015, La Vuelta a España, 7th; 2017, Liège - Bastogne - Liège, 1st; 2023, UCI World Champs Gravel, 4th; 2024, Castellon Gravel Race, 1st; 2024, Belgian Waffle Ride, 25th"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656002",
+                    "_key": "416656002",
+                    "_rev": "_iASVplK--N",
+                    "_to": "cyclists/416655799",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "3rd",
+                    "result": 3,
+                    "type": "grand_tour",
+                    "year": "2015",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655800",
+                "_id": "cyclists/416655800",
+                "_rev": "_iASVpjy--F",
+                "name": "Mathieu",
+                "surname": "van der Poel",
+                "trademark": "Boss Of Cross",
+                "country": "Netherlands",
+                "strength": "Classics",
+                "disciplines": "Road, MTB, CX",
+                "stats": {
+                    "wins": 49,
+                    "grandTours": 4,
+                    "classics": 18
+                },
+                "results": {
+                    "list": [
+                        "2022, UCI World Champs Gravel, 3rd",
+                        "2022, Tour de France, DNF",
+                        "2023, Tour de France, 57th",
+                        "2023, UCI World Champs Road, 1st",
+                        "2024, Ronde van Vlaanderen, 1st",
+                        "2024, Paris - Roubaix, 1st"
+                    ],
+                    "year": {
+                        "2022": [
+                            "3rd, UCI World Champs Gravel",
+                            "DNF, Tour de France"
+                        ],
+                        "2023": [
+                            "57th, Tour de France",
+                            "1st, UCI World Champs Road"
+                        ],
+                        "2024": [
+                            "1st, Ronde van Vlaanderen",
+                            "1st, Paris - Roubaix"
+                        ]
+                    },
+                    "palmares": "2022, UCI World Champs Gravel, 3rd; 2022, Tour de France, DNF; 2023, Tour de France, 57th; 2023, UCI World Champs Road, 1st; 2024, Ronde van Vlaanderen, 1st; 2024, Paris - Roubaix, 1st"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656004",
+                    "_key": "416656004",
+                    "_rev": "_iASVplK--P",
+                    "_to": "cyclists/416655800",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "57th",
+                    "result": 57,
+                    "type": "grand_tour",
+                    "year": "2023",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656003",
+                    "_key": "416656003",
+                    "_rev": "_iASVplK--O",
+                    "_to": "cyclists/416655800",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "DNF",
+                    "result": -1,
+                    "type": "grand_tour",
+                    "year": "2022",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655801",
+                "_id": "cyclists/416655801",
+                "_rev": "_iASVpjy--G",
+                "name": "Wout",
+                "surname": "van Aert",
+                "trademark": "Can Do It All",
+                "country": "Belgium",
+                "strength": "Classics",
+                "disciplines": "Road, CX",
+                "stats": {
+                    "wins": 46,
+                    "grandTours": 5,
+                    "classics": 16
+                },
+                "results": {
+                    "list": [
+                        "2021, Amstel Gold, 1st",
+                        "2022, Critérium du Dauphiné, 49th",
+                        "2022, Tour de France, 21st",
+                        "2023, Tour of Britain, 1st",
+                        "2023, Tour de Suisse, 31st",
+                        "2023, Paris - Roubaix, 3rd",
+                        "2023, Tirreno - Adriatico, 53rd"
+                    ],
+                    "year": {
+                        "2021": [
+                            "1st, Amstel Gold"
+                        ],
+                        "2022": [
+                            "49th, Critérium du Dauphiné",
+                            "21st, Tour de France"
+                        ],
+                        "2023": [
+                            "1st, Tour of Britain",
+                            "31st, Tour de Suisse",
+                            "3rd, Paris - Roubaix",
+                            "53rd, Tirreno - Adriatico"
+                        ]
+                    },
+                    "palmares": "2021, Amstel Gold, 1st; 2022, Critérium du Dauphiné, 49th; 2022, Tour de France, 21st; 2023, Tour of Britain, 1st; 2023, Tour de Suisse, 31st; 2023, Paris - Roubaix, 3rd; 2023, Tirreno - Adriatico, 53rd"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656005",
+                    "_key": "416656005",
+                    "_rev": "_iASVplK--Q",
+                    "_to": "cyclists/416655801",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "21st",
+                    "result": 21,
+                    "type": "grand_tour",
+                    "year": "2022",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655802",
+                "_id": "cyclists/416655802",
+                "_rev": "_iASVpjy--H",
+                "name": "Tadej",
+                "surname": "Pogačar",
+                "trademark": "Tufts",
+                "country": "Slovenia",
+                "strength": "General Classification",
+                "disciplines": "Road, TT",
+                "stats": {
+                    "wins": 75,
+                    "grandTours": 6,
+                    "classics": 14
+                },
+                "results": {
+                    "list": [
+                        "2015, UCI World Champs Road, DNF",
+                        "2017, UCI World Champs Road, 17th",
+                        "2017, Tour of Slovenia, 5th",
+                        "2019, La Vuelta a España, 3rd",
+                        "2019, Tour of Slovenia, 4th",
+                        "2019, Strade Bianche, 30th",
+                        "2021, Tour de France, 1st",
+                        "2021, Liège - Bastogne - Liège, 1st",
+                        "2021, Tirreno - Adriatico, 53rd",
+                        "2022, Strade Bianche, 1st",
+                        "2023, Paris - Nice, 1st"
+                    ],
+                    "year": {
+                        "2015": [
+                            "DNF, UCI World Champs Road"
+                        ],
+                        "2017": [
+                            "17th, UCI World Champs Road",
+                            "5th, Tour of Slovenia"
+                        ],
+                        "2019": [
+                            "3rd, La Vuelta a España",
+                            "4th, Tour of Slovenia",
+                            "30th, Strade Bianche"
+                        ],
+                        "2021": [
+                            "1st, Tour de France",
+                            "1st, Liège - Bastogne - Liège",
+                            "53rd, Tirreno - Adriatico"
+                        ],
+                        "2022": [
+                            "1st, Strade Bianche"
+                        ],
+                        "2023": [
+                            "1st, Paris - Nice"
+                        ]
+                    },
+                    "palmares": "2015, UCI World Champs Road, DNF; 2017, UCI World Champs Road, 17th; 2017, Tour of Slovenia, 5th; 2019, La Vuelta a España, 3rd; 2019, Tour of Slovenia, 4th; 2019, Strade Bianche, 30th; 2021, Tour de France, 1st; 2021, Liège - Bastogne - Liège, 1st; 2021, Tirreno - Adriatico, 53rd; 2022, Strade Bianche, 1st; 2023, Paris - Nice, 1st"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656006",
+                    "_key": "416656006",
+                    "_rev": "_iASVplK--R",
+                    "_to": "cyclists/416655802",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "1st",
+                    "result": 1,
+                    "type": "grand_tour",
+                    "year": "2021",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655803",
+                "_id": "cyclists/416655803",
+                "_rev": "_iASVpjy--I",
+                "name": "Vincenzo",
+                "surname": "Nibali",
+                "trademark": "The Shark",
+                "country": "Italy",
+                "strength": "General Classification",
+                "disciplines": "Road",
+                "stats": {
+                    "wins": 52,
+                    "grandTours": 27,
+                    "classics": 44
+                },
+                "results": {
+                    "list": [
+                        "2014, Tour de France, 1st",
+                        "2015, Tour de France, 4th",
+                        "2015, Liège - Bastogne - Liège, 13th",
+                        "2015, Critérium du Dauphiné, 12th",
+                        "2016, Giro d'Italia, 1st",
+                        "2017, La Vuelta a España, 2nd",
+                        "2017, Giro d'Italia, 3rd",
+                        "2022, La Vuelta a España, 45th",
+                        "2022, Giro d'Italia, 4th"
+                    ],
+                    "year": {
+                        "2014": [
+                            "1st, Tour de France"
+                        ],
+                        "2015": [
+                            "4th, Tour de France",
+                            "13th, Liège - Bastogne - Liège",
+                            "12th, Critérium du Dauphiné"
+                        ],
+                        "2016": [
+                            "1st, Giro d'Italia"
+                        ],
+                        "2017": [
+                            "2nd, La Vuelta a España",
+                            "3rd, Giro d'Italia"
+                        ],
+                        "2022": [
+                            "45th, La Vuelta a España",
+                            "4th, Giro d'Italia"
+                        ]
+                    },
+                    "palmares": "2014, Tour de France, 1st; 2015, Tour de France, 4th; 2015, Liège - Bastogne - Liège, 13th; 2015, Critérium du Dauphiné, 12th; 2016, Giro d'Italia, 1st; 2017, La Vuelta a España, 2nd; 2017, Giro d'Italia, 3rd; 2022, La Vuelta a España, 45th; 2022, Giro d'Italia, 4th"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656008",
+                    "_key": "416656008",
+                    "_rev": "_iASVplK--T",
+                    "_to": "cyclists/416655803",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "4th",
+                    "result": 4,
+                    "type": "grand_tour",
+                    "year": "2015",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656007",
+                    "_key": "416656007",
+                    "_rev": "_iASVplK--S",
+                    "_to": "cyclists/416655803",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "1st",
+                    "result": 1,
+                    "type": "grand_tour",
+                    "year": "2014",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655805",
+                "_id": "cyclists/416655805",
+                "_rev": "_iASVpjy--K",
+                "name": "Peter",
+                "surname": "Sagan",
+                "trademark": "Wheelie",
+                "country": "Slovakia",
+                "strength": "Sprinter",
+                "disciplines": "Road, MTB",
+                "stats": {
+                    "wins": 121,
+                    "grandTours": 18,
+                    "classics": 36
+                },
+                "results": {
+                    "list": [
+                        "2015, Strade Bianche, 31st",
+                        "2015, Paris - Roubaix, 23rd",
+                        "2015, Tour de France, 46th",
+                        "2015, UCI World Champs Road, 1st",
+                        "2016, UCI World Champs Road, 1st",
+                        "2017, UCI World Champs Road, 1st",
+                        "2018, Paris - Roubaix, 1st",
+                        "2022, UCI World Champs Gravel, 14th"
+                    ],
+                    "year": {
+                        "2015": [
+                            "31st, Strade Bianche",
+                            "23rd, Paris - Roubaix",
+                            "46th, Tour de France",
+                            "1st, UCI World Champs Road"
+                        ],
+                        "2016": [
+                            "1st, UCI World Champs Road"
+                        ],
+                        "2017": [
+                            "1st, UCI World Champs Road"
+                        ],
+                        "2018": [
+                            "1st, Paris - Roubaix"
+                        ],
+                        "2022": [
+                            "14th, UCI World Champs Gravel"
+                        ]
+                    },
+                    "palmares": "2015, Strade Bianche, 31st; 2015, Paris - Roubaix, 23rd; 2015, Tour de France, 46th; 2015, UCI World Champs Road, 1st; 2016, UCI World Champs Road, 1st; 2017, UCI World Champs Road, 1st; 2018, Paris - Roubaix, 1st; 2022, UCI World Champs Gravel, 14th"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656009",
+                    "_key": "416656009",
+                    "_rev": "_iASVplK--U",
+                    "_to": "cyclists/416655805",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "46th",
+                    "result": 46,
+                    "type": "grand_tour",
+                    "year": "2015",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655807",
+                "_id": "cyclists/416655807",
+                "_rev": "_iASVpjy--M",
+                "name": "Thibaut",
+                "surname": "Pinot",
+                "country": "France",
+                "strength": "General Classification",
+                "stats": {
+                    "wins": 33,
+                    "grandTours": 18,
+                    "classics": 9
+                },
+                "results": {
+                    "list": [
+                        "2015, Tour de France, 16th",
+                        "2015, Tour de Suisse, 4th",
+                        "2017, Tour de France, DNF",
+                        "2017, Giro d'Italia, 4th",
+                        "2017, Tirreno - Adriatico, 3rd"
+                    ],
+                    "year": {
+                        "2015": [
+                            "16th, Tour de France",
+                            "4th, Tour de Suisse"
+                        ],
+                        "2017": [
+                            "DNF, Tour de France",
+                            "4th, Giro d'Italia",
+                            "3rd, Tirreno - Adriatico"
+                        ]
+                    },
+                    "palmares": "2015, Tour de France, 16th; 2015, Tour de Suisse, 4th; 2017, Tour de France, DNF; 2017, Giro d'Italia, 4th; 2017, Tirreno - Adriatico, 3rd"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656011",
+                    "_key": "416656011",
+                    "_rev": "_iASVplK--W",
+                    "_to": "cyclists/416655807",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "DNF",
+                    "result": -1,
+                    "type": "grand_tour",
+                    "year": "2017",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656010",
+                    "_key": "416656010",
+                    "_rev": "_iASVplK--V",
+                    "_to": "cyclists/416655807",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "16th",
+                    "result": 16,
+                    "type": "grand_tour",
+                    "year": "2015",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
+        },
+        {
+            "cyclist": {
+                "_key": "416655809",
+                "_id": "cyclists/416655809",
+                "_rev": "_iASVpjy--O",
+                "name": "Chris",
+                "surname": "Froome",
+                "country": "UK",
+                "strength": "General Classification",
+                "disciplines": "Road",
+                "stats": {
+                    "wins": 46,
+                    "grandTours": 21,
+                    "classics": 9
+                },
+                "results": {
+                    "list": [
+                        "2015, Tour de France, 1st",
+                        "2015, Critérium du Dauphiné, 1st",
+                        "2017, Tour de France, 1st",
+                        "2017, La Vuelta a España, 1st"
+                    ],
+                    "year": {
+                        "2015": [
+                            "1st, Tour de France",
+                            "1st, Critérium du Dauphiné"
+                        ],
+                        "2017": [
+                            "1st, Tour de France",
+                            "1st, La Vuelta a España"
+                        ]
+                    },
+                    "palmares": "2015, Tour de France, 1st; 2015, Critérium du Dauphiné, 1st; 2017, Tour de France, 1st; 2017, La Vuelta a España, 1st"
+                }
+            },
+            "races": [
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656013",
+                    "_key": "416656013",
+                    "_rev": "_iASVplK--Y",
+                    "_to": "cyclists/416655809",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "1st",
+                    "result": 1,
+                    "type": "grand_tour",
+                    "year": "2017",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                },
+                {
+                    "_from": "races/416655847",
+                    "_id": "race_attendance/416656012",
+                    "_key": "416656012",
+                    "_rev": "_iASVplK--X",
+                    "_to": "cyclists/416655809",
+                    "discipline": "road",
+                    "name": "Tour de France",
+                    "position": "1st",
+                    "result": 1,
+                    "type": "grand_tour",
+                    "year": "2015",
+                    "_vertex._key": "416655847",
+                    "_vertex._id": "races/416655847"
+                }
+            ]
         }
-    ]
+    ],
+    "size": 14
 }
