@@ -765,13 +765,17 @@ export function fetchRelations(
 
       const parentIdProp = bound === 'INBOUND' ? '_to' : '_from'
 
-      if (edgeDataScope === EdgeDataScope.JOINED) {
+      if (edgeDataScope === EdgeDataScope.JOINED || edgeDataScope === EdgeDataScope.JOINED_GREEDY) {
         query.push(literal(`LET parentDoc = DOCUMENT(e.${parentIdProp}) `))
-        // query.push(literal(`RETURN MERGE_RECURSIVE(e, { "${propNameEdgeData}": parentDoc }) `))
-        query.push(aql`RETURN MERGE_RECURSIVE(${join(etrim, '')}, { ${propNameEdgeData}: parentDoc }) `)
+        if (edgeDataScope === EdgeDataScope.JOINED_GREEDY) {
+          query.push(aql`RETURN MERGE_RECURSIVE(${join(etrim, '')}, { ${propNameEdgeData}: parentDoc }) `)
+        } else {
+          query.push(aql`RETURN MERGE_RECURSIVE(${join(etrim, '')}, { ${propNameEdgeData}: KEEP(parentDoc, "_key", "_id" ) }) `)
+        }
       } else {
-        query.push(aql`RETURN MERGE_RECURSIVE(e, UNSET(parentDoc, "_key", "_id", "_rev", "_from", "_to" ), `)
-        query.push(literal(`{ "_${propNameEdgeData}._id": parentDoc._id, "_${propNameEdgeData}._key": parentDoc._key }) `))
+        query.push(literal(`LET parentDoc = DOCUMENT(e.${parentIdProp}) `))
+        query.push(aql`RETURN MERGE_RECURSIVE(${join(etrim, '')}, UNSET(parentDoc, "_key", "_id", "_rev", "_from", "_to" ), `)
+        query.push(literal(`{ "_${propNameEdgeData}_id": parentDoc._id, "_${propNameEdgeData}_key": parentDoc._key }) `))
       }
     }
 

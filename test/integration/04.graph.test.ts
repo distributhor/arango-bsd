@@ -11,14 +11,16 @@ const conn = new ArangoConnection([{
 function fetchAllTeamsForCyclist(id: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
     id, VAR.cyclistCollection, VAR.teamMembershipGraph, 'OUTBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX,
-    undefined, undefined, undefined, undefined, { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
+    undefined, undefined, undefined,
+    undefined, { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
   )
 }
 
 function fetchAllCyclistsInTeam(id: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
     id, VAR.teamCollection, VAR.teamMembershipGraph, 'INBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX,
-    undefined, undefined, undefined, { keep: ['name', 'surname'] }, { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
+    undefined, undefined, undefined,
+    { keep: ['name', 'surname'] }, { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
   )
 }
 

@@ -113,9 +113,10 @@ export enum GraphFetchStrategy {
 }
 
 export enum EdgeDataScope {
+  NONE = 'NONE',
   MERGED = 'MERGED',
   JOINED = 'JOINED',
-  NONE = 'NONE'
+  JOINED_GREEDY = 'JOINED_GREEDY'
 }
 
 export interface GraphFetchInstruction {
