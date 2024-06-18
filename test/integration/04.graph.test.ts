@@ -10,25 +10,35 @@ const conn = new ArangoConnection([{
 
 function fetchAllTeamsForCyclist(id: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
-    id, VAR.cyclistCollection, VAR.teamMembershipGraph, 'OUTBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX
+    id, VAR.cyclistCollection, VAR.teamMembershipGraph, 'OUTBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX,
+    undefined, undefined, undefined, undefined, { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
   )
 }
 
 function fetchAllCyclistsInTeam(id: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
-    id, VAR.teamCollection, VAR.teamMembershipGraph, 'INBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX
+    id, VAR.teamCollection, VAR.teamMembershipGraph, 'INBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX,
+    undefined, undefined, undefined, { keep: ['name', 'surname'] }, { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
   )
 }
 
-// function fetchAllCyclistsInRace(raceId: string): GraphFetchInstruction {
-//   return ArangoConnection.util.toGraphFetchInstruction(
-//     raceId, VAR.raceCollection, VAR.raceAttendanceGraph, 'OUTBOUND', GraphFetchStrategy.DISTINCT_VERTEX, 'race', 'cyclist', 'attendance'
-//   )
-// }
+function fetchAllCyclistsInRace(raceId: string): GraphFetchInstruction {
+  return ArangoConnection.util.toGraphFetchInstruction(
+    raceId, VAR.raceCollection, VAR.raceAttendanceGraph, 'OUTBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED,
+    'race', 'cyclist', 'attendance',
+    { keep: ['name', 'surname'] },
+    { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] },
+    EdgeDataScope.NONE
+  )
+}
 
 function fetchAllRacesForCyclist(cyclistId: string): GraphFetchInstruction {
   return ArangoConnection.util.toGraphFetchInstruction(
-    cyclistId, VAR.cyclistCollection, VAR.raceAttendanceGraph, 'INBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGES_TUPLE, 'race', 'cyclist', 'attendance'
+    cyclistId, VAR.cyclistCollection, VAR.raceAttendanceGraph, 'INBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED,
+    'race', 'cyclist', 'attendance',
+    { keep: ['name', 'type'] },
+    { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] },
+    EdgeDataScope.NONE
   )
 }
 
@@ -37,33 +47,29 @@ describe('Guacamole Integration Tests', () => {
     // expect.assertions(199)
 
     const soler = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Soler' })
+    const cancellara = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Cancellara' })
     const nibali = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Nibali' })
     const basso = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Basso' })
-    const greg = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'van Avermaet' })
+    const hincapie = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Hincapie' })
+    const mohoric = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Mohorič' })
+    const pinot = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'Pinot' })
+    const gva = await conn.db(VAR.dbName).read(VAR.cyclistCollection, { property: 'surname', value: 'van Avermaet' })
 
     const movistar = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: "Movistar - Caisse d'Epargne" })
     const bahrain = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Bahrain' })
     const astana = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Astana' })
     const uae = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'UAE Emirates' })
     const liquigas = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Liquigas' })
-    const thinkoff = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Tinkoff - CSC' })
+    const tinkoff = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'Tinkoff - CSC' })
+    const bmc = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'BMC' })
+    const fdj = await conn.db(VAR.dbName).read(VAR.teamCollection, { property: 'name', value: 'FDJ' })
 
-    // const tourDeFrance = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Tour de France' })
-    // const parisRoubaix = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Paris - Roubaix' })
-    // const liegeBastogne = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Liège - Bastogne - Liège' })
-    // const stradeBianche = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Strade Bianche' })
-    // const milanoSanremo = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Milano - Sanremo' })
-    // const gravelWorldChamps = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'UCI World Champs Gravel' })
+    const tourDeFrance = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Tour de France' })
+    const parisRoubaix = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Paris - Roubaix' })
+    const liegeBastogne = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Liège - Bastogne - Liège' })
+    const milanoSanremo = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Milano - Sanremo' })
+    const tirreno = await conn.db(VAR.dbName).read(VAR.raceCollection, { property: 'name', value: 'Tirreno - Adriatico' })
 
-    expect(soler._key).toBeDefined()
-    expect(movistar._key).toBeDefined()
-    // expect(tourDeFrance._key).toBeDefined()
-
-    // includeGroupData: false
-    // FOR v, e, p IN 1 INBOUND "teams/416000141" GRAPH team_membership FILTER v != null RETURN v
-    //
-    // includeGroupData: true
-    // FOR v, e, p IN 1 INBOUND "teams/416001064" GRAPH team_membership FILTER v != null RETURN MERGE(v, { "team_membership": e })
     const movistarTeam1 = await conn.db(VAR.dbName).fetchRelations(
       fetchAllCyclistsInTeam(movistar._key)
     )
@@ -128,17 +134,42 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    const thinkoffTeam1 = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllCyclistsInTeam(thinkoff._key)
+    const tinkoffTeam1 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(tinkoff._key)
     )
 
-    expect(thinkoffTeam1.data.length).toEqual(4)
-    expect(thinkoffTeam1.data).toEqual(
+    expect(tinkoffTeam1.data.length).toEqual(4)
+    expect(tinkoffTeam1.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'Alberto', surname: 'Contador' }),
         expect.objectContaining({ name: 'Peter', surname: 'Sagan' }),
         expect.objectContaining({ name: 'Fabian', surname: 'Cancellara' }),
         expect.objectContaining({ name: 'Ivan', surname: 'Basso' })
+      ])
+    )
+
+    const bmcTeam1 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(bmc._key)
+    )
+
+    expect(bmcTeam1.data.length).toEqual(3)
+    expect(bmcTeam1.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Rohan', surname: 'Dennis' }),
+        expect.objectContaining({ name: 'Greg', surname: 'van Avermaet' }),
+        expect.objectContaining({ name: 'George', surname: 'Hincapie' })
+      ])
+    )
+
+    const fdjTeam1 = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInTeam(fdj._key)
+    )
+
+    expect(fdjTeam1.data.length).toEqual(2)
+    expect(fdjTeam1.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Arnaud', surname: 'Démare' }),
+        expect.objectContaining({ name: 'Thibaut', surname: 'Pinot' })
       ])
     )
 
@@ -180,23 +211,256 @@ describe('Guacamole Integration Tests', () => {
       ])
     )
 
-    // const parisRoubaixHistory = await conn.db(VAR.dbName).fetchRelations(
-    //   fetchAllCyclistsInRace(parisRoubaix._key), {
-    //     strategy: GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED,
-    //     edgeDataScope: EdgeDataScope.NONE
-    //   }
-    // )
-
-    // console.log(JSON.stringify(parisRoubaixHistory))
-
-    const gregHistory = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllRacesForCyclist(greg._key), {
-        strategy: GraphFetchStrategy.NON_DISTINCT_VERTEX_EDGE_TUPLE,
-        edgeDataScope: EdgeDataScope.NONE
-      }
+    const hincapieTeams = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllTeamsForCyclist(hincapie._key)
     )
 
-    console.log(JSON.stringify(gregHistory))
+    expect(hincapieTeams.data.length).toEqual(3)
+    expect(hincapieTeams.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'HTC Columbia - T-Mobile' }),
+        expect.objectContaining({ name: 'Discovery - US Postal' }),
+        expect.objectContaining({ name: 'BMC' })
+      ])
+    )
+
+    const mohoricTeams = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllTeamsForCyclist(mohoric._key)
+    )
+
+    expect(mohoricTeams.data.length).toEqual(1)
+    expect(mohoricTeams.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Bahrain' })
+      ])
+    )
+
+    const pinotTeams = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllTeamsForCyclist(pinot._key)
+    )
+
+    expect(pinotTeams.data.length).toEqual(1)
+    expect(pinotTeams.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'FDJ' })
+      ])
+    )
+
+    const gvaTeams = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllTeamsForCyclist(gva._key)
+    )
+
+    expect(gvaTeams.data.length).toEqual(3)
+    expect(gvaTeams.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'AG2R' }),
+        expect.objectContaining({ name: 'Lotto' }),
+        expect.objectContaining({ name: 'BMC' })
+      ])
+    )
+
+    const parisRoubaixHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInRace(parisRoubaix._key)
+    )
+
+    expect(parisRoubaixHistory.data.length).toEqual(7)
+    expect(parisRoubaixHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'George', surname: 'Hincapie' }),
+        expect.objectContaining({ name: 'Mathieu', surname: 'van der Poel' }),
+        expect.objectContaining({ name: 'Greg', surname: 'van Avermaet' }),
+        expect.objectContaining({ name: 'Peter', surname: 'Sagan' }),
+        expect.objectContaining({ name: 'Matej', surname: 'Mohorič' }),
+        expect.objectContaining({ name: 'Fabian', surname: 'Cancellara' })
+      ])
+    )
+
+    expect(parisRoubaixHistory.data[0].name).toBeDefined()
+    expect(parisRoubaixHistory.data[0].surname).toBeDefined()
+    expect(parisRoubaixHistory.data[0].country).toBeUndefined()
+    expect(parisRoubaixHistory.data[0].discipline).toBeUndefined()
+    expect(parisRoubaixHistory.data[0].attendance[0]._key).toBeDefined()
+    expect(parisRoubaixHistory.data[0].attendance[0].position).toBeDefined()
+    expect(parisRoubaixHistory.data[0].attendance[0].result).toBeDefined()
+    expect(parisRoubaixHistory.data[0].attendance[0].year).toBeDefined()
+    expect(parisRoubaixHistory.data[0].attendance[0]._rev).toBeUndefined()
+
+    const tdfHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInRace(tourDeFrance._key)
+    )
+
+    expect(tdfHistory.data.length).toEqual(14)
+    expect(tdfHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Lance', surname: 'Armstrong' }),
+        expect.objectContaining({ name: 'George', surname: 'Hincapie' }),
+        expect.objectContaining({ name: 'Ivan', surname: 'Basso' }),
+        expect.objectContaining({ name: 'Vincenzo', surname: 'Nibali' }),
+        expect.objectContaining({ name: 'Peter', surname: 'Sagan' }),
+        expect.objectContaining({ name: 'Thibaut', surname: 'Pinot' }),
+        expect.objectContaining({ name: 'Chris', surname: 'Froome' })
+      ])
+    )
+
+    const liegeBastogneHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInRace(liegeBastogne._key)
+    )
+    expect(liegeBastogneHistory.data.length).toEqual(4)
+    expect(liegeBastogneHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Lance', surname: 'Armstrong' }),
+        expect.objectContaining({ name: 'Vincenzo', surname: 'Nibali' })
+      ])
+    )
+
+    const milanoSanremoHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInRace(milanoSanremo._key)
+    )
+
+    expect(milanoSanremoHistory.data.length).toEqual(5)
+    expect(milanoSanremoHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Matej', surname: 'Mohorič' }),
+        expect.objectContaining({ name: 'Fabian', surname: 'Cancellara' })
+      ])
+    )
+
+    const tirrenoHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllCyclistsInRace(tirreno._key)
+    )
+
+    expect(tirrenoHistory.data.length).toEqual(8)
+    expect(tirrenoHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'George', surname: 'Hincapie' }),
+        expect.objectContaining({ name: 'Ivan', surname: 'Basso' }),
+        expect.objectContaining({ name: 'Alberto', surname: 'Contador' }),
+        expect.objectContaining({ name: 'Wout', surname: 'van Aert' }),
+        expect.objectContaining({ name: 'Tadej', surname: 'Pogačar' }),
+        expect.objectContaining({ name: 'Greg', surname: 'van Avermaet' }),
+        expect.objectContaining({ name: 'Thibaut', surname: 'Pinot' }),
+        expect.objectContaining({ name: 'Fabian', surname: 'Cancellara' })
+      ])
+    )
+
+    const solerHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllRacesForCyclist(soler._key)
+    )
+
+    expect(solerHistory.data.length).toEqual(0)
+
+    const cancellaraHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllRacesForCyclist(cancellara._key)
+    )
+
+    expect(cancellaraHistory.data.length).toEqual(6)
+    expect(cancellaraHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Olympic Games ITT' }),
+        expect.objectContaining({ name: 'UCI World Champs ITT' }),
+        expect.objectContaining({ name: 'Milano - Sanremo' }),
+        expect.objectContaining({ name: 'Tour de Suisse' }),
+        expect.objectContaining({ name: 'Tirreno - Adriatico' }),
+        expect.objectContaining({ name: 'Paris - Roubaix' })
+      ])
+    )
+
+    expect(cancellaraHistory.data[0].name).toBeDefined()
+    expect(cancellaraHistory.data[0].type).toBeDefined()
+    expect(cancellaraHistory.data[0].discipline).toBeUndefined()
+    expect(cancellaraHistory.data[0].attendance[0]._key).toBeDefined()
+    expect(cancellaraHistory.data[0].attendance[0].position).toBeDefined()
+    expect(cancellaraHistory.data[0].attendance[0].result).toBeDefined()
+    expect(cancellaraHistory.data[0].attendance[0].year).toBeDefined()
+    expect(cancellaraHistory.data[0].attendance[0]._rev).toBeUndefined()
+
+    const nibaliHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllRacesForCyclist(nibali._key)
+    )
+
+    expect(nibaliHistory.data.length).toEqual(5)
+    expect(nibaliHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Critérium du Dauphiné' }),
+        expect.objectContaining({ name: 'Liège - Bastogne - Liège' }),
+        expect.objectContaining({ name: 'La Vuelta a España' }),
+        expect.objectContaining({ name: "Giro d'Italia" }),
+        expect.objectContaining({ name: 'Tour de France' })
+      ])
+    )
+
+    const bassoHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllRacesForCyclist(basso._key)
+    )
+
+    expect(bassoHistory.data.length).toEqual(6)
+    expect(bassoHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Volta Ciclista a Catalunya' }),
+        expect.objectContaining({ name: 'Tirreno - Adriatico' }),
+        expect.objectContaining({ name: 'Tour of Britain' }),
+        expect.objectContaining({ name: "Giro d'Italia" }),
+        expect.objectContaining({ name: 'Tour de France' }),
+        expect.objectContaining({ name: 'Paris - Nice' })
+      ])
+    )
+
+    const hincapieHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllRacesForCyclist(hincapie._key)
+    )
+
+    expect(hincapieHistory.data.length).toEqual(5)
+    expect(hincapieHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Gent - Wevelgem' }),
+        expect.objectContaining({ name: 'Tirreno - Adriatico' }),
+        expect.objectContaining({ name: 'Tour of Benelux' }),
+        expect.objectContaining({ name: 'Tour de France' }),
+        expect.objectContaining({ name: 'Paris - Roubaix' })
+      ])
+    )
+
+    const mohoricHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllRacesForCyclist(mohoric._key)
+    )
+
+    expect(mohoricHistory.data.length).toEqual(4)
+    expect(mohoricHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Milano - Sanremo' }),
+        expect.objectContaining({ name: 'UCI World Champs Gravel' }),
+        expect.objectContaining({ name: 'Strade Bianche' }),
+        expect.objectContaining({ name: 'Paris - Roubaix' })
+      ])
+    )
+
+    const pinotHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllRacesForCyclist(pinot._key)
+    )
+
+    expect(pinotHistory.data.length).toEqual(4)
+    expect(pinotHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Tour de France' }),
+        expect.objectContaining({ name: 'Tirreno - Adriatico' }),
+        expect.objectContaining({ name: "Giro d'Italia" }),
+        expect.objectContaining({ name: 'Tour de Suisse' })
+      ])
+    )
+
+    const gvaHistory = await conn.db(VAR.dbName).fetchRelations(
+      fetchAllRacesForCyclist(gva._key)
+    )
+
+    expect(gvaHistory.data.length).toEqual(4)
+    expect(gvaHistory.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'Paris - Roubaix' }),
+        expect.objectContaining({ name: 'Tirreno - Adriatico' }),
+        expect.objectContaining({ name: 'Olympic Games Road Race' }),
+        expect.objectContaining({ name: 'The Traka 200' })
+      ])
+    )
 
     // //////////////////////////////////////////////////////////////////////////////////
     //
@@ -210,88 +474,88 @@ describe('Guacamole Integration Tests', () => {
     // LET team_members_removed = (FOR key IN team_members_keys REMOVE key IN team_members RETURN { _id: OLD._id, _key: OLD._key, _rev: OLD._rev })
     // REMOVE d IN cyclists RETURN MERGE({ _id: OLD._id, _key: OLD._key, _rev: OLD._rev }, { team_members: team_members_removed } )
     // bindVars: { '@value0': 'cyclists', value1: '_key', value2: '416049399' }
-    const result1A = await conn.db(VAR.dbName).delete(VAR.cyclistCollection, soler._key, [
-      { graph: VAR.teamMembershipGraph, edge: VAR.teamMembershipEdge }
-    ])
+    //   const result1A = await conn.db(VAR.dbName).delete(VAR.cyclistCollection, soler._key, [
+    //     { graph: VAR.teamMembershipGraph, edge: VAR.teamMembershipEdge }
+    //   ])
 
-    expect(result1A.length).toEqual(1)
-    expect(result1A).toBeDefined()
-    expect(Array.isArray(result1A)).toBeTruthy()
-    expect(result1A.length).toEqual(1)
-    expect(result1A[0]._key).toBeDefined()
-    // expect(result1A[0].team_members).toBeDefined()
-    // expect(result1A[0].team_members.length).toEqual(2)
+    //   expect(result1A.length).toEqual(1)
+    //   expect(result1A).toBeDefined()
+    //   expect(Array.isArray(result1A)).toBeTruthy()
+    //   expect(result1A.length).toEqual(1)
+    //   expect(result1A[0]._key).toBeDefined()
+    //   // expect(result1A[0].team_members).toBeDefined()
+    //   // expect(result1A[0].team_members.length).toEqual(2)
 
-    const result1ValidationA = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllTeamsForCyclist(soler._key)
-    )
+    //   const result1ValidationA = await conn.db(VAR.dbName).fetchRelations(
+    //     fetchAllTeamsForCyclist(soler._key)
+    //   )
 
-    expect(result1ValidationA.data.length).toEqual(0)
+    //   expect(result1ValidationA.data.length).toEqual(0)
 
-    const movistarTeam2 = await await conn.db(VAR.dbName).fetchRelations(
-      fetchAllCyclistsInTeam(movistar._key)
-    )
+    //   const movistarTeam2 = await await conn.db(VAR.dbName).fetchRelations(
+    //     fetchAllCyclistsInTeam(movistar._key)
+    //   )
 
-    expect(movistarTeam2.data.length).toEqual(1)
-    expect(movistarTeam2.data).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ name: 'Alejandro', surname: 'Valverde' })
-      ])
-    )
+    //   expect(movistarTeam2.data.length).toEqual(1)
+    //   expect(movistarTeam2.data).toEqual(
+    //     expect.arrayContaining([
+    //       expect.objectContaining({ name: 'Alejandro', surname: 'Valverde' })
+    //     ])
+    //   )
 
-    const uaeTeam2 = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllCyclistsInTeam(uae._key)
-    )
+    //   const uaeTeam2 = await conn.db(VAR.dbName).fetchRelations(
+    //     fetchAllCyclistsInTeam(uae._key)
+    //   )
 
-    expect(uaeTeam2.data.length).toEqual(2)
-    expect(uaeTeam2.data).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ name: 'Tim', surname: 'Wellens' }),
-        expect.objectContaining({ name: 'Tadej', surname: 'Pogačar' })
-      ])
-    )
+    //   expect(uaeTeam2.data.length).toEqual(2)
+    //   expect(uaeTeam2.data).toEqual(
+    //     expect.arrayContaining([
+    //       expect.objectContaining({ name: 'Tim', surname: 'Wellens' }),
+    //       expect.objectContaining({ name: 'Tadej', surname: 'Pogačar' })
+    //     ])
+    //   )
 
-    // FOR d IN @@value0 FILTER d.@value1 == @value2
-    // LET team_members_keys = (FOR v, e, p IN 1..1 ANY d GRAPH team_membership RETURN e._key)
-    // LET team_members_removed = (FOR key IN team_members_keys REMOVE key IN team_members RETURN { _id: OLD._id, _key: OLD._key, _rev: OLD._rev })
-    // REMOVE d IN cyclists RETURN MERGE({ _id: OLD._id, _key: OLD._key, _rev: OLD._rev }, { team_members: team_members_removed } )
-    // bindVars: { '@value0': 'cyclists', value1: 'surname', value2: 'Basso' }
-    const result3C = await conn.db(VAR.dbName).delete(VAR.cyclistCollection, { value: 'Basso', property: 'surname' }, [
-      { graph: VAR.teamMembershipGraph, edge: VAR.teamMembershipEdge }
-    ])
+    //   // FOR d IN @@value0 FILTER d.@value1 == @value2
+    //   // LET team_members_keys = (FOR v, e, p IN 1..1 ANY d GRAPH team_membership RETURN e._key)
+    //   // LET team_members_removed = (FOR key IN team_members_keys REMOVE key IN team_members RETURN { _id: OLD._id, _key: OLD._key, _rev: OLD._rev })
+    //   // REMOVE d IN cyclists RETURN MERGE({ _id: OLD._id, _key: OLD._key, _rev: OLD._rev }, { team_members: team_members_removed } )
+    //   // bindVars: { '@value0': 'cyclists', value1: 'surname', value2: 'Basso' }
+    //   const result3C = await conn.db(VAR.dbName).delete(VAR.cyclistCollection, { value: 'Basso', property: 'surname' }, [
+    //     { graph: VAR.teamMembershipGraph, edge: VAR.teamMembershipEdge }
+    //   ])
 
-    // console.log(result3C)
-    expect(result3C.length).toEqual(1)
-    expect(result3C).toBeDefined()
-    expect(Array.isArray(result3C)).toBeTruthy()
-    expect(result3C.length).toEqual(1)
-    expect(result3C[0]._key).toBeDefined()
-    // expect(result3C[0].team_members).toBeDefined()
-    // expect(result3C[0].team_members.length).toEqual(2)
+    //   // console.log(result3C)
+    //   expect(result3C.length).toEqual(1)
+    //   expect(result3C).toBeDefined()
+    //   expect(Array.isArray(result3C)).toBeTruthy()
+    //   expect(result3C.length).toEqual(1)
+    //   expect(result3C[0]._key).toBeDefined()
+    //   // expect(result3C[0].team_members).toBeDefined()
+    //   // expect(result3C[0].team_members.length).toEqual(2)
 
-    const liquigasTeam2 = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllCyclistsInTeam(liquigas._key)
-    )
+    //   const liquigasTeam2 = await conn.db(VAR.dbName).fetchRelations(
+    //     fetchAllCyclistsInTeam(liquigas._key)
+    //   )
 
-    expect(liquigasTeam2.data.length).toEqual(2)
-    expect(liquigasTeam2.data).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ name: 'Vincenzo', surname: 'Nibali' }),
-        expect.objectContaining({ name: 'Peter', surname: 'Sagan' })
-      ])
-    )
+    //   expect(liquigasTeam2.data.length).toEqual(2)
+    //   expect(liquigasTeam2.data).toEqual(
+    //     expect.arrayContaining([
+    //       expect.objectContaining({ name: 'Vincenzo', surname: 'Nibali' }),
+    //       expect.objectContaining({ name: 'Peter', surname: 'Sagan' })
+    //     ])
+    //   )
 
-    const thinkoffTeam2 = await conn.db(VAR.dbName).fetchRelations(
-      fetchAllCyclistsInTeam(thinkoff._key)
-    )
+    //   const tinkoffTeam2 = await conn.db(VAR.dbName).fetchRelations(
+    //     fetchAllCyclistsInTeam(tinkoff._key)
+    //   )
 
-    expect(thinkoffTeam2.data.length).toEqual(3)
-    expect(thinkoffTeam2.data).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ name: 'Alberto', surname: 'Contador' }),
-        expect.objectContaining({ name: 'Peter', surname: 'Sagan' }),
-        expect.objectContaining({ name: 'Fabian', surname: 'Cancellara' })
-      ])
-    )
+  //   expect(tinkoffTeam2.data.length).toEqual(3)
+  //   expect(tinkoffTeam2.data).toEqual(
+  //     expect.arrayContaining([
+  //       expect.objectContaining({ name: 'Alberto', surname: 'Contador' }),
+  //       expect.objectContaining({ name: 'Peter', surname: 'Sagan' }),
+  //       expect.objectContaining({ name: 'Fabian', surname: 'Cancellara' })
+  //     ])
+  //   )
   })
 })

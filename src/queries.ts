@@ -16,7 +16,8 @@ import {
   GraphFetchInstruction,
   GraphFetchStrategy,
   EdgeDataScope,
-  GraphFetchOptions
+  GraphFetchOptions,
+  DocumentTrimOptions
 } from './types'
 
 const debugQueries = debug('guacamole:log:query')
@@ -237,6 +238,31 @@ function _toPropertyFilter(prop: PropertyValue): AqlQuery {
   }
 
   return join(f)
+}
+
+/** @internal */
+function _toTrimmedDocStatement(trimOpts: DocumentTrimOptions, docVar?: string): AqlValue[] {
+  const trim: AqlValue[] = []
+
+  const d = docVar ?? 'd'
+
+  if (trimOpts?.keep) {
+    if (Array.isArray(trimOpts.keep)) {
+      trim.push(literal(`KEEP(${d}, "${trimOpts.keep.join('", "')}")`))
+    } else {
+      trim.push(literal(`KEEP(${d}, "${trimOpts.keep}")`))
+    }
+  } else if (trimOpts?.omit) {
+    if (Array.isArray(trimOpts.omit)) {
+      trim.push(literal(`UNSET_RECURSIVE(${d}, "${trimOpts.omit.join('", "')}")`))
+    } else {
+      trim.push(literal(`UNSET_RECURSIVE(${d}, "${trimOpts.omit}")`))
+    }
+  } else {
+    trim.push(literal(`${d}`))
+  }
+
+  return trim
 }
 
 /** @internal */
@@ -640,7 +666,7 @@ export function uniqueConstraintQuery(
 export function fetchRelations(
   fetch: GraphFetchInstruction,
   options?: GraphFetchOptions
-): string {
+): AqlQuery {
   const { from, graph, direction } = fetch
 
   const bound = (direction.toUpperCase() === 'IN' || direction.toUpperCase() === 'INBOUND')
@@ -650,7 +676,11 @@ export function fetchRelations(
   let propNameVertexTo: string = 'vertex'
   let propNameVertexFrom: string = 'vertex'
   let propNameEdges: string = 'edges'
+
   const parentVertex: string = 'ref'
+
+  let vertexTrim
+  let edgeTrim
 
   let strategy = GraphFetchStrategy.NON_DISTINCT_VERTEX
   let edgeDataScope = EdgeDataScope.NONE
@@ -671,124 +701,140 @@ export function fetchRelations(
     edgeDataScope = options.edgeDataScope
   }
 
-  if (fetch?.fromVertexName) {
-    propNameVertexFrom = fetch.fromVertexName
+  if (fetch?.vertexNameFrom) {
+    propNameVertexFrom = fetch.vertexNameFrom
   }
 
-  if (options?.fromVertexName) {
-    propNameVertexFrom = options.fromVertexName
+  if (options?.vertexNameFrom) {
+    propNameVertexFrom = options.vertexNameFrom
   }
 
-  if (fetch?.toVertexName) {
-    propNameVertexTo = fetch.toVertexName
+  if (fetch?.vertexNameTo) {
+    propNameVertexTo = fetch.vertexNameTo
   }
 
-  if (options?.toVertexName) {
-    propNameVertexTo = options.toVertexName
+  if (options?.vertexNameTo) {
+    propNameVertexTo = options.vertexNameTo
   }
 
-  if (fetch?.edgesName) {
-    propNameEdges = fetch.edgesName
+  if (fetch?.edgeName) {
+    propNameEdges = fetch.edgeName
   }
 
-  if (options?.edgesName) {
-    propNameEdges = options.edgesName
+  if (options?.edgeName) {
+    propNameEdges = options.edgeName
   }
+
+  if (fetch?.vertexTrim) {
+    vertexTrim = fetch.vertexTrim
+  }
+
+  if (options?.vertexTrim) {
+    vertexTrim = options.vertexTrim
+  }
+
+  if (fetch?.edgeTrim) {
+    edgeTrim = fetch.edgeTrim
+  }
+
+  if (options?.edgeTrim) {
+    edgeTrim = options.edgeTrim
+  }
+
+  const dtrim = _toTrimmedDocStatement(vertexTrim)
+  const vtrim = _toTrimmedDocStatement(vertexTrim, 'v')
+  const etrim = _toTrimmedDocStatement(edgeTrim, 'e')
+
+  const query: AqlValue[] = []
 
   if (
     strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGES_TUPLE ||
     strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED
   ) {
-    let query = ''
-    if (edgeDataScope !== EdgeDataScope.NONE) {
-      query += 'LET ve = ('
-      query += 'FOR v,e IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null '
+    query.push(literal('LET ve = ('))
+    query.push(literal(`FOR v,e IN 1 ${bound} "${from.collection}/${from.key}" GRAPH ${graph} FILTER v != null`))
+    // query += 'FOR v,e IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null '
 
-      // if (bound === 'OUTBOUND') {
-      //   query += 'LET reverseDoc = DOCUMENT(e._from) '
-      // } else {
-      //   query += 'LET reverseDoc = DOCUMENT(e._to) '
-      // }
-      const reverseDocField = bound === 'INBOUND' ? '_to' : '_from'
-
-      query += 'LET reverseDoc = DOCUMENT(e.' + reverseDocField + ') '
-
+    if (edgeDataScope === EdgeDataScope.NONE) {
+      query.push(aql`RETURN ${join(etrim, '')}`)
+    } else {
       let propNameEdgeData = bound === 'INBOUND' ? propNameVertexFrom : propNameVertexTo
       if (propNameEdgeData === 'vertex') {
         propNameEdgeData = parentVertex
       }
 
+      const parentIdProp = bound === 'INBOUND' ? '_to' : '_from'
+
       if (edgeDataScope === EdgeDataScope.JOINED) {
-        query += 'RETURN MERGE_RECURSIVE(e, { "' + propNameEdgeData + '": reverseDoc }) '
+        query.push(literal(`LET parentDoc = DOCUMENT(e.${parentIdProp}) `))
+        // query.push(literal(`RETURN MERGE_RECURSIVE(e, { "${propNameEdgeData}": parentDoc }) `))
+        query.push(aql`RETURN MERGE_RECURSIVE(${join(etrim, '')}, { ${propNameEdgeData}: parentDoc }) `)
       } else {
-        query += 'RETURN MERGE_RECURSIVE(e, UNSET(reverseDoc, "_key", "_id", "_rev", "_from", "_to" ), '
-        query += '{ "_' + propNameEdgeData + '._id": reverseDoc._id, "_' + propNameEdgeData + '._key": reverseDoc._key }) '
-        // query += '{ "' + propNameEdgeData + '": { "_id": reverseDoc._id, "_key": reverseDoc._key, "_rev": reverseDoc._id } }) '
+        query.push(aql`RETURN MERGE_RECURSIVE(e, UNSET(parentDoc, "_key", "_id", "_rev", "_from", "_to" ), `)
+        query.push(literal(`{ "_${propNameEdgeData}._id": parentDoc._id, "_${propNameEdgeData}._key": parentDoc._key }) `))
       }
-      query += ') '
-    } else {
-      query += 'LET ve = ('
-      query += 'FOR v,e IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null '
-      // query += 'RETURN MERGE_RECURSIVE(e, { "_vertex": v._key })'
-      query += 'RETURN e'
-      query += ') ' // query += ') RETURN ve'
     }
+
+    query.push(literal(') ')) // query += ') RETURN ve'
 
     const vertexIdField = bound === 'INBOUND' ? '_from' : '_to'
 
-    query += 'LET distinctVsGroupedByE = ('
-    query += 'FOR i IN ve COLLECT vertexId = i.' + vertexIdField + ' INTO edgesGrouped = i RETURN { "vertex": vertexId, "edges": edgesGrouped }'
-    /// query += ') RETURN distinctVsGroupedByE'
-    query += ') '
+    query.push(literal('LET distinctVGroupedByE = ('))
+    query.push(literal(`FOR e IN ve COLLECT vertexId = e.${vertexIdField} INTO edgesGrouped = e RETURN { "vertex": vertexId, "edges": edgesGrouped }`))
+    /// query += ') RETURN distinctVGroupedByE'
+    query.push(literal(') '))
 
     if (strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGES_TUPLE) {
       const propName = bound === 'INBOUND' ? propNameVertexTo : propNameVertexFrom
-      query += 'FOR dve IN distinctVsGroupedByE '
-      query += 'LET d = DOCUMENT(dve.vertex) '
-      query += 'RETURN { "' + propName + '": d, "' + propNameEdges + '": dve.edges}'
+      query.push(literal('FOR dve IN distinctVGroupedByE '))
+      query.push(literal('LET d = DOCUMENT(dve.vertex) '))
+      // query.push(literal(`RETURN { "${propName}": d, "${propNameEdges}": dve.edges}`))
+      query.push(aql`RETURN { ${propName}: ${join(dtrim, '')}, ${propNameEdges}: dve.edges}`)
     } else if (strategy === GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED) {
-      query += 'FOR dve IN distinctVsGroupedByE '
-      query += 'LET d = DOCUMENT(dve.vertex) '
-      query += 'RETURN MERGE_RECURSIVE(d, { "' + propNameEdges + '": dve.edges})'
+      query.push(literal('FOR dve IN distinctVGroupedByE '))
+      query.push(literal('LET d = DOCUMENT(dve.vertex) '))
+      // query.push(literal(`RETURN MERGE_RECURSIVE(d, { "${propNameEdges}": dve.edges})`))
+      query.push(aql`RETURN MERGE_RECURSIVE(${join(dtrim, '')}, { ${propNameEdges}: dve.edges})`)
+    }
+  } else {
+    query.push(literal(`FOR v,e IN 1 ${bound} "${from.collection}/${from.key}" GRAPH ${graph} FILTER v != null `))
+
+    if (strategy === GraphFetchStrategy.NON_DISTINCT_VERTEX_EDGE_TUPLE) {
+      // query.push(literal(`RETURN { "${propNameVertexTo}": v, "' + propNameEdges + '": e }`))
+      query.push(aql`RETURN { ${propNameVertexTo}: ${join(vtrim, '')}, ${propNameEdges}: ${join(etrim, '')} }`)
     }
 
-    if (options?.printQuery) {
-      console.log(query)
+    if (strategy === GraphFetchStrategy.DISTINCT_VERTEX) {
+      // WK test this in both directions - similar to vertexIdField above?
+      // query.push(literal('COLLECT vertexId = v._key INTO vertexGrouped = v RETURN FIRST(vertexGrouped)'))
+      query.push(literal('COLLECT vertexId = v._key INTO vertexGrouped = v'))
+      query.push(literal('LET d = FIRST(vertexGrouped)'))
+      query.push(aql`RETURN ${join(dtrim, '')}`)
     }
 
-    return query
-  }
-
-  if (strategy === GraphFetchStrategy.NON_DISTINCT_VERTEX_EDGE_TUPLE) {
-    let query = 'FOR v,e IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null '
-    query += 'RETURN { "' + propNameVertexTo + '": v, "' + propNameEdges + '": e }'
-
-    if (options?.printQuery) {
-      console.log(query)
+    if (strategy === GraphFetchStrategy.NON_DISTINCT_VERTEX) {
+      // query.push(literal('RETURN v'))
+      query.push(aql`RETURN ${join(vtrim, '')}`)
     }
-
-    return query
   }
 
-  if (strategy === GraphFetchStrategy.DISTINCT_VERTEX) {
-    let query = 'FOR v IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null '
-    query += 'COLLECT vertexId = v._key INTO vertexGrouped = v RETURN FIRST(vertexGrouped)'
+  const q = join(query)
 
-    if (options?.printQuery) {
-      console.log(query)
-    }
-
-    return query
+  if (_debugFiltersEnabled(options) || _printQuery(options)) {
+    _debug.log.queries(q)
+  } else {
+    _debug.queries(q)
   }
 
-  // strategy === GraphFetchStrategy.NON_DISTINCT_VERTEX}
-  const query = 'FOR v IN 1 ' + bound + ' "' + from.collection + '/' + from.key + '" GRAPH ' + graph + ' FILTER v != null RETURN v'
+  return q
 
-  if (options?.printQuery) {
-    console.log(query)
-  }
+  // const opts = _toQueryOpts(options)
 
-  return query
+  // const q = opts && opts.length > 0
+  //   ? aql`FOR d IN ${collection} ${join(opts, '')} RETURN ${join(trim, '')}`
+  //   : aql`FOR d IN ${collection} RETURN ${join(trim, '')}`
+
+  // return q
 }
 
 export const Queries = {

@@ -123,17 +123,21 @@ export interface GraphFetchInstruction {
   graph: string
   direction: string
   strategy?: GraphFetchStrategy
-  fromVertexName?: string
-  toVertexName?: string
-  edgesName?: string
+  vertexNameFrom?: string
+  vertexNameTo?: string
+  edgeName?: string
+  vertexTrim?: DocumentTrimOptions
+  edgeTrim?: DocumentTrimOptions
   edgeDataScope?: EdgeDataScope
 }
 
 export interface GraphFetchOptions {
   strategy?: GraphFetchStrategy
-  fromVertexName?: string
-  toVertexName?: string
-  edgesName?: string
+  vertexNameFrom?: string
+  vertexNameTo?: string
+  vertexTrim?: DocumentTrimOptions
+  edgeTrim?: DocumentTrimOptions
+  edgeName?: string
   edgeDataScope?: EdgeDataScope
   printQuery?: boolean
 }

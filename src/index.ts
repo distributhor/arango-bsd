@@ -190,9 +190,11 @@ const staticUtils = {
     graph: string,
     direction: string,
     strategy: GraphFetchStrategy,
-    toVertexName?: string,
-    fromVertexName?: string,
-    edgesName?: string,
+    vertexNameTo?: string,
+    vertexNameFrom?: string,
+    edgeName?: string,
+    vertexTrim?: DocumentTrimOptions,
+    edgeTrim?: DocumentTrimOptions,
     edgeDataScope?: EdgeDataScope
   ): GraphFetchInstruction {
     return {
@@ -203,9 +205,11 @@ const staticUtils = {
       graph,
       direction,
       strategy,
-      toVertexName,
-      fromVertexName,
-      edgesName,
+      vertexNameTo,
+      vertexNameFrom,
+      edgeName,
+      vertexTrim,
+      edgeTrim,
       edgeDataScope
     }
   }
