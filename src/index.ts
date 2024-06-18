@@ -183,38 +183,6 @@ interface InstancePool {
   [key: string]: ArangoDBWithSpice
 }
 
-const staticUtils = {
-  toGraphFetchInstruction: function (
-    key: string,
-    collection: string,
-    graph: string,
-    direction: string,
-    strategy: GraphFetchStrategy,
-    vertexNameTo?: string,
-    vertexNameFrom?: string,
-    edgeName?: string,
-    vertexTrim?: DocumentTrimOptions,
-    edgeTrim?: DocumentTrimOptions,
-    edgeDataScope?: EdgeDataScope
-  ): GraphFetchInstruction {
-    return {
-      from: {
-        collection,
-        key
-      },
-      graph,
-      direction,
-      strategy,
-      vertexNameTo,
-      vertexNameFrom,
-      edgeName,
-      vertexTrim,
-      edgeTrim,
-      edgeDataScope
-    }
-  }
-}
-
 /**
  * A class that manages instances of {@link ArangoDB} classes.
  *
@@ -255,8 +223,6 @@ export class ArangoConnection {
   private readonly pool: InstancePool = {}
 
   public readonly system: Database
-
-  public static util = staticUtils
 
   constructor(dbs: Config | Database | Config[] | Database[], options?: GuacamoleOptions) {
     this.guacamole = options
@@ -1236,8 +1202,6 @@ export class ArangoDB {
 export class ArangoDBWithSpice extends ArangoDB {
   /** @internal */
   manage: DbAdmin
-
-  public static util = staticUtils
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(db: Config | Database, options?: GuacamoleOptions) {

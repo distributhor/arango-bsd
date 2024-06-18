@@ -1,4 +1,4 @@
-import { ArangoConnection, EdgeDataScope, GraphFetchInstruction, GraphFetchStrategy } from '../../src/index'
+import { ArangoConnection, GraphFetchInstruction, GraphFetchStrategy } from '../../src/index'
 
 import { VAR } from './jest.shared'
 
@@ -8,40 +8,53 @@ const conn = new ArangoConnection([{
   auth: { username: VAR.dbAdminUser, password: VAR.dbAdminPassword }
 }], { printQueries: false, debugFilters: false })
 
-function fetchAllTeamsForCyclist(id: string): GraphFetchInstruction {
-  return ArangoConnection.util.toGraphFetchInstruction(
-    id, VAR.cyclistCollection, VAR.teamMembershipGraph, 'OUTBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX,
-    undefined, undefined, undefined,
-    undefined, { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
-  )
+function fetchAllTeamsForCyclist(cyclistId: string): GraphFetchInstruction {
+  return {
+    from: { key: cyclistId, collection: VAR.cyclistCollection },
+    graph: VAR.teamMembershipGraph,
+    direction: 'OUTBOUND',
+    strategy: GraphFetchStrategy.NON_DISTINCT_VERTEX,
+    edgeTrim: { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
+  }
 }
 
-function fetchAllCyclistsInTeam(id: string): GraphFetchInstruction {
-  return ArangoConnection.util.toGraphFetchInstruction(
-    id, VAR.teamCollection, VAR.teamMembershipGraph, 'INBOUND', GraphFetchStrategy.NON_DISTINCT_VERTEX,
-    undefined, undefined, undefined,
-    { keep: ['name', 'surname'] }, { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
-  )
+function fetchAllCyclistsInTeam(teamId: string): GraphFetchInstruction {
+  return {
+    from: { key: teamId, collection: VAR.teamCollection },
+    graph: VAR.teamMembershipGraph,
+    direction: 'INBOUND',
+    strategy: GraphFetchStrategy.NON_DISTINCT_VERTEX,
+    vertexTrim: { keep: ['name', 'surname'] },
+    edgeTrim: { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
+  }
 }
 
 function fetchAllCyclistsInRace(raceId: string): GraphFetchInstruction {
-  return ArangoConnection.util.toGraphFetchInstruction(
-    raceId, VAR.raceCollection, VAR.raceAttendanceGraph, 'OUTBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED,
-    'race', 'cyclist', 'attendance',
-    { keep: ['name', 'surname'] },
-    { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] },
-    EdgeDataScope.NONE
-  )
+  return {
+    from: { key: raceId, collection: VAR.raceCollection },
+    graph: VAR.raceAttendanceGraph,
+    direction: 'OUTBOUND',
+    strategy: GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED,
+    vertexNameFrom: 'cyclist',
+    vertexNameTo: 'race',
+    edgeName: 'attendance',
+    vertexTrim: { keep: ['name', 'surname'] },
+    edgeTrim: { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
+  }
 }
 
 function fetchAllRacesForCyclist(cyclistId: string): GraphFetchInstruction {
-  return ArangoConnection.util.toGraphFetchInstruction(
-    cyclistId, VAR.cyclistCollection, VAR.raceAttendanceGraph, 'INBOUND', GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED,
-    'race', 'cyclist', 'attendance',
-    { keep: ['name', 'type'] },
-    { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] },
-    EdgeDataScope.NONE
-  )
+  return {
+    from: { key: cyclistId, collection: VAR.cyclistCollection },
+    graph: VAR.raceAttendanceGraph,
+    direction: 'INBOUND',
+    strategy: GraphFetchStrategy.DISTINCT_VERTEX_EDGES_JOINED,
+    vertexNameFrom: 'cyclist',
+    vertexNameTo: 'race',
+    edgeName: 'attendance',
+    vertexTrim: { keep: ['name', 'type'] },
+    edgeTrim: { keep: ['_key', '_from', '_to', 'year', 'position', 'result'] }
+  }
 }
 
 describe('Guacamole Integration Tests', () => {
