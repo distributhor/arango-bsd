@@ -1,6 +1,6 @@
 /* eslint-disable jest/no-conditional-expect */
 import { ArangoConnection, ArangoDB } from '../../src/index'
-import { QueryResult } from '../../src/types'
+import type { QueryResult } from '../../src/types'
 
 import { VAR } from './jest.shared'
 

@@ -2,7 +2,7 @@
 import { aql } from 'arangojs/aql'
 import { ArrayCursor } from 'arangojs/cursor'
 import { ArangoConnection, ArangoDB } from '../../src/index'
-import { MatchType, QueryResult } from '../../src/types'
+import { MatchType, type QueryResult } from '../../src/types'
 
 import { VAR } from './jest.shared'
 

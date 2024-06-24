@@ -2,9 +2,9 @@
 import _clone from 'lodash.clonedeep'
 import _omit from 'lodash.omit'
 
-import { DbStructure } from '../../src/dbms'
+import type { DbStructure } from '../../src/dbms'
 import { ArangoConnection } from '../../src/index'
-import { GraphRelation, QueryResult } from '../../src/types'
+import type { GraphRelation, QueryResult } from '../../src/types'
 
 import { VAR } from './jest.shared'
 

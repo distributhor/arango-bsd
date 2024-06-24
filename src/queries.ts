@@ -1,23 +1,23 @@
 import debug from 'debug'
-import { aql, AqlQuery, AqlValue, isAqlQuery, join, literal } from 'arangojs/aql'
-import { DocumentCollection, EdgeCollection } from 'arangojs/collection'
+import { aql, type AqlQuery, type AqlValue, isAqlQuery, join, literal } from 'arangojs/aql'
+import type { DocumentCollection, EdgeCollection } from 'arangojs/collection'
 import {
+  type UniqueConstraint,
+  type Identifier,
+  type FetchOptions,
+  type PropertyValue,
+  type SearchTerms,
+  type Filter,
+  type Criteria,
+  type GraphFetchInstruction,
+  type GraphFetchOptions,
+  type DocumentTrimOptions,
   MatchTypeOperator,
-  UniqueConstraint,
-  Identifier,
-  FetchOptions,
-  PropertyValue,
-  SearchTerms,
-  Filter,
-  Criteria,
   MatchType,
   isSearch,
   isFilter,
-  GraphFetchInstruction,
   GraphFetchStrategy,
-  EdgeDataScope,
-  GraphFetchOptions,
-  DocumentTrimOptions
+  EdgeDataScope
 } from './types'
 
 const debugQueries = debug('guacamole:log:query')
@@ -241,7 +241,10 @@ function _toPropertyFilter(prop: PropertyValue): AqlQuery {
 }
 
 /** @internal */
-function _toTrimmedDocStatement(trimOpts: DocumentTrimOptions, docVar?: string): AqlValue[] {
+function _toTrimmedDocStatement(
+  trimOpts: DocumentTrimOptions | undefined, 
+  docVar?: string
+): AqlValue[] {
   const trim: AqlValue[] = []
 
   const d = docVar ?? 'd'
@@ -673,17 +676,18 @@ export function fetchRelations(
     ? 'INBOUND'
     : 'OUTBOUND'
 
-  let propNameVertexTo: string = 'vertex'
-  let propNameVertexFrom: string = 'vertex'
-  let propNameEdges: string = 'edges'
+  let strategy = GraphFetchStrategy.NON_DISTINCT_VERTEX
+
+  let propNameVertexTo = 'vertex'
+  let propNameVertexFrom = 'vertex'
+  let propNameEdges = 'edges'
+
+  let vertexTrim: DocumentTrimOptions | undefined = undefined
+  let edgeTrim: DocumentTrimOptions | undefined = undefined
+
+  let edgeDataScope = EdgeDataScope.NONE
 
   const parentVertex: string = 'ref'
-
-  let vertexTrim
-  let edgeTrim
-
-  let strategy = GraphFetchStrategy.NON_DISTINCT_VERTEX
-  let edgeDataScope = EdgeDataScope.NONE
 
   if (fetch?.strategy) {
     strategy = fetch.strategy

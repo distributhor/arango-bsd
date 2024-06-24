@@ -1,4 +1,4 @@
-import { ArangoConnection, GraphFetchInstruction, GraphFetchStrategy } from '../../src/index'
+import { ArangoConnection, type GraphFetchInstruction, GraphFetchStrategy } from '../../src/index'
 
 import { VAR } from './jest.shared'
 

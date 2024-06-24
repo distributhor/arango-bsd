@@ -1,6 +1,6 @@
 import debug from 'debug'
 import { Database } from 'arangojs'
-import { Config } from 'arangojs/connection'
+import type { Config } from 'arangojs/connection'
 
 const _debug = {
   errors: debug('guacamole:debug:error'),
@@ -21,7 +21,7 @@ interface EntityAvailability {
   allExist: boolean
 }
 
-export const enum DbClearanceMethod {
+export enum DbClearanceMethod {
   DELETE_DATA = 'DELETE_DATA',
   RECREATE_DB = 'RECREATE_DB',
 }

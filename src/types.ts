@@ -1,8 +1,8 @@
-import { AqlLiteral, AqlQuery } from 'arangojs/aql'
-import { DocumentOperationFailure } from 'arangojs/collection'
-import { CursorStats } from 'arangojs/cursor'
-import { QueryOptions } from 'arangojs/database'
-import { DocumentData, DocumentMetadata, ObjectWithKey, Patch } from 'arangojs/documents'
+import type { AqlLiteral, AqlQuery } from 'arangojs/aql'
+import type { DocumentOperationFailure } from 'arangojs/collection'
+import type { CursorStats } from 'arangojs/cursor'
+import type { QueryOptions } from 'arangojs/database'
+import type { DocumentData, DocumentMetadata, ObjectWithKey, Patch } from 'arangojs/documents'
 
 /** @internal */
 export function isFilter(x: any): x is Filter {
@@ -48,7 +48,7 @@ export interface PropertyValues {
 }
 
 export interface Identifier {
-  value: string | Number
+  value: string | number
   property?: string
 }
 

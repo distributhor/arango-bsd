@@ -1,46 +1,43 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import debug from 'debug'
 import {
-  GuacamoleOptions,
-  UniqueConstraint,
-  UniqueConstraintResult,
-  FetchOptions,
-  DocumentTrimOptions,
-  QueryResult,
-  PropertyValues,
-  PropertyValue,
-  Filter,
-  Criteria,
-  Identifier,
-  MatchType,
-  DocumentMeta,
-  DocumentUpdate,
-  isIdentifier,
-  isFilter,
-  GraphRelation,
-  LiteralQuery,
+  type GuacamoleOptions,
+  type UniqueConstraint,
+  type UniqueConstraintResult,
+  type FetchOptions,
+  type DocumentTrimOptions,
+  type QueryResult,
+  type PropertyValues,
+  type PropertyValue,
+  type Filter,
+  type Criteria,
+  type Identifier,
+  type DocumentMeta,
+  type DocumentUpdate,
+  type GraphRelation,
+  type LiteralQuery,
+  type DocumentDataWithKey,
+  type GraphFetchInstruction,
+  type GraphFetchOptions,
   isLiteralQuery,
   isDocumentOperationFailure,
-  DocumentDataWithKey,
   isObjectWithKey,
-  GraphFetchInstruction,
-  GraphFetchStrategy,
-  GraphFetchOptions,
-  EdgeDataScope
+  isIdentifier,
+  isFilter,
+  MatchType
 } from './types'
 import { DbAdmin } from './dbms'
 import { Queries } from './queries'
-import {
+import type {
   CollectionInsertOptions,
   CollectionReadOptions,
   CollectionRemoveOptions,
   CollectionUpdateOptions,
   DocumentCollection,
-  DocumentOperationFailure,
   DocumentOperationMetadata,
   EdgeCollection
 } from 'arangojs/collection'
-import {
+import type {
   Document,
   DocumentData,
   DocumentMetadata,
@@ -49,10 +46,10 @@ import {
   ObjectWithKey
 } from 'arangojs/documents'
 import { Database } from 'arangojs'
-import { AqlQuery, isAqlQuery, literal } from 'arangojs/aql'
-import { QueryOptions } from 'arangojs/database'
-import { ArrayCursor } from 'arangojs/cursor'
-import { Config } from 'arangojs/connection'
+import { type AqlQuery, isAqlQuery, literal } from 'arangojs/aql'
+import type { QueryOptions } from 'arangojs/database'
+import type { ArrayCursor } from 'arangojs/cursor'
+import type { Config } from 'arangojs/connection'
 
 import _has from 'lodash.has'
 import _get from 'lodash.get'
@@ -452,7 +449,7 @@ export class ArangoDB {
     trim?: DocumentTrimOptions,
     options?: CollectionReadOptions
   ): Promise<Document<T> | null> {
-    let d
+    let d: T | T[] | null
 
     if (!options) {
       options = {}
